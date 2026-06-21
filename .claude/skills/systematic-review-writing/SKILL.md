@@ -1,3 +1,8 @@
+---
+name: systematic-review-writing
+description: 系统性综述写作专用工作流 — PRISMA 合规、多Agent协作
+---
+
 # Systematic Review Writing Skill
 
 系统性综述写作专用工作流，整合 AI-Scientist-v2 的迭代改进与 PaperTree 的多Agent协作。
