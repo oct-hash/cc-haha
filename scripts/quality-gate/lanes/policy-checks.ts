@@ -2,6 +2,7 @@
 
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
+import { homedir } from 'node:os'
 import { parseFrontmatter, readJSON, readText } from '../utils/helpers'
 import type { LaneExecutionContext, LaneResult, DetailItem } from './types'
 
@@ -33,6 +34,13 @@ export async function runPolicyChecks(ctx: LaneExecutionContext): Promise<LaneRe
   // --- Settings ---
   const settingsResults = validateSettings(join(rootDir, '.claude'))
   allDetails.push(...settingsResults)
+
+  // --- Global Skills (~/.agents/skills/) ---
+  const globalSkillResults = validateGlobalSkills(
+    join(homedir(), '.agents', 'skills'),
+    join(rootDir, '.claude', 'skills'),
+  )
+  allDetails.push(...globalSkillResults)
 
   const hasErrors = allDetails.some((d) => d.status === 'error')
   const hasWarns = allDetails.some((d) => d.status === 'warn')
@@ -253,6 +261,107 @@ function validateSkills(skillsDir: string): DetailItem[] {
       message: `Could not scan skills directory: ${err instanceof Error ? err.message : String(err)}`,
     })
   }
+  return results
+}
+
+/** Validate global skills in ~/.agents/skills/ and check for staleness vs project copy */
+function validateGlobalSkills(
+  globalSkillsDir: string,
+  projectSkillsDir: string,
+): DetailItem[] {
+  const results: DetailItem[] = []
+
+  if (!existsSync(globalSkillsDir)) {
+    results.push({
+      label: 'Global skills (~/.agents/skills/)',
+      status: 'warn',
+      message: 'Directory not found',
+    })
+    return results
+  }
+
+  try {
+    const entries = readdirSync(globalSkillsDir, { withFileTypes: true })
+    const dirs = entries.filter(
+      (e) => e.isDirectory() && !e.name.startsWith('__') && !e.name.startsWith('.'),
+    )
+
+    let validCount = 0
+    let staleCount = 0
+
+    for (const dir of dirs) {
+      const globalSkillPath = join(globalSkillsDir, dir.name, 'SKILL.md')
+      const projectSkillPath = join(projectSkillsDir, dir.name, 'SKILL.md')
+
+      if (!existsSync(globalSkillPath)) {
+        results.push({
+          label: `${dir.name}/ (global): missing SKILL.md`,
+          status: 'warn',
+        })
+        continue
+      }
+
+      const globalContent = readText(globalSkillPath)
+      if (!globalContent) {
+        results.push({
+          label: `${dir.name}/ (global): SKILL.md empty`,
+          status: 'error',
+        })
+        continue
+      }
+
+      const { data } = parseFrontmatter(globalContent)
+      if (data.name || data.description) validCount++
+
+      // Staleness check: compare project copy vs global source
+      if (existsSync(projectSkillPath)) {
+        const projectContent = readText(projectSkillPath)
+        if (projectContent && projectContent !== globalContent) {
+          staleCount++
+          results.push({
+            label: `${dir.name}: project copy stale vs global source`,
+            status: 'warn',
+            message: 'Run update to sync from ~/.agents/skills/',
+          })
+        }
+      }
+
+      // agent-reach specific: verify 6 reference files exist
+      if (dir.name === 'agent-reach') {
+        const refDir = join(globalSkillsDir, dir.name, 'references')
+        const expectedRefs = ['search', 'social', 'career', 'dev', 'web', 'video']
+        let missingRefs = 0
+        for (const ref of expectedRefs) {
+          if (!existsSync(join(refDir, `${ref}.md`))) {
+            missingRefs++
+            results.push({
+              label: `agent-reach/references/${ref}.md`,
+              status: 'error',
+              message: 'Missing reference file',
+            })
+          }
+        }
+        if (missingRefs === 0) {
+          results.push({
+            label: `agent-reach references (${expectedRefs.length} files)`,
+            status: 'ok',
+          })
+        }
+      }
+    }
+
+    results.push({
+      label: `Global skills (${validCount} valid, ${staleCount} stale vs project)`,
+      status: staleCount > 0 ? 'warn' : 'ok',
+    })
+  } catch (err) {
+    results.push({
+      label: 'Global skills',
+      status: 'warn',
+      message: `Could not scan: ${err instanceof Error ? err.message : String(err)}`,
+    })
+  }
+
   return results
 }
 

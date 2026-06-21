@@ -1,5 +1,33 @@
 # Changelog
 
+## haha-v1.3 (2026-06-22)
+
+### Agent Reach: 全层接入
+
+将 agent-reach（13 平台互联网调研路由器 skill）全层接入 haha 5 层防御 + 6 质量门禁通道。
+
+#### 四阶段实施
+
+| 阶段 | 内容 | 文件 |
+|------|------|:---:|
+| 1 | Skills 复制 | `.claude/skills/agent-reach/` (SKILL.md + 6 refs) |
+| 2 | Agent 包装器 | `.claude/agents/agent-reach.md` (haiku, fork) |
+| 3 | Quality Gate 扩展 | `policy-checks.ts` + `server-checks.ts` |
+| 4 | 文档 | `CLAUDE.md` + `CHANGELOG.md` |
+
+#### 质量门禁新增检查
+
+- **policy-checks**: `validateGlobalSkills()` — 扫描 `~/.agents/skills/`，frontmatter 校验 + 滞后台检测 + agent-reach 6 refs 存在性
+- **server-checks**: `checkAgentReachTools()` — 3 级 CLI 工具检查（核心=error, 零配置=warn, 需登录=info）
+
+#### 设计原则
+
+- 纯增量零冲突 — 不碰 `src/`、不新建 lane、不修改 `modes.ts`/`index.ts`/`types.ts`
+- 全局源 `~/.agents/skills/agent-reach/` 保留为权威源，项目副本用于发现
+- 滞后台检测使用字节级对比
+
+---
+
 ## haha-v1.2 (2026-06-22)
 
 ### Quality Gate: 质量门禁系统
@@ -150,7 +178,8 @@ src/
 main (原始源码)
   ├── haha-v1.0 (基线 — 可运行 + 文档)
   │     └── haha-v1.1 (5层防御系统)
-  │           └── haha-v1.2 (质量门禁) ← 当前
+  │           └── haha-v1.2 (质量门禁)
+  │                 └── haha-v1.3 (Agent Reach 全层接入) ← 当前
 ```
 
 ## 向上游同步
