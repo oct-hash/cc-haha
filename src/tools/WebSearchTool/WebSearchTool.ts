@@ -277,7 +277,7 @@ export const WebSearchTool = buildTool({
       signal: context.abortController.signal,
       options: {
         getToolPermissionContext: async () => appState.toolPermissionContext,
-        model: useHaiku ? getSmallFastModel() : context.options.mainLoopModel,
+        model: getSmallFastModel(), // Force Haiku for web search to ensure web_search tool works
         toolChoice: useHaiku ? { type: 'tool', name: 'web_search' } : undefined,
         isNonInteractiveSession: context.options.isNonInteractiveSession,
         hasAppendSystemPrompt: !!context.options.appendSystemPrompt,

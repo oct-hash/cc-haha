@@ -90,6 +90,11 @@ async function main(): Promise<void> {
     } = await import('../utils/computerUse/mcpServer.js');
     await runComputerUseMcpServer();
     return;
+  } else if (process.argv.includes('--mcp-server')) {
+    profileCheckpoint('cli_mcp_server_path');
+    const { runMcpServer } = await import('../utils/mcpServer.js');
+    await runMcpServer();
+    return;
   }
 
   // Fast-path for `--daemon-worker=<kind>` (internal — supervisor spawns this).

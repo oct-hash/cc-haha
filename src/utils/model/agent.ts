@@ -149,6 +149,21 @@ export function getAgentModelOptions(): AgentModelOption[] {
       description: 'Fast and efficient for simple tasks',
     },
     {
+      value: 'pro',
+      label: 'Pro (MiniMax M2.7)',
+      description: 'MiniMax M2.7 high-speed mode for production use',
+    },
+    {
+      value: 'ultrav4',
+      label: 'Ultra V4 (DeepSeek V4)',
+      description: 'DeepSeek V4 Flash for maximum capability',
+    },
+    {
+      value: 'ultra',
+      label: 'Ultra (DeepSeek V3)',
+      description: 'DeepSeek V3 for maximum capability',
+    },
+    {
       value: 'inherit',
       label: 'Inherit from parent',
       description: 'Use the same model as the main conversation',

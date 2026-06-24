@@ -55,6 +55,10 @@ export type FrontmatterData = {
   // Never consults settings.defaultShell: skills are portable across platforms,
   // so the author picks the shell, not the reader. See docs/design/ps-shell-selection.md §5.3.
   shell?: string | null
+  // Tags for skill categorization (used by marketplace)
+  tags?: string | string[] | null
+  // Author of the skill (used by marketplace)
+  author?: string | null
   [key: string]: unknown
 }
 

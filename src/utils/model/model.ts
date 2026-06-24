@@ -378,6 +378,10 @@ export function getPublicModelDisplayName(model: ModelName): string | null {
       return 'Haiku 4.5'
     case getModelStrings().haiku35:
       return 'Haiku 3.5'
+    case 'deepseek-v4-pro':
+      return 'DeepSeek V4 Pro'
+    case 'deepseek-v4-flash':
+      return 'DeepSeek V4 Flash'
     default:
       return null
   }
@@ -465,6 +469,18 @@ export function parseUserSpecifiedModel(
         return getDefaultOpusModel() + (has1mTag ? '[1m]' : '')
       case 'best':
         return getBestModel()
+      case 'pro':
+        // MiniMax M2.7 high-speed mode
+        return process.env.MINIMAX_MODEL || 'MiniMax-M2.7'
+      case 'deepseek-v4-pro':
+        // DeepSeek V4 Pro mode - use env var or fallback
+        return process.env.DEEPSEEK_V4_PRO_MODEL || 'deepseek-v4-pro'
+      case 'ultrav4':
+        // DeepSeek V4 Flash mode - use env var or fallback
+        return process.env.DEEPSEEK_V4_FLASH_MODEL || 'deepseek-v4-flash'
+      case 'ultra':
+        // DeepSeek V3 mode - use env var or fallback
+        return process.env.DEEPSEEK_ULTRA_MODEL || process.env.ANTHROPIC_DEFAULT_OPUS_MODEL || 'deepseek-chat'
       default:
     }
   }
@@ -608,6 +624,15 @@ export function getMarketingNameForModel(modelId: string): string | undefined {
   }
   if (canonical.includes('claude-3-5-haiku')) {
     return 'Claude 3.5 Haiku'
+  }
+  if (canonical.includes('deepseek-v4-pro')) {
+    return 'DeepSeek V4 Pro'
+  }
+  if (canonical.includes('deepseek-v4-flash')) {
+    return 'DeepSeek V4 Flash'
+  }
+  if (canonical.includes('deepseek-chat')) {
+    return 'DeepSeek V3'
   }
 
   return undefined

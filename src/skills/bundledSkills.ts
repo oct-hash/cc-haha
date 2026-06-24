@@ -34,6 +34,18 @@ export type BundledSkillDefinition = {
    * same contract as disk-based skills.
    */
   files?: Record<string, string>
+  /**
+   * Version of the skill for marketplace tracking.
+   */
+  version?: string
+  /**
+   * Tags for skill categorization.
+   */
+  tags?: string[]
+  /**
+   * Author of the skill.
+   */
+  author?: string
   getPromptForCommand: (
     args: string,
     context: ToolUseContext,
@@ -91,6 +103,9 @@ export function registerBundledSkill(definition: BundledSkillDefinition): void {
     skillRoot,
     context: definition.context,
     agent: definition.agent,
+    version: definition.version,
+    tags: definition.tags,
+    author: definition.author,
     isEnabled: definition.isEnabled,
     isHidden: !(definition.userInvocable ?? true),
     progressMessage: 'running',

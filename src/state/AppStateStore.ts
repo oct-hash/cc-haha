@@ -156,6 +156,16 @@ export type AppState = DeepImmutable<{
   // Always-on bridge: first-time remote dialog pending (set by /remote-control command)
   showRemoteCallout: boolean
 }> & {
+  // Team mode for multi-agent collaboration
+  teamMode: {
+    enabled: boolean
+    autoActivate: boolean
+    roles: Array<{
+      id: string
+      name: string
+      active: boolean
+    }>
+  }
   // Unified task state - excluded from DeepImmutable because TaskState contains function types
   tasks: { [taskId: string]: TaskState }
   // Name → AgentId registry populated by Agent tool when `name` is provided.
@@ -497,6 +507,11 @@ export function getDefaultAppState(): AppState {
     replBridgeError: undefined,
     replBridgeInitialName: undefined,
     showRemoteCallout: false,
+    teamMode: {
+      enabled: false,
+      autoActivate: false,
+      roles: [],
+    },
     toolPermissionContext: {
       ...getEmptyToolPermissionContext(),
       mode: initialMode,

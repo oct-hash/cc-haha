@@ -196,6 +196,8 @@ export function parseSkillFrontmatterFields(
   argumentNames: string[]
   whenToUse: string | undefined
   version: string | undefined
+  tags: string[] | undefined
+  author: string | undefined
   model: ReturnType<typeof parseUserSpecifiedModel> | undefined
   disableModelInvocation: boolean
   userInvocable: boolean
@@ -251,6 +253,8 @@ export function parseSkillFrontmatterFields(
     ),
     whenToUse: frontmatter.when_to_use as string | undefined,
     version: frontmatter.version as string | undefined,
+    tags: frontmatter.tags as string[] | undefined,
+    author: frontmatter.author as string | undefined,
     model,
     disableModelInvocation: parseBooleanFrontmatter(
       frontmatter['disable-model-invocation'],
@@ -278,6 +282,8 @@ export function createSkillCommand({
   argumentNames,
   whenToUse,
   version,
+  tags,
+  author,
   model,
   disableModelInvocation,
   userInvocable,
@@ -301,6 +307,8 @@ export function createSkillCommand({
   argumentNames: string[]
   whenToUse: string | undefined
   version: string | undefined
+  tags: string[] | undefined
+  author: string | undefined
   model: string | undefined
   disableModelInvocation: boolean
   userInvocable: boolean
@@ -324,6 +332,8 @@ export function createSkillCommand({
     argNames: argumentNames.length > 0 ? argumentNames : undefined,
     whenToUse,
     version,
+    tags,
+    author,
     model,
     disableModelInvocation,
     userInvocable,
@@ -637,12 +647,14 @@ async function loadSkillsFromCommandsDir(
  */
 export const getSkillDirCommands = memoize(
   async (cwd: string): Promise<Command[]> => {
+    // Load OMC (Oh My Claude) skills from .claude/omc-skills/ if it exists
+    const omcSkillsDir = join(getClaudeConfigHomeDir(), 'omc-skills')
     const userSkillsDir = join(getClaudeConfigHomeDir(), 'skills')
     const managedSkillsDir = join(getManagedFilePath(), '.claude', 'skills')
     const projectSkillsDirs = getProjectDirsUpToHome('skills', cwd)
 
     logForDebugging(
-      `Loading skills from: managed=${managedSkillsDir}, user=${userSkillsDir}, project=[${projectSkillsDirs.join(', ')}]`,
+      `Loading skills from: managed=${managedSkillsDir}, user=${userSkillsDir}, omc=${omcSkillsDir}, project=[${projectSkillsDirs.join(', ')}]`,
     )
 
     // Load from additional directories (--add-dir)
@@ -679,6 +691,7 @@ export const getSkillDirCommands = memoize(
     const [
       managedSkills,
       userSkills,
+      omcSkills,
       projectSkillsNested,
       additionalSkillsNested,
       legacyCommands,
@@ -688,6 +701,9 @@ export const getSkillDirCommands = memoize(
         : loadSkillsFromSkillsDir(managedSkillsDir, 'policySettings'),
       isSettingSourceEnabled('userSettings') && !skillsLocked
         ? loadSkillsFromSkillsDir(userSkillsDir, 'userSettings')
+        : Promise.resolve([]),
+      isSettingSourceEnabled('userSettings') && !skillsLocked
+        ? loadSkillsFromSkillsDir(omcSkillsDir, 'userSettings')
         : Promise.resolve([]),
       projectSettingsEnabled
         ? Promise.all(
@@ -717,6 +733,7 @@ export const getSkillDirCommands = memoize(
     const allSkillsWithPaths = [
       ...managedSkills,
       ...userSkills,
+      ...omcSkills,
       ...projectSkillsNested.flat(),
       ...additionalSkillsNested.flat(),
       ...legacyCommands,

@@ -543,7 +543,7 @@ async function findMarkdownFilesNative(
  * @param dir Directory (eg. "~/.claude/commands")
  * @returns Array of parsed markdown files with metadata
  */
-async function loadMarkdownFiles(dir: string): Promise<
+export async function loadMarkdownFiles(dir: string): Promise<
   {
     filePath: string
     frontmatter: FrontmatterData
@@ -567,11 +567,25 @@ async function loadMarkdownFiles(dir: string): Promise<
           signal,
         )
   } catch (e: unknown) {
-    // Handle missing/inaccessible dir directly instead of pre-checking
-    // existence (TOCTOU). findMarkdownFilesNative already catches internally;
-    // ripGrep rejects on inaccessible target paths.
-    if (isFsInaccessible(e)) return []
-    throw e
+    if (useNative) {
+      // Native search failed. Missing/inaccessible dir is expected —
+      // return empty instead of crashing.
+      if (isFsInaccessible(e)) return []
+      throw e
+    }
+    // Ripgrep failed. ENOENT from spawn() always means the rg binary
+    // itself is missing (the target dir is irrelevant — ripgrep would need
+    // to exist to even start and report on the dir). Fall back to native
+    // Node.js file search instead of silently returning nothing.
+    logForDebugging(
+      `ripgrep not available for ${dir}, falling back to native file search`,
+    )
+    try {
+      files = await findMarkdownFilesNative(dir, signal)
+    } catch (fallbackError) {
+      if (isFsInaccessible(fallbackError)) return []
+      throw fallbackError
+    }
   }
 
   const results = await Promise.all(
