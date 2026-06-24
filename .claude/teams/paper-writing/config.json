@@ -1,0 +1,46 @@
+{
+  "name": "paper-writing",
+  "description": "多Agent学术写作团队 - 文献收集、审核、整理、写作全流程",
+  "members": [
+    {
+      "name": "coordinator",
+      "agentType": "general-purpose",
+      "description": "协调者 - 分配任务、整合结果、控制流程"
+    },
+    {
+      "name": "collector",
+      "agentType": "Explore",
+      "description": "文献收集 - 搜索下载学术论文"
+    },
+    {
+      "name": "lit_reviewer",
+      "agentType": "general-purpose",
+      "description": "文献审核 - 评估质量、相关性、真实性"
+    },
+    {
+      "name": "organizer",
+      "agentType": "general-purpose",
+      "description": "文献整理 - 分类、提取关键信息"
+    },
+    {
+      "name": "org_reviewer",
+      "agentType": "general-purpose",
+      "description": "整理审核 - 检查整理完整性"
+    },
+    {
+      "name": "frameworker",
+      "agentType": "general-purpose",
+      "description": "框架生成 - 根据文献提出论文大纲"
+    },
+    {
+      "name": "critic",
+      "agentType": "general-purpose",
+      "description": "挑刺Agent - 挑战框架/章节、指出漏洞"
+    },
+    {
+      "name": "writer",
+      "agentType": "general-purpose",
+      "description": "章节写作 - 按章节分工写作"
+    }
+  ]
+}

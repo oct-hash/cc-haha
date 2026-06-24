@@ -1,0 +1,57 @@
+{
+  "memory": {
+    "backend": "builtin",
+    "citations": "auto"
+  },
+  "agents": {
+    "defaults": {
+      "memorySearch": {
+        "provider": "auto",
+        "model": "text-embedding-3-small",
+        "enabled": true,
+        "cache": {
+          "enabled": true,
+          "maxEntries": 50000
+        },
+        "query": {
+          "hybrid": {
+            "enabled": true,
+            "vectorWeight": 0.7,
+            "textWeight": 0.3,
+            "candidateMultiplier": 4,
+            "mmr": {
+              "enabled": true,
+              "lambda": 0.7
+            },
+            "temporalDecay": {
+              "enabled": true,
+              "halfLifeDays": 30
+            }
+          }
+        },
+        "extraPaths": [
+          ".claude/memory"
+        ]
+      }
+    }
+  },
+  "plugins": {
+    "entries": {
+      "memory-core": {
+        "subagent": {
+          "allowModelOverride": true,
+          "allowedModels": [
+            "anthropic/claude-sonnet-4-6"
+          ]
+        },
+        "config": {
+          "dreaming": {
+            "enabled": true,
+            "frequency": "0 3 * * *",
+            "model": "anthropic/claude-sonnet-4-6"
+          }
+        }
+      }
+    }
+  }
+}

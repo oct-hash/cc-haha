@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "latex": {
+      "command": "C:/Python314/python.exe",
+      "args": ["D:/claude-code-haha/src/services/latex/mcp_server.py"],
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "TEXMFHOME": "D:/texmf"
+      },
+      "description": "ChineseResearchLaTeX 项目管理 - 编译 NSFC/论文/学位论文/简历模板"
+    },
+    "semantic-scholar": {
+      "command": "node",
+      "args": ["C:/Users/Asus/.openclaw/mcp-servers/semantic-scholar-server.js"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": ""
+      },
+      "description": "Semantic Scholar Academic Search API"
+    },
+    "chrome-cdp": {
+      "command": "node",
+      "args": ["C:/Users/Asus/.openclaw/mcp-servers/chrome-cdp-server.js", "9222"],
+      "description": "Chrome DevTools Protocol via MCP"
+    },
+    "graphify": {
+      "command": "C:/Python314/python.exe",
+      "args": ["D:/hermes-kb/graphify/server.py"],
+      "description": "Knowledge graph extraction from text using spaCy and NetworkX"
+    }
+  }
+}

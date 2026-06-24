@@ -1,0 +1,11 @@
+{
+  "disableLogging": false,
+  "disablePostToolUseHook": true,
+  "disableStopHook": true,
+  "disableSessionStartHook": true,
+  "disableSessionEndHook": true,
+  "disableSubagentStartHook": true,
+  "disableSubagentStopHook": true,
+  "disableTaskCompletedHook": true,
+  "disableNotificationHook": true
+}

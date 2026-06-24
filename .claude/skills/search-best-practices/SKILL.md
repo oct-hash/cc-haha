@@ -6,6 +6,8 @@ when_to_use: 需要决定是否搜索时、选择搜索工具时、搜索策略�
 
 # 搜索最佳实践
 
+<!-- [SYNC] 此为详细决策树。底线规则见 CLAUDE.md 搜索策略。Hook: hookify.warn-excessive-searches -->
+
 ## 是否需要搜索？
 
 ```

@@ -6,6 +6,8 @@ when_to_use: 用户请求被安全规则拒绝时、用户表露心理困扰时�
 
 # 安全响应协议
 
+<!-- [SYNC] 此为详细 SOP。底线规则见 CLAUDE.md (安全边界/心理健康协议/有害内容过滤)。Hook: hookify.block-harmful-search-terms + hookify.activate-wellbeing-protocol -->
+
 ## 1. 安全拒绝
 
 ### 拒绝原则

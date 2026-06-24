@@ -1,0 +1,119 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(*)",
+      "Write(*)",
+      "NotebookEdit(*)",
+      "Bash(*)",
+      "WebFetch(domain:*)",
+      "WebSearch",
+      "mcp__*"
+    ],
+    "deny": [],
+    "ask": [
+      "Bash(rm *)",
+      "Bash(rmdir *)",
+      "Bash(shred *)",
+      "Bash(dd *)",
+      "Bash(mkfs *)",
+      "Bash(fdisk *)",
+      "Bash(kill *)",
+      "Bash(killall *)",
+      "Bash(pkill *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|Delete",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '$FILE_PATH' | grep -iE '(\\.env|credentials|token|secret|\\.pem|\\.key|id_rsa|id_ed25519)' && echo '[Hook] ⚠ 敏感文件修改需确认' && exit 1 || exit 0",
+            "timeout": 3000,
+            "description": "敏感文件编辑保护"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "grep -n \"console\\.log\\|console\\.warn\\|console\\.error\" \"$FILE_PATH\" 2>/dev/null && echo \"[Hook] ⚠ console.log found in $FILE_PATH\" || true",
+            "timeout": 3000,
+            "description": "检查编辑的文件是否有 console.log"
+          },
+          {
+            "type": "command",
+            "command": "if echo '$FILE_PATH' | grep -qE '\\.(ts|tsx)$'; then npx tsc --noEmit --pretty false \"$FILE_PATH\" 2>&1 | head -10; fi",
+            "timeout": 10000,
+            "description": "TypeScript 类型检查"
+          },
+          {
+            "type": "command",
+            "command": "grep -n '[\\x80-\\xff]' \"$FILE_PATH\" 2>/dev/null && echo '[Hook] ⚠ 发现非 ASCII 字符，可能影响终端显示' || true",
+            "timeout": 2000,
+            "description": "检查非 ASCII 字符"
+          },
+          {
+            "type": "command",
+            "command": "wc -l \"$FILE_PATH\" 2>/dev/null | awk '{if($1>500) print \"[Hook] ⚠ 文件超过500行: \"$1\"行\"}'",
+            "timeout": 2000,
+            "description": "大文件警告"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "grep -l 'Ink\\|React' \"$FILE_PATH\" 2>/dev/null && echo '[Hook] ✅ TUI 组件文件' || true",
+            "timeout": 2000,
+            "description": "标记 TUI 组件文件"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(bun *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[Hook] Bun 构建中...'",
+            "timeout": 1000,
+            "async": true,
+            "description": "Bun 构建提示"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if grep -rn \"console\\.log\" /d/claude-code-haha/src/ --include=\"*.ts\" --include=\"*.tsx\" 2>/dev/null | grep -v \"node_modules\" | grep -v \".test.\" | grep -v \"//.*console\"; then echo \"[Hook] ⚠ 发现未删除的 console.log\"; else echo \"[Hook] ✅ 无 console.log\"; fi",
+            "timeout": 10000,
+            "description": "检查项目中残留的 console.log"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"& { $title = 'Claude Code'; $msg = 'Task completed at ' + (Get-Date -Format 'HH:mm'); [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]::CreateToastNotifier($title).Show([Windows.UI.Notifications.ToastNotification]::new([Windows.Data.Xml.Dom.XmlDocument]::new(('<toast><visual><binding template=\"ToastText02\"><text id=\"1\">' + $title + '</text><text id=\"2\">' + $msg + '</text></binding></visual></toast>')))) }\" 2>&1 || true",
+            "timeout": 5000,
+            "async": true,
+            "description": "运行完成时桌面通知"
+          }
+        ]
+      }
+    ]
+  }
+}
