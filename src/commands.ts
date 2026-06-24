@@ -38,10 +38,12 @@ import releaseNotes from './commands/release-notes/index.js'
 import rename from './commands/rename/index.js'
 import resume from './commands/resume/index.js'
 import review, { ultrareview } from './commands/review.js'
+import reviewSummary from './commands/review-summary/index.js'
 import session from './commands/session/index.js'
 import share from './commands/share/index.js'
 import skills from './commands/skills/index.js'
 import status from './commands/status/index.js'
+import taskDone from './commands/task-done/index.js'
 import tasks from './commands/tasks/index.js'
 import teleport from './commands/teleport/index.js'
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -121,6 +123,7 @@ const buddy = (
 /* eslint-enable @typescript-eslint/no-require-imports */
 import thinkback from './commands/thinkback/index.js'
 import thinkbackPlay from './commands/thinkback-play/index.js'
+
 import permissions from './commands/permissions/index.js'
 import plan from './commands/plan/index.js'
 import fast from './commands/fast/index.js'
@@ -294,13 +297,16 @@ const COMMANDS = memoize((): Command[] => [
   reloadPlugins,
   rename,
   resume,
+  reviewSummary,
   session,
+  share,
   skills,
   stats,
   status,
   statusline,
   stickers,
   tag,
+  taskDone,
   theme,
   feedback,
   review,
@@ -336,6 +342,7 @@ const COMMANDS = memoize((): Command[] => [
   passes,
   ...(peersCmd ? [peersCmd] : []),
   tasks,
+
   ...(workflowsCmd ? [workflowsCmd] : []),
   ...(torch ? [torch] : []),
   ...(process.env.USER_TYPE === 'ant' && !process.env.IS_DEMO

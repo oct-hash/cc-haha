@@ -1,7 +1,8 @@
 import { feature } from 'bun:bundle'
 import memoize from 'lodash-es/memoize.js'
-import { basename } from 'path'
+import { basename, join } from 'path'
 import type { SettingSource } from 'src/utils/settings/constants.js'
+import { isSettingSourceEnabled } from '../../utils/settings/constants.js'
 import { z } from 'zod/v4'
 import { isAutoMemoryEnabled } from '../../memdir/paths.js'
 import {
@@ -19,11 +20,13 @@ import {
   type EffortValue,
   parseEffortValue,
 } from '../../utils/effort.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
+import { isEnvTruthy, getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 import { parsePositiveIntFromFrontmatter } from '../../utils/frontmatterParser.js'
 import { lazySchema } from '../../utils/lazySchema.js'
 import { logError } from '../../utils/log.js'
 import {
+  type MarkdownFile,
+  loadMarkdownFiles,
   loadMarkdownFilesForSubdir,
   parseAgentToolsFromFrontmatter,
   parseSlashCommandToolsFromFrontmatter,
@@ -37,6 +40,7 @@ import {
   loadPluginAgents,
 } from '../../utils/plugins/loadPluginAgents.js'
 import { HooksSchema, type HooksSettings } from '../../utils/settings/types.js'
+import { isRestrictedToPluginOnly } from '../../utils/settings/pluginOnlyPolicy.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import { FILE_EDIT_TOOL_NAME } from '../FileEditTool/constants.js'
 import { FILE_READ_TOOL_NAME } from '../FileReadTool/prompt.js'
@@ -307,8 +311,25 @@ export const getAgentDefinitionsWithOverrides = memoize(
     try {
       const markdownFiles = await loadMarkdownFilesForSubdir('agents', cwd)
 
+      // Load OMC (Oh My Claude) agents from ~/.claude/omc-agents/
+      const omcAgentsDir = join(getClaudeConfigHomeDir(), 'omc-agents')
+      let omcMarkdownFiles: MarkdownFile[] = []
+      if (
+        isSettingSourceEnabled('userSettings') &&
+        !isRestrictedToPluginOnly('agents')
+      ) {
+        const rawOmcFiles = await loadMarkdownFiles(omcAgentsDir)
+        omcMarkdownFiles = rawOmcFiles.map(file => ({
+          ...file,
+          baseDir: omcAgentsDir,
+          source: 'userSettings' as const,
+        }))
+      }
+
+      const allMarkdownFiles = [...markdownFiles, ...omcMarkdownFiles]
+
       const failedFiles: Array<{ path: string; error: string }> = []
-      const customAgents = markdownFiles
+      const customAgents = allMarkdownFiles
         .map(({ filePath, baseDir, frontmatter, content, source }) => {
           const agent = parseAgentFromMarkdown(
             filePath,
@@ -364,6 +385,15 @@ export const getAgentDefinitionsWithOverrides = memoize(
 
       const activeAgents = getActiveAgentsFromList(allAgentsList)
 
+      logForDebugging(
+        `[AGENT_LOAD] builtIn=${builtInAgents.length} plugin=${pluginAgents.length} custom=${customAgents.length} active=${activeAgents.length} total=${allAgentsList.length}`
+      )
+      if (failedFiles.length > 0) {
+        logForDebugging(
+          `[AGENT_LOAD] failedFiles: ${failedFiles.map(f => `${f.path}: ${f.error}`).join(' | ')}`
+        )
+      }
+
       // Initialize colors for all active agents
       for (const agent of activeAgents) {
         if (agent.color) {
@@ -379,7 +409,9 @@ export const getAgentDefinitionsWithOverrides = memoize(
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error)
+      const errorStack = error instanceof Error ? error.stack : ''
       logForDebugging(`Error loading agent definitions: ${errorMessage}`)
+      logForDebugging(`Agent load error stack: ${errorStack || '(no stack)'}`)
       logError(error)
       // Even on error, return the built-in agents
       const builtInAgents = getBuiltInAgents()

@@ -2056,6 +2056,7 @@ async function run(): Promise<CommanderCommand> {
       allAgents,
       activeAgents: getActiveAgentsFromList(allAgents)
     };
+    logForDebugging(`[STARTUP_AGENTS] allAgents=${allAgents.length} activeAgents=${agentDefinitions.activeAgents.length} failedFiles=${agentDefinitionsResult.failedFiles?.length ?? 0}`);
 
     // Look up main thread agent from CLI flag or settings
     const agentSetting = agentCli ?? getInitialSettings().agent;
@@ -2929,6 +2930,7 @@ async function run(): Promise<CommanderCommand> {
       /* eslint-enable @typescript-eslint/no-require-imports */
       ccrMirrorEnabled = isCcrMirrorEnabled();
     }
+    logForDebugging(`[STARTUP_STATE] Initializing AppState with agentDefinitions: all=${agentDefinitions.allAgents.length} active=${agentDefinitions.activeAgents.length}`);
     const initialState: AppState = {
       settings: getInitialSettings(),
       tasks: {},

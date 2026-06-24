@@ -2,3 +2,37 @@
 .env.*
 !.env.example
 node_modules
+
+# Debug and log files
+*.log
+.playwright-mcp/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+*.tsbuildinfo
+
+# Generated data and downloads
+papers/
+analysis/
+eval/
+virtual_tech/
+docs/prompt-comparison/
+
+# Third-party dependencies and resources
+packages/
+awesome-claude-code/
+
+# Design artifacts
+.ecc-design/
+
+# Local config backups
+*.bak
+.claude/*.bak

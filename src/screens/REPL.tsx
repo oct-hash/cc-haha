@@ -3152,6 +3152,33 @@ export function REPL({
       proactiveModule?.resumeProactive();
     }
 
+    // Task-done trigger: check for "任务完成", "done", etc.
+    // Import dynamically to avoid circular deps and enable tree-shaking
+    const trimmedInput = expandPastedTextRefs(input, pastedContents).trim();
+    if (!speculationAccept && !input.trim().startsWith('/')) {
+      const { checkTaskDoneTrigger } = await import('../hooks/taskDoneTrigger.js');
+      if (checkTaskDoneTrigger && checkTaskDoneTrigger(trimmedInput)) {
+        const { processTaskDoneTrigger } = await import('../hooks/taskDoneTrigger.js');
+        if (processTaskDoneTrigger) {
+          const reviewText = await processTaskDoneTrigger({
+            messages: messagesRef.current,
+            input: trimmedInput
+          })
+          if (reviewText) {
+            addNotification({
+              key: 'task-done-review',
+              text: reviewText,
+              priority: 'high'
+            })
+            setInputValue('')
+            helpers.setCursorOffset(0)
+            helpers.clearBuffer()
+            return
+          }
+        }
+      }
+    }
+
     // Handle immediate commands - these bypass the queue and execute right away
     // even while Claude is processing. Commands opt-in via `immediate: true`.
     // Commands triggered via keybindings are always treated as immediate.
