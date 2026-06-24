@@ -1,0 +1,20 @@
+{
+  "name": "wechat",
+  "version": "1.0.0",
+  "description": "WeChat ClawBot channel integration for Claude Code",
+  "mcpServers": {
+    "wechat": {
+      "type": "stdio",
+      "command": "bun",
+      "args": ["--env-file=.env", "./src/services/channels/wechat/index.ts"],
+      "env": {}
+    }
+  },
+  "channels": [
+    {
+      "server": "wechat",
+      "displayName": "WeChat",
+      "userConfig": {}
+    }
+  ]
+}

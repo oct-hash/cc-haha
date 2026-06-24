@@ -312,6 +312,38 @@ export async function getAnthropicClient({
     ...(isDebugToStdErr() && { logger: createStderrLogger() }),
   }
 
+  // Model-based routing: when model is MiniMax, route to MiniMax endpoint
+  // This allows using MiniMax M2.7 (pro) as a backup model without changing
+  // the default ANTHROPIC_BASE_URL/ANTHROPIC_API_KEY (which may point to DeepSeek).
+  const isMiniMaxModel = model?.toLowerCase().includes('minimax')
+  if (isMiniMaxModel && process.env.MINIMAX_BASE_URL && process.env.MINIMAX_API_KEY) {
+    clientConfig.baseURL = process.env.MINIMAX_BASE_URL
+    // MiniMax Anthropic-compatible API expects the API key in the
+    // 'Authorization: Bearer <key>' header, NOT in 'x-api-key'.
+    // Using authToken (instead of apiKey) makes the SDK send the
+    // correct Authorization header format.
+    clientConfig.authToken = process.env.MINIMAX_API_KEY
+    // Clear apiKey to avoid sending wrong key as x-api-key header.
+    // MiniMax would reject the DeepSeek key in x-api-key.
+    clientConfig.apiKey = undefined
+    // Remove Authorization header that may have been set from the
+    // default provider (e.g. DeepSeek via ANTHROPIC_AUTH_TOKEN or
+    // apiKeyHelper). Must be cleared so the SDK's authToken-based
+    // Authorization header is the only one sent.
+    delete defaultHeaders['Authorization']
+    logForDebugging(
+      `[API:routing] Using MiniMax endpoint for model: ${model}`,
+    )
+  } else if (isMiniMaxModel && !process.env.MINIMAX_API_KEY) {
+    logForDebugging(
+      `[API:routing] MiniMax model requested but MINIMAX_API_KEY not set, using default endpoint`,
+    )
+  } else if (isMiniMaxModel && !process.env.MINIMAX_BASE_URL) {
+    logForDebugging(
+      `[API:routing] MiniMax model requested but MINIMAX_BASE_URL not set, using default endpoint`,
+    )
+  }
+
   return new Anthropic(clientConfig)
 }
 

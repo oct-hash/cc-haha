@@ -1,0 +1,60 @@
+{
+  "mcpServers": {
+    "gbrain": {
+      "command": "bun",
+      "args": ["--env-file=.env", "run", "../gbrain/src/cli.ts", "serve"]
+    },
+    "qqmail": {
+      "command": "bun",
+      "args": ["--env-file=.env", "./src/services/channels/qqmail/index.ts"]
+    },
+    "windows-mcp": {
+      "command": "uvx",
+      "args": ["windows-mcp"],
+      "env": {
+        "WINDOWS_MCP_SCREENSHOT_SCALE": "0.5",
+        "ANONYMIZED_TELEMETRY": "false"
+      }
+    },
+    "sequential-thinking": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "context7": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@upstash/context7-mcp@latest"]
+    },
+    "github": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-github"]
+    },
+    "playwright": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@playwright/mcp", "--browser", "chrome"]
+    },
+    "token-optimizer": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "token-optimizer-mcp"]
+    },
+    "evalview": {
+      "command": "python",
+      "args": ["-m", "evalview", "mcp", "serve"]
+    },
+    "test-mcp": {
+      "command": "bun",
+      "args": ["--env-file=.env", "./test-mcp-server.ts"]
+    },
+    "drissionpage": {
+      "command": "drissionpage-mcp"
+    },
+    "latex": {
+      "command": "python",
+      "args": ["./src/services/latex/mcp_server.py"],
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "TEXMFHOME": "D:/texmf"
+      },
+      "description": "ChineseResearchLaTeX 项目管理 - 编译 NSFC/论文/学位论文/简历模板 (TEXMFHOME 按需修改)"
+    }
+  }
+}
