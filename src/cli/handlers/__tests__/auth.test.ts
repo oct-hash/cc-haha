@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'bun:test'
-import { vi as vitest } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'bun:test';
+import { vi as vitest } from 'vitest';
 
 // Test CLI auth handler functions
 // The authLogin, authStatus, and authLogout functions have side effects
@@ -9,17 +9,22 @@ describe('Auth Handler - Core Logic', () => {
   describe('installOAuthTokens logic', () => {
     // Test the token installation logic in isolation
     interface MockOAuthTokens {
-      accessToken: string
-      refreshToken: string | null
-      expiresAt: number | null
-      scopes: string[]
-      subscriptionType: string | null
-      rateLimitTier: string | null
+      accessToken: string;
+      refreshToken: string | null;
+      expiresAt: number | null;
+      scopes: string[];
+      subscriptionType: string | null;
+      rateLimitTier: string | null;
       profile?: {
-        account: { uuid: string; email: string; display_name?: string; created_at: string }
-        organization: { uuid: string; billing_type?: string; has_extra_usage_enabled?: boolean; subscription_created_at?: string }
-      }
-      tokenAccount?: { uuid: string; emailAddress: string; organizationUuid: string }
+        account: { uuid: string; email: string; display_name?: string; created_at: string };
+        organization: {
+          uuid: string;
+          billing_type?: string;
+          has_extra_usage_enabled?: boolean;
+          subscription_created_at?: string;
+        };
+      };
+      tokenAccount?: { uuid: string; emailAddress: string; organizationUuid: string };
     }
 
     it('correctly extracts account info from profile', () => {
@@ -44,14 +49,14 @@ describe('Auth Handler - Core Logic', () => {
             subscription_created_at: '2024-01-01',
           },
         },
-      }
+      };
 
       // Extract account info
-      const profile = tokens.profile
-      expect(profile?.account.uuid).toBe('acc-123')
-      expect(profile?.account.email).toBe('user@example.com')
-      expect(profile?.organization.uuid).toBe('org-456')
-    })
+      const profile = tokens.profile;
+      expect(profile?.account.uuid).toBe('acc-123');
+      expect(profile?.account.email).toBe('user@example.com');
+      expect(profile?.organization.uuid).toBe('org-456');
+    });
 
     it('handles tokens without profile (fallback to tokenAccount)', () => {
       const tokens: MockOAuthTokens = {
@@ -66,13 +71,13 @@ describe('Auth Handler - Core Logic', () => {
           emailAddress: 'token@example.com',
           organizationUuid: 'org-101',
         },
-      }
+      };
 
       // Should use tokenAccount when profile is not available
-      expect(tokens.tokenAccount?.uuid).toBe('acc-789')
-      expect(tokens.profile).toBeUndefined()
-    })
-  })
+      expect(tokens.tokenAccount?.uuid).toBe('acc-789');
+      expect(tokens.profile).toBeUndefined();
+    });
+  });
 
   describe('authLogin method resolution', () => {
     it('resolves login method correctly with forceLoginMethod', () => {
@@ -83,42 +88,39 @@ describe('Auth Handler - Core Logic', () => {
         forceLoginMethod?: 'claudeai' | 'console',
       ) => {
         if (useConsole && claudeai) {
-          return 'invalid' // Cannot use both
+          return 'invalid'; // Cannot use both
         }
-        return forceLoginMethod
-          ? forceLoginMethod === 'claudeai'
-          : !useConsole
-      }
+        return forceLoginMethod ? forceLoginMethod === 'claudeai' : !useConsole;
+      };
 
-      expect(resolveLoginMethod(false, false)).toBe(true) // default is claudeai
-      expect(resolveLoginMethod(true, false)).toBe(false) // useConsole = false means claudeai
-      expect(resolveLoginMethod(false, true)).toBe(true) // claudeai explicitly
-      expect(resolveLoginMethod(true, true)).toBe('invalid') // cannot use both
-    })
+      expect(resolveLoginMethod(false, false)).toBe(true); // default is claudeai
+      expect(resolveLoginMethod(true, false)).toBe(false); // useConsole = false means claudeai
+      expect(resolveLoginMethod(false, true)).toBe(true); // claudeai explicitly
+      expect(resolveLoginMethod(true, true)).toBe('invalid'); // cannot use both
+    });
 
     it('detects conflicting console and claudeai flags', () => {
-      const hasConflict = (useConsole?: boolean, claudeai?: boolean) =>
-        !!(useConsole && claudeai)
+      const hasConflict = (useConsole?: boolean, claudeai?: boolean) => !!(useConsole && claudeai);
 
-      expect(hasConflict(true, true)).toBe(true)
-      expect(hasConflict(true, false)).toBe(false)
-      expect(hasConflict(false, true)).toBe(false)
-      expect(hasConflict(undefined, undefined)).toBe(false)
-    })
-  })
+      expect(hasConflict(true, true)).toBe(true);
+      expect(hasConflict(true, false)).toBe(false);
+      expect(hasConflict(false, true)).toBe(false);
+      expect(hasConflict(undefined, undefined)).toBe(false);
+    });
+  });
 
   describe('authStatus output formatting', () => {
     it('formats auth status output correctly', () => {
       // Test the JSON output structure
       interface AuthStatusOutput {
-        loggedIn: boolean
-        authMethod: string
-        apiProvider: string
-        apiKeySource?: string
-        email?: string
-        orgId?: string
-        orgName?: string
-        subscriptionType?: string | null
+        loggedIn: boolean;
+        authMethod: string;
+        apiProvider: string;
+        apiKeySource?: string;
+        email?: string;
+        orgId?: string;
+        orgName?: string;
+        subscriptionType?: string | null;
       }
 
       const buildOutput = (
@@ -131,13 +133,13 @@ describe('Auth Handler - Core Logic', () => {
         authMethod,
         apiProvider,
         ...(apiKeySource && { apiKeySource }),
-      })
+      });
 
-      const output = buildOutput(true, 'claude.ai', 'firstParty')
-      expect(output.loggedIn).toBe(true)
-      expect(output.authMethod).toBe('claude.ai')
-      expect(output.apiProvider).toBe('firstParty')
-    })
+      const output = buildOutput(true, 'claude.ai', 'firstParty');
+      expect(output.loggedIn).toBe(true);
+      expect(output.authMethod).toBe('claude.ai');
+      expect(output.apiProvider).toBe('firstParty');
+    });
 
     it('handles not logged in state', () => {
       const isLoggedIn = (
@@ -145,29 +147,29 @@ describe('Auth Handler - Core Logic', () => {
         apiKeySource: string,
         hasApiKeyEnvVar: boolean,
         using3P: boolean,
-      ) => hasToken || apiKeySource !== 'none' || hasApiKeyEnvVar || using3P
+      ) => hasToken || apiKeySource !== 'none' || hasApiKeyEnvVar || using3P;
 
-      expect(isLoggedIn(false, 'none', false, false)).toBe(false)
-      expect(isLoggedIn(true, 'none', false, false)).toBe(true)
-      expect(isLoggedIn(false, 'apiKeyHelper', false, false)).toBe(true)
-      expect(isLoggedIn(false, 'none', true, false)).toBe(true)
-      expect(isLoggedIn(false, 'none', false, true)).toBe(true)
-    })
-  })
+      expect(isLoggedIn(false, 'none', false, false)).toBe(false);
+      expect(isLoggedIn(true, 'none', false, false)).toBe(true);
+      expect(isLoggedIn(false, 'apiKeyHelper', false, false)).toBe(true);
+      expect(isLoggedIn(false, 'none', true, false)).toBe(true);
+      expect(isLoggedIn(false, 'none', false, true)).toBe(true);
+    });
+  });
 
   describe('OAuth scope handling', () => {
     it('identifies Claude.ai auth scope correctly', () => {
-      const CLAUDE_AI_PROFILE_SCOPE = 'user:profile'
+      const CLAUDE_AI_PROFILE_SCOPE = 'user:profile';
 
       const shouldUseClaudeAIAuth = (scopes?: string[]) =>
-        scopes?.includes(CLAUDE_AI_PROFILE_SCOPE) ?? false
+        scopes?.includes(CLAUDE_AI_PROFILE_SCOPE) ?? false;
 
-      expect(shouldUseClaudeAIAuth(['user:profile', 'user:inference'])).toBe(true)
-      expect(shouldUseClaudeAIAuth(['user:inference'])).toBe(false)
-      expect(shouldUseClaudeAIAuth(undefined)).toBe(false)
-      expect(shouldUseClaudeAIAuth([])).toBe(false)
-    })
-  })
+      expect(shouldUseClaudeAIAuth(['user:profile', 'user:inference'])).toBe(true);
+      expect(shouldUseClaudeAIAuth(['user:inference'])).toBe(false);
+      expect(shouldUseClaudeAIAuth(undefined)).toBe(false);
+      expect(shouldUseClaudeAIAuth([])).toBe(false);
+    });
+  });
 
   describe('Org validation logic', () => {
     it('validates org UUID match correctly', () => {
@@ -175,42 +177,42 @@ describe('Auth Handler - Core Logic', () => {
         required: string | undefined,
         actual: string | undefined,
       ): boolean => {
-        if (!required) return true
-        return required === actual
-      }
+        if (!required) return true;
+        return required === actual;
+      };
 
-      expect(validateOrgMatch(undefined, 'any-org')).toBe(true) // No requirement
-      expect(validateOrgMatch('org-123', 'org-123')).toBe(true) // Match
-      expect(validateOrgMatch('org-123', 'org-456')).toBe(false) // Mismatch
-    })
+      expect(validateOrgMatch(undefined, 'any-org')).toBe(true); // No requirement
+      expect(validateOrgMatch('org-123', 'org-123')).toBe(true); // Match
+      expect(validateOrgMatch('org-123', 'org-456')).toBe(false); // Mismatch
+    });
 
     it('distinguishes env var tokens from regular tokens', () => {
       type TokenSource =
         | 'CLAUDE_CODE_OAUTH_TOKEN'
         | 'CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR'
         | 'claude.ai'
-        | 'other'
+        | 'other';
 
       const isEnvVarToken = (source: TokenSource) =>
         source === 'CLAUDE_CODE_OAUTH_TOKEN' ||
-        source === 'CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR'
+        source === 'CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR';
 
-      expect(isEnvVarToken('CLAUDE_CODE_OAUTH_TOKEN')).toBe(true)
-      expect(isEnvVarToken('CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR')).toBe(true)
-      expect(isEnvVarToken('claude.ai')).toBe(false)
-      expect(isEnvVarToken('other')).toBe(false)
-    })
-  })
-})
+      expect(isEnvVarToken('CLAUDE_CODE_OAUTH_TOKEN')).toBe(true);
+      expect(isEnvVarToken('CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR')).toBe(true);
+      expect(isEnvVarToken('claude.ai')).toBe(false);
+      expect(isEnvVarToken('other')).toBe(false);
+    });
+  });
+});
 
 describe('OAuth token structure validation', () => {
   interface OAuthTokens {
-    accessToken: string
-    refreshToken: string | null
-    expiresAt: number | null
-    scopes: string[]
-    subscriptionType: string | null
-    rateLimitTier: string | null
+    accessToken: string;
+    refreshToken: string | null;
+    expiresAt: number | null;
+    scopes: string[];
+    subscriptionType: string | null;
+    rateLimitTier: string | null;
   }
 
   const isValidOAuthTokens = (tokens: OAuthTokens): boolean => {
@@ -218,16 +220,12 @@ describe('OAuth token structure validation', () => {
       typeof tokens.accessToken === 'string' &&
       tokens.accessToken.length > 0 &&
       Array.isArray(tokens.scopes)
-    )
-  }
+    );
+  };
 
   const isInferenceOnlyToken = (tokens: OAuthTokens): boolean => {
-    return (
-      !tokens.refreshToken ||
-      !tokens.expiresAt ||
-      tokens.scopes.length === 1
-    )
-  }
+    return !tokens.refreshToken || !tokens.expiresAt || tokens.scopes.length === 1;
+  };
 
   it('validates OAuth token structure', () => {
     const validTokens: OAuthTokens = {
@@ -237,10 +235,10 @@ describe('OAuth token structure validation', () => {
       scopes: ['user:profile', 'user:inference'],
       subscriptionType: 'pro',
       rateLimitTier: null,
-    }
+    };
 
-    expect(isValidOAuthTokens(validTokens)).toBe(true)
-  })
+    expect(isValidOAuthTokens(validTokens)).toBe(true);
+  });
 
   it('detects inference-only tokens', () => {
     const inferenceOnly: OAuthTokens = {
@@ -250,9 +248,9 @@ describe('OAuth token structure validation', () => {
       scopes: ['user:inference'],
       subscriptionType: null,
       rateLimitTier: null,
-    }
+    };
 
-    expect(isInferenceOnlyToken(inferenceOnly)).toBe(true)
+    expect(isInferenceOnlyToken(inferenceOnly)).toBe(true);
 
     const fullTokens: OAuthTokens = {
       accessToken: 'token-123',
@@ -261,8 +259,8 @@ describe('OAuth token structure validation', () => {
       scopes: ['user:profile', 'user:inference'],
       subscriptionType: 'pro',
       rateLimitTier: null,
-    }
+    };
 
-    expect(isInferenceOnlyToken(fullTokens)).toBe(false)
-  })
-})
+    expect(isInferenceOnlyToken(fullTokens)).toBe(false);
+  });
+});

@@ -1,42 +1,39 @@
 // Quality Gate CLI entry point + orchestration
 
-import { join } from 'node:path'
+import { join } from 'node:path';
+import { runConfigAudit } from './lanes/config-audit';
+import { runCoverage } from './lanes/coverage';
+import { runDepHealth } from './lanes/dep-health';
+import { runDocChecks } from './lanes/doc-checks';
+import { runFileHygiene } from './lanes/file-hygiene';
+import { runImpactReport } from './lanes/impact-report';
+import { runLintCheck } from './lanes/lint-check';
+import { runPolicyChecks } from './lanes/policy-checks';
+import { runProviderSmoke } from './lanes/provider-smoke';
 import {
-  getGitSha,
-  isGitRepo,
-  isGitDirty,
-  runId,
-} from './utils/helpers'
-import { printHeader, printLaneResult, printSummary, printError, printUsage } from './utils/report'
-import { getLanesForMode, getLaneById, filterLanes } from './modes'
-import { runImpactReport } from './lanes/impact-report'
-import { runPolicyChecks } from './lanes/policy-checks'
-import { runCoverage } from './lanes/coverage'
-import { runQuarantine, quarantineAdd, quarantineList, quarantineResolve } from './lanes/quarantine'
-import { runServerChecks } from './lanes/server-checks'
-import { runProviderSmoke } from './lanes/provider-smoke'
-import { runTypeCheck } from './lanes/typecheck'
-import { runLintCheck } from './lanes/lint-check'
-import { runTestResults } from './lanes/test-results'
-import { runFileHygiene } from './lanes/file-hygiene'
-import { runDocChecks } from './lanes/doc-checks'
-import { runConfigAudit } from './lanes/config-audit'
-import { runSecurityScan } from './lanes/security-scan'
-import { runDepHealth } from './lanes/dep-health'
+  quarantineAdd,
+  quarantineList,
+  quarantineResolve,
+  runQuarantine,
+} from './lanes/quarantine';
+import { runSecurityScan } from './lanes/security-scan';
+import { runServerChecks } from './lanes/server-checks';
+import { runTestResults } from './lanes/test-results';
+import { runTypeCheck } from './lanes/typecheck';
 import type {
-  LaneResult,
   LaneExecutionContext,
+  LaneResult,
+  QualityGateMode,
   QualityGateOptions,
   QualityGateReport,
-  QualityGateMode,
-} from './lanes/types'
+} from './lanes/types';
+import { filterLanes, getLaneById, getLanesForMode } from './modes';
+import { getGitSha, isGitDirty, isGitRepo, runId } from './utils/helpers';
+import { printError, printHeader, printLaneResult, printSummary, printUsage } from './utils/report';
 
 // ── Lane runner registry ───────────────────────────────────────
 
-const LANE_RUNNERS: Record<
-  string,
-  (ctx: LaneExecutionContext) => Promise<LaneResult>
-> = {
+const LANE_RUNNERS: Record<string, (ctx: LaneExecutionContext) => Promise<LaneResult>> = {
   'impact-report': runImpactReport,
   'policy-checks': runPolicyChecks,
   typecheck: runTypeCheck,
@@ -51,23 +48,23 @@ const LANE_RUNNERS: Record<
   quarantine: runQuarantine,
   'server-checks': runServerChecks,
   'provider-smoke': runProviderSmoke,
-}
+};
 
 // ── CLI Argument Parsing ───────────────────────────────────────
 
 function parseArgs(raw: string[]): {
-  mode: QualityGateMode
-  dryRun: boolean
-  allowLive: boolean
-  onlyLanes?: string[]
-  skipLanes?: string[]
-  jsonOutput: boolean
-  verbose: boolean
-  quarantineCmd?: string
-  quarantineArgs: Record<string, string>
-  showHelp: boolean
+  mode: QualityGateMode;
+  dryRun: boolean;
+  allowLive: boolean;
+  onlyLanes?: string[];
+  skipLanes?: string[];
+  jsonOutput: boolean;
+  verbose: boolean;
+  quarantineCmd?: string;
+  quarantineArgs: Record<string, string>;
+  showHelp: boolean;
 } {
-  const args = raw.slice(2) // skip bun + script path
+  const args = raw.slice(2); // skip bun + script path
   const result: ReturnType<typeof parseArgs> = {
     mode: 'pr',
     dryRun: false,
@@ -76,82 +73,88 @@ function parseArgs(raw: string[]): {
     verbose: false,
     quarantineArgs: {},
     showHelp: false,
-  }
+  };
 
-  let i = 0
+  let i = 0;
   while (i < args.length) {
-    const arg = args[i]
+    const arg = args[i];
 
     switch (arg) {
       case '--mode': {
-        const v = args[++i]
+        const v = args[++i];
         if (v === 'pr' || v === 'baseline' || v === 'release') {
-          result.mode = v
+          result.mode = v;
         }
-        break
+        break;
       }
       case '--only':
-        result.onlyLanes = (args[++i] || '').split(',').map((s) => s.trim())
-        break
+        result.onlyLanes = (args[++i] || '').split(',').map((s) => s.trim());
+        break;
       case '--skip':
-        result.skipLanes = (args[++i] || '').split(',').map((s) => s.trim())
-        break
+        result.skipLanes = (args[++i] || '').split(',').map((s) => s.trim());
+        break;
       case '--allow-live':
-        result.allowLive = true
-        break
+        result.allowLive = true;
+        break;
       case '--dry-run':
-        result.dryRun = true
-        break
+        result.dryRun = true;
+        break;
       case '--json':
-        result.jsonOutput = true
-        break
+        result.jsonOutput = true;
+        break;
       case '--verbose':
-        result.verbose = true
-        break
+        result.verbose = true;
+        break;
       case '--help':
-        result.showHelp = true
-        break
+        result.showHelp = true;
+        break;
       case 'quarantine': {
-        result.quarantineCmd = args[++i] // list | add | resolve
+        result.quarantineCmd = args[++i]; // list | add | resolve
         // Parse remaining sub-args into a flat map
-        let j = i + 1
+        let j = i + 1;
         while (j < args.length) {
-          if (args[j] === '--lane' || args[j] === '--title' || args[j] === '--owner' ||
-              args[j] === '--reason' || args[j] === '--id' || args[j] === '--note') {
-            const key = args[j].replace(/^--/, '')
-            result.quarantineArgs[key] = args[j + 1] || ''
-            j += 2
+          if (
+            args[j] === '--lane' ||
+            args[j] === '--title' ||
+            args[j] === '--owner' ||
+            args[j] === '--reason' ||
+            args[j] === '--id' ||
+            args[j] === '--note'
+          ) {
+            const key = args[j].replace(/^--/, '');
+            result.quarantineArgs[key] = args[j + 1] || '';
+            j += 2;
           } else {
-            j++
+            j++;
           }
         }
-        i = args.length // consume rest
-        break
+        i = args.length; // consume rest
+        break;
       }
     }
-    i++
+    i++;
   }
 
-  return result
+  return result;
 }
 
 // ── Main Orchestrator ──────────────────────────────────────────
 
 async function main(): Promise<void> {
-  const args = parseArgs(Bun.argv)
+  const args = parseArgs(Bun.argv);
 
   if (args.showHelp) {
-    printUsage()
-    process.exit(0)
+    printUsage();
+    process.exit(0);
   }
 
-  const rootDir = process.cwd()
-  const startedAt = new Date()
+  const rootDir = process.cwd();
+  const startedAt = new Date();
 
   // ── Handle quarantine sub-commands ──
   if (args.quarantineCmd) {
-    await handleQuarantineCmd(args.quarantineCmd, args.quarantineArgs, rootDir)
-    return
+    await handleQuarantineCmd(args.quarantineCmd, args.quarantineArgs, rootDir);
+    return;
   }
 
   const options: QualityGateOptions = {
@@ -162,65 +165,63 @@ async function main(): Promise<void> {
     runId: runId(),
     onlyLanes: args.onlyLanes,
     skipLanes: args.skipLanes,
-  }
+  };
 
   const ctx: LaneExecutionContext = {
     options,
     rootDir,
     outputDir: join(rootDir, 'scripts', 'quality-gate', 'data'),
-  }
+  };
 
   // JSON output: suppress terminal formatting
   if (!args.jsonOutput) {
-    printHeader(options.mode, options.runId!)
+    printHeader(options.mode, options.runId!);
   }
 
   // ── Determine lanes to run ──
-  let laneIds = getLanesForMode(options.mode)
-  laneIds = filterLanes(laneIds, options.onlyLanes, options.skipLanes)
+  let laneIds = getLanesForMode(options.mode);
+  laneIds = filterLanes(laneIds, options.onlyLanes, options.skipLanes);
 
   if (args.dryRun) {
     if (!args.jsonOutput) {
-      console.log('  Dry run — would execute:')
+      console.log('  Dry run — would execute:');
       for (const id of laneIds) {
-        const lane = getLaneById(id)
-        console.log(`    - ${lane?.title || id}`)
+        const lane = getLaneById(id);
+        console.log(`    - ${lane?.title || id}`);
       }
-      console.log('')
+      console.log('');
     } else {
-      console.log(JSON.stringify({ mode: options.mode, lanes: laneIds, dryRun: true }))
+      console.log(JSON.stringify({ mode: options.mode, lanes: laneIds, dryRun: true }));
     }
-    process.exit(0)
+    process.exit(0);
   }
 
   // ── Run impact-report first (unless skipped via --only/--skip) ──
-  let impactResult: LaneResult | null = null
-  let triggeredLaneIds: string[] = []
+  let impactResult: LaneResult | null = null;
+  let triggeredLaneIds: string[] = [];
 
   if (laneIds.includes('impact-report')) {
-    impactResult = await LANE_RUNNERS['impact-report'](ctx)
+    impactResult = await LANE_RUNNERS['impact-report'](ctx);
   }
 
   // Extract triggered lane IDs from impact-report details
   if (impactResult && impactResult.details) {
     // Look for the "Required lanes" detail to get the canonical list
-    const requiredDetail = impactResult.details.find(
-      (d) => d.label === 'Required lanes',
-    )
+    const requiredDetail = impactResult.details.find((d) => d.label === 'Required lanes');
     if (requiredDetail?.message && requiredDetail.message !== 'none (docs-only change)') {
-      triggeredLaneIds = requiredDetail.message.split(', ').filter(Boolean)
+      triggeredLaneIds = requiredDetail.message.split(', ').filter(Boolean);
     }
   }
 
   // ── Run remaining lanes ──
-  const results: LaneResult[] = []
-  if (impactResult) results.push(impactResult)
+  const results: LaneResult[] = [];
+  if (impactResult) results.push(impactResult);
 
   for (const laneId of laneIds) {
-    if (laneId === 'impact-report') continue
+    if (laneId === 'impact-report') continue;
 
-    const lane = getLaneById(laneId)
-    if (!lane) continue
+    const lane = getLaneById(laneId);
+    if (!lane) continue;
 
     // Skip live lanes without --allow-live
     if (lane.live && !options.allowLive) {
@@ -232,12 +233,12 @@ async function main(): Promise<void> {
         category: lane.category,
         skipReason: 'Live checks require --allow-live',
         live: true,
-      })
-      continue
+      });
+      continue;
     }
 
     // Skip lanes not triggered by impact (unless forced via --only or always-run)
-    const alwaysRun = !lane.impactTrigger || lane.id === 'quarantine'
+    const alwaysRun = !lane.impactTrigger || lane.id === 'quarantine';
     if (!alwaysRun && !options.onlyLanes && triggeredLaneIds.length > 0) {
       if (!triggeredLaneIds.includes(laneId)) {
         results.push({
@@ -247,21 +248,21 @@ async function main(): Promise<void> {
           durationMs: 0,
           category: lane.category,
           skipReason: `Not impacted (no matching file changes)`,
-        })
-        continue
+        });
+        continue;
       }
     }
 
-    const runner = LANE_RUNNERS[laneId]
-    if (!runner) continue
+    const runner = LANE_RUNNERS[laneId];
+    if (!runner) continue;
 
-    const result = await runner(ctx)
-    results.push(result)
+    const result = await runner(ctx);
+    results.push(result);
   }
 
   // ── Build report ──
-  const finishedAt = new Date()
-  const isRepo = await isGitRepo(rootDir)
+  const finishedAt = new Date();
+  const isRepo = await isGitRepo(rootDir);
 
   const report: QualityGateReport = {
     schemaVersion: 1,
@@ -282,21 +283,21 @@ async function main(): Promise<void> {
       failed: results.filter((r) => r.status === 'failed').length,
       skipped: results.filter((r) => r.status === 'skipped').length,
     },
-  }
+  };
 
   // ── Output ──
   if (args.jsonOutput) {
-    console.log(JSON.stringify(report, null, 2))
+    console.log(JSON.stringify(report, null, 2));
   } else {
     results.forEach((r, i) => {
       if (args.verbose || r.status !== 'skipped' || r.skipReason) {
-        printLaneResult(r, i)
+        printLaneResult(r, i);
       }
-    })
-    printSummary(report)
+    });
+    printSummary(report);
   }
 
-  process.exit(report.summary.failed > 0 ? 1 : 0)
+  process.exit(report.summary.failed > 0 ? 1 : 0);
 }
 
 // ── Quarantine Sub-commands ────────────────────────────────────
@@ -308,35 +309,35 @@ async function handleQuarantineCmd(
 ): Promise<void> {
   switch (cmd) {
     case 'list':
-      await quarantineList(rootDir)
-      break
+      await quarantineList(rootDir);
+      break;
     case 'add':
       if (!args.lane || !args.title || !args.owner) {
-        printError('quarantine add requires --lane, --title, and --owner')
-        process.exit(1)
+        printError('quarantine add requires --lane, --title, and --owner');
+        process.exit(1);
       }
       await quarantineAdd(rootDir, {
         lane: args.lane,
         title: args.title,
         owner: args.owner,
         reason: args.reason,
-      })
-      break
+      });
+      break;
     case 'resolve':
       if (!args.id) {
-        printError('quarantine resolve requires --id')
-        process.exit(1)
+        printError('quarantine resolve requires --id');
+        process.exit(1);
       }
-      await quarantineResolve(rootDir, args.id, args.note)
-      break
+      await quarantineResolve(rootDir, args.id, args.note);
+      break;
     default:
-      printError(`Unknown quarantine command: ${cmd}`)
-      printUsage()
-      process.exit(1)
+      printError(`Unknown quarantine command: ${cmd}`);
+      printUsage();
+      process.exit(1);
   }
 }
 
 main().catch((err) => {
-  printError(err instanceof Error ? err.message : String(err))
-  process.exit(2)
-})
+  printError(err instanceof Error ? err.message : String(err));
+  process.exit(2);
+});

@@ -23,7 +23,7 @@
         "noBannedTypes": "off",
         "noExcessiveCognitiveComplexity": {
           "level": "warn",
-          "options": { "maxComplexity": 20 }
+          "options": { "maxAllowedComplexity": 20 }
         }
       }
     }

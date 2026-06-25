@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "created_at": "2026-06-25T16:08:12.296Z",
+  "updated_at": "2026-06-25T16:13:05.133Z",
+  "totalErrors": 62,
+  "totalWarnings": 1,
+  "perFile": {
+    "scripts/resolve-paths.mjs": 1,
+    "scripts/quality-gate/lanes/config-audit.ts": 1,
+    "scripts/quality-gate/lanes/coverage.ts": 1,
+    "scripts/generate-sounds.ts": 6,
+    "scripts/enrich-papers.ts": 5,
+    "scripts/quality-gate/index.ts": 2,
+    "scripts/hooks.js": 11,
+    "scripts/quality-gate/lanes/impact-report.ts": 1,
+    "scripts/quality-gate/lanes/lint-check.ts": 2,
+    "scripts/quality-gate/lanes/provider-smoke.ts": 4,
+    "scripts/quality-gate/lanes/test-results.ts": 1,
+    "scripts/quality-gate/lanes/quarantine.ts": 1,
+    "scripts/quality-gate/lanes/policy-checks.ts": 2,
+    "scripts/quality-gate/lanes/typecheck.ts": 1,
+    "scripts/quality-gate/setup-pre-push.ts": 2,
+    "scripts/quality-gate/utils/helpers.ts": 3,
+    "src/Task.ts": 1,
+    "scripts/test-agent-load.ts": 2,
+    "src/Tool.ts": 1,
+    "src/bridge/__tests__/jwtUtils.test.ts": 1,
+    "src/QueryEngine.ts": 2,
+    "src/vim/operators.ts": 2,
+    "scripts/test-store-pipeline.ts": 9
+  }
+}

@@ -1,70 +1,68 @@
 // Terminal report formatting using chalk
 
-import chalk from 'chalk'
-import type { LaneResult, QualityGateReport } from '../lanes/types'
+import chalk from 'chalk';
+import type { LaneResult, QualityGateReport } from '../lanes/types';
 
-function pad(n: number, width: number = 2): string {
-  return String(n).padStart(width)
+function pad(n: number, width = 2): string {
+  return String(n).padStart(width);
 }
 
 function formatDuration(ms: number): string {
-  if (ms < 1000) return `${ms}ms`
-  return `${(ms / 1000).toFixed(1)}s`
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
 }
 
 function statusIcon(status: string): string {
   switch (status) {
     case 'passed':
-      return chalk.green('✓')
+      return chalk.green('✓');
     case 'failed':
-      return chalk.red('✗')
+      return chalk.red('✗');
     case 'skipped':
-      return chalk.yellow('○')
+      return chalk.yellow('○');
     case 'warn':
-      return chalk.yellow('△')
+      return chalk.yellow('△');
     default:
-      return '?'
+      return '?';
   }
 }
 
 function statusColor(status: string): typeof chalk.green {
   switch (status) {
     case 'passed':
-      return chalk.green
+      return chalk.green;
     case 'failed':
-      return chalk.red
+      return chalk.red;
     case 'skipped':
     case 'warn':
-      return chalk.yellow
+      return chalk.yellow;
     default:
-      return chalk.white
+      return chalk.white;
   }
 }
 
 export function printHeader(mode: string, runId: string): void {
-  console.log('')
+  console.log('');
   console.log(
-    chalk.bold.cyan('═══ Quality Gate ') +
-      chalk.cyan(`[${mode}] `) +
-      chalk.gray(`${runId}`),
-  )
-  console.log('')
+    chalk.bold.cyan('═══ Quality Gate ') + chalk.cyan(`[${mode}] `) + chalk.gray(`${runId}`),
+  );
+  console.log('');
 }
 
 export function printLaneResult(result: LaneResult, index: number): void {
-  const icon = statusIcon(result.status)
-  const color = statusColor(result.status)
-  const num = chalk.gray(`${pad(index + 1)}.`)
-  const title = color(result.title)
-  const time = chalk.gray(formatDuration(result.durationMs))
+  const icon = statusIcon(result.status);
+  const color = statusColor(result.status);
+  const num = chalk.gray(`${pad(index + 1)}.`);
+  const title = color(result.title);
+  const time = chalk.gray(formatDuration(result.durationMs));
 
-  console.log(`  ${num} ${icon} ${title} ${time}`)
+  console.log(`  ${num} ${icon} ${title} ${time}`);
 
   if (result.error) {
-    console.log(`     ${chalk.red('Error:')} ${result.error}`)
+    console.log(`     ${chalk.red('Error:')} ${result.error}`);
   }
   if (result.skipReason) {
-    console.log(`     ${chalk.gray('Skipped:')} ${result.skipReason}`)
+    console.log(`     ${chalk.gray('Skipped:')} ${result.skipReason}`);
   }
   if (result.details) {
     for (const detail of result.details) {
@@ -73,56 +71,53 @@ export function printLaneResult(result: LaneResult, index: number): void {
           ? chalk.green('  ✓')
           : detail.status === 'warn'
             ? chalk.yellow('  △')
-            : chalk.red('  ✗')
-      const line = `${dIcon} ${detail.label}`
+            : chalk.red('  ✗');
+      const line = `${dIcon} ${detail.label}`;
       if (detail.status === 'ok') {
-        console.log(`     ${chalk.gray(line)}`)
+        console.log(`     ${chalk.gray(line)}`);
       } else {
-        console.log(`     ${line}`)
+        console.log(`     ${line}`);
       }
       if (detail.message) {
-        console.log(`       ${chalk.gray(detail.message)}`)
+        console.log(`       ${chalk.gray(detail.message)}`);
       }
     }
   }
 }
 
 export function printSummary(report: QualityGateReport): void {
-  console.log('')
-  console.log(chalk.bold('─── Summary ───'))
+  console.log('');
+  console.log(chalk.bold('─── Summary ───'));
   console.log(
     `  ${chalk.green(`✓ ${report.summary.passed} passed`)}  ` +
       `${chalk.red(`✗ ${report.summary.failed} failed`)}  ` +
       `${chalk.yellow(`○ ${report.summary.skipped} skipped`)}`,
-  )
+  );
 
   if (report.git.sha) {
-    console.log(
-      chalk.gray(`  git: ${report.git.sha}${report.git.dirty ? ' (dirty)' : ''}`),
-    )
+    console.log(chalk.gray(`  git: ${report.git.sha}${report.git.dirty ? ' (dirty)' : ''}`));
   }
 
   console.log(
     chalk.gray(
       `  time: ${formatDuration(
-        new Date(report.finishedAt).getTime() -
-          new Date(report.startedAt).getTime(),
+        new Date(report.finishedAt).getTime() - new Date(report.startedAt).getTime(),
       )}`,
     ),
-  )
-  console.log('')
+  );
+  console.log('');
 
   if (report.summary.failed > 0) {
-    console.log(chalk.red.bold('Quality gate FAILED'))
-    console.log('')
+    console.log(chalk.red.bold('Quality gate FAILED'));
+    console.log('');
   } else {
-    console.log(chalk.green.bold('Quality gate PASSED'))
-    console.log('')
+    console.log(chalk.green.bold('Quality gate PASSED'));
+    console.log('');
   }
 }
 
 export function printError(message: string): void {
-  console.error(chalk.red(`\n  Error: ${message}\n`))
+  console.error(chalk.red(`\n  Error: ${message}\n`));
 }
 
 export function printUsage(): void {
@@ -146,5 +141,5 @@ export function printUsage(): void {
     bun run quality-gate quarantine list
     bun run quality-gate quarantine add --lane <id> --title "<text>" --owner "@user" [--reason "<text>"]
     bun run quality-gate quarantine resolve --id <uuid>
-`)
+`);
 }

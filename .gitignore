@@ -33,6 +33,15 @@ awesome-claude-code/
 # Design artifacts
 .ecc-design/
 
+# Sensitive files (keys, credentials)
+*.pem
+*.key
+id_rsa
+id_ed25519
+id_ecdsa
+credentials
+*credentials*
+
 # Local config backups
 *.bak
 .claude/*.bak
