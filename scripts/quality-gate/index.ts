@@ -15,6 +15,14 @@ import { runCoverage } from './lanes/coverage'
 import { runQuarantine, quarantineAdd, quarantineList, quarantineResolve } from './lanes/quarantine'
 import { runServerChecks } from './lanes/server-checks'
 import { runProviderSmoke } from './lanes/provider-smoke'
+import { runTypeCheck } from './lanes/typecheck'
+import { runLintCheck } from './lanes/lint-check'
+import { runTestResults } from './lanes/test-results'
+import { runFileHygiene } from './lanes/file-hygiene'
+import { runDocChecks } from './lanes/doc-checks'
+import { runConfigAudit } from './lanes/config-audit'
+import { runSecurityScan } from './lanes/security-scan'
+import { runDepHealth } from './lanes/dep-health'
 import type {
   LaneResult,
   LaneExecutionContext,
@@ -31,6 +39,14 @@ const LANE_RUNNERS: Record<
 > = {
   'impact-report': runImpactReport,
   'policy-checks': runPolicyChecks,
+  typecheck: runTypeCheck,
+  'lint-check': runLintCheck,
+  'test-results': runTestResults,
+  'file-hygiene': runFileHygiene,
+  'doc-checks': runDocChecks,
+  'config-audit': runConfigAudit,
+  'security-scan': runSecurityScan,
+  'dep-health': runDepHealth,
   coverage: runCoverage,
   quarantine: runQuarantine,
   'server-checks': runServerChecks,

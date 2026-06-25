@@ -129,6 +129,14 @@ export interface LaneExecutionContext {
 // Trigger patterns: which file changes trigger which lane ids
 export const LANE_TRIGGERS: Record<string, string[]> = {
   coverage: ['src/**/*.ts', 'src/**/*.tsx'],
+  typecheck: ['src/**/*.ts', 'src/**/*.tsx', 'tsconfig.json'],
+  'lint-check': ['src/**/*.ts', 'src/**/*.tsx', 'biome.json', 'package.json'],
+  'test-results': ['src/**/*.ts', 'src/**/*.tsx', 'src/testing/**/*', 'bunfig.toml'],
+  'file-hygiene': ['src/**/*', '.claude/**/*', '.env*'],
+  'doc-checks': ['README*.md', 'CHANGELOG.md', 'CLAUDE.md', 'AGENTS.md', 'docs/**'],
+  'config-audit': ['.env*', '.mcp.json', '.claude/settings*.json', '.claude/marketplace.json', 'tsconfig.json'],
+  'security-scan': ['src/**/*', '.env*', 'package.json', 'bun.lock'],
+  'dep-health': ['package.json', 'bun.lock'],
   'policy-checks': [
     '.claude/hookify.*.local.md',
     '.claude/agents/**/*.md',

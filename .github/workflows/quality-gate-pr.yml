@@ -1,0 +1,41 @@
+name: Quality Gate (PR)
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.x'
+
+      - run: bun install --frozen-lockfile
+
+      - name: Run quality gate (PR mode)
+        run: bun run quality-gate --mode pr --json > gate-result.json
+
+      - name: Upload gate result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-gate-result
+          path: gate-result.json
+
+      - name: Report summary
+        if: always()
+        run: |
+          if grep -q '"failed": *0' gate-result.json; then
+            echo "✅ All quality checks passed"
+          else
+            echo "❌ Some quality checks failed — review the artifact for details"
+            exit 1
+          fi

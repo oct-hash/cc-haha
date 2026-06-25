@@ -19,6 +19,15 @@
     },
     "types": [
       "bun-types"
-    ]
-  }
+    ],
+
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "lib": ["ESNext"]
+  },
+  "include": ["src/**/*", "scripts/**/*", "stubs/**/*"],
+  "exclude": ["node_modules", "packages"]
 }

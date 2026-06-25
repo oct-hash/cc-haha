@@ -36,6 +36,11 @@
       "command": "cmd",
       "args": ["/c", "npx", "-y", "token-optimizer-mcp"]
     },
+    "exa": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "exa-mcp-server"],
+      "description": "Exa AI 网页搜索 — 继承父进程的 EXA_API_KEY（从 .env 加载）"
+    },
     "evalview": {
       "command": "python",
       "args": ["-m", "evalview", "mcp", "serve"]
