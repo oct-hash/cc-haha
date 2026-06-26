@@ -16,7 +16,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 | 界面 | 纯命令行 | Ink TUI (React 兼容终端) |
 | 扩展 | 配置层面 (hooks/plugins) | 可修改源码、添加组件 |
 | 模型 | 单模型 | 多模型 (MiniMax/OpenRouter 等) |
-| Channel | 无 | Telegram/Feishu/Discord |
+| Channel | 无 | WeChat / QQMail |
 
 ---
 
@@ -65,7 +65,7 @@ Tools 委托给 src/utils/ 辅助函数
 - **Memory**: Claude Code Memory + GBrain MCP 并存
   - Memory: 偏好/反馈/项目上下文
   - GBrain: 知识库/文档/论文搜索
-- **Channel**: 支持 Telegram/Feishu/Discord 远程控制
+- **Channel**: WeChat MCP Server + QQMail 文献同步，支持远程消息交互
 
 ---
 
@@ -344,7 +344,7 @@ rules/
 | Memory | `docs/memory/01-usage-guide.md` |
 | Agent | `docs/agent/01-usage-guide.md` |
 | Skills | `docs/skills/01-usage-guide.md` |
-| Channel | `docs/channel/01-channel-system.md` |
+| Channel | `src/services/channels/` (WeChat + QQMail) |
 | Computer Use | `docs/features/computer-use.md` |
 | Agent Reach | `.claude/skills/agent-reach/SKILL.md` |
 | Agent Reach Refs | `.claude/skills/agent-reach/references/` |
