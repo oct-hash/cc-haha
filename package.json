@@ -30,16 +30,16 @@
     "ci": "bun run check && bun run quality-gate --mode pr --json"
   },
   "dependencies": {
-    "@anthropic-ai/sandbox-runtime": "^0.0.52",
-    "@anthropic-ai/sdk": "0.100.1",
+    "@anthropic-ai/sandbox-runtime": "^0.0.61",
+    "@anthropic-ai/sdk": "^0.106.0",
     "@aws-sdk/client-bedrock-runtime": "^3.1075.0",
     "@commander-js/extra-typings": "^15.0.0",
     "@growthbook/growthbook": "^1.6.5",
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@opentelemetry/api-logs": "0.218.0",
+    "@opentelemetry/api-logs": "^0.219.0",
     "@opentelemetry/core": "^2.8.0",
     "@opentelemetry/resources": "^2.8.0",
-    "@opentelemetry/sdk-logs": "0.218.0",
+    "@opentelemetry/sdk-logs": "^0.219.0",
     "@opentelemetry/sdk-metrics": "^2.8.0",
     "@opentelemetry/sdk-trace-base": "^2.8.0",
     "@opentelemetry/semantic-conventions": "^1.41.1",
@@ -72,7 +72,7 @@
     "mailparser": "^3.9.12",
     "marked": "^18.0.5",
     "p-map": "^7.0.4",
-    "pdfjs-dist": "^6.0.227",
+    "pdfjs-dist": "^6.1.200",
     "picomatch": "^4.0.4",
     "proper-lockfile": "^4.1.2",
     "qrcode": "^1.5.4",
@@ -89,7 +89,7 @@
     "type-fest": "^5.7.0",
     "undici": "^8.5.0",
     "usehooks-ts": "^3.1.1",
-    "vscode-jsonrpc": "^8.2.1",
+    "vscode-jsonrpc": "9.0.0",
     "vscode-languageserver-types": "^3.18.0",
     "wrap-ansi": "^10.0.0",
     "ws": "^8.21.0",
@@ -98,11 +98,11 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "2.5.1",
     "@types/imap": "^0.8.43",
     "@types/react": "^19.2.17",
     "bun-types": "^1.3.14",
     "promptfoo": "^0.121.17",
-    "typescript": "^5.9.3"
+    "typescript": "6.0.3"
   }
 }

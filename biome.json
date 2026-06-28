@@ -1,19 +1,17 @@
 ﻿{
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
+  "$schema": "https://biomejs.dev/schemas/2.5.1/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "correctness": {
         "noUnusedVariables": "error"
       },
       "suspicious": {
         "noExplicitAny": "warn",
-        "noConsoleLog": "warn",
-        "noDebugger": "error"
+        "noDebugger": "error",
+        "noConsole": { "level": "warn", "options": { "allow": ["log"] } }
       },
       "style": {
         "noNonNullAssertion": "warn",
@@ -42,7 +40,14 @@
     }
   },
   "files": {
-    "include": ["src/**/*", "scripts/**/*"],
-    "ignore": ["node_modules", "packages", "stubs", "*.json", "*.toml"]
+    "includes": [
+      "**/src/**/*",
+      "**/scripts/**/*",
+      "!**/node_modules",
+      "!**/packages",
+      "!**/stubs",
+      "!**/*.json",
+      "!**/*.toml"
+    ]
   }
 }
