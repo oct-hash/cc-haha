@@ -211,13 +211,17 @@ MUST 拒绝：武器/爆炸物制造、非法药物合成、恶意代码（勒�
 | Server | 用途 |
 |--------|------|
 | **context7** | 最新库/框架文档 |
-| **github** | GitHub API (issues、PRs、repos、code search) |
-| **playwright** | 浏览器自动化 & 视觉测试 |
-| **sequential-thinking** | 结构化多步推理 |
-| **token-optimizer** | Token 优化 & 缓存 |
+| **drissionpage** | 浏览器自动化 (DrissionPage) |
 | **evalview** | Agent 评估 & 回归测试 |
+| **exa** | Exa AI 网页搜索与内容抓取 |
 | **gbrain** | 知识图谱 / wiki brain |
+| **github** | GitHub API (issues、PRs、repos、code search) |
+| **latex** | LaTeX 项目管理与编译 |
+| **playwright** | 浏览器自动化 & 视觉测试 (Playwright) |
 | **qqmail** | QQ Mail 渠道集成 |
+| **sequential-thinking** | 结构化多步推理 |
+| **test-mcp** | MCP 连接测试 |
+| **token-optimizer** | Token 优化 & 缓存 |
 
 ---
 
