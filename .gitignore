@@ -42,6 +42,11 @@ id_ecdsa
 credentials
 *credentials*
 
+# TTS test artifacts
+_test_*.mp3
+_tts_test.py
+_voice_list.py
+
 # Local config backups
 *.bak
 .claude/*.bak
