@@ -48,9 +48,7 @@ import tasks from './commands/tasks/index.js'
 import teleport from './commands/teleport/index.js'
 /* eslint-disable @typescript-eslint/no-require-imports */
 const agentsPlatform =
-  process.env.USER_TYPE === 'ant'
-    ? require('./commands/agents-platform/index.js').default
-    : null
+  process.env.USER_TYPE === 'ant' ? require('./commands/agents-platform/index.js').default : null
 /* eslint-enable @typescript-eslint/no-require-imports */
 import securityReview from './commands/security-review.js'
 import bughunter from './commands/bughunter/index.js'
@@ -62,33 +60,20 @@ import { feature } from 'bun:bundle'
 // Dead code elimination: conditional imports
 /* eslint-disable @typescript-eslint/no-require-imports */
 const proactive =
-  feature('PROACTIVE') || feature('KAIROS')
-    ? require('./commands/proactive.js').default
-    : null
+  feature('PROACTIVE') || feature('KAIROS') ? require('./commands/proactive.js').default : null
 const briefCommand =
-  feature('KAIROS') || feature('KAIROS_BRIEF')
-    ? require('./commands/brief.js').default
-    : null
-const assistantCommand = feature('KAIROS')
-  ? require('./commands/assistant/index.js').default
-  : null
-const bridge = feature('BRIDGE_MODE')
-  ? require('./commands/bridge/index.js').default
-  : null
+  feature('KAIROS') || feature('KAIROS_BRIEF') ? require('./commands/brief.js').default : null
+const assistantCommand = feature('KAIROS') ? require('./commands/assistant/index.js').default : null
+const bridge = feature('BRIDGE_MODE') ? require('./commands/bridge/index.js').default : null
 const remoteControlServerCommand =
   feature('DAEMON') && feature('BRIDGE_MODE')
     ? require('./commands/remoteControlServer/index.js').default
     : null
-const voiceCommand = feature('VOICE_MODE')
-  ? require('./commands/voice/index.js').default
-  : null
-const forceSnip = feature('HISTORY_SNIP')
-  ? require('./commands/force-snip.js').default
-  : null
+const voiceCommand = feature('VOICE_MODE') ? require('./commands/voice/index.js').default : null
+const forceSnip = feature('HISTORY_SNIP') ? require('./commands/force-snip.js').default : null
 const workflowsCmd = feature('WORKFLOW_SCRIPTS')
-  ? (
-      require('./commands/workflows/index.js') as typeof import('./commands/workflows/index.js')
-    ).default
+  ? (require('./commands/workflows/index.js') as typeof import('./commands/workflows/index.js'))
+      .default
   : null
 const webCmd = feature('CCR_REMOTE_SETUP')
   ? (
@@ -103,23 +88,16 @@ const clearSkillIndexCache = feature('EXPERIMENTAL_SKILL_SEARCH')
 const subscribePr = feature('KAIROS_GITHUB_WEBHOOKS')
   ? require('./commands/subscribe-pr.js').default
   : null
-const ultraplan = feature('ULTRAPLAN')
-  ? require('./commands/ultraplan.js').default
-  : null
+const ultraplan = feature('ULTRAPLAN') ? require('./commands/ultraplan.js').default : null
 const torch = feature('TORCH') ? require('./commands/torch.js').default : null
 const peersCmd = feature('UDS_INBOX')
-  ? (
-      require('./commands/peers/index.js') as typeof import('./commands/peers/index.js')
-    ).default
+  ? (require('./commands/peers/index.js') as typeof import('./commands/peers/index.js')).default
   : null
 const forkCmd = feature('FORK_SUBAGENT')
-  ? (
-      require('./commands/fork/index.js') as typeof import('./commands/fork/index.js')
-    ).default
+  ? (require('./commands/fork/index.js') as typeof import('./commands/fork/index.js')).default
   : null
-const buddy = (
-  require('./commands/buddy/index.js') as typeof import('./commands/buddy/index.js')
-).default
+const buddy = (require('./commands/buddy/index.js') as typeof import('./commands/buddy/index.js'))
+  .default
 /* eslint-enable @typescript-eslint/no-require-imports */
 import thinkback from './commands/thinkback/index.js'
 import thinkbackPlay from './commands/thinkback-play/index.js'
@@ -141,10 +119,7 @@ import mockLimits from './commands/mock-limits/index.js'
 import bridgeKick from './commands/bridge-kick.js'
 import version from './commands/version.js'
 import summary from './commands/summary/index.js'
-import {
-  resetLimits,
-  resetLimitsNonInteractive,
-} from './commands/reset-limits/index.js'
+import { resetLimits, resetLimitsNonInteractive } from './commands/reset-limits/index.js'
 import antTrace from './commands/ant-trace/index.js'
 import perfIssue from './commands/perf-issue/index.js'
 import sandboxToggle from './commands/sandbox-toggle/index.js'
@@ -154,11 +129,7 @@ import advisor from './commands/advisor.js'
 import { logError } from './utils/log.js'
 import { toError } from './utils/errors.js'
 import { logForDebugging } from './utils/debug.js'
-import {
-  getSkillDirCommands,
-  clearSkillCaches,
-  getDynamicSkills,
-} from './skills/loadSkillsDir.js'
+import { getSkillDirCommands, clearSkillCaches, getDynamicSkills } from './skills/loadSkillsDir.js'
 import { getBundledSkills } from './skills/bundledSkills.js'
 import { getBuiltinPluginSkillCommands } from './plugins/builtinPlugins.js'
 import {
@@ -178,10 +149,7 @@ import tag from './commands/tag/index.js'
 import outputStyle from './commands/output-style/index.js'
 import remoteEnv from './commands/remote-env/index.js'
 import upgrade from './commands/upgrade/index.js'
-import {
-  extraUsage,
-  extraUsageNonInteractive,
-} from './commands/extra-usage/index.js'
+import { extraUsage, extraUsageNonInteractive } from './commands/extra-usage/index.js'
 import rateLimitOptions from './commands/rate-limit-options/index.js'
 import statusline from './commands/statusline.js'
 import effort from './commands/effort/index.js'
@@ -204,11 +172,7 @@ const usageReport: Command = {
 import oauthRefresh from './commands/oauth-refresh/index.js'
 import debugToolCall from './commands/debug-tool-call/index.js'
 import { getSettingSourceName } from './utils/settings/constants.js'
-import {
-  type Command,
-  getCommandName,
-  isCommandEnabled,
-} from './types/command.js'
+import { type Command, getCommandName, isCommandEnabled } from './types/command.js'
 
 // Re-export types from the centralized location
 export type {
@@ -345,14 +309,11 @@ const COMMANDS = memoize((): Command[] => [
 
   ...(workflowsCmd ? [workflowsCmd] : []),
   ...(torch ? [torch] : []),
-  ...(process.env.USER_TYPE === 'ant' && !process.env.IS_DEMO
-    ? INTERNAL_ONLY_COMMANDS
-    : []),
+  ...(process.env.USER_TYPE === 'ant' && !process.env.IS_DEMO ? INTERNAL_ONLY_COMMANDS : []),
 ])
 
 export const builtInCommandNames = memoize(
-  (): Set<string> =>
-    new Set(COMMANDS().flatMap(_ => [_.name, ...(_.aliases ?? [])])),
+  (): Set<string> => new Set(COMMANDS().flatMap((_) => [_.name, ...(_.aliases ?? [])])),
 )
 
 async function getSkills(cwd: string): Promise<{
@@ -363,14 +324,12 @@ async function getSkills(cwd: string): Promise<{
 }> {
   try {
     const [skillDirCommands, pluginSkills] = await Promise.all([
-      getSkillDirCommands(cwd).catch(err => {
+      getSkillDirCommands(cwd).catch((err) => {
         logError(toError(err))
-        logForDebugging(
-          'Skill directory commands failed to load, continuing without them',
-        )
+        logForDebugging('Skill directory commands failed to load, continuing without them')
         return []
       }),
-      getPluginSkills().catch(err => {
+      getPluginSkills().catch((err) => {
         logError(toError(err))
         logForDebugging('Plugin skills failed to load, continuing without them')
         return []
@@ -430,11 +389,7 @@ export function meetsAvailabilityRequirement(cmd: Command): boolean {
         // Console API key user = direct 1P API customer (not 3P, not claude.ai).
         // Excludes 3P (Bedrock/Vertex/Foundry) who don't set ANTHROPIC_BASE_URL
         // and gateway users who proxy through a custom base URL.
-        if (
-          !isClaudeAISubscriber() &&
-          !isUsing3PServices() &&
-          isFirstPartyAnthropicBaseUrl()
-        )
+        if (!isClaudeAISubscriber() && !isUsing3PServices() && isFirstPartyAnthropicBaseUrl())
           return true
         break
       default: {
@@ -486,7 +441,7 @@ export async function getCommands(cwd: string): Promise<Command[]> {
 
   // Build base commands without dynamic skills
   const baseCommands = allCommands.filter(
-    _ => meetsAvailabilityRequirement(_) && isCommandEnabled(_),
+    (_) => meetsAvailabilityRequirement(_) && isCommandEnabled(_),
   )
 
   if (dynamicSkills.length === 0) {
@@ -494,21 +449,24 @@ export async function getCommands(cwd: string): Promise<Command[]> {
   }
 
   // Dedupe dynamic skills - only add if not already present
-  const baseCommandNames = new Set(baseCommands.map(c => c.name))
-  const uniqueDynamicSkills = dynamicSkills.filter(
-    s =>
-      !baseCommandNames.has(s.name) &&
-      meetsAvailabilityRequirement(s) &&
-      isCommandEnabled(s),
-  )
+  const baseCommandNames = new Set(baseCommands.map((c) => c.name))
+  const uniqueDynamicSkills = dynamicSkills.filter((s) => {
+    if (baseCommandNames.has(s.name)) {
+      logForDebugging(
+        `[skills] Disk skill "${s.name}" hidden by bundled/plugin skill with same name`,
+      )
+      return false
+    }
+    return meetsAvailabilityRequirement(s) && isCommandEnabled(s)
+  })
 
   if (uniqueDynamicSkills.length === 0) {
     return baseCommands
   }
 
   // Insert dynamic skills after plugin skills but before built-in commands
-  const builtInNames = new Set(COMMANDS().map(c => c.name))
-  const insertIndex = baseCommands.findIndex(c => builtInNames.has(c.name))
+  const builtInNames = new Set(COMMANDS().map((c) => c.name))
+  const insertIndex = baseCommands.findIndex((c) => builtInNames.has(c.name))
 
   if (insertIndex === -1) {
     return [...baseCommands, ...uniqueDynamicSkills]
@@ -549,15 +507,10 @@ export function clearCommandsCache(): void {
  * callers that need MCP skills in their skill index thread them through
  * separately.
  */
-export function getMcpSkillCommands(
-  mcpCommands: readonly Command[],
-): readonly Command[] {
+export function getMcpSkillCommands(mcpCommands: readonly Command[]): readonly Command[] {
   if (feature('MCP_SKILLS')) {
     return mcpCommands.filter(
-      cmd =>
-        cmd.type === 'prompt' &&
-        cmd.loadedFrom === 'mcp' &&
-        !cmd.disableModelInvocation,
+      (cmd) => cmd.type === 'prompt' && cmd.loadedFrom === 'mcp' && !cmd.disableModelInvocation,
     )
   }
   return []
@@ -565,52 +518,48 @@ export function getMcpSkillCommands(
 
 // SkillTool shows ALL prompt-based commands that the model can invoke
 // This includes both skills (from /skills/) and commands (from /commands/)
-export const getSkillToolCommands = memoize(
-  async (cwd: string): Promise<Command[]> => {
-    const allCommands = await getCommands(cwd)
-    return allCommands.filter(
-      cmd =>
-        cmd.type === 'prompt' &&
-        !cmd.disableModelInvocation &&
-        cmd.source !== 'builtin' &&
-        // Always include skills from /skills/ dirs, bundled skills, and legacy /commands/ entries
-        // (they all get an auto-derived description from the first line if frontmatter is missing).
-        // Plugin/MCP commands still require an explicit description to appear in the listing.
-        (cmd.loadedFrom === 'bundled' ||
-          cmd.loadedFrom === 'skills' ||
-          cmd.loadedFrom === 'commands_DEPRECATED' ||
-          cmd.hasUserSpecifiedDescription ||
-          cmd.whenToUse),
-    )
-  },
-)
+export const getSkillToolCommands = memoize(async (cwd: string): Promise<Command[]> => {
+  const allCommands = await getCommands(cwd)
+  return allCommands.filter(
+    (cmd) =>
+      cmd.type === 'prompt' &&
+      !cmd.disableModelInvocation &&
+      cmd.source !== 'builtin' &&
+      // Always include skills from /skills/ dirs, bundled skills, and legacy /commands/ entries
+      // (they all get an auto-derived description from the first line if frontmatter is missing).
+      // Plugin/MCP commands still require an explicit description to appear in the listing.
+      (cmd.loadedFrom === 'bundled' ||
+        cmd.loadedFrom === 'skills' ||
+        cmd.loadedFrom === 'commands_DEPRECATED' ||
+        cmd.hasUserSpecifiedDescription ||
+        cmd.whenToUse),
+  )
+})
 
 // Filters commands to include only skills. Skills are commands that provide
 // specialized capabilities for the model to use. They are identified by
 // loadedFrom being 'skills', 'plugin', or 'bundled', or having disableModelInvocation set.
-export const getSlashCommandToolSkills = memoize(
-  async (cwd: string): Promise<Command[]> => {
-    try {
-      const allCommands = await getCommands(cwd)
-      return allCommands.filter(
-        cmd =>
-          cmd.type === 'prompt' &&
-          cmd.source !== 'builtin' &&
-          (cmd.hasUserSpecifiedDescription || cmd.whenToUse) &&
-          (cmd.loadedFrom === 'skills' ||
-            cmd.loadedFrom === 'plugin' ||
-            cmd.loadedFrom === 'bundled' ||
-            cmd.disableModelInvocation),
-      )
-    } catch (error) {
-      logError(toError(error))
-      // Return empty array rather than throwing - skills are non-critical
-      // This prevents skill loading failures from breaking the entire system
-      logForDebugging('Returning empty skills array due to load failure')
-      return []
-    }
-  },
-)
+export const getSlashCommandToolSkills = memoize(async (cwd: string): Promise<Command[]> => {
+  try {
+    const allCommands = await getCommands(cwd)
+    return allCommands.filter(
+      (cmd) =>
+        cmd.type === 'prompt' &&
+        cmd.source !== 'builtin' &&
+        (cmd.hasUserSpecifiedDescription || cmd.whenToUse) &&
+        (cmd.loadedFrom === 'skills' ||
+          cmd.loadedFrom === 'plugin' ||
+          cmd.loadedFrom === 'bundled' ||
+          cmd.disableModelInvocation),
+    )
+  } catch (error) {
+    logError(toError(error))
+    // Return empty array rather than throwing - skills are non-critical
+    // This prevents skill loading failures from breaking the entire system
+    logForDebugging('Returning empty skills array due to load failure')
+    return []
+  }
+})
 
 /**
  * Commands that are safe to use in remote mode (--remote).
@@ -687,15 +636,12 @@ export function isBridgeSafeCommand(cmd: Command): boolean {
  * the CCR init message arrives.
  */
 export function filterCommandsForRemoteMode(commands: Command[]): Command[] {
-  return commands.filter(cmd => REMOTE_SAFE_COMMANDS.has(cmd))
+  return commands.filter((cmd) => REMOTE_SAFE_COMMANDS.has(cmd))
 }
 
-export function findCommand(
-  commandName: string,
-  commands: Command[],
-): Command | undefined {
+export function findCommand(commandName: string, commands: Command[]): Command | undefined {
   return commands.find(
-    _ =>
+    (_) =>
       _.name === commandName ||
       getCommandName(_) === commandName ||
       _.aliases?.includes(commandName),
@@ -711,7 +657,7 @@ export function getCommand(commandName: string, commands: Command[]): Command {
   if (!command) {
     throw ReferenceError(
       `Command ${commandName} not found. Available commands: ${commands
-        .map(_ => {
+        .map((_) => {
           const name = getCommandName(_)
           return _.aliases ? `${name} (aliases: ${_.aliases.join(', ')})` : name
         })

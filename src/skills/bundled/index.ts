@@ -22,6 +22,7 @@ export function initBundledSkills(): void {
   require('./simplify.js').registerSimplifySkill()
   require('./batch.js').registerBatchSkill()
   require('./stuck.js').registerStuckSkill()
+  require('./projectBrief.js').registerProjectBriefSkill()
   if (feature('KAIROS') || feature('KAIROS_DREAM')) {
     const { registerDreamSkill } = require('./dream.js')
     registerDreamSkill()
@@ -38,9 +39,7 @@ export function initBundledSkills(): void {
     registerLoopSkill()
   }
   if (feature('AGENT_TRIGGERS_REMOTE')) {
-    const {
-      registerScheduleRemoteAgentsSkill,
-    } = require('./scheduleRemoteAgents.js')
+    const { registerScheduleRemoteAgentsSkill } = require('./scheduleRemoteAgents.js')
     registerScheduleRemoteAgentsSkill()
   }
   if (feature('BUILDING_CLAUDE_APPS')) {
