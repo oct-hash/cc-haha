@@ -46,25 +46,19 @@ import {
   isCommandEnabled,
   type ResumeEntrypoint,
 } from '../commands.js'
-import { CostThresholdDialog } from '../components/CostThresholdDialog.js'
-import { PromptDialog } from '../components/hooks/PromptDialog.js'
-import { IdleReturnDialog } from '../components/IdleReturnDialog.js'
 import {
   MessageSelector,
   messagesAfterAreOnlySynthetic,
   selectableUserMessagesFilter,
 } from '../components/MessageSelector.js'
-import { ElicitationDialog } from '../components/mcp/ElicitationDialog.js'
 import { prependModeCharacterToInput } from '../components/PromptInput/inputModes.js'
 import PromptInput from '../components/PromptInput/PromptInput.js'
-import { PromptInputQueuedCommands } from '../components/PromptInput/PromptInputQueuedCommands.js'
 import {
   PermissionRequest,
   type ToolUseConfirm,
 } from '../components/permissions/PermissionRequest.js'
-import { WorkerPendingPermission } from '../components/permissions/WorkerPendingPermission.js'
 import { SkillImprovementSurvey } from '../components/SkillImprovementSurvey.js'
-import { BriefIdleStatus, type SpinnerMode, SpinnerWithVerb } from '../components/Spinner.js'
+import { type SpinnerMode, SpinnerWithVerb } from '../components/Spinner.js'
 import type { JumpHandle } from '../components/VirtualMessageList.js'
 import { getSystemPrompt } from '../constants/prompts.js'
 import { useFpsMetrics } from '../context/fpsMetrics.js'
@@ -88,7 +82,6 @@ import { useApiKeyVerification } from '../hooks/useApiKeyVerification.js'
 import { useAssistantHistory } from '../hooks/useAssistantHistory.js'
 import { useBackgroundTaskNavigation } from '../hooks/useBackgroundTaskNavigation.js'
 import { CancelRequestHandler } from '../hooks/useCancelRequest.js'
-import { CommandKeybindingHandlers } from '../hooks/useCommandKeybindings.js'
 import { useDeferredHookMessages } from '../hooks/useDeferredHookMessages.js'
 import { useDirectConnect } from '../hooks/useDirectConnect.js'
 import { GlobalKeybindingHandlers } from '../hooks/useGlobalKeybindings.js'
@@ -229,8 +222,6 @@ import {
 } from 'src/services/analytics/index.js'
 import { Messages } from '../components/Messages.js'
 import { buildPermissionUpdates } from '../components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.js'
-import { TaskListV2 } from '../components/TaskListV2.js'
-import { TeammateViewHeader } from '../components/TeammateViewHeader.js'
 import {
   BASH_INPUT_TAG,
   COMMAND_MESSAGE_TAG,
@@ -386,9 +377,7 @@ const launchUltraplan: any = feature('ULTRAPLAN')
 import exit from '../commands/exit/index.js'
 import { EffortCallout, shouldShowEffortCallout } from '../components/EffortCallout.js'
 import { ExitFlow } from '../components/ExitFlow.js'
-import { IdeOnboardingDialog } from '../components/IdeOnboardingDialog.js'
 import { RemoteCallout } from '../components/RemoteCallout.js'
-import { SessionBackgroundHint } from '../components/SessionBackgroundHint.js'
 import { useCommandQueue } from '../hooks/useCommandQueue.js'
 import { useIDEIntegration } from '../hooks/useIDEIntegration.js'
 import { useSessionBackgrounding } from '../hooks/useSessionBackgrounding.js'
@@ -435,7 +424,6 @@ const UndercoverAutoCallout =
 
 import { SANDBOX_NETWORK_ACCESS_TOOL_NAME } from 'src/cli/structuredIO.js'
 import { AUTO_MODE_DESCRIPTION } from 'src/components/AutoModeOptInDialog.js'
-import { PluginHintMenu } from 'src/components/ClaudeCodeHint/PluginHintMenu.js'
 import {
   DesktopUpsellStartup,
   shouldShowDesktopUpsellStartup,
@@ -444,15 +432,12 @@ import { FeedbackSurvey } from 'src/components/FeedbackSurvey/FeedbackSurvey.js'
 import { useFeedbackSurvey } from 'src/components/FeedbackSurvey/useFeedbackSurvey.js'
 import { useMemorySurvey } from 'src/components/FeedbackSurvey/useMemorySurvey.js'
 import { usePostCompactSurvey } from 'src/components/FeedbackSurvey/usePostCompactSurvey.js'
-import { LspRecommendationMenu } from 'src/components/LspRecommendation/LspRecommendationMenu.js'
-import { UserTextMessage } from 'src/components/messages/UserTextMessage.js'
 import { SandboxPermissionRequest } from 'src/components/permissions/SandboxPermissionRequest.js'
 import { SandboxViolationExpandedView } from 'src/components/SandboxViolationExpandedView.js'
 import { useAwaySummary } from 'src/hooks/useAwaySummary.js'
 import { useFileHistorySnapshotInit } from 'src/hooks/useFileHistorySnapshotInit.js'
 import { useNotificationLayer } from 'src/hooks/useNotificationLayer.js'
 import { usePromptsFromClaudeInChrome } from 'src/hooks/usePromptsFromClaudeInChrome.js'
-import { MCPConnectionManager } from 'src/services/mcp/MCPConnectionManager.js'
 import { getTipToShowOnSpinner, recordShownTip } from 'src/services/tips/tipScheduler.js'
 import {
   checkAndDisableAutoModeIfNeeded,
@@ -463,17 +448,14 @@ import {
 import { performStartupChecks } from 'src/utils/plugins/performStartupChecks.js'
 import { SandboxManager } from 'src/utils/sandbox/sandbox-adapter.js'
 import type { Theme } from 'src/utils/theme.js'
-import { AwsAuthStatusBox } from '../components/AwsAuthStatusBox.js'
 import { TungstenLiveMonitor } from '../tools/TungstenTool/TungstenLiveMonitor.js'
 import type { HookProgress } from '../types/hooks.js'
 import { createAbortController } from '../utils/abortController.js'
 /* eslint-enable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
 import { activityManager } from '../utils/activityManager.js'
 import {
-  AutoRunIssueNotification,
   type AutoRunIssueReason,
   getAutoRunCommand,
-  getAutoRunIssueReasonText,
   shouldAutoRunIssue,
 } from '../utils/autoRunIssue.js'
 
@@ -483,7 +465,6 @@ const WebBrowserPanelModule = feature('WEB_BROWSER_TOOL')
   : null
 
 import {
-  CompanionFloatingBubble,
   CompanionSprite,
   MIN_COLS_FOR_FULL_SPRITE,
 } from '../buddy/CompanionSprite.js'
@@ -497,8 +478,6 @@ import {
 } from '../components/FullscreenLayout.js'
 import {
   type MessageActionCaps,
-  MessageActionsBar,
-  MessageActionsKeybindings,
   type MessageActionsNav,
   type MessageActionsState,
   useMessageActions,
