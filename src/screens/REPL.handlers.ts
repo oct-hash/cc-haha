@@ -1,4 +1,5 @@
-import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
+import type { ContentBlockParam, ImageBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
+import { randomUUID } from 'crypto'
 import type { RefObject } from 'react'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js'
 import {
@@ -15,17 +16,32 @@ import {
 import { prependModeCharacterToInput } from '../components/PromptInput/inputModes.js'
 import { LOCAL_COMMAND_STDOUT_TAG } from '../constants/xml.js'
 import { addToHistory, expandPastedTextRefs, parseReferences } from '../history.js'
+import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
+import { resetMicrocompactState } from '../services/compact/microCompact.js'
 import type { SetToolJSXFn } from '../Tool.js'
-import type { Message as MessageType } from '../types/message.js'
+import { injectUserMessageToTeammate } from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
+import type { InProcessTeammateTaskState } from '../tasks/InProcessTeammateTask/types.js'
+import {
+  appendMessageToLocalAgent,
+  isLocalAgentTask,
+  type LocalAgentTaskState,
+  queuePendingMessage,
+} from '../tasks/LocalAgentTask/LocalAgentTask.js'
+import { resumeAgentBackground } from '../tools/AgentTool/resumeAgent.js'
+import type { Message as MessageType, UserMessage } from '../types/message.js'
 import { createAbortController } from '../utils/abortController.js'
 import type { PastedContent } from '../utils/config.js'
 import { getGlobalConfig } from '../utils/config.js'
+import { logForDebugging } from '../utils/debug.js'
+import { errorMessage } from '../utils/errors.js'
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js'
 import type { PromptInputHelpers } from '../utils/handlePromptSubmit.js'
+import type { SetAppState } from '../utils/messageQueueManager.js'
 import {
   createCommandInputMessage,
   createUserMessage,
   formatCommandInputTags,
+  textForResubmit,
 } from '../utils/messages.js'
 import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js'
 import type { QueryGuard } from '../utils/QueryGuard.js'
@@ -694,5 +710,159 @@ export function tryAddToHistory(params: AddToHistoryParams): void {
   // cache so it's suggested immediately (not after the 60s TTL).
   if (inputMode === 'bash') {
     prependToShellHistoryCache(input.trim())
+  }
+}
+
+export interface HandleAgentSubmitParams {
+  input: string
+  task: InProcessTeammateTaskState | LocalAgentTaskState
+  helpers: PromptInputHelpers
+  setAppState: SetAppState
+  setInputValue: (value: string) => void
+  getToolUseContext: (
+    messages: MessageType[],
+    newMessages: MessageType[],
+    abortController: AbortController,
+    model: string,
+  ) => ProcessUserInputContext
+  canUseTool: CanUseToolFn
+  mainLoopModel: string
+  messagesRef: RefObject<MessageType[]>
+  onResumeFailed: (agentId: string, errorMessage: string) => void
+}
+
+export async function handleAgentSubmit(params: HandleAgentSubmitParams): Promise<void> {
+  const {
+    input,
+    task,
+    helpers,
+    setAppState,
+    setInputValue,
+    getToolUseContext,
+    canUseTool,
+    mainLoopModel,
+    messagesRef,
+    onResumeFailed,
+  } = params
+
+  if (isLocalAgentTask(task)) {
+    appendMessageToLocalAgent(task.id, createUserMessage({ content: input }), setAppState)
+    if (task.status === 'running') {
+      queuePendingMessage(task.id, input, setAppState)
+    } else {
+      void resumeAgentBackground({
+        agentId: task.id,
+        prompt: input,
+        toolUseContext: getToolUseContext(
+          messagesRef.current,
+          [],
+          new AbortController(),
+          mainLoopModel,
+        ),
+        canUseTool,
+      }).catch((err) => {
+        logForDebugging(`resumeAgentBackground failed: ${errorMessage(err)}`)
+        onResumeFailed(task.id, errorMessage(err))
+      })
+    }
+  } else {
+    injectUserMessageToTeammate(task.id, input, setAppState)
+  }
+  setInputValue('')
+  helpers.setCursorOffset(0)
+  helpers.clearBuffer()
+}
+
+export interface HandleRewindConversationToParams {
+  message: UserMessage
+  messagesRef: RefObject<MessageType[]>
+  setMessages: (updater: MessageType[] | ((prev: MessageType[]) => MessageType[])) => void
+  setConversationId: (id: string) => void
+  setAppState: SetAppState
+  onRewind?: () => void
+}
+
+export function handleRewindConversationTo(params: HandleRewindConversationToParams): void {
+  const { message, messagesRef, setMessages, setConversationId, setAppState, onRewind } = params
+  const prev = messagesRef.current
+  const messageIndex = prev.lastIndexOf(message)
+  if (messageIndex === -1) return
+
+  logEvent('tengu_conversation_rewind', {
+    preRewindMessageCount: prev.length,
+    postRewindMessageCount: messageIndex,
+    messagesRemoved: prev.length - messageIndex,
+    rewindToMessageIndex: messageIndex,
+  })
+
+  setMessages(prev.slice(0, messageIndex))
+  // Careful, this has to happen after setMessages
+  setConversationId(randomUUID())
+  // Reset cached microcompact state so stale pinned cache edits
+  // don't reference tool_use_ids from truncated messages
+  resetMicrocompactState()
+
+  onRewind?.()
+
+  // Restore state from the message we're rewinding to
+  setAppState((prev) => ({
+    ...prev,
+    // Restore permission mode from the message
+    toolPermissionContext:
+      message.permissionMode && prev.toolPermissionContext.mode !== message.permissionMode
+        ? {
+            ...prev.toolPermissionContext,
+            mode: message.permissionMode,
+          }
+        : prev.toolPermissionContext,
+    // Clear stale prompt suggestion from previous conversation state
+    promptSuggestion: {
+      text: null,
+      promptId: null,
+      shownAt: 0,
+      acceptedAt: 0,
+      generationRequestId: null,
+    },
+  }))
+}
+
+export interface HandleRestoreMessageInputParams {
+  message: UserMessage
+  setInputValue: (value: string) => void
+  setInputMode: (mode: string) => void
+  setPastedContents: (contents: Record<number, PastedContent>) => void
+}
+
+export function handleRestoreMessageInput(params: HandleRestoreMessageInputParams): void {
+  const { message, setInputValue, setInputMode, setPastedContents } = params
+  const r = textForResubmit(message)
+  if (r) {
+    setInputValue(r.text)
+    setInputMode(r.mode)
+  }
+
+  // Restore pasted images
+  if (
+    Array.isArray(message.message.content) &&
+    message.message.content.some((block: ContentBlockParam) => block.type === 'image')
+  ) {
+    const imageBlocks: Array<ImageBlockParam> = message.message.content.filter(
+      (block: ContentBlockParam) => block.type === 'image',
+    )
+    if (imageBlocks.length > 0) {
+      const newPastedContents: Record<number, PastedContent> = {}
+      imageBlocks.forEach((block, index) => {
+        if (block.source.type === 'base64') {
+          const id = message.imagePasteIds?.[index] ?? index + 1
+          newPastedContents[id] = {
+            id,
+            type: 'image',
+            content: block.source.data,
+            mediaType: block.source.media_type,
+          }
+        }
+      })
+      setPastedContents(newPastedContents)
+    }
   }
 }

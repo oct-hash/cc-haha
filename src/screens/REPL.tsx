@@ -112,15 +112,10 @@ import type { DirectConnectConfig } from '../server/directConnectManager.js'
 import { sendNotification } from '../services/notifier.js'
 import { startPreventSleep, stopPreventSleep } from '../services/preventSleep.js'
 import type { SSHSession } from '../ssh/createSSHSession.js'
+import { getAllInProcessTeammateTasks } from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
 import {
-  getAllInProcessTeammateTasks,
-  injectUserMessageToTeammate,
-} from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
-import {
-  appendMessageToLocalAgent,
   isLocalAgentTask,
   type LocalAgentTaskState,
-  queuePendingMessage,
 } from '../tasks/LocalAgentTask/LocalAgentTask.js'
 import type { PromptRequest, PromptResponse } from '../types/hooks.js'
 import { asAgentId, asSessionId } from '../types/ids.js'
@@ -162,7 +157,10 @@ import { endInteractionSpan } from '../utils/telemetry/sessionTracing.js'
 import { parseTokenBudget } from '../utils/tokenBudget.js'
 import {
   applySubmitStateReset,
+  handleAgentSubmit,
   handleRemoteSubmit,
+  handleRestoreMessageInput,
+  handleRewindConversationTo,
   resolveStashAfterSubmit,
   resolveStashBeforeSubmit,
   tryAddToHistory,
@@ -215,7 +213,7 @@ const getCoordinatorUserContext: (
   ? require('../coordinator/coordinatorMode.js').getCoordinatorUserContext
   : () => ({})
 
-import type { ContentBlockParam, ImageBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
+import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 import { randomUUID, type UUID } from 'crypto'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js'
 import {
@@ -246,7 +244,6 @@ import { useTasksV2WithCollapseEffect } from '../hooks/useTasksV2.js'
 import { maybeMarkProjectOnboardingComplete } from '../projectOnboardingState.js'
 import { query } from '../query.js'
 import { partialCompactConversation } from '../services/compact/compact.js'
-import { resetMicrocompactState } from '../services/compact/microCompact.js'
 import { runPostCompactCleanup } from '../services/compact/postCompactCleanup.js'
 import type { MCPServerConnection, ScopedMcpServerConfig } from '../services/mcp/types.js'
 import { useAppState, useAppStateStore, useSetAppState } from '../state/AppState.js'
@@ -259,7 +256,6 @@ import { restoreRemoteAgentTasks } from '../tasks/RemoteAgentTask/RemoteAgentTas
 import type { AgentColorName } from '../tools/AgentTool/agentColorManager.js'
 import { resolveAgentTools } from '../tools/AgentTool/agentToolUtils.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
-import { resumeAgentBackground } from '../tools/AgentTool/resumeAgent.js'
 import { clearSpeculativeChecks } from '../tools/BashTool/bashPermissions.js'
 import { SLEEP_TOOL_NAME } from '../tools/SleepTool/prompt.js'
 import { WEB_FETCH_TOOL_NAME } from '../tools/WebFetchTool/prompt.js'
@@ -308,7 +304,6 @@ import {
   isCompactBoundaryMessage,
   type StreamingThinking,
   type StreamingToolUse,
-  textForResubmit,
 } from '../utils/messages.js'
 import { getScratchpadDir, isScratchpadEnabled } from '../utils/permissions/filesystem.js'
 import {
@@ -4103,42 +4098,24 @@ export function REPL({
       task: InProcessTeammateTaskState | LocalAgentTaskState,
       helpers: PromptInputHelpers,
     ) => {
-      if (isLocalAgentTask(task)) {
-        appendMessageToLocalAgent(
-          task.id,
-          createUserMessage({
-            content: input,
-          }),
-          setAppState,
-        )
-        if (task.status === 'running') {
-          queuePendingMessage(task.id, input, setAppState)
-        } else {
-          void resumeAgentBackground({
-            agentId: task.id,
-            prompt: input,
-            toolUseContext: getToolUseContext(
-              messagesRef.current,
-              [],
-              new AbortController(),
-              mainLoopModel,
-            ),
-            canUseTool,
-          }).catch((err) => {
-            logForDebugging(`resumeAgentBackground failed: ${errorMessage(err)}`)
-            addNotification({
-              key: `resume-agent-failed-${task.id}`,
-              jsx: <Text color="error">Failed to resume agent: {errorMessage(err)}</Text>,
-              priority: 'low',
-            })
+      await handleAgentSubmit({
+        input,
+        task,
+        helpers,
+        setAppState,
+        setInputValue,
+        getToolUseContext,
+        canUseTool,
+        mainLoopModel,
+        messagesRef,
+        onResumeFailed: (agentId, errMsg) => {
+          addNotification({
+            key: `resume-agent-failed-${agentId}`,
+            jsx: <Text color="error">Failed to resume agent: {errMsg}</Text>,
+            priority: 'low',
           })
-        }
-      } else {
-        injectUserMessageToTeammate(task.id, input, setAppState)
-      }
-      setInputValue('')
-      helpers.setCursorOffset(0)
-      helpers.clearBuffer()
+        },
+      })
     },
     [setAppState, setInputValue, getToolUseContext, canUseTool, mainLoopModel, addNotification],
   )
@@ -4234,57 +4211,24 @@ export function REPL({
   // stale closures.
   const rewindConversationTo = useCallback(
     (message: UserMessage) => {
-      const prev = messagesRef.current
-      const messageIndex = prev.lastIndexOf(message)
-      if (messageIndex === -1) return
-      logEvent('tengu_conversation_rewind', {
-        preRewindMessageCount: prev.length,
-        postRewindMessageCount: messageIndex,
-        messagesRemoved: prev.length - messageIndex,
-        rewindToMessageIndex: messageIndex,
+      handleRewindConversationTo({
+        message,
+        messagesRef,
+        setMessages,
+        setConversationId,
+        setAppState,
+        onRewind: feature('CONTEXT_COLLAPSE')
+          ? () => {
+              /* eslint-disable @typescript-eslint/no-require-imports */
+              ;(
+                require('../services/contextCollapse/index.js') as typeof import('../services/contextCollapse/index.js')
+              ).resetContextCollapse()
+              /* eslint-enable @typescript-eslint/no-require-imports */
+            }
+          : undefined,
       })
-      setMessages(prev.slice(0, messageIndex))
-      // Careful, this has to happen after setMessages
-      setConversationId(randomUUID())
-      // Reset cached microcompact state so stale pinned cache edits
-      // don't reference tool_use_ids from truncated messages
-      resetMicrocompactState()
-      if (feature('CONTEXT_COLLAPSE')) {
-        // Rewind truncates the REPL array. Commits whose archived span
-        // was past the rewind point can't be projected anymore
-        // (projectView silently skips them) but the staged queue and ID
-        // maps reference stale uuids. Simplest safe reset: drop
-        // everything. The ctx-agent will re-stage on the next
-        // threshold crossing.
-        /* eslint-disable @typescript-eslint/no-require-imports */
-        ;(
-          require('../services/contextCollapse/index.js') as typeof import('../services/contextCollapse/index.js')
-        ).resetContextCollapse()
-        /* eslint-enable @typescript-eslint/no-require-imports */
-      }
-
-      // Restore state from the message we're rewinding to
-      setAppState((prev) => ({
-        ...prev,
-        // Restore permission mode from the message
-        toolPermissionContext:
-          message.permissionMode && prev.toolPermissionContext.mode !== message.permissionMode
-            ? {
-                ...prev.toolPermissionContext,
-                mode: message.permissionMode,
-              }
-            : prev.toolPermissionContext,
-        // Clear stale prompt suggestion from previous conversation state
-        promptSuggestion: {
-          text: null,
-          promptId: null,
-          shownAt: 0,
-          acceptedAt: 0,
-          generationRequestId: null,
-        },
-      }))
     },
-    [setMessages, setAppState],
+    [setMessages, setAppState, setConversationId],
   )
 
   // Synchronous rewind + input population. Used directly by auto-restore on
@@ -4293,36 +4237,12 @@ export function REPL({
   const restoreMessageSync = useCallback(
     (message: UserMessage) => {
       rewindConversationTo(message)
-      const r = textForResubmit(message)
-      if (r) {
-        setInputValue(r.text)
-        setInputMode(r.mode)
-      }
-
-      // Restore pasted images
-      if (
-        Array.isArray(message.message.content) &&
-        message.message.content.some((block) => block.type === 'image')
-      ) {
-        const imageBlocks: Array<ImageBlockParam> = message.message.content.filter(
-          (block) => block.type === 'image',
-        )
-        if (imageBlocks.length > 0) {
-          const newPastedContents: Record<number, PastedContent> = {}
-          imageBlocks.forEach((block, index) => {
-            if (block.source.type === 'base64') {
-              const id = message.imagePasteIds?.[index] ?? index + 1
-              newPastedContents[id] = {
-                id,
-                type: 'image',
-                content: block.source.data,
-                mediaType: block.source.media_type,
-              }
-            }
-          })
-          setPastedContents(newPastedContents)
-        }
-      }
+      handleRestoreMessageInput({
+        message,
+        setInputValue,
+        setInputMode: (mode: string) => setInputMode(mode as PromptInputMode),
+        setPastedContents,
+      })
     },
     [rewindConversationTo, setInputValue],
   )
