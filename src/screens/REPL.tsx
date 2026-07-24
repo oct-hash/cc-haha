@@ -163,6 +163,7 @@ import type {
 } from './REPL.render.js'
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { MainRender, TranscriptView } from './REPL.render.js'
+import { median } from './REPL.utils.js'
 
 // Dead code elimination: conditional imports
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
@@ -495,12 +496,6 @@ const RECENT_SCROLL_REPIN_WINDOW_MS = 3000
 // Use LRU cache to prevent unbounded memory growth
 // 100 files should be sufficient for most coding sessions while preventing
 // memory issues when working across many files in large projects
-
-function median(values: number[]): number {
-  const sorted = [...values].sort((a, b) => a - b)
-  const mid = Math.floor(sorted.length / 2)
-  return sorted.length % 2 === 0 ? Math.round((sorted[mid - 1]! + sorted[mid]!) / 2) : sorted[mid]!
-}
 
 export type Props = {
   commands: Command[]
