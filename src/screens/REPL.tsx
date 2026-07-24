@@ -41,7 +41,6 @@ import {
 } from '../bootstrap/state.js'
 import {
   type Command,
-  type CommandResultDisplay,
   getCommandName,
   isCommandEnabled,
   type ResumeEntrypoint,
@@ -51,7 +50,6 @@ import {
   messagesAfterAreOnlySynthetic,
   selectableUserMessagesFilter,
 } from '../components/MessageSelector.js'
-import { prependModeCharacterToInput } from '../components/PromptInput/inputModes.js'
 import PromptInput from '../components/PromptInput/PromptInput.js'
 import {
   PermissionRequest,
@@ -71,12 +69,7 @@ import {
   saveCurrentSessionCosts,
 } from '../cost-tracker.js'
 import { useCostSummary } from '../costHook.js'
-import {
-  addToHistory,
-  expandPastedTextRefs,
-  parseReferences,
-  removeLastFromHistory,
-} from '../history.js'
+import { removeLastFromHistory } from '../history.js'
 import { useAfterFirstRender } from '../hooks/useAfterFirstRender.js'
 import { useApiKeyVerification } from '../hooks/useApiKeyVerification.js'
 import { useAssistantHistory } from '../hooks/useAssistantHistory.js'
@@ -150,7 +143,6 @@ import { formatTokens, truncateToWidth } from '../utils/format.js'
 import { logError } from '../utils/log.js'
 import { isHumanTurn } from '../utils/messagePredicates.js'
 import { QueryGuard } from '../utils/QueryGuard.js'
-import { prependToShellHistoryCache } from '../utils/suggestions/shellHistoryCompletion.js'
 import {
   registerLeaderSetToolPermissionContext,
   registerLeaderToolUseConfirmQueue,
@@ -168,6 +160,16 @@ import { buildEffectiveSystemPrompt } from '../utils/systemPrompt.js'
 import { getAgentName, getTeamName } from '../utils/teammate.js'
 import { endInteractionSpan } from '../utils/telemetry/sessionTracing.js'
 import { parseTokenBudget } from '../utils/tokenBudget.js'
+import {
+  applySubmitStateReset,
+  handleRemoteSubmit,
+  resolveStashAfterSubmit,
+  resolveStashBeforeSubmit,
+  tryAddToHistory,
+  tryHandleIdleReturnCheck,
+  tryHandleImmediateCommand,
+  tryHandleTaskDoneTrigger,
+} from './REPL.handlers.js'
 import type {
   MainRenderProps,
   ToolJSXValue,
@@ -297,11 +299,9 @@ import {
   createAgentsKilledMessage,
   createApiMetricsMessage,
   createAssistantMessage,
-  createCommandInputMessage,
   createSystemMessage,
   createTurnDurationMessage,
   createUserMessage,
-  formatCommandInputTags,
   getContentText,
   getMessagesAfterCompactBoundary,
   handleMessageFromStream,
@@ -354,7 +354,6 @@ import {
   provisionContentReplacementState,
   reconstructContentReplacementState,
 } from '../utils/toolResultStorage.js'
-import { escapeXml } from '../utils/xml.js'
 
 // Dead code elimination: conditional import for loop mode
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -464,10 +463,7 @@ const WebBrowserPanelModule = feature('WEB_BROWSER_TOOL')
   ? (require('../tools/WebBrowserTool/WebBrowserPanel.js') as typeof import('../tools/WebBrowserTool/WebBrowserPanel.js'))
   : null
 
-import {
-  CompanionSprite,
-  MIN_COLS_FOR_FULL_SPRITE,
-} from '../buddy/CompanionSprite.js'
+import { CompanionSprite, MIN_COLS_FOR_FULL_SPRITE } from '../buddy/CompanionSprite.js'
 import { fireCompanionObserver } from '../buddy/observer.js'
 import { REMOTE_SAFE_COMMANDS } from '../commands.js'
 import { DevBar } from '../components/DevBar.js'
@@ -497,7 +493,6 @@ import {
   isMouseTrackingEnabled,
   maybeGetTmuxMouseHint,
 } from '../utils/fullscreen.js'
-import type { RemoteMessageContent } from '../utils/teleport/api.js'
 
 // Stable empty array for hooks that accept MCPServerConnection[] — avoids
 // creating a new [] literal on every render in remote mode, which would
@@ -3864,188 +3859,48 @@ export function REPL({
       }
 
       // Task-done trigger: check for "任务完成", "done", etc.
-      // Import dynamically to avoid circular deps and enable tree-shaking
-      const trimmedInput = expandPastedTextRefs(input, pastedContents).trim()
-      if (!speculationAccept && !input.trim().startsWith('/')) {
-        const { checkTaskDoneTrigger } = await import('../hooks/taskDoneTrigger.js')
-        if (checkTaskDoneTrigger && checkTaskDoneTrigger(trimmedInput)) {
-          const { processTaskDoneTrigger } = await import('../hooks/taskDoneTrigger.js')
-          if (processTaskDoneTrigger) {
-            const reviewText = await processTaskDoneTrigger({
-              messages: messagesRef.current,
-              input: trimmedInput,
-            })
-            if (reviewText) {
-              addNotification({
-                key: 'task-done-review',
-                text: reviewText,
-                priority: 'high',
-              })
-              setInputValue('')
-              helpers.setCursorOffset(0)
-              helpers.clearBuffer()
-              return
-            }
-          }
-        }
+      // Imported dynamically to avoid circular deps and enable tree-shaking.
+      if (
+        await tryHandleTaskDoneTrigger({
+          input,
+          pastedContents,
+          speculationAccept,
+          messagesRef,
+          addNotification,
+          setInputValue,
+          helpers,
+        })
+      ) {
+        return
       }
 
       // Handle immediate commands - these bypass the queue and execute right away
       // even while Claude is processing. Commands opt-in via `immediate: true`.
       // Commands triggered via keybindings are always treated as immediate.
       if (!speculationAccept && input.trim().startsWith('/')) {
-        // Expand [Pasted text #N] refs so immediate commands (e.g. /btw) receive
-        // the pasted content, not the placeholder. The non-immediate path gets
-        // this expansion later in handlePromptSubmit.
-        const trimmedInput = expandPastedTextRefs(input, pastedContents).trim()
-        const spaceIndex = trimmedInput.indexOf(' ')
-        const commandName =
-          spaceIndex === -1 ? trimmedInput.slice(1) : trimmedInput.slice(1, spaceIndex)
-        const commandArgs = spaceIndex === -1 ? '' : trimmedInput.slice(spaceIndex + 1).trim()
-
-        // Find matching command - treat as immediate if:
-        // 1. Command has `immediate: true`, OR
-        // 2. Command was triggered via keybinding (fromKeybinding option)
-        const matchingCommand = commands.find(
-          (cmd) =>
-            isCommandEnabled(cmd) &&
-            (cmd.name === commandName ||
-              cmd.aliases?.includes(commandName) ||
-              getCommandName(cmd) === commandName),
-        )
-        if (matchingCommand?.name === 'clear' && idleHintShownRef.current) {
-          logEvent('tengu_idle_return_action', {
-            action: 'hint_converted' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            variant:
-              idleHintShownRef.current as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            idleMinutes: Math.round((Date.now() - lastQueryCompletionTimeRef.current) / 60_000),
-            messageCount: messagesRef.current.length,
-            totalInputTokens: getTotalInputTokens(),
+        if (
+          await tryHandleImmediateCommand({
+            input,
+            helpers,
+            commands,
+            queryGuard,
+            pastedContents,
+            inputValueRef,
+            stashedPrompt,
+            messagesRef,
+            mainLoopModel,
+            setInputValue,
+            setPastedContents,
+            setStashedPrompt,
+            setToolJSX,
+            setMessages,
+            addNotification,
+            getToolUseContext,
+            idleHintShownRef,
+            lastQueryCompletionTimeRef,
+            options,
           })
-          idleHintShownRef.current = false
-        }
-        const shouldTreatAsImmediate =
-          queryGuard.isActive && (matchingCommand?.immediate || options?.fromKeybinding)
-        if (matchingCommand && shouldTreatAsImmediate && matchingCommand.type === 'local-jsx') {
-          // Only clear input if the submitted text matches what's in the prompt.
-          // When a command keybinding fires, input is "/<command>" but the actual
-          // input value is the user's existing text - don't clear it in that case.
-          if (input.trim() === inputValueRef.current.trim()) {
-            setInputValue('')
-            helpers.setCursorOffset(0)
-            helpers.clearBuffer()
-            setPastedContents({})
-          }
-          const pastedTextRefs = parseReferences(input).filter(
-            (r) => pastedContents[r.id]?.type === 'text',
-          )
-          const pastedTextCount = pastedTextRefs.length
-          const pastedTextBytes = pastedTextRefs.reduce(
-            (sum, r) => sum + (pastedContents[r.id]?.content.length ?? 0),
-            0,
-          )
-          logEvent('tengu_paste_text', {
-            pastedTextCount,
-            pastedTextBytes,
-          })
-          logEvent('tengu_immediate_command_executed', {
-            commandName:
-              matchingCommand.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            fromKeybinding: options?.fromKeybinding ?? false,
-          })
-
-          // Execute the command directly
-          const executeImmediateCommand = async (): Promise<void> => {
-            let doneWasCalled = false
-            const onDone = (
-              result?: string,
-              doneOptions?: {
-                display?: CommandResultDisplay
-                metaMessages?: string[]
-              },
-            ): void => {
-              doneWasCalled = true
-              setToolJSX({
-                jsx: null,
-                shouldHidePromptInput: false,
-                clearLocalJSX: true,
-              })
-              const newMessages: MessageType[] = []
-              if (result && doneOptions?.display !== 'skip') {
-                addNotification({
-                  key: `immediate-${matchingCommand.name}`,
-                  text: result,
-                  priority: 'immediate',
-                })
-                // In fullscreen the command just showed as a centered modal
-                // pane — the notification above is enough feedback. Adding
-                // "❯ /config" + "⎿ dismissed" to the transcript is clutter
-                // (those messages are type:system subtype:local_command —
-                // user-visible but NOT sent to the model, so skipping them
-                // doesn't change model context). Outside fullscreen the
-                // transcript entry stays so scrollback shows what ran.
-                if (!isFullscreenEnvEnabled()) {
-                  newMessages.push(
-                    createCommandInputMessage(
-                      formatCommandInputTags(getCommandName(matchingCommand), commandArgs),
-                    ),
-                    createCommandInputMessage(
-                      `<${LOCAL_COMMAND_STDOUT_TAG}>${escapeXml(result)}</${LOCAL_COMMAND_STDOUT_TAG}>`,
-                    ),
-                  )
-                }
-              }
-              // Inject meta messages (model-visible, user-hidden) into the transcript
-              if (doneOptions?.metaMessages?.length) {
-                newMessages.push(
-                  ...doneOptions.metaMessages.map((content) =>
-                    createUserMessage({
-                      content,
-                      isMeta: true,
-                    }),
-                  ),
-                )
-              }
-              if (newMessages.length) {
-                setMessages((prev) => [...prev, ...newMessages])
-              }
-              // Restore stashed prompt after local-jsx command completes.
-              // The normal stash restoration path (below) is skipped because
-              // local-jsx commands return early from onSubmit.
-              if (stashedPrompt !== undefined) {
-                setInputValue(stashedPrompt.text)
-                helpers.setCursorOffset(stashedPrompt.cursorOffset)
-                setPastedContents(stashedPrompt.pastedContents)
-                setStashedPrompt(undefined)
-              }
-            }
-
-            // Build context for the command (reuses existing getToolUseContext).
-            // Read messages via ref to keep onSubmit stable across message
-            // updates — matches the pattern at L2384/L2400/L2662 and avoids
-            // pinning stale REPL render scopes in downstream closures.
-            const context = getToolUseContext(
-              messagesRef.current,
-              [],
-              createAbortController(),
-              mainLoopModel,
-            )
-            const mod = await matchingCommand.load()
-            const jsx = await mod.call(onDone, context, commandArgs)
-
-            // Skip if onDone already fired — prevents stuck isLocalJSXCommand
-            // (see processSlashCommand.tsx local-jsx case for full mechanism).
-            if (jsx && !doneWasCalled) {
-              // shouldHidePromptInput: false keeps Notifications mounted
-              // so the onDone result isn't lost
-              setToolJSX({
-                jsx,
-                shouldHidePromptInput: false,
-                isLocalJSXCommand: true,
-              })
-            }
-          }
-          void executeImmediateCommand()
+        ) {
           return // Always return early - don't add to history or queue
         }
       }
@@ -4058,117 +3913,67 @@ export function REPL({
       // Idle-return: prompt returning users to start fresh when the
       // conversation is large and the cache is cold. tengu_willow_mode
       // controls treatment: "dialog" (blocking), "hint" (notification), "off".
-      {
-        const willowMode = getFeatureValue_CACHED_MAY_BE_STALE('tengu_willow_mode', 'off')
-        const idleThresholdMin = Number(process.env.CLAUDE_CODE_IDLE_THRESHOLD_MINUTES ?? 75)
-        const tokenThreshold = Number(process.env.CLAUDE_CODE_IDLE_TOKEN_THRESHOLD ?? 100_000)
-        if (
-          willowMode !== 'off' &&
-          !getGlobalConfig().idleReturnDismissed &&
-          !skipIdleCheckRef.current &&
-          !speculationAccept &&
-          !input.trim().startsWith('/') &&
-          lastQueryCompletionTimeRef.current > 0 &&
-          getTotalInputTokens() >= tokenThreshold
-        ) {
-          const idleMs = Date.now() - lastQueryCompletionTimeRef.current
-          const idleMinutes = idleMs / 60_000
-          if (idleMinutes >= idleThresholdMin && willowMode === 'dialog') {
-            setIdleReturnPending({
-              input,
-              idleMinutes,
-            })
-            setInputValue('')
-            helpers.setCursorOffset(0)
-            helpers.clearBuffer()
-            return
-          }
-        }
-      }
-
-      // Add to history for direct user submissions.
-      // Queued command processing (executeQueuedInput) doesn't call onSubmit,
-      // so notifications and already-queued user input won't be added to history here.
-      // Skip history for keybinding-triggered commands (user didn't type the command).
-      if (!options?.fromKeybinding) {
-        addToHistory({
-          display: speculationAccept ? input : prependModeCharacterToInput(input, inputMode),
-          pastedContents: speculationAccept ? {} : pastedContents,
+      if (
+        tryHandleIdleReturnCheck({
+          input,
+          speculationAccept,
+          skipIdleCheckRef,
+          lastQueryCompletionTimeRef,
+          setIdleReturnPending,
+          setInputValue,
+          helpers,
         })
-        // Add the just-submitted command to the front of the ghost-text
-        // cache so it's suggested immediately (not after the 60s TTL).
-        if (inputMode === 'bash') {
-          prependToShellHistoryCache(input.trim())
-        }
+      ) {
+        return
       }
 
-      // Restore stash if present, but NOT for slash commands or when loading.
-      // - Slash commands (especially interactive ones like /model, /context) hide
-      //   the prompt and show a picker UI. Restoring the stash during a command would
-      //   place the text in a hidden input, and the user would lose it by typing the
-      //   next command. Instead, preserve the stash so it survives across command runs.
-      // - When loading, the submitted input will be queued and handlePromptSubmit
-      //   will clear the input field (onInputChange('')), which would clobber the
-      //   restored stash. Defer restoration to after handlePromptSubmit (below).
-      //   Remote mode is exempt: it sends via WebSocket and returns early without
-      //   calling handlePromptSubmit, so there's no clobbering risk — restore eagerly.
-      // In both deferred cases, the stash is restored after await handlePromptSubmit.
-      const isSlashCommand = !speculationAccept && input.trim().startsWith('/')
-      // Submit runs "now" (not queued) when not already loading, or when
-      // accepting speculation, or in remote mode (which sends via WS and
-      // returns early without calling handlePromptSubmit).
-      const submitsNow = !isLoading || speculationAccept || activeRemote.isRemoteMode
-      if (stashedPrompt !== undefined && !isSlashCommand && submitsNow) {
-        setInputValue(stashedPrompt.text)
-        helpers.setCursorOffset(stashedPrompt.cursorOffset)
-        setPastedContents(stashedPrompt.pastedContents)
-        setStashedPrompt(undefined)
-      } else if (submitsNow) {
-        if (!options?.fromKeybinding) {
-          // Clear input when not loading or accepting speculation.
-          // Preserve input for keybinding-triggered commands.
-          setInputValue('')
-          helpers.setCursorOffset(0)
-        }
-        setPastedContents({})
-      }
-      if (submitsNow) {
-        setInputMode('prompt')
-        setIDESelection(undefined)
-        setSubmitCount((_) => _ + 1)
-        helpers.clearBuffer()
-        tipPickedThisTurnRef.current = false
+      tryAddToHistory({
+        fromKeybinding: options?.fromKeybinding,
+        speculationAccept,
+        input,
+        inputMode,
+        pastedContents,
+      })
 
-        // Show the placeholder in the same React batch as setInputValue('').
-        // Skip for slash/bash (they have their own echo), speculation and remote
-        // mode (both setMessages directly with no gap to bridge).
-        if (
-          !isSlashCommand &&
-          inputMode === 'prompt' &&
-          !speculationAccept &&
-          !activeRemote.isRemoteMode
-        ) {
-          setUserInputOnProcessing(input)
-          // showSpinner includes userInputOnProcessing, so the spinner appears
-          // on this render. Reset timing refs now (before queryGuard.reserve()
-          // would) so elapsed time doesn't read as Date.now() - 0. The
-          // isQueryActive transition above does the same reset — idempotent.
-          resetTimingRefs()
-        }
-
-        // Increment prompt count for attribution tracking and save snapshot
-        // The snapshot persists promptCount so it survives compaction
-        if (feature('COMMIT_ATTRIBUTION')) {
-          setAppState((prev) => ({
-            ...prev,
-            attribution: incrementPromptCount(prev.attribution, (snapshot) => {
-              void recordAttributionSnapshot(snapshot).catch((error) => {
-                logForDebugging(`Attribution: Failed to save snapshot: ${error}`)
-              })
-            }),
-          }))
-        }
-      }
+      const { isSlashCommand, submitsNow } = resolveStashBeforeSubmit({
+        input,
+        speculationAccept,
+        isLoading,
+        isRemoteMode: activeRemote.isRemoteMode,
+        stashedPrompt,
+        fromKeybinding: options?.fromKeybinding,
+        setInputValue,
+        setCursorOffset: helpers.setCursorOffset,
+        setPastedContents,
+        setStashedPrompt,
+      })
+      applySubmitStateReset({
+        submitsNow,
+        isSlashCommand,
+        inputMode,
+        input,
+        speculationAccept,
+        isRemoteMode: activeRemote.isRemoteMode,
+        setInputMode: (mode: string) => setInputMode(mode as PromptInputMode),
+        setIDESelection,
+        setSubmitCount,
+        clearBuffer: helpers.clearBuffer,
+        tipPickedThisTurnRef,
+        setUserInputOnProcessing,
+        resetTimingRefs,
+        incrementAttribution: feature('COMMIT_ATTRIBUTION')
+          ? () => {
+              setAppState((prev) => ({
+                ...prev,
+                attribution: incrementPromptCount(prev.attribution, (snapshot) => {
+                  void recordAttributionSnapshot(snapshot).catch((error) => {
+                    logForDebugging(`Attribution: Failed to save snapshot: ${error}`)
+                  })
+                }),
+              }))
+            }
+          : undefined,
+      })
 
       // Handle speculation acceptance
       if (speculationAccept) {
@@ -4192,95 +3997,17 @@ export function REPL({
       }
 
       // Remote mode: send input via stream-json instead of local query.
-      // Permission requests from the remote are bridged into toolUseConfirmQueue
-      // and rendered using the standard PermissionRequest component.
-      //
-      // local-jsx slash commands (e.g. /agents, /config) render UI in THIS
-      // process — they have no remote equivalent. Let those fall through to
-      // handlePromptSubmit so they execute locally. Prompt commands and
-      // plain text go to the remote.
+      // local-jsx slash commands fall through to local handlePromptSubmit.
       if (
-        activeRemote.isRemoteMode &&
-        !(
-          isSlashCommand &&
-          commands.find((c) => {
-            const name = input.trim().slice(1).split(/\s/)[0]
-            return (
-              isCommandEnabled(c) &&
-              (c.name === name || c.aliases?.includes(name!) || getCommandName(c) === name)
-            )
-          })?.type === 'local-jsx'
-        )
+        await handleRemoteSubmit({
+          input,
+          isSlashCommand,
+          commands,
+          pastedContents,
+          activeRemote,
+          setMessages,
+        })
       ) {
-        // Build content blocks when there are pasted attachments (images)
-        const pastedValues = Object.values(pastedContents)
-        const imageContents = pastedValues.filter((c) => c.type === 'image')
-        const imagePasteIds = imageContents.length > 0 ? imageContents.map((c) => c.id) : undefined
-        let messageContent: string | ContentBlockParam[] = input.trim()
-        let remoteContent: RemoteMessageContent = input.trim()
-        if (pastedValues.length > 0) {
-          const contentBlocks: ContentBlockParam[] = []
-          const remoteBlocks: Array<{
-            type: string
-            [key: string]: unknown
-          }> = []
-          const trimmedInput = input.trim()
-          if (trimmedInput) {
-            contentBlocks.push({
-              type: 'text',
-              text: trimmedInput,
-            })
-            remoteBlocks.push({
-              type: 'text',
-              text: trimmedInput,
-            })
-          }
-          for (const pasted of pastedValues) {
-            if (pasted.type === 'image') {
-              const source = {
-                type: 'base64' as const,
-                media_type: (pasted.mediaType ?? 'image/png') as
-                  | 'image/jpeg'
-                  | 'image/png'
-                  | 'image/gif'
-                  | 'image/webp',
-                data: pasted.content,
-              }
-              contentBlocks.push({
-                type: 'image',
-                source,
-              })
-              remoteBlocks.push({
-                type: 'image',
-                source,
-              })
-            } else {
-              contentBlocks.push({
-                type: 'text',
-                text: pasted.content,
-              })
-              remoteBlocks.push({
-                type: 'text',
-                text: pasted.content,
-              })
-            }
-          }
-          messageContent = contentBlocks
-          remoteContent = remoteBlocks
-        }
-
-        // Create and add user message to UI
-        // Note: empty input already handled by early return above
-        const userMessage = createUserMessage({
-          content: messageContent,
-          imagePasteIds,
-        })
-        setMessages((prev) => [...prev, userMessage])
-
-        // Send to remote session
-        await activeRemote.sendMessage(remoteContent, {
-          uuid: userMessage.uuid,
-        })
         return
       }
 
@@ -4317,18 +4044,15 @@ export function REPL({
         hasInterruptibleToolInProgress: hasInterruptibleToolInProgressRef.current,
       })
 
-      // Restore stash that was deferred above. Two cases:
-      // - Slash command: handlePromptSubmit awaited the full command execution
-      //   (including interactive pickers). Restoring now places the stash back in
-      //   the visible input.
-      // - Loading (queued): handlePromptSubmit enqueued + cleared input, then
-      //   returned quickly. Restoring now places the stash back after the clear.
-      if ((isSlashCommand || isLoading) && stashedPrompt !== undefined) {
-        setInputValue(stashedPrompt.text)
-        helpers.setCursorOffset(stashedPrompt.cursorOffset)
-        setPastedContents(stashedPrompt.pastedContents)
-        setStashedPrompt(undefined)
-      }
+      resolveStashAfterSubmit({
+        isSlashCommand,
+        isLoading,
+        stashedPrompt,
+        setInputValue,
+        setCursorOffset: helpers.setCursorOffset,
+        setPastedContents,
+        setStashedPrompt,
+      })
     },
     [
       queryGuard,
