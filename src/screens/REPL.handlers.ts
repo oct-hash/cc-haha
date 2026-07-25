@@ -1,3 +1,4 @@
+import { feature } from 'bun:bundle'
 import type { ContentBlockParam, ImageBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 import { randomUUID } from 'crypto'
 import type { RefObject } from 'react'
@@ -6,20 +7,55 @@ import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
 } from 'src/services/analytics/index.js'
-import { getTotalInputTokens } from '../bootstrap/state.js'
+import {
+  getBudgetContinuationCount,
+  getCurrentTurnTokenBudget,
+  getTotalInputTokens,
+  getTurnClassifierCount,
+  getTurnClassifierDurationMs,
+  getTurnHookCount,
+  getTurnHookDurationMs,
+  getTurnOutputTokens,
+  getTurnToolCount,
+  getTurnToolDurationMs,
+  resetTurnClassifierDuration,
+  resetTurnHookDuration,
+  resetTurnToolDuration,
+  snapshotOutputTokensForTurn,
+} from '../bootstrap/state.js'
+import { fireCompanionObserver } from '../buddy/observer.js'
 import {
   type Command,
   type CommandResultDisplay,
   getCommandName,
   isCommandEnabled,
 } from '../commands.js'
+import {
+  messagesAfterAreOnlySynthetic,
+  selectableUserMessagesFilter,
+} from '../components/MessageSelector.js'
 import { prependModeCharacterToInput } from '../components/PromptInput/inputModes.js'
-import { LOCAL_COMMAND_STDOUT_TAG } from '../constants/xml.js'
+import type { SpinnerMode } from '../components/Spinner.js'
+import { getSystemPrompt } from '../constants/prompts.js'
+import {
+  BASH_INPUT_TAG,
+  COMMAND_MESSAGE_TAG,
+  COMMAND_NAME_TAG,
+  LOCAL_COMMAND_STDOUT_TAG,
+} from '../constants/xml.js'
+import { getSystemContext, getUserContext } from '../context.js'
 import { addToHistory, expandPastedTextRefs, parseReferences } from '../history.js'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
+import { mergeClients } from '../hooks/useMergedClients.js'
+import { maybeMarkProjectOnboardingComplete } from '../projectOnboardingState.js'
+import { query } from '../query.js'
 import { resetMicrocompactState } from '../services/compact/microCompact.js'
+import { diagnosticTracker } from '../services/diagnosticTracking.js'
 import type { SetToolJSXFn } from '../Tool.js'
-import { injectUserMessageToTeammate } from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
+import {
+  getAllInProcessTeammateTasks,
+  injectUserMessageToTeammate,
+} from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
 import type { InProcessTeammateTaskState } from '../tasks/InProcessTeammateTask/types.js'
 import {
   appendMessageToLocalAgent,
@@ -27,27 +63,65 @@ import {
   type LocalAgentTaskState,
   queuePendingMessage,
 } from '../tasks/LocalAgentTask/LocalAgentTask.js'
+import { startBackgroundSession } from '../tasks/LocalMainSessionTask.js'
+import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
 import { resumeAgentBackground } from '../tools/AgentTool/resumeAgent.js'
 import type { Message as MessageType, UserMessage } from '../types/message.js'
 import { createAbortController } from '../utils/abortController.js'
+import { isAgentSwarmsEnabled } from '../utils/agentSwarmsEnabled.js'
+import { count } from '../utils/array.js'
+import { createAttachmentMessage, getQueuedCommandAttachments } from '../utils/attachments.js'
 import type { PastedContent } from '../utils/config.js'
-import { getGlobalConfig } from '../utils/config.js'
+import { getGlobalConfig, getGlobalConfigWriteCount } from '../utils/config.js'
 import { logForDebugging } from '../utils/debug.js'
+import type { EffortValue } from '../utils/effort.js'
 import { errorMessage } from '../utils/errors.js'
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js'
 import type { PromptInputHelpers } from '../utils/handlePromptSubmit.js'
-import type { SetAppState } from '../utils/messageQueueManager.js'
+import { closeOpenDiffs, getConnectedIdeClient } from '../utils/ide.js'
 import {
+  enqueue,
+  getCommandQueueLength,
+  removeByFilter,
+  type SetAppState,
+} from '../utils/messageQueueManager.js'
+import {
+  createApiMetricsMessage,
   createCommandInputMessage,
+  createTurnDurationMessage,
   createUserMessage,
   formatCommandInputTags,
+  getContentText,
+  getMessagesAfterCompactBoundary,
+  handleMessageFromStream,
+  isCompactBoundaryMessage,
+  type StreamingThinking,
+  type StreamingToolUse,
   textForResubmit,
 } from '../utils/messages.js'
+import {
+  checkAndDisableAutoModeIfNeeded,
+  checkAndDisableBypassPermissionsIfNeeded,
+} from '../utils/permissions/bypassPermissionsKillswitch.js'
+import { getScratchpadDir, isScratchpadEnabled } from '../utils/permissions/filesystem.js'
 import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js'
+import { getQuerySourceForREPL } from '../utils/promptCategory.js'
 import type { QueryGuard } from '../utils/QueryGuard.js'
+import { logQueryProfileReport, queryCheckpoint } from '../utils/queryProfiler.js'
+import {
+  isEphemeralToolProgress,
+  isLoggableMessage,
+  removeTranscriptMessage,
+} from '../utils/sessionStorage.js'
+import { generateSessionTitle } from '../utils/sessionTitle.js'
 import { prependToShellHistoryCache } from '../utils/suggestions/shellHistoryCompletion.js'
+import { setMemberActive } from '../utils/swarm/teamHelpers.js'
+import { buildEffectiveSystemPrompt } from '../utils/systemPrompt.js'
+import { getAgentName, getTeamName } from '../utils/teammate.js'
 import type { RemoteMessageContent } from '../utils/teleport/api.js'
+import { parseTokenBudget } from '../utils/tokenBudget.js'
 import { escapeXml } from '../utils/xml.js'
+import { median } from './REPL.utils.js'
 
 export interface HandleImmediateCommandParams {
   input: string
@@ -863,6 +937,747 @@ export function handleRestoreMessageInput(params: HandleRestoreMessageInputParam
         }
       })
       setPastedContents(newPastedContents)
+    }
+  }
+}
+
+export interface HandleBackgroundQueryParams {
+  abortController: AbortController | null
+  messagesRef: RefObject<MessageType[]>
+  mainLoopModel: string
+  getToolUseContext: (
+    messages: MessageType[],
+    newMessages: MessageType[],
+    abortController: AbortController,
+    mainLoopModel: string,
+  ) => ProcessUserInputContext
+  additionalWorkingDirectories: string[]
+  mainThreadAgentDefinition: AgentDefinition | undefined
+  customSystemPrompt: string | undefined
+  appendSystemPrompt: string | undefined
+  canUseTool: CanUseToolFn
+  setAppState: SetAppState
+  terminalTitle: string
+}
+
+export async function handleBackgroundQuery(params: HandleBackgroundQueryParams): Promise<void> {
+  const {
+    abortController,
+    messagesRef,
+    mainLoopModel,
+    getToolUseContext,
+    additionalWorkingDirectories,
+    mainThreadAgentDefinition,
+    customSystemPrompt,
+    appendSystemPrompt,
+    canUseTool,
+    setAppState,
+    terminalTitle,
+  } = params
+
+  abortController?.abort('background')
+  const removedNotifications = removeByFilter((cmd) => cmd.mode === 'task-notification')
+
+  const toolUseContext = getToolUseContext(
+    messagesRef.current,
+    [],
+    new AbortController(),
+    mainLoopModel,
+  )
+  const [defaultSystemPrompt, userContext, systemContext] = await Promise.all([
+    getSystemPrompt(
+      toolUseContext.options.tools,
+      mainLoopModel,
+      additionalWorkingDirectories,
+      toolUseContext.options.mcpClients,
+    ),
+    getUserContext(),
+    getSystemContext(),
+  ])
+  const systemPrompt = buildEffectiveSystemPrompt({
+    mainThreadAgentDefinition,
+    toolUseContext,
+    customSystemPrompt,
+    defaultSystemPrompt,
+    appendSystemPrompt,
+  })
+  toolUseContext.renderedSystemPrompt = systemPrompt
+  const notificationAttachments = await getQueuedCommandAttachments(removedNotifications).catch(
+    () => [],
+  )
+  const notificationMessages = notificationAttachments.map(createAttachmentMessage)
+
+  const existingPrompts = new Set<string>()
+  for (const m of messagesRef.current) {
+    if (
+      m.type === 'attachment' &&
+      m.attachment.type === 'queued_command' &&
+      m.attachment.commandMode === 'task-notification' &&
+      typeof m.attachment.prompt === 'string'
+    ) {
+      existingPrompts.add(m.attachment.prompt)
+    }
+  }
+  const uniqueNotifications = notificationMessages.filter(
+    (m) =>
+      m.attachment.type === 'queued_command' &&
+      (typeof m.attachment.prompt !== 'string' || !existingPrompts.has(m.attachment.prompt)),
+  )
+  startBackgroundSession({
+    messages: [...messagesRef.current, ...uniqueNotifications],
+    queryParams: {
+      systemPrompt,
+      userContext,
+      systemContext,
+      canUseTool,
+      toolUseContext,
+      querySource: getQuerySourceForREPL(),
+    },
+    description: terminalTitle,
+    setAppState,
+    agentDefinition: mainThreadAgentDefinition,
+  })
+}
+
+export interface HandleQueryEventParams {
+  event: Parameters<typeof handleMessageFromStream>[0]
+  setMessages: (updater: (prev: MessageType[]) => MessageType[]) => void
+  setResponseLength: (updater: (length: number) => number) => void
+  setStreamMode: (mode: SpinnerMode) => void
+  setStreamingToolUses: (uses: StreamingToolUse[]) => void
+  setStreamingThinking: (thinking: StreamingThinking | null) => void
+  onStreamingText: (f: (current: string | null) => string | null) => void
+  setConversationId: (value: string | ((prev: string) => string)) => void
+  responseLengthRef: RefObject<number>
+  apiMetricsRef: RefObject<
+    {
+      ttftMs: number
+      firstTokenTime: number
+      lastTokenTime: number
+      responseLengthBaseline: number
+      endResponseLength: number
+    }[]
+  >
+  setContextBlocked?: (blocked: boolean) => void
+}
+
+export function handleQueryEvent(params: HandleQueryEventParams): void {
+  const {
+    event,
+    setMessages,
+    setResponseLength,
+    setStreamMode,
+    setStreamingToolUses,
+    setStreamingThinking,
+    onStreamingText,
+    setConversationId,
+    responseLengthRef,
+    apiMetricsRef,
+    setContextBlocked,
+  } = params
+
+  handleMessageFromStream(
+    event,
+    (newMessage) => {
+      if (isCompactBoundaryMessage(newMessage)) {
+        if (isFullscreenEnvEnabled()) {
+          setMessages((old) => [
+            ...getMessagesAfterCompactBoundary(old, {
+              includeSnipped: true,
+            }),
+            newMessage,
+          ])
+        } else {
+          setMessages(() => [newMessage])
+        }
+        setConversationId(randomUUID())
+        setContextBlocked?.(false)
+      } else if (newMessage.type === 'progress' && isEphemeralToolProgress(newMessage.data.type)) {
+        setMessages((oldMessages) => {
+          const last = oldMessages.at(-1)
+          if (
+            last?.type === 'progress' &&
+            last.parentToolUseID === newMessage.parentToolUseID &&
+            last.data.type === newMessage.data.type
+          ) {
+            const copy = oldMessages.slice()
+            copy[copy.length - 1] = newMessage
+            return copy
+          }
+          return [...oldMessages, newMessage]
+        })
+      } else {
+        setMessages((oldMessages) => [...oldMessages, newMessage])
+      }
+      if (setContextBlocked) {
+        if (
+          newMessage.type === 'assistant' &&
+          'isApiErrorMessage' in newMessage &&
+          newMessage.isApiErrorMessage
+        ) {
+          setContextBlocked(true)
+        } else if (newMessage.type === 'assistant') {
+          setContextBlocked(false)
+        }
+      }
+    },
+    (newContent) => {
+      setResponseLength((length) => length + newContent.length)
+    },
+    setStreamMode,
+    setStreamingToolUses,
+    (tombstonedMessage) => {
+      setMessages((oldMessages) => oldMessages.filter((m) => m !== tombstonedMessage))
+      void removeTranscriptMessage(tombstonedMessage.uuid)
+    },
+    setStreamingThinking,
+    (metrics) => {
+      const now = Date.now()
+      const baseline = responseLengthRef.current
+      apiMetricsRef.current.push({
+        ...metrics,
+        firstTokenTime: now,
+        lastTokenTime: now,
+        responseLengthBaseline: baseline,
+        endResponseLength: baseline,
+      })
+    },
+    onStreamingText,
+  )
+}
+
+export interface HandleQueryImplParams {
+  messagesIncludingNewMessages: MessageType[]
+  newMessages: MessageType[]
+  abortController: AbortController
+  shouldQuery: boolean
+  additionalAllowedTools: string[]
+  mainLoopModelParam: string
+  effort: EffortValue | undefined
+  store: {
+    getState: () => any
+    setState: (updater: (prev: any) => any) => void
+  }
+  setMessages: (updater: (prev: MessageType[]) => MessageType[]) => void
+  setAbortController: (controller: AbortController | null) => void
+  setAppState: SetAppState
+  setConversationId: (value: string | ((prev: string) => string)) => void
+  setHaikuTitle: (title: string) => void
+  getToolUseContext: (
+    messages: MessageType[],
+    newMessages: MessageType[],
+    abortController: AbortController,
+    mainLoopModel: string,
+  ) => ProcessUserInputContext
+  onQueryEvent: (event: Parameters<typeof handleMessageFromStream>[0]) => void
+  canUseTool: CanUseToolFn
+  onTurnComplete: ((messages: MessageType[]) => void | Promise<void>) | undefined
+  resetLoadingState: () => void
+  messagesRef: RefObject<MessageType[]>
+  haikuTitleAttemptedRef: RefObject<boolean>
+  loadingStartTimeRef: RefObject<number>
+  apiMetricsRef: RefObject<
+    {
+      ttftMs: number
+      firstTokenTime: number
+      lastTokenTime: number
+      responseLengthBaseline: number
+      endResponseLength: number
+    }[]
+  >
+  terminalFocusRef: RefObject<boolean>
+  initialMcpClients: readonly { name: string }[] | undefined
+  mainThreadAgentDefinition: AgentDefinition | undefined
+  customSystemPrompt: string | undefined
+  appendSystemPrompt: string | undefined
+  titleDisabled: boolean
+  sessionTitle: string | undefined
+  agentTitle: string | undefined
+  toolPermissionContext: {
+    additionalWorkingDirectories: Map<string, unknown>
+    alwaysAllowRules: { command: string[] | null }
+    mode: string
+  }
+  proactiveModule:
+    | {
+        isProactiveActive: () => boolean
+        setContextBlocked: (v: boolean) => void
+      }
+    | undefined
+  getCoordinatorUserContext: (
+    mcpClients: readonly { name: string }[],
+    scratchpadDir?: string,
+  ) => Record<string, string>
+}
+
+export async function handleQueryImpl(params: HandleQueryImplParams): Promise<void> {
+  const {
+    messagesIncludingNewMessages,
+    newMessages,
+    abortController,
+    shouldQuery,
+    additionalAllowedTools,
+    mainLoopModelParam,
+    effort,
+    store,
+    setMessages,
+    setAbortController,
+    setAppState,
+    setConversationId,
+    setHaikuTitle,
+    getToolUseContext,
+    onQueryEvent,
+    canUseTool,
+    onTurnComplete,
+    resetLoadingState,
+    messagesRef,
+    haikuTitleAttemptedRef,
+    loadingStartTimeRef,
+    apiMetricsRef,
+    terminalFocusRef,
+    initialMcpClients,
+    mainThreadAgentDefinition,
+    customSystemPrompt,
+    appendSystemPrompt,
+    titleDisabled,
+    sessionTitle,
+    agentTitle,
+    toolPermissionContext,
+    proactiveModule,
+    getCoordinatorUserContext,
+  } = params
+
+  if (shouldQuery) {
+    const freshClients = mergeClients(initialMcpClients, store.getState().mcp.clients)
+    void diagnosticTracker.handleQueryStart(freshClients)
+    const ideClient = getConnectedIdeClient(freshClients)
+    if (ideClient) {
+      void closeOpenDiffs(ideClient)
+    }
+  }
+
+  void maybeMarkProjectOnboardingComplete()
+
+  if (!titleDisabled && !sessionTitle && !agentTitle && !haikuTitleAttemptedRef.current) {
+    const firstUserMessage = newMessages.find((m) => m.type === 'user' && !m.isMeta)
+    const text =
+      firstUserMessage?.type === 'user' ? getContentText(firstUserMessage.message.content) : null
+    if (
+      text &&
+      !text.startsWith(`<${LOCAL_COMMAND_STDOUT_TAG}>`) &&
+      !text.startsWith(`<${COMMAND_MESSAGE_TAG}>`) &&
+      !text.startsWith(`<${COMMAND_NAME_TAG}>`) &&
+      !text.startsWith(`<${BASH_INPUT_TAG}>`)
+    ) {
+      haikuTitleAttemptedRef.current = true
+      void generateSessionTitle(text, new AbortController().signal).then(
+        (title) => {
+          if (title) setHaikuTitle(title)
+          else haikuTitleAttemptedRef.current = false
+        },
+        () => {
+          haikuTitleAttemptedRef.current = false
+        },
+      )
+    }
+  }
+
+  store.setState((prev: any) => {
+    const cur = prev.toolPermissionContext.alwaysAllowRules.command
+    if (
+      cur === additionalAllowedTools ||
+      (cur?.length === additionalAllowedTools.length &&
+        cur.every((v: any, i: number) => v === additionalAllowedTools[i]))
+    ) {
+      return prev
+    }
+    return {
+      ...prev,
+      toolPermissionContext: {
+        ...prev.toolPermissionContext,
+        alwaysAllowRules: {
+          ...prev.toolPermissionContext.alwaysAllowRules,
+          command: additionalAllowedTools,
+        },
+      },
+    }
+  })
+
+  if (!shouldQuery) {
+    if (newMessages.some(isCompactBoundaryMessage)) {
+      setConversationId(randomUUID())
+      proactiveModule?.setContextBlocked(false)
+    }
+    resetLoadingState()
+    setAbortController(null)
+    return
+  }
+  const toolUseContext = getToolUseContext(
+    messagesIncludingNewMessages,
+    newMessages,
+    abortController,
+    mainLoopModelParam,
+  )
+  const { tools: freshTools, mcpClients: freshMcpClients } = toolUseContext.options
+
+  if (effort !== undefined) {
+    const previousGetAppState = toolUseContext.getAppState
+    toolUseContext.getAppState = () => ({
+      ...previousGetAppState(),
+      effortValue: effort,
+    })
+  }
+  queryCheckpoint('query_context_loading_start')
+  const [, , defaultSystemPrompt, baseUserContext, systemContext] = await Promise.all([
+    checkAndDisableBypassPermissionsIfNeeded(toolPermissionContext as any, setAppState),
+    feature('TRANSCRIPT_CLASSIFIER')
+      ? checkAndDisableAutoModeIfNeeded(
+          toolPermissionContext as any,
+          setAppState,
+          store.getState().fastMode,
+        )
+      : undefined,
+    getSystemPrompt(
+      freshTools,
+      mainLoopModelParam,
+      Array.from(toolPermissionContext.additionalWorkingDirectories.keys()),
+      freshMcpClients,
+    ),
+    getUserContext(),
+    getSystemContext(),
+  ])
+  const userContext = {
+    ...baseUserContext,
+    ...getCoordinatorUserContext(
+      freshMcpClients,
+      isScratchpadEnabled() ? getScratchpadDir() : undefined,
+    ),
+    ...(proactiveModule?.isProactiveActive() && !terminalFocusRef.current
+      ? {
+          terminalFocus: 'The terminal is unfocused \u2014 the user is not actively watching.',
+        }
+      : {}),
+  }
+  queryCheckpoint('query_context_loading_end')
+  const systemPrompt = buildEffectiveSystemPrompt({
+    mainThreadAgentDefinition,
+    toolUseContext,
+    customSystemPrompt,
+    defaultSystemPrompt,
+    appendSystemPrompt,
+  })
+  toolUseContext.renderedSystemPrompt = systemPrompt
+  queryCheckpoint('query_query_start')
+  resetTurnHookDuration()
+  resetTurnToolDuration()
+  resetTurnClassifierDuration()
+  for await (const event of query({
+    messages: messagesIncludingNewMessages,
+    systemPrompt,
+    userContext,
+    systemContext,
+    canUseTool,
+    toolUseContext,
+    querySource: getQuerySourceForREPL(),
+  })) {
+    onQueryEvent(event)
+  }
+  void fireCompanionObserver(messagesRef.current, (reaction) =>
+    setAppState((prev: any) =>
+      prev.companionReaction === reaction
+        ? prev
+        : {
+            ...prev,
+            companionReaction: reaction,
+          },
+    ),
+  )
+  queryCheckpoint('query_end')
+
+  if ('external' === 'ant' && apiMetricsRef.current.length > 0) {
+    const entries = apiMetricsRef.current
+    const ttfts = entries.map((e) => e.ttftMs)
+    const otpsValues = entries.map((e) => {
+      const delta = Math.round((e.endResponseLength - e.responseLengthBaseline) / 4)
+      const samplingMs = e.lastTokenTime - e.firstTokenTime
+      return samplingMs > 0 ? Math.round(delta / (samplingMs / 1000)) : 0
+    })
+    const isMultiRequest = entries.length > 1
+    const hookMs = getTurnHookDurationMs()
+    const hookCount = getTurnHookCount()
+    const toolMs = getTurnToolDurationMs()
+    const toolCount = getTurnToolCount()
+    const classifierMs = getTurnClassifierDurationMs()
+    const classifierCount = getTurnClassifierCount()
+    const turnMs = Date.now() - loadingStartTimeRef.current
+    setMessages((prev) => [
+      ...prev,
+      createApiMetricsMessage({
+        ttftMs: isMultiRequest ? median(ttfts) : ttfts[0]!,
+        otps: isMultiRequest ? median(otpsValues) : otpsValues[0]!,
+        isP50: isMultiRequest,
+        hookDurationMs: hookMs > 0 ? hookMs : undefined,
+        hookCount: hookCount > 0 ? hookCount : undefined,
+        turnDurationMs: turnMs > 0 ? turnMs : undefined,
+        toolDurationMs: toolMs > 0 ? toolMs : undefined,
+        toolCount: toolCount > 0 ? toolCount : undefined,
+        classifierDurationMs: classifierMs > 0 ? classifierMs : undefined,
+        classifierCount: classifierCount > 0 ? classifierCount : undefined,
+        configWriteCount: getGlobalConfigWriteCount(),
+      }),
+    ])
+  }
+  resetLoadingState()
+
+  logQueryProfileReport()
+
+  await onTurnComplete?.(messagesRef.current)
+}
+
+export interface HandleQueryParams {
+  newMessages: MessageType[]
+  abortController: AbortController
+  shouldQuery: boolean
+  additionalAllowedTools: string[]
+  mainLoopModelParam: string
+  onBeforeQueryCallback?: (input: string, newMessages: MessageType[]) => Promise<boolean>
+  input?: string
+  effort?: EffortValue
+  queryGuard: QueryGuard
+  onQueryImpl: (
+    messagesIncludingNewMessages: MessageType[],
+    newMessages: MessageType[],
+    abortController: AbortController,
+    shouldQuery: boolean,
+    additionalAllowedTools: string[],
+    mainLoopModelParam: string,
+    effort?: EffortValue,
+  ) => Promise<void>
+  setMessages: (updater: (prev: MessageType[]) => MessageType[]) => void
+  setAppState: SetAppState
+  setAbortController: (controller: AbortController | null) => void
+  setStreamingToolUses: (uses: StreamingToolUse[]) => void
+  setStreamingText: (text: string | null) => void
+  messagesRef: RefObject<MessageType[]>
+  responseLengthRef: RefObject<number>
+  apiMetricsRef: RefObject<
+    {
+      ttftMs: number
+      firstTokenTime: number
+      lastTokenTime: number
+      responseLengthBaseline: number
+      endResponseLength: number
+    }[]
+  >
+  loadingStartTimeRef: RefObject<number>
+  totalPausedMsRef: RefObject<number>
+  swarmStartTimeRef: RefObject<number | null>
+  swarmBudgetInfoRef: RefObject<
+    | {
+        tokens: number
+        limit: number
+        nudges: number
+      }
+    | undefined
+  >
+  skipIdleCheckRef: RefObject<boolean>
+  inputValueRef: RefObject<string>
+  sendBridgeResultRef: RefObject<() => void>
+  restoreMessageSyncRef: RefObject<(message: UserMessage) => void>
+  store: {
+    getState: () => any
+    setState: (updater: (prev: any) => any) => void
+  }
+  resetTimingRefs: () => void
+  resetLoadingState: () => void
+  mrOnBeforeQuery: (input: string, messages: MessageType[], newCount: number) => Promise<void>
+  mrOnTurnComplete: (messages: MessageType[], wasAborted: boolean) => Promise<void>
+  removeLastFromHistory: () => void
+  setLastQueryCompletionTime: (time: number) => void
+  proactiveActive: boolean
+}
+
+export async function handleQuery(params: HandleQueryParams): Promise<void> {
+  const {
+    newMessages,
+    abortController,
+    shouldQuery,
+    additionalAllowedTools,
+    mainLoopModelParam,
+    onBeforeQueryCallback,
+    input,
+    effort,
+    queryGuard,
+    onQueryImpl,
+    setMessages,
+    setAppState,
+    setAbortController,
+    setStreamingToolUses,
+    setStreamingText,
+    messagesRef,
+    responseLengthRef,
+    apiMetricsRef,
+    loadingStartTimeRef,
+    totalPausedMsRef,
+    swarmStartTimeRef,
+    swarmBudgetInfoRef,
+    skipIdleCheckRef,
+    inputValueRef,
+    sendBridgeResultRef,
+    restoreMessageSyncRef,
+    store,
+    resetTimingRefs,
+    resetLoadingState,
+    mrOnBeforeQuery,
+    mrOnTurnComplete,
+    removeLastFromHistory,
+    setLastQueryCompletionTime,
+    proactiveActive,
+  } = params
+
+  if (isAgentSwarmsEnabled()) {
+    const teamName = getTeamName()
+    const agentName = getAgentName()
+    if (teamName && agentName) {
+      void setMemberActive(teamName, agentName, true)
+    }
+  }
+
+  const thisGeneration = queryGuard.tryStart()
+  if (thisGeneration === null) {
+    logEvent('tengu_concurrent_onquery_detected', {})
+
+    newMessages
+      .filter((m): m is UserMessage => m.type === 'user' && !m.isMeta)
+      .map((_) => getContentText(_.message.content))
+      .filter((_) => _ !== null)
+      .forEach((msg, i) => {
+        enqueue({
+          value: msg,
+          mode: 'prompt',
+        })
+        if (i === 0) {
+          logEvent('tengu_concurrent_onquery_enqueued', {})
+        }
+      })
+    return
+  }
+  try {
+    resetTimingRefs()
+    setMessages((oldMessages) => [...oldMessages, ...newMessages])
+    responseLengthRef.current = 0
+    if (feature('TOKEN_BUDGET')) {
+      const parsedBudget = input ? parseTokenBudget(input) : null
+      snapshotOutputTokensForTurn(parsedBudget ?? getCurrentTurnTokenBudget())
+    }
+    apiMetricsRef.current = []
+    setStreamingToolUses([])
+    setStreamingText(null)
+
+    const latestMessages = messagesRef.current
+    if (input) {
+      await mrOnBeforeQuery(input, latestMessages, newMessages.length)
+    }
+
+    if (onBeforeQueryCallback && input) {
+      const shouldProceed = await onBeforeQueryCallback(input, latestMessages)
+      if (!shouldProceed) {
+        return
+      }
+    }
+    await onQueryImpl(
+      latestMessages,
+      newMessages,
+      abortController,
+      shouldQuery,
+      additionalAllowedTools,
+      mainLoopModelParam,
+      effort,
+    )
+  } finally {
+    if (queryGuard.end(thisGeneration)) {
+      setLastQueryCompletionTime(Date.now())
+      skipIdleCheckRef.current = false
+      resetLoadingState()
+      await mrOnTurnComplete(messagesRef.current, abortController.signal.aborted)
+
+      sendBridgeResultRef.current()
+
+      if ('external' === 'ant' && !abortController.signal.aborted) {
+        setAppState((prev: any) => {
+          if (prev.tungstenActiveSession === undefined) return prev
+          if (prev.tungstenPanelAutoHidden === true) return prev
+          return {
+            ...prev,
+            tungstenPanelAutoHidden: true,
+          }
+        })
+      }
+
+      let budgetInfo:
+        | {
+            tokens: number
+            limit: number
+            nudges: number
+          }
+        | undefined
+      if (feature('TOKEN_BUDGET')) {
+        if (
+          getCurrentTurnTokenBudget() !== null &&
+          getCurrentTurnTokenBudget()! > 0 &&
+          !abortController.signal.aborted
+        ) {
+          budgetInfo = {
+            tokens: getTurnOutputTokens(),
+            limit: getCurrentTurnTokenBudget()!,
+            nudges: getBudgetContinuationCount(),
+          }
+        }
+        snapshotOutputTokensForTurn(null)
+      }
+
+      const turnDurationMs = Date.now() - loadingStartTimeRef.current - totalPausedMsRef.current
+      if (
+        (turnDurationMs > 30000 || budgetInfo !== undefined) &&
+        !abortController.signal.aborted &&
+        !proactiveActive
+      ) {
+        const hasRunningSwarmAgents = getAllInProcessTeammateTasks(store.getState().tasks).some(
+          (t) => t.status === 'running',
+        )
+        if (hasRunningSwarmAgents) {
+          if (swarmStartTimeRef.current === null) {
+            swarmStartTimeRef.current = loadingStartTimeRef.current
+          }
+          if (budgetInfo) {
+            swarmBudgetInfoRef.current = budgetInfo
+          }
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            createTurnDurationMessage(turnDurationMs, budgetInfo, count(prev, isLoggableMessage)),
+          ])
+        }
+      }
+      setAbortController(null)
+    }
+
+    if (
+      abortController.signal.reason === 'user-cancel' &&
+      !queryGuard.isActive &&
+      inputValueRef.current === '' &&
+      getCommandQueueLength() === 0 &&
+      !store.getState().viewingAgentTaskId
+    ) {
+      const msgs = messagesRef.current
+      const lastUserMsg = msgs.findLast(selectableUserMessagesFilter)
+      if (lastUserMsg) {
+        const idx = msgs.lastIndexOf(lastUserMsg)
+        if (messagesAfterAreOnlySynthetic(msgs, idx)) {
+          removeLastFromHistory()
+          restoreMessageSyncRef.current(lastUserMsg)
+        }
+      }
     }
   }
 }
