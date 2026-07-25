@@ -6,11 +6,18 @@ vi.mock('../../utils/messages.js', () => ({
   isCompactBoundaryMessage: vi.fn(() => false),
   isEphemeralToolProgress: vi.fn(() => false),
   getMessagesAfterCompactBoundary: vi.fn(() => []),
-  createUserMessage: vi.fn(),
-  createCommandInputMessage: vi.fn(),
+  createUserMessage: vi.fn((data: any) => ({
+    type: 'user' as const,
+    message: data,
+    content: data.content,
+  })),
+  createCommandInputMessage: vi.fn((content: string) => ({
+    type: 'command_input' as const,
+    content,
+  })),
   createApiMetricsMessage: vi.fn(),
   createTurnDurationMessage: vi.fn(),
-  formatCommandInputTags: vi.fn(),
+  formatCommandInputTags: vi.fn((name: string, args: string) => `${name} ${args}`),
   getContentText: vi.fn((content: any) => {
     if (Array.isArray(content)) {
       return content.find((c: any) => c.type === 'text')?.text ?? null
@@ -109,8 +116,8 @@ vi.mock('../../utils/config.js', () => ({
 }))
 vi.mock('../../history.js', () => ({
   addToHistory: vi.fn(),
-  expandPastedTextRefs: vi.fn(),
-  parseReferences: vi.fn(),
+  expandPastedTextRefs: vi.fn((input: string) => input),
+  parseReferences: vi.fn(() => []),
 }))
 vi.mock('../../context.js', () => ({
   getSystemContext: vi.fn(() => ({})),
@@ -147,15 +154,22 @@ vi.mock('../../tasks/LocalMainSessionTask.js', () => ({
   startBackgroundSession: vi.fn(),
 }))
 vi.mock('../../tools/AgentTool/resumeAgent.js', () => ({
-  resumeAgentBackground: vi.fn(),
+  resumeAgentBackground: vi.fn(() => Promise.resolve()),
 }))
 vi.mock('../../tools/AgentTool/loadAgentsDir.js', () => ({}))
 vi.mock('../../utils/promptCategory.js', () => ({
   getQuerySourceForREPL: vi.fn(() => 'repl'),
 }))
 vi.mock('../../utils/attachments.js', () => ({
-  createAttachmentMessage: vi.fn(),
-  getQueuedCommandAttachments: vi.fn(() => []),
+  createAttachmentMessage: vi.fn((att: any) => ({
+    type: 'attachment' as const,
+    attachment: {
+      type: 'queued_command' as const,
+      commandMode: 'task-notification' as const,
+      prompt: att.prompt,
+    },
+  })),
+  getQueuedCommandAttachments: vi.fn(() => Promise.resolve([])),
 }))
 vi.mock('../../services/analytics/growthbook.js', () => ({
   getFeatureValue_CACHED_MAY_BE_STALE: vi.fn(),
@@ -215,7 +229,14 @@ import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js'
 import { enqueue } from '../../utils/messageQueueManager.js'
 // ── Imports after all mocks ──────────────────────────────────────────────
 import { handleMessageFromStream } from '../../utils/messages.js'
-import { handleQuery, handleQueryEvent, handleQueryImpl } from '../REPL.handlers.js'
+import {
+  handleAgentSubmit,
+  handleBackgroundQuery,
+  handleQuery,
+  handleQueryEvent,
+  handleQueryImpl,
+  tryHandleImmediateCommand,
+} from '../REPL.handlers.js'
 
 function createMockRef<T>(current: T): { current: T } {
   return { current }
@@ -796,5 +817,541 @@ describe('handleQueryImpl', () => {
     await handleQueryImpl(params as any)
 
     expect(params.setAbortController).toHaveBeenCalledWith(null)
+  })
+})
+
+// ── tryHandleImmediateCommand tests ───────────────────────────────────────
+
+describe('tryHandleImmediateCommand', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  function createImmediateParams(overrides: Record<string, any> = {}) {
+    return {
+      input: '/test-cmd arg1',
+      helpers: {
+        setCursorOffset: vi.fn(),
+        clearBuffer: vi.fn(),
+        resetHistory: vi.fn(),
+      } as any,
+      commands: [
+        {
+          name: 'test-cmd',
+          type: 'local-jsx' as const,
+          immediate: true,
+          load: vi.fn(() =>
+            Promise.resolve({
+              call: vi.fn(() => Promise.resolve(null)),
+            }),
+          ),
+        },
+      ],
+      queryGuard: { isActive: true, tryStart: vi.fn(), end: vi.fn() } as any,
+      pastedContents: {},
+      inputValueRef: createMockRef('/test-cmd arg1'),
+      stashedPrompt: undefined,
+      messagesRef: createMockRef([]),
+      mainLoopModel: 'test-model',
+      setInputValue: vi.fn(),
+      setPastedContents: vi.fn(),
+      setStashedPrompt: vi.fn(),
+      setToolJSX: vi.fn(),
+      setMessages: vi.fn(),
+      addNotification: vi.fn(),
+      getToolUseContext: vi.fn(() => ({
+        options: { tools: [], mcpClients: [], systemPrompt: '', userContext: {} },
+        renderedSystemPrompt: '',
+      })),
+      idleHintShownRef: createMockRef(false),
+      lastQueryCompletionTimeRef: createMockRef(0),
+      options: undefined,
+      ...overrides,
+    }
+  }
+
+  it('returns false when no matching command is found', async () => {
+    const params = createImmediateParams({
+      commands: [],
+    })
+
+    const result = await tryHandleImmediateCommand(params as any)
+
+    expect(result).toBe(false)
+  })
+
+  it('returns false when queryGuard is not active', async () => {
+    const params = createImmediateParams({
+      queryGuard: { isActive: false, tryStart: vi.fn(), end: vi.fn() } as any,
+    })
+
+    const result = await tryHandleImmediateCommand(params as any)
+
+    expect(result).toBe(false)
+  })
+
+  it('returns false when command is not marked as immediate', async () => {
+    const params = createImmediateParams({
+      commands: [{ name: 'test-cmd', type: 'local-jsx' as const, immediate: false }],
+    })
+
+    const result = await tryHandleImmediateCommand(params as any)
+
+    expect(result).toBe(false)
+  })
+
+  it('treats command as immediate when triggered from keybinding', async () => {
+    const loadFn = vi.fn(() => Promise.resolve({ call: vi.fn(() => Promise.resolve(null)) }))
+    const params = createImmediateParams({
+      commands: [{ name: 'test-cmd', type: 'local-jsx' as const, immediate: false, load: loadFn }],
+      options: { fromKeybinding: true },
+    })
+
+    const result = await tryHandleImmediateCommand(params as any)
+
+    expect(result).toBe(true)
+    expect(loadFn).toHaveBeenCalled()
+  })
+
+  it('logs idle return event when clear command is used with idleHintShown', async () => {
+    const loadFn = vi.fn(() => Promise.resolve({ call: vi.fn((onDone: any) => onDone('cleared')) }))
+    const params = createImmediateParams({
+      input: '/clear',
+      commands: [{ name: 'clear', type: 'local-jsx' as const, immediate: true, load: loadFn }],
+      idleHintShownRef: createMockRef(true),
+      lastQueryCompletionTimeRef: createMockRef(Date.now() - 120_000),
+    })
+
+    await tryHandleImmediateCommand(params as any)
+
+    expect(logEvent).toHaveBeenCalledWith(
+      'tengu_idle_return_action',
+      expect.objectContaining({
+        action: 'hint_converted',
+      }),
+    )
+    expect(params.idleHintShownRef.current).toBe(false)
+  })
+
+  it('clears input when submitted text matches current input value', async () => {
+    const params = createImmediateParams({
+      input: '/test-cmd arg1',
+      inputValueRef: createMockRef('/test-cmd arg1'),
+    })
+
+    await tryHandleImmediateCommand(params as any)
+
+    expect(params.setInputValue).toHaveBeenCalledWith('')
+    expect(params.helpers.setCursorOffset).toHaveBeenCalledWith(0)
+    expect(params.helpers.clearBuffer).toHaveBeenCalled()
+    expect(params.setPastedContents).toHaveBeenCalledWith({})
+  })
+
+  it('does NOT clear input when submitted text differs from current input (keybinding scenario)', async () => {
+    const params = createImmediateParams({
+      input: '/test-cmd',
+      inputValueRef: createMockRef('user was typing something'),
+    })
+
+    await tryHandleImmediateCommand(params as any)
+
+    expect(params.setInputValue).not.toHaveBeenCalled()
+  })
+
+  it('executes command and renders JSX when onDone is not called synchronously', async () => {
+    const mockJsx = { type: 'div' }
+    const callFn = vi.fn((onDone: any) => {
+      // Don't call onDone — returns JSX instead
+      return mockJsx
+    })
+    const loadFn = vi.fn(() => Promise.resolve({ call: callFn }))
+    const params = createImmediateParams({
+      commands: [{ name: 'test-cmd', type: 'local-jsx' as const, immediate: true, load: loadFn }],
+    })
+
+    await tryHandleImmediateCommand(params as any)
+
+    // executeImmediateCommand is void-invoked — wait for async inner function
+    await new Promise((r) => setTimeout(r, 10))
+
+    expect(loadFn).toHaveBeenCalled()
+    expect(callFn).toHaveBeenCalled()
+    expect(params.setToolJSX).toHaveBeenCalledWith({
+      jsx: mockJsx,
+      shouldHidePromptInput: false,
+      isLocalJSXCommand: true,
+    })
+  })
+
+  it('skips JSX rendering when onDone was already called', async () => {
+    const callFn = vi.fn((onDone: any) => {
+      onDone('result text')
+      return { type: 'div' }
+    })
+    const loadFn = vi.fn(() => Promise.resolve({ call: callFn }))
+    const params = createImmediateParams({
+      commands: [{ name: 'test-cmd', type: 'local-jsx' as const, immediate: true, load: loadFn }],
+    })
+
+    await tryHandleImmediateCommand(params as any)
+
+    // setToolJSX is called to clear (by onDone), but NOT to set JSX
+    expect(params.setToolJSX).toHaveBeenCalledTimes(1)
+    expect(params.setToolJSX).toHaveBeenCalledWith({
+      jsx: null,
+      shouldHidePromptInput: false,
+      clearLocalJSX: true,
+    })
+  })
+
+  it('onDone restores stashed prompt after command completes', async () => {
+    const stashedPrompt = {
+      text: 'stashed',
+      cursorOffset: 5,
+      pastedContents: { 0: { type: 'text' as const, content: 'pasted' } },
+    }
+    const callFn = vi.fn((onDone: any) => {
+      onDone('done')
+    })
+    const loadFn = vi.fn(() => Promise.resolve({ call: callFn }))
+    const params = createImmediateParams({
+      commands: [{ name: 'test-cmd', type: 'local-jsx' as const, immediate: true, load: loadFn }],
+      stashedPrompt,
+    })
+
+    await tryHandleImmediateCommand(params as any)
+
+    expect(params.setInputValue).toHaveBeenCalledWith('stashed')
+    expect(params.helpers.setCursorOffset).toHaveBeenCalledWith(5)
+    expect(params.setPastedContents).toHaveBeenCalledWith({
+      0: { type: 'text', content: 'pasted' },
+    })
+    expect(params.setStashedPrompt).toHaveBeenCalledWith(undefined)
+  })
+
+  it('onDone skips notification when display is skip', async () => {
+    const callFn = vi.fn((onDone: any) => {
+      onDone('result', { display: 'skip' })
+    })
+    const loadFn = vi.fn(() => Promise.resolve({ call: callFn }))
+    const params = createImmediateParams({
+      commands: [{ name: 'test-cmd', type: 'local-jsx' as const, immediate: true, load: loadFn }],
+    })
+
+    await tryHandleImmediateCommand(params as any)
+
+    expect(params.addNotification).not.toHaveBeenCalled()
+  })
+
+  it('onDone injects meta messages into transcript', async () => {
+    const callFn = vi.fn((onDone: any) => {
+      onDone('result', { metaMessages: ['meta msg 1', 'meta msg 2'] })
+    })
+    const loadFn = vi.fn(() => Promise.resolve({ call: callFn }))
+    const params = createImmediateParams({
+      commands: [{ name: 'test-cmd', type: 'local-jsx' as const, immediate: true, load: loadFn }],
+    })
+
+    await tryHandleImmediateCommand(params as any)
+
+    const setMessagesCall = params.setMessages.mock.calls[0][0]
+    const prev: any[] = []
+    const updated = typeof setMessagesCall === 'function' ? setMessagesCall(prev) : setMessagesCall
+    expect(updated.length).toBe(4) // 2 command messages + 2 meta messages
+  })
+
+  it('returns false when matching command type is not local-jsx', async () => {
+    const params = createImmediateParams({
+      commands: [{ name: 'test-cmd', type: 'local' as any, immediate: true }],
+    })
+
+    const result = await tryHandleImmediateCommand(params as any)
+
+    expect(result).toBe(false)
+  })
+})
+
+// ── handleBackgroundQuery tests ────────────────────────────────────────────
+
+describe('handleBackgroundQuery', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  function createBgParams(overrides: Record<string, any> = {}) {
+    return {
+      abortController: new AbortController(),
+      messagesRef: createMockRef([]),
+      mainLoopModel: 'test-model',
+      getToolUseContext: vi.fn(() => ({
+        options: {
+          tools: [],
+          mcpClients: [],
+          systemPrompt: '',
+          userContext: {},
+          abortController: new AbortController(),
+          shouldSend: true,
+          verbose: false,
+        },
+        renderedSystemPrompt: '',
+      })),
+      additionalWorkingDirectories: [],
+      mainThreadAgentDefinition: undefined,
+      customSystemPrompt: undefined,
+      appendSystemPrompt: undefined,
+      canUseTool: vi.fn(),
+      setAppState: vi.fn(),
+      terminalTitle: 'Test Session',
+      ...overrides,
+    }
+  }
+
+  it('aborts existing abortController with background reason', async () => {
+    const ctrl = new AbortController()
+    const abortSpy = vi.spyOn(ctrl, 'abort')
+    const params = createBgParams({ abortController: ctrl })
+
+    await handleBackgroundQuery(params as any)
+
+    expect(abortSpy).toHaveBeenCalledWith('background')
+  })
+
+  it('handles null abortController without error', async () => {
+    const params = createBgParams({ abortController: null })
+
+    await handleBackgroundQuery(params as any)
+    // Should not throw
+  })
+
+  it('removes task-notification messages from queue', async () => {
+    const { removeByFilter } = await import('../../utils/messageQueueManager.js')
+    const params = createBgParams()
+
+    await handleBackgroundQuery(params as any)
+
+    expect(removeByFilter).toHaveBeenCalled()
+    const filterFn = (removeByFilter as any).mock.calls[0][0]
+    expect(filterFn({ mode: 'task-notification' })).toBe(true)
+    expect(filterFn({ mode: 'prompt' })).toBe(false)
+  })
+
+  it('fetches system prompt, user context, and system context', async () => {
+    const { getSystemPrompt } = await import('../../constants/prompts.js')
+    const { getUserContext, getSystemContext } = await import('../../context.js')
+    const params = createBgParams()
+
+    await handleBackgroundQuery(params as any)
+
+    expect(getSystemPrompt).toHaveBeenCalled()
+    expect(getUserContext).toHaveBeenCalled()
+    expect(getSystemContext).toHaveBeenCalled()
+  })
+
+  it('calls buildEffectiveSystemPrompt with correct params', async () => {
+    const { buildEffectiveSystemPrompt } = await import('../../utils/systemPrompt.js')
+    const params = createBgParams()
+
+    await handleBackgroundQuery(params as any)
+
+    expect(buildEffectiveSystemPrompt).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mainThreadAgentDefinition: undefined,
+        customSystemPrompt: undefined,
+        appendSystemPrompt: undefined,
+      }),
+    )
+  })
+
+  it('calls startBackgroundSession with messages and query params', async () => {
+    const { startBackgroundSession } = await import('../../tasks/LocalMainSessionTask.js')
+    const params = createBgParams()
+
+    await handleBackgroundQuery(params as any)
+
+    expect(startBackgroundSession).toHaveBeenCalledTimes(1)
+    const callArgs = (startBackgroundSession as any).mock.calls[0][0]
+    expect(callArgs.messages).toEqual([])
+    expect(callArgs.queryParams).toBeDefined()
+    expect(callArgs.description).toBe('Test Session')
+    expect(callArgs.agentDefinition).toBeUndefined()
+  })
+
+  it('deduplicates notification attachments against existing messages', async () => {
+    const { createAttachmentMessage, getQueuedCommandAttachments } = await import(
+      '../../utils/attachments.js'
+    )
+    const { startBackgroundSession } = await import('../../tasks/LocalMainSessionTask.js')
+    ;(getQueuedCommandAttachments as any).mockResolvedValue([
+      { prompt: 'task-1', other: 'data' },
+      { prompt: 'task-2', other: 'data' },
+    ])
+    ;(createAttachmentMessage as any).mockImplementation((att: any) => ({
+      type: 'attachment' as const,
+      attachment: {
+        type: 'queued_command' as const,
+        commandMode: 'task-notification',
+        prompt: att.prompt,
+      },
+    }))
+
+    const params = createBgParams({
+      messagesRef: createMockRef([
+        {
+          type: 'attachment' as const,
+          attachment: {
+            type: 'queued_command' as const,
+            commandMode: 'task-notification',
+            prompt: 'task-1',
+          },
+        },
+      ]),
+    })
+
+    await handleBackgroundQuery(params as any)
+
+    const callArgs = (startBackgroundSession as any).mock.calls[0][0]
+    // messages = existing (task-1) + unique notifications (task-2 only)
+    const attachmentMessages = callArgs.messages.filter((m: any) => m.type === 'attachment')
+    expect(attachmentMessages.length).toBe(2)
+    const prompts = attachmentMessages.map((m: any) => m.attachment.prompt)
+    expect(prompts).toContain('task-1') // from messagesRef
+    expect(prompts).toContain('task-2') // new unique notification
+  })
+
+  it('handles getQueuedCommandAttachments error gracefully', async () => {
+    const { getQueuedCommandAttachments } = await import('../../utils/attachments.js')
+    ;(getQueuedCommandAttachments as any).mockRejectedValue(new Error('fetch failed'))
+
+    const params = createBgParams()
+
+    await expect(handleBackgroundQuery(params as any)).resolves.toBeUndefined()
+  })
+})
+
+// ── handleAgentSubmit tests ────────────────────────────────────────────────
+
+describe('handleAgentSubmit', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  function createAgentSubmitParams(overrides: Record<string, any> = {}) {
+    return {
+      input: 'test message',
+      task: {
+        id: 'agent-1',
+        status: 'running',
+        type: 'local',
+      },
+      helpers: {
+        setCursorOffset: vi.fn(),
+        clearBuffer: vi.fn(),
+        resetHistory: vi.fn(),
+      } as any,
+      setAppState: vi.fn(),
+      setInputValue: vi.fn(),
+      getToolUseContext: vi.fn(() => ({
+        options: { tools: [], mcpClients: [], systemPrompt: '', userContext: {} },
+        renderedSystemPrompt: '',
+      })),
+      canUseTool: vi.fn(),
+      mainLoopModel: 'test-model',
+      messagesRef: createMockRef([]),
+      onResumeFailed: vi.fn(),
+      ...overrides,
+    }
+  }
+
+  it('appends message and queues pending when local task is running', async () => {
+    const { appendMessageToLocalAgent, queuePendingMessage, isLocalAgentTask } = await import(
+      '../../tasks/LocalAgentTask/LocalAgentTask.js'
+    )
+    ;(isLocalAgentTask as any).mockReturnValue(true)
+
+    const params = createAgentSubmitParams({
+      task: { id: 'agent-1', status: 'running', type: 'local' },
+    })
+
+    await handleAgentSubmit(params as any)
+
+    expect(appendMessageToLocalAgent).toHaveBeenCalledWith(
+      'agent-1',
+      expect.any(Object),
+      params.setAppState,
+    )
+    expect(queuePendingMessage).toHaveBeenCalledWith('agent-1', 'test message', params.setAppState)
+  })
+
+  it('resumes agent in background when local task is stopped', async () => {
+    const { appendMessageToLocalAgent, isLocalAgentTask } = await import(
+      '../../tasks/LocalAgentTask/LocalAgentTask.js'
+    )
+    const { resumeAgentBackground } = await import('../../tools/AgentTool/resumeAgent.js')
+    ;(isLocalAgentTask as any).mockReturnValue(true)
+
+    const params = createAgentSubmitParams({
+      task: { id: 'agent-1', status: 'stopped', type: 'local' },
+    })
+
+    await handleAgentSubmit(params as any)
+
+    expect(appendMessageToLocalAgent).toHaveBeenCalled()
+    expect(resumeAgentBackground).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agentId: 'agent-1',
+        prompt: 'test message',
+      }),
+    )
+  })
+
+  it('calls onResumeFailed when resumeAgentBackground throws', async () => {
+    const { isLocalAgentTask } = await import('../../tasks/LocalAgentTask/LocalAgentTask.js')
+    const { resumeAgentBackground } = await import('../../tools/AgentTool/resumeAgent.js')
+    ;(isLocalAgentTask as any).mockReturnValue(true)
+    ;(resumeAgentBackground as any).mockRejectedValue(new Error('resume failed'))
+
+    const params = createAgentSubmitParams({
+      task: { id: 'agent-1', status: 'stopped', type: 'local' },
+    })
+
+    await handleAgentSubmit(params as any)
+
+    // The .catch() handler is a microtask — flush with a short delay
+    await new Promise((r) => setTimeout(r, 10))
+
+    expect(params.onResumeFailed).toHaveBeenCalledWith('agent-1', 'Error: resume failed')
+  })
+
+  it('calls injectUserMessageToTeammate for non-local tasks', async () => {
+    const { injectUserMessageToTeammate } = await import(
+      '../../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
+    )
+    const { isLocalAgentTask } = await import('../../tasks/LocalAgentTask/LocalAgentTask.js')
+    ;(isLocalAgentTask as any).mockReturnValue(false)
+
+    const params = createAgentSubmitParams({
+      task: { id: 'swarm-agent-1', status: 'running', type: 'swarm' },
+    })
+
+    await handleAgentSubmit(params as any)
+
+    expect(injectUserMessageToTeammate).toHaveBeenCalledWith(
+      'swarm-agent-1',
+      'test message',
+      params.setAppState,
+    )
+  })
+
+  it('clears input after submission', async () => {
+    const { isLocalAgentTask } = await import('../../tasks/LocalAgentTask/LocalAgentTask.js')
+    ;(isLocalAgentTask as any).mockReturnValue(true)
+
+    const params = createAgentSubmitParams()
+
+    await handleAgentSubmit(params as any)
+
+    expect(params.setInputValue).toHaveBeenCalledWith('')
+    expect(params.helpers.setCursorOffset).toHaveBeenCalledWith(0)
+    expect(params.helpers.clearBuffer).toHaveBeenCalled()
   })
 })
