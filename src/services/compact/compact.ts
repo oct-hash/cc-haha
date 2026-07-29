@@ -435,6 +435,12 @@ async function compactWithPTLRetry(
   return { summary, summaryResponse }
 }
 
+/**
+ * Builds post-compact file/agent/plan/skill/delta attachments.
+ * IMPORTANT: This function clears `context.readFileState` and
+ * `context.loadedNestedMemoryPaths` as side effects. It must be called
+ * after the compaction summary succeeds but before post-compact hooks run.
+ */
 async function buildCompactAttachments(
   context: ToolUseContext,
   messagesToKeep: Message[] = [],
