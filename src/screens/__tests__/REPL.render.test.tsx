@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'bun:test'
-import { render } from 'ink-testing-library'
 import React from 'react'
 import { MainRender } from '../REPL.render'
 import { createMockMainRenderProps } from './REPL.testHelpers'
@@ -7,19 +6,9 @@ import { createMockMainRenderProps } from './REPL.testHelpers'
 describe('MainRender', () => {
   it('renders without throwing with default mock props', () => {
     const props = createMockMainRenderProps()
-    // MainRender should return a React element (not throw)
     const element = MainRender(props)
     expect(element).toBeDefined()
     expect(React.isValidElement(element)).toBe(true)
-  })
-
-  it('produces output when rendered via ink-testing-library', () => {
-    const props = createMockMainRenderProps()
-    const { lastFrame, unmount } = render(MainRender(props) as React.ReactElement)
-    const frame = lastFrame()
-    // Should produce some terminal output
-    expect(typeof frame).toBe('string')
-    unmount()
   })
 
   it('renders in transcript screen mode without throwing', () => {

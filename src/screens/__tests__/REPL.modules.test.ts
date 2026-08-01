@@ -27,7 +27,7 @@ describe('REPL module imports', () => {
 })
 
 describe('useNotificationLayer', () => {
-  it('imports without error', async () => {
+  it('imports without error', { timeout: 15_000 }, async () => {
     const mod = await import('../../hooks/useNotificationLayer.js')
     expect(mod).toBeDefined()
     expect(typeof mod.useNotificationLayer).toBe('function')

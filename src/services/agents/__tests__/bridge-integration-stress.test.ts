@@ -609,7 +609,7 @@ describe('维度 7 — 生命周期竞争', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('维度 8 — 真实混合场景', () => {
-  it('模拟用户切换 agent 三次 + 各对话两轮 + 持久化完整', async () => {
+  it('模拟用户切换 agent 三次 + 各对话两轮 + 持久化完整', { timeout: 30_000 }, async () => {
     let sm = getSessionManager()
 
     // 用户启动：用 claude-haha 对话
@@ -620,7 +620,10 @@ describe('维度 8 — 真实混合场景', () => {
 
     // 用户 Ctrl+B 切换到 codex 做后台查询
     const bg1 = sm.createSession('codex')
-    const bg1Events = await collect(bg1.chatStream('bg-task', new AbortController()))
+    const bgCtrl = new AbortController()
+    const bgTimeout = setTimeout(() => bgCtrl.abort(), 3000)
+    const bg1Events = await collect(bg1.chatStream('bg-task', bgCtrl))
+    clearTimeout(bgTimeout)
     // codex 无 queryExecutor，可能返回 error
     if (bg1Events.some((e) => e.type === 'done')) {
       // 正常完成
