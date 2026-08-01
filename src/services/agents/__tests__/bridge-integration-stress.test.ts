@@ -629,7 +629,7 @@ describe('维度 8 — 真实混合场景', () => {
       // 正常完成
     }
     bg1.destroy()
-    sm.save().catch(() => {})
+    await sm.save().catch(() => {})
 
     // 用户切换到 claude-code（bridgeAdapterStream 模式）
     const existing = sm.listSessions().find((s) => s.agentKind === 'claude-code')

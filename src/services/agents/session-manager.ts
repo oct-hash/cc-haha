@@ -212,20 +212,31 @@ export class SessionManager {
 
   // --- Persistence -----------------------------------------------------------
 
+  private _saveChain: Promise<void> = Promise.resolve()
+
   async save(): Promise<void> {
-    const state = {
-      activeKind: this.activeKind,
-      config: this.config,
-      sessions: Array.from(this.sessions.values()).map((s) => ({
-        id: s.id,
-        agentKind: s.agentKind,
-        metadata: s.metadata,
-        config: s.config,
-      })),
-    }
-    const filePath = getSessionsPath()
-    await fs.promises.mkdir(path.dirname(filePath), { recursive: true })
-    await fs.promises.writeFile(filePath, JSON.stringify(state, null, 2))
+    // Serialize writes: concurrent save() calls chain sequentially so the last
+    // snapshot always wins instead of racing on the filesystem.
+    this._saveChain = this._saveChain
+      .then(async () => {
+        const state = {
+          activeKind: this.activeKind,
+          config: this.config,
+          sessions: Array.from(this.sessions.values()).map((s) => ({
+            id: s.id,
+            agentKind: s.agentKind,
+            metadata: s.metadata,
+            config: s.config,
+          })),
+        }
+        const filePath = getSessionsPath()
+        await fs.promises.mkdir(path.dirname(filePath), { recursive: true })
+        await fs.promises.writeFile(filePath, JSON.stringify(state, null, 2))
+      })
+      .catch(() => {
+        // Swallow to keep the chain alive for subsequent saves
+      })
+    return this._saveChain
   }
 
   static async load(config?: SessionManagerConfig): Promise<SessionManager> {
