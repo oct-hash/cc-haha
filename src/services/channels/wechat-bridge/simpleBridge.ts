@@ -3,13 +3,15 @@
  * Poll messages and forward to Claude, then reply
  */
 
-import { execSync, spawn } from 'node:child_process'
+import { execSync, spawn, spawnSync } from 'node:child_process'
 import axios from 'axios'
 
 const CONFIG = {
   weixinAccountId: 'e87c180011fe-im-bot',
   claudeApiKey: process.env.ANTHROPIC_AUTH_TOKEN || '',
-  claudeApiUrl: process.env.ANTHROPIC_BASE_URL?.replace('/v1', '/v1') || 'https://api.minimaxi.com/anthropic/v1/messages',
+  claudeApiUrl:
+    process.env.ANTHROPIC_BASE_URL?.replace('/v1', '/v1') ||
+    'https://api.minimaxi.com/anthropic/v1/messages',
   claudeModel: process.env.ANTHROPIC_MODEL || 'MiniMax-M2.7',
   pollIntervalMs: 5000,
   maxResponseTimeMs: 90000,
@@ -51,12 +53,19 @@ async function pollMessages(): Promise<Array<{ from: string; content: string }>>
 
 async function sendMessage(to: string, text: string): Promise<void> {
   try {
-    const output = execSync(`npx weixin-mcp send ${to} "${text.replace(/"/g, '\\"')}"`, {
+    // Use spawnSync with args array to avoid shell injection from user-supplied
+    // message text or recipient id. Previously execSync with string interpolation
+    // was vulnerable to $(), backticks, ; and other shell metacharacters.
+    const output = spawnSync('npx', ['weixin-mcp', 'send', to, text], {
       env: { ...process.env, WEIXIN_ACCOUNT_ID: CONFIG.weixinAccountId },
       timeout: 10000,
       encoding: 'utf-8',
     })
-    console.error('[Bridge] Send result:', output.toString().trim())
+    if (output.status !== 0) {
+      console.error('[Bridge] Send failed:', output.stderr?.toString().trim())
+    } else {
+      console.error('[Bridge] Send result:', output.stdout?.toString().trim())
+    }
   } catch (err: unknown) {
     const error = err as { stderr?: string }
     console.error('[Bridge] Send error:', error.stderr)
@@ -75,7 +84,7 @@ async function callClaude(userId: string, message: string): Promise<string> {
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${CONFIG.claudeApiKey}`,
+          Authorization: `Bearer ${CONFIG.claudeApiKey}`,
           'anthropic-version': '2023-06-01',
         },
         timeout: CONFIG.maxResponseTimeMs,
@@ -83,7 +92,10 @@ async function callClaude(userId: string, message: string): Promise<string> {
     )
     return response.data.content?.[0]?.text || '抱歉，没有收到回复。'
   } catch (err: unknown) {
-    const error = err as { response?: { data?: { error?: { message?: string } } }; message?: string }
+    const error = err as {
+      response?: { data?: { error?: { message?: string } } }
+      message?: string
+    }
     console.error('[Bridge] Claude error:', error.response?.data?.error?.message || error.message)
     throw err
   }

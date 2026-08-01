@@ -91,6 +91,7 @@ import { launchAssistantInstallWizard, launchAssistantSessionChooser, launchInva
 import { SHOW_CURSOR } from './ink/termio/dec.js';
 import { exitWithError, exitWithMessage, getRenderContext, renderAndRun, showSetupScreens } from './interactiveHelpers.js';
 import { initBuiltinPlugins } from './plugins/bundled/index.js';
+import { getSessionManager, initSessionManager } from './services/agents/session-manager.js';
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { checkQuotaStatus } from './services/claudeAiLimits.js';
 import { getMcpToolsCommandsAndResources, prefetchAllMcpResources } from './services/mcp/client.js';
@@ -2070,6 +2071,10 @@ async function run(): Promise<CommanderCommand> {
 
     // Store the main thread agent type in bootstrap state so hooks can access it
     setMainThreadAgentType(mainThreadAgentDefinition?.agentType);
+
+    // Initialize session manager for agent lifecycle tracking
+    await initSessionManager();
+    getSessionManager().setActiveKind('claude-haha');
 
     // Log agent flag usage — only log agent name for built-in agents to avoid leaking custom agent names
     if (mainThreadAgentDefinition) {

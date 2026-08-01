@@ -1,10 +1,10 @@
-import Imap from 'imap'
-import { simpleParser, ParsedMail } from 'mailparser'
-import type { QQMailConfig, QQMail, MailAttachment } from './types.js'
+import { ImapFlow } from 'imapflow'
+import { type ParsedMail, simpleParser } from 'mailparser'
+import type { MailAttachment, QQMail, QQMailConfig } from './types.js'
 
 export class QQMailIMAP {
   private config: QQMailConfig
-  private imap: Imap
+  private client: ImapFlow
 
   constructor(config: QQMailConfig) {
     this.config = {
@@ -13,196 +13,103 @@ export class QQMailIMAP {
       tls: true,
       ...config,
     }
-    this.imap = new Imap(this.buildConfig())
-  }
-
-  private buildConfig(): Imap.Config {
-    return {
-      user: this.config.user,
-      password: this.config.authCode,
+    this.client = new ImapFlow({
       host: this.config.host,
       port: this.config.port,
-      tls: this.config.tls,
-    }
+      secure: this.config.tls ?? true,
+      auth: {
+        user: this.config.user,
+        pass: this.config.authCode,
+      },
+      logger: false,
+    })
   }
 
   async connect(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.imap.once('ready', () => resolve())
-      this.imap.once('error', (err) => reject(err))
-      this.imap.connect()
-    })
+    await this.client.connect()
   }
 
   async disconnect(): Promise<void> {
-    return new Promise((resolve) => {
-      this.imap.end()
-      this.imap.once('end', () => resolve())
-    })
+    await this.client.logout()
   }
 
   async listEmails(
-    options: {
-      box?: string
-      limit?: number
-      since?: Date
-      before?: Date
-    } = {}
+    options: { box?: string; limit?: number; since?: Date; before?: Date } = {},
   ): Promise<QQMail[]> {
     const { box = 'INBOX', limit = 20, since, before } = options
+    const mails: QQMail[] = []
 
-    return new Promise((resolve, reject) => {
-      const mails: QQMail[] = []
+    const lock = await this.client.getMailboxLock(box)
+    try {
+      const searchQuery: { since?: Date; before?: Date } = {}
+      if (since) searchQuery.since = since
+      if (before) searchQuery.before = before
 
-      const searchCriteria: string[] = ['ALL']
-      if (since) searchCriteria.push('SINCE', this.formatDate(since))
-      if (before) searchCriteria.push('BEFORE', this.formatDate(before))
+      const uids = await this.client.search(searchQuery, { uid: true })
 
-      const fetchOpts: Imap.FetchOptions = {
-        bodies: '',
-        struct: true,
-      }
+      if (!uids || uids.length === 0) return []
 
-      this.imap.openBox(box, false, (err) => {
-        if (err) {
-          reject(err)
-          return
+      // Get latest emails (reverse to get most recent first)
+      const targetUids = uids.slice(-limit).reverse()
+
+      for await (const msg of this.client.fetch(targetUids, { source: true }, { uid: true })) {
+        try {
+          const parsed = await simpleParser(msg.source)
+          const attachments = this.extractAttachments(parsed)
+
+          mails.push({
+            uid: msg.uid,
+            id: String(msg.uid),
+            subject: parsed.subject || '(no subject)',
+            from: parsed.from?.text || '',
+            to: parsed.to?.text || '',
+            date: parsed.date || new Date(),
+            hasAttachments: attachments.length > 0,
+            attachments,
+            body: parsed.text || parsed.textAsHtml || '',
+          })
+        } catch (err) {
+          console.error(`Failed to parse message ${msg.uid}:`, err)
         }
+      }
+    } finally {
+      lock.release()
+    }
 
-        this.imap.search(searchCriteria, (err, results) => {
-          if (err) {
-            reject(err)
-            return
-          }
-
-          if (results.length === 0) {
-            resolve([])
-            return
-          }
-
-          // Get latest emails (reverse to get most recent first)
-          const uids = results.slice(-limit).reverse()
-
-          const fetch = this.imap.fetch(uids, fetchOpts)
-          let pendingMessages = uids.length
-          let fetchError: Error | null = null
-
-          const finish = () => {
-            if (fetchError) return
-            // Sort by date descending
-            mails.sort((a, b) => b.date.getTime() - a.date.getTime())
-            resolve(mails)
-          }
-
-          fetch.on('message', (msg) => {
-            let uid = 0
-
-            msg.once('attributes', (attrs) => {
-              uid = attrs.uid
-            })
-
-            msg.on('body', async (stream) => {
-              try {
-                const parsed = await simpleParser(stream)
-                const attachments = this.extractAttachments(parsed)
-
-                const mail: QQMail = {
-                  uid,
-                  id: String(uid),
-                  subject: parsed.subject || '(no subject)',
-                  from: parsed.from?.text || '',
-                  to: parsed.to?.text || '',
-                  date: parsed.date || new Date(),
-                  hasAttachments: attachments.length > 0,
-                  attachments,
-                  body: parsed.text || parsed.textAsHtml || '',
-                }
-
-                mails.push(mail)
-              } catch (err) {
-                // Continue even if one message fails
-                console.error(`Failed to parse message ${uid}:`, err)
-              } finally {
-                pendingMessages--
-                if (pendingMessages <= 0) {
-                  finish()
-                }
-              }
-            })
-
-            msg.once('error', (err) => {
-              fetchError = err as Error
-              reject(err)
-            })
-          })
-
-          fetch.once('end', () => {
-            // If no messages were fetched, resolve immediately
-            if (pendingMessages <= 0) {
-              finish()
-            }
-          })
-
-          fetch.once('error', (err) => {
-            fetchError = err as Error
-            reject(err)
-          })
-
-          fetch.once('error', reject)
-        })
-      })
-    })
+    // Sort by date descending
+    mails.sort((a, b) => b.date.getTime() - a.date.getTime())
+    return mails
   }
 
   async getEmailBody(uid: number, box = 'INBOX'): Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.imap.openBox(box, false, (err) => {
-        if (err) {
-          reject(err)
-          return
-        }
-
-        const fetch = this.imap.fetch(uid, { bodies: '' })
-
-        fetch.on('message', async (msg) => {
-          msg.on('body', async (stream) => {
-            const parsed = await simpleParser(stream)
-            resolve(parsed.text || parsed.textAsHtml || '')
-          })
-          msg.once('error', reject)
-        })
-
-        fetch.once('error', reject)
-      })
-    })
+    const lock = await this.client.getMailboxLock(box)
+    try {
+      for await (const msg of this.client.fetch(uid, { source: true }, { uid: true })) {
+        const parsed = await simpleParser(msg.source)
+        return parsed.text || parsed.textAsHtml || ''
+      }
+      return ''
+    } finally {
+      lock.release()
+    }
   }
 
   async getAttachment(
     uid: number,
     attachmentIndex: number,
-    box = 'INBOX'
+    box = 'INBOX',
   ): Promise<MailAttachment | null> {
-    return new Promise((resolve, reject) => {
-      this.imap.openBox(box, false, (err) => {
-        if (err) {
-          reject(err)
-          return
-        }
-
-        const fetch = this.imap.fetch(uid, { bodies: '', struct: true })
-
-        fetch.on('message', async (msg) => {
-          msg.on('body', async (stream) => {
-            const parsed = await simpleParser(stream)
-            const attachments = this.extractAttachments(parsed)
-            resolve(attachments[attachmentIndex] || null)
-          })
-          msg.once('error', reject)
-        })
-
-        fetch.once('error', reject)
-      })
-    })
+    const lock = await this.client.getMailboxLock(box)
+    try {
+      for await (const msg of this.client.fetch(uid, { source: true }, { uid: true })) {
+        const parsed = await simpleParser(msg.source)
+        const attachments = this.extractAttachments(parsed)
+        return attachments[attachmentIndex] || null
+      }
+      return null
+    } finally {
+      lock.release()
+    }
   }
 
   private extractAttachments(mail: ParsedMail): MailAttachment[] {
@@ -224,10 +131,6 @@ export class QQMailIMAP {
     }
 
     return attachments
-  }
-
-  private formatDate(date: Date): string {
-    return date.toISOString().split('T')[0]
   }
 }
 

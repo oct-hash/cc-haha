@@ -4,6 +4,8 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ---
 
+<product_information>
+
 ## 项目定位
 
 基于 Claude Code 源码的增强版 Ink TUI 终端，支持 MCP Servers、Plugins、Skills、自定义 API 端点和多模型（MiniMax、OpenRouter 等）。
@@ -18,7 +20,9 @@ This file provides guidance to Claude Code when working with code in this reposi
 | 模型 | 单模型 | 多模型 (MiniMax/OpenRouter 等) |
 | Channel | 无 | WeChat / QQMail |
 
----
+</product_information>
+
+<project_architecture>
 
 ## 启动命令
 
@@ -32,8 +36,6 @@ bun --env-file=.env ./src/entrypoints/cli.tsx
 # Recovery CLI
 CLAUDE_CODE_FORCE_RECOVERY_CLI=1 ./bin/claude-haha
 ```
-
----
 
 ## 核心架构
 
@@ -67,7 +69,9 @@ Tools 委托给 src/utils/ 辅助函数
   - GBrain: 知识库/文档/论文搜索
 - **Channel**: WeChat MCP Server + QQMail 文献同步，支持远程消息交互
 
----
+</project_architecture>
+
+<configuration>
 
 ## 配置说明
 
@@ -86,11 +90,29 @@ Tools 委托给 src/utils/ 辅助函数
 
 危险命令需要确认：`rm`、`kill`、`dd`、`mkfs`、`shred`、`fdisk`
 
----
+</configuration>
+
+<claude_behavior>
 
 ## 行为准则 (Behavioral Rules)
 
 > 从 PROMPT_fable5.md 提取的通用行为规范，对所有模型生效。
+
+<safety_taxonomy>
+
+### 内容安全分类 (Content Safety Taxonomy)
+
+> 参考 Opus 5 / Fable 5 的安全分层架构。所有用户输入按以下分类路由处理：
+
+| 类别 | 处理策略 | 示例 |
+|------|---------|------|
+| **SAFE** | 正常处理 | 软件工程、数据分析、文档编写 |
+| **SENSITIVE** | 谨慎处理，不存储敏感数据 | 医疗建议、财务分析、法律咨询 |
+| **RESTRICTED** | 拒绝或重定向 | 武器制造、非法药物、恶意代码 |
+| **AUTHORIZED_ONLY** | 仅授权上下文 | 渗透测试 (需授权)、CTF 竞赛、安全研究 |
+| **BIO_CHEM** | 知识边界内回答，不给步骤 | 化合物合成、生物实验设计 |
+| **LLM_RD** | 技术讨论OK，不协助越狱/prompt注入 | 模型架构、训练方法、系统提示词分析 |
+| **HARMFUL_CONTENT** | 零容忍 - 不搜索/引用/转述 | 仇恨言论、暴力极端主义、CSAM |
 
 ### 安全边界
 
@@ -168,6 +190,8 @@ MUST 拒绝：武器/爆炸物制造、非法药物合成、恶意代码（勒�
 
 <!-- [SYNC] 此为底线规则；Skill: safe-response-protocol (有害内容部分)；Hook: hookify.block-harmful-search-terms -->
 
+</safety_taxonomy>
+
 ### 图片搜索准则
 
 → 详见 `image-search-guidelines` 技能。底线：视觉能提升理解时才搜，纯文字任务跳过。
@@ -180,7 +204,9 @@ MUST 拒绝：武器/爆炸物制造、非法药物合成、恶意代码（勒�
 
 <!-- [SYNC] Skill: citation-format (详细引用规范) -->
 
----
+</claude_behavior>
+
+<subsystem_boundaries>
 
 ## Hooks 系统
 
@@ -204,8 +230,6 @@ MUST 拒绝：武器/爆炸物制造、非法药物合成、恶意代码（勒�
 |------|------|
 | 会话结束 | 桌面通知 + 会话摘要 (ECC) + Hookify stop 规则 |
 
----
-
 ## MCP Servers
 
 | Server | 用途 |
@@ -222,8 +246,6 @@ MUST 拒绝：武器/爆炸物制造、非法药物合成、恶意代码（勒�
 | **sequential-thinking** | 结构化多步推理 |
 | **test-mcp** | MCP 连接测试 |
 | **token-optimizer** | Token 优化 & 缓存 |
-
----
 
 ## Agent Reach — 互联网调研路由器
 
@@ -259,11 +281,22 @@ agent-reach search "query"         # Exa AI 搜索
 agent-reach 小红书 "关键词"         # 平台搜索
 ```
 
-### 使用规则
+### 搜索→入库 SOP（强制执行）
 
-所有互联网搜索/调研 MUST 使用 agent-reach skill（通过 agent-reach agent 或直接调用）。
+> 完整 SOP → [`docs/sop-search-ingestion.md`](docs/sop-search-ingestion.md)。此处仅保留检查清单。
 
----
+| # | 规则 | 核心要点 |
+|---|------|---------|
+| 1 | 体检 | `agent-reach doctor --json` 后台 30s 超时，不阻塞 |
+| 2 | 内部查重 | **双通道**: `gbrain search`(关键词) + `gbrain query`(语义) 都用 |
+| 3 | 搜索预算 | ≤3 次搜索/≤3 平台；🌐跨语言例外 ≤5 次 |
+| 4 | 结果筛选 | 核心入库 ≤5 条 + 延伸阅读 ≤3 条 |
+| 5 | 去重 | R5a: `put_page` 前 `search` slug + R5b: 双通道 `search`+`query` title/摘要语义去重 |
+| 6 | 结构化 | frontmatter(tags/source/date) + 摘要 + 关键发现 + 来源 |
+| 7 | 关联校验 | `get_links` 验证 + `add_link` 关联已有页面 |
+| 8 | 输出清单 | `📦 本次入库 (X 条)` 格式，不得无声入库 |
+
+**反模式**：跳过 doctor | 只用 query 不用 search | 搜 5+ 次不停 | 全量 dump 不入库 | 入库不写清单 | 重复建同名页面
 
 ## 插件系统
 
@@ -274,8 +307,6 @@ agent-reach 小红书 "关键词"         # 平台搜索
 | **commit-commands** | official | Git commit/Push/PR 工作流 |
 | **feature-dev** | official | 功能开发 (architecture/explore/review) |
 | **hookify** | official | 可配置 hooks (`.local.md` 文件) |
-
----
 
 ## 规则系统
 
@@ -300,19 +331,57 @@ rules/
 └── web/             # 前端 (CSS、设计质量、性能、安全)
 ```
 
----
+</subsystem_boundaries>
 
-## Memory 系统
+<memory_system>
 
+## Memory 系统 (三层统一架构)
+
+> 参考 Opus 5 的 memory 作为一等架构子系统的设计，本项目有三层 memory：
+
+### Tier 1: Session Memory (会话内)
+| 特性 | 配置 |
+|------|------|
+| 实现 | `src/services/SessionMemory/sessionMemory.ts` |
+| 生命周期 | 单次会话 |
+| 用途 | 工具调用结果缓存、上下文压缩 |
+
+### Tier 2: Auto Memory (跨会话)
 | 特性 | 配置 |
 |------|------|
 | 后端 | builtin (文件存储于 `~/.claude/projects/D--claude-code-haha/memory/`) |
 | 搜索 | 混合搜索 (vector + keyword) + MMR 去重 + 时间衰减 |
+| 类型 | user / feedback / project / reference (四类闭包) |
 | Dreaming | 每日 03:00 自动记忆整合 |
-| 引用 | Auto 模式 |
-| 额外路径 | `.claude/memory` |
+| 工具 | Write (写 memory 文件) + Grep (搜索历史) |
 
----
+### Tier 3: External Knowledge (外部知识)
+| 系统 | 用途 | 接口 |
+|------|------|------|
+| **GBrain MCP** | 知识图谱 / wiki brain | `mcp__gbrain__*` tools |
+| **claude-mem-lite** | 轻量持久记忆 + 跨会话 TODO | `mem_search`, `mem_save`, `mem_defer` |
+| **Context7 MCP** | 最新库/框架文档 | `mcp__context7__*` tools |
+
+### Memory 工具速查
+
+| 场景 | 工具 |
+|------|------|
+| 学习到用户偏好/反馈 | Write → `~/.claude/.../memory/<topic>.md` |
+| 记录架构决策 | Write → `~/.claude/.../memory/<topic>.md` |
+| 搜索历史记忆 | Grep `memory/` 或 `mem_search "关键词"` |
+| 知识库搜索 | `mcp__gbrain__query` |
+| 最新文档查询 | `mcp__context7__query-docs` |
+| 跨会话 TODO | `mem_defer` / `mem_defer_list` |
+
+### 写入原则
+- 不保存可从代码/git 推导的信息（代码模式、架构、文件路径）
+- 不保存 CLAUDE.md 已记录的信息
+- 不保存临时任务状态（用 TaskCreate 代替）
+- 保存：用户画像、反馈纠正、项目上下文、外部系统指针
+
+</memory_system>
+
+<agent_ecosystem>
 
 ## Custom Agents
 
@@ -323,7 +392,9 @@ rules/
 - **专家**: security-reviewer, code-reviewer, database-reviewer, healthcare-reviewer
 - **工作流**: planner, architect, tdd-guide, e2e-runner, refactor-cleaner, doc-updater
 
----
+</agent_ecosystem>
+
+<cross_session_communication>
 
 ## 文件对话系统
 
@@ -339,7 +410,9 @@ rules/
 
 讨论文件：`PROJECT_DISCUSSION.md`（项目根目录）
 
----
+</cross_session_communication>
+
+<reference_index>
 
 ## Quick Ref
 
@@ -367,3 +440,23 @@ rules/
 | Agent Reach (全局源) | `~/.agents/skills/agent-reach/` |
 | 自定义命令 | `~/.claude/commands/` |
 | ECC 插件 | `~/.claude/ecc/` |
+
+</reference_index>
+
+<!-- claude-mem-lite:begin v1 -->
+## claude-mem-lite — persistent memory
+
+PreToolUse hooks already run `mem_recall` for past lessons before Read/Edit/Write. The calls worth making proactively:
+
+| When | Call |
+|------|------|
+| Before Edit/Write | hook already recalled; if a `#NN` lesson was injected, cite `#NN` next time you produce user-visible text (citing = adopting the feedback; uncited lessons decay) |
+| After fixing a non-trivial bug | `mem_save(type="bugfix", lesson_learned="<root cause + fix>", importance=2)` |
+| After a non-obvious architecture decision | `mem_save(type="decision", lesson_learned="<constraint + tradeoff>")` |
+| Deferring to a future session | `mem_defer({title, priority:1|2|3, detail})`; when fixed, add `closes_deferred=[N]` to `mem_save` |
+| Looking up past work / history | `mem_search "keywords"` · `mem_recent` · `mem_timeline` |
+
+Path cost is round-trips, not milliseconds: the PreToolUse hook above already recalls (0 calls) — prefer it. For an explicit query, if these `mem_*` tools are deferred behind ToolSearch this session, the Bash CLI (exact path in the detail doc) is one call vs two (ToolSearch + call).
+
+Full tool + CLI tables, citation/decay rules, and save discipline → `.claude/plugin_claude_mem_lite.md`
+<!-- claude-mem-lite:end -->

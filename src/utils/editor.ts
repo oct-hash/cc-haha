@@ -99,11 +99,10 @@ export function openFileInExternalEditor(
     let child
     if (process.platform === 'win32') {
       // shell: true on win32 so code.cmd / cursor.cmd / windsurf.cmd resolve —
-      // CreateProcess can't execute .cmd/.bat directly. Assemble quoted command
-      // string; cmd.exe doesn't expand $() or backticks inside double quotes.
-      // Quote each arg so paths with spaces survive the shell join.
-      const gotoStr = gotoArgv.map(a => `"${a}"`).join(' ')
-      child = spawn(`${editor} ${gotoStr}`, { ...detachedOpts, shell: true })
+      // CreateProcess can't execute .cmd/.bat directly. Use argv array (not
+      // string interpolation) — spawn handles argument escaping even with
+      // shell: true, preventing injection from malicious file paths.
+      child = spawn(editor, gotoArgv, { ...detachedOpts, shell: true })
     } else {
       // POSIX: argv array with no shell — injection-safe. shell: true would
       // expand $() / backticks inside double quotes, and filePath is
