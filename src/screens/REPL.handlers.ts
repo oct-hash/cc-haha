@@ -49,6 +49,8 @@ import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import { mergeClients } from '../hooks/useMergedClients.js'
 import { maybeMarkProjectOnboardingComplete } from '../projectOnboardingState.js'
 import { query } from '../query.js'
+import { getSessionManager } from '../services/agents/session-manager.js'
+import type { AgentKind } from '../services/agents/types.js'
 import { resetMicrocompactState } from '../services/compact/microCompact.js'
 import { diagnosticTracker } from '../services/diagnosticTracking.js'
 import type { SetToolJSXFn } from '../Tool.js'
@@ -81,6 +83,7 @@ import type { PromptInputHelpers } from '../utils/handlePromptSubmit.js'
 import { closeOpenDiffs, getConnectedIdeClient } from '../utils/ide.js'
 import {
   enqueue,
+  enqueuePendingNotification,
   getCommandQueueLength,
   removeByFilter,
   type SetAppState,
@@ -975,6 +978,19 @@ export async function handleBackgroundQuery(params: HandleBackgroundQueryParams)
     terminalTitle,
   } = params
 
+  const agentKind = getSessionManager().getActiveKind()
+
+  // Non-haha agents: delegate to SessionManager bridge stream
+  if (agentKind !== 'claude-haha') {
+    abortController?.abort('background')
+    startBackgroundBridgeStream({
+      kind: agentKind,
+      userText: terminalTitle,
+      messagesRef,
+    })
+    return
+  }
+
   abortController?.abort('background')
   const removedNotifications = removeByFilter((cmd) => cmd.mode === 'task-notification')
 
@@ -1039,8 +1055,138 @@ export async function handleBackgroundQuery(params: HandleBackgroundQueryParams)
   })
 }
 
+// -- Agent adapter bridge: converts NormalizedEvent → stream_event for onQueryEvent ---
+
+type QueryEvent = Parameters<typeof handleMessageFromStream>[0]
+
+function makeTextEvent(text: string): QueryEvent {
+  return {
+    type: 'stream_event',
+    event: {
+      type: 'content_block_delta',
+      delta: { type: 'text_delta', text },
+      index: 0,
+    },
+  }
+}
+
+async function bridgeAdapterStream(
+  kind: AgentKind,
+  userMessage: string,
+  abortController: AbortController,
+  onQueryEvent: (event: QueryEvent) => void,
+): Promise<void> {
+  const sm = getSessionManager()
+
+  // Reuse existing session for this agent kind, or create one
+  const existing = sm.listSessions().find((s) => s.agentKind === kind)
+  const handle =
+    existing ??
+    sm.createSession(kind, {
+      cwd: process.cwd(),
+      env: process.env as Record<string, string>,
+    })
+  if (!existing) await sm.save()
+
+  for await (const ev of handle.chatStream(userMessage, abortController)) {
+    switch (ev.type) {
+      case 'session':
+        onQueryEvent(makeTextEvent(`\n🆔 Session: ${ev.sessionId}\n`))
+        break
+      case 'text_chunk':
+        onQueryEvent(makeTextEvent(ev.content))
+        break
+      case 'tool_call_start':
+        onQueryEvent(makeTextEvent(`\n🔧 ${ev.name}(${ev.inputPreview})\n`))
+        break
+      case 'tool_call_end':
+        onQueryEvent(
+          makeTextEvent(
+            ev.isError
+              ? `\n❌ ${ev.outputPreview || '(no output)'}\n`
+              : `\n📋 ${ev.outputPreview || '(no output)'}\n`,
+          ),
+        )
+        break
+      case 'error':
+        onQueryEvent(makeTextEvent(`\n⚠️ ${ev.message}\n`))
+        break
+      case 'done':
+        break
+    }
+  }
+
+  // Persist updated metadata (tokens, tool calls, errors)
+  await sm.save()
+}
+
+// -- Background bridge for Ctrl+B with non-haha agents -----------------------
+
+async function startBackgroundBridgeStream({
+  kind,
+  userText,
+  messagesRef,
+}: {
+  kind: AgentKind
+  userText: string
+  messagesRef: RefObject<MessageType[]>
+}): Promise<void> {
+  const sm = getSessionManager()
+  const handle = sm.createSession(kind, {
+    cwd: process.cwd(),
+    env: process.env as Record<string, string>,
+  })
+  await sm.save()
+
+  const abortController = createAbortController()
+
+  // Fire-and-forget: stream in background, notify on completion
+  void (async () => {
+    let output = ''
+    try {
+      for await (const ev of handle.chatStream(userText, abortController)) {
+        switch (ev.type) {
+          case 'text_chunk':
+            output += ev.content
+            break
+          case 'tool_call_start':
+            output += `\n${ev.name}(${ev.inputPreview})\n`
+            break
+          case 'tool_call_end':
+            if (ev.isError) {
+              output += `\n${ev.outputPreview || '(no output)'}\n`
+            }
+            break
+          case 'error':
+            output += `\n${ev.message}\n`
+            break
+          case 'done':
+          case 'session':
+            break
+        }
+      }
+
+      if (output.trim()) {
+        enqueuePendingNotification({
+          value: output.trim(),
+          mode: 'task-notification',
+        })
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      enqueuePendingNotification({
+        value: `[${kind}] ${msg}`,
+        mode: 'task-notification',
+      })
+    } finally {
+      handle.destroy()
+      sm.save().catch(() => {})
+    }
+  })()
+}
+
 export interface HandleQueryEventParams {
-  event: Parameters<typeof handleMessageFromStream>[0]
+  event: QueryEvent
   setMessages: (updater: (prev: MessageType[]) => MessageType[]) => void
   setResponseLength: (updater: (length: number) => number) => void
   setStreamMode: (mode: SpinnerMode) => void
@@ -1169,7 +1315,7 @@ export interface HandleQueryImplParams {
     abortController: AbortController,
     mainLoopModel: string,
   ) => ProcessUserInputContext
-  onQueryEvent: (event: Parameters<typeof handleMessageFromStream>[0]) => void
+  onQueryEvent: (event: QueryEvent) => void
   canUseTool: CanUseToolFn
   onTurnComplete: ((messages: MessageType[]) => void | Promise<void>) | undefined
   resetLoadingState: () => void
@@ -1371,16 +1517,29 @@ export async function handleQueryImpl(params: HandleQueryImplParams): Promise<vo
   resetTurnHookDuration()
   resetTurnToolDuration()
   resetTurnClassifierDuration()
-  for await (const event of query({
-    messages: messagesIncludingNewMessages,
-    systemPrompt,
-    userContext,
-    systemContext,
-    canUseTool,
-    toolUseContext,
-    querySource: getQuerySourceForREPL(),
-  })) {
-    onQueryEvent(event)
+  const agentKind =
+    (process.env.CLAUDE_CODE_AGENT_KIND as AgentKind | undefined) ??
+    getSessionManager().getActiveKind()
+  if (agentKind && agentKind !== 'claude-haha') {
+    // Use external agent backend (claude-code or codex CLI)
+    const lastUserMsg = [...messagesIncludingNewMessages].reverse().find((m) => m.type === 'user')
+    const userText =
+      lastUserMsg?.type === 'user' ? (getContentText(lastUserMsg.message.content) ?? '') : ''
+    if (userText) {
+      await bridgeAdapterStream(agentKind, userText, abortController, onQueryEvent)
+    }
+  } else {
+    for await (const event of query({
+      messages: messagesIncludingNewMessages,
+      systemPrompt,
+      userContext,
+      systemContext,
+      canUseTool,
+      toolUseContext,
+      querySource: getQuerySourceForREPL(),
+    })) {
+      onQueryEvent(event)
+    }
   }
   void fireCompanionObserver(messagesRef.current, (reaction) =>
     setAppState((prev: any) =>
