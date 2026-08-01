@@ -5,17 +5,9 @@
 
 import { execSync, spawn, spawnSync } from 'node:child_process'
 import axios from 'axios'
+import { getBridgeConfig } from './config.js'
 
-const CONFIG = {
-  weixinAccountId: 'e87c180011fe-im-bot',
-  claudeApiKey: process.env.ANTHROPIC_AUTH_TOKEN || '',
-  claudeApiUrl:
-    process.env.ANTHROPIC_BASE_URL?.replace('/v1', '/v1') ||
-    'https://api.minimaxi.com/anthropic/v1/messages',
-  claudeModel: process.env.ANTHROPIC_MODEL || 'MiniMax-M2.7',
-  pollIntervalMs: 5000,
-  maxResponseTimeMs: 90000,
-}
+const CONFIG = getBridgeConfig()
 
 async function pollMessages(): Promise<Array<{ from: string; content: string }>> {
   try {

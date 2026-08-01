@@ -9,16 +9,9 @@
 
 import { spawn } from 'node:child_process'
 import axios from 'axios'
+import { getBridgeConfig } from './config.js'
 
-// Configuration
-const CONFIG = {
-  weixinAccountId: process.env.WEIXIN_ACCOUNT_ID || 'e87c180011fe-im-bot',
-  claudeApiKey: process.env.ANTHROPIC_AUTH_TOKEN || process.env.ANTHROPIC_API_KEY || '',
-  claudeApiUrl: process.env.ANTHROPIC_BASE_URL?.replace('/v1', '/v1') || 'https://api.minimaxi.com/anthropic/v1/messages',
-  claudeModel: process.env.ANTHROPIC_MODEL || 'MiniMax-M2.7',
-  pollIntervalMs: 5000,
-  maxResponseTimeMs: 90000,
-}
+const CONFIG = getBridgeConfig()
 
 interface WechatMessage {
   from_user_id: string

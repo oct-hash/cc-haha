@@ -5,8 +5,10 @@ import type { AssistantMessage, Message } from '../../types/message.js'
 import { all } from '../../utils/generators.js'
 import { type MessageUpdateLazy, runToolUse } from './toolExecution.js'
 
+const DEFAULT_MAX_TOOL_USE_CONCURRENCY = 10
+
 function getMaxToolUseConcurrency(): number {
-  return parseInt(process.env.CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY || '', 10) || 10
+  return parseInt(process.env.CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY || '', 10) || DEFAULT_MAX_TOOL_USE_CONCURRENCY
 }
 
 export type MessageUpdate = {
