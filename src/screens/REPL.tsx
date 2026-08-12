@@ -6,6 +6,7 @@ import { useREPLMessages } from "./REPL.hooks.messages.js"
 import { useREPLResume } from "./REPL.hooks.resume.js"
 import { useREPLIdleReset } from "./REPL.hooks.idle-reset.js"
 import { useREPLDialogs } from "./REPL.hooks.dialogs.js"
+import { useREPLToolContext } from "./REPL.hooks.tool-context.js"
 import { feature } from 'bun:bundle'
 import { spawnSync } from 'child_process'
 import { writeFile } from 'fs/promises'
@@ -85,7 +86,6 @@ import { useReplBridge } from '../hooks/useReplBridge.js'
 import { useSkillImprovementSurvey } from '../hooks/useSkillImprovementSurvey.js'
 import { useSSHSession } from '../hooks/useSSHSession.js'
 import { useSwarmInitialization } from '../hooks/useSwarmInitialization.js'
-import { registerSandboxPermissionCallback } from '../hooks/useSwarmPermissionPoller.js'
 import { useTeammateViewAutoExit } from '../hooks/useTeammateViewAutoExit.js'
 import { useTerminalSize } from '../hooks/useTerminalSize.js'
 import { useSearchHighlight } from '../ink/hooks/use-search-highlight.js'
@@ -106,7 +106,6 @@ import {
   isLocalAgentTask,
   type LocalAgentTaskState,
 } from '../tasks/LocalAgentTask/LocalAgentTask.js'
-import type { PromptRequest, PromptResponse } from '../types/hooks.js'
 import { asAgentId, asSessionId } from '../types/ids.js'
 import type { PromptInputMode, QueuedCommand, VimMode } from '../types/textInputTypes.js'
 import { count } from '../utils/array.js'
@@ -127,17 +126,10 @@ import { logError } from '../utils/log.js'
 import { isHumanTurn } from '../utils/messagePredicates.js'
 import { QueryGuard } from '../utils/QueryGuard.js'
 import {
-  registerLeaderSetToolPermissionContext,
   registerLeaderToolUseConfirmQueue,
-  unregisterLeaderSetToolPermissionContext,
   unregisterLeaderToolUseConfirmQueue,
 } from '../utils/swarm/leaderPermissionBridge.js'
-import {
-  generateSandboxRequestId,
-  isSwarmWorker,
-  sendSandboxPermissionRequestViaMailbox,
-  sendSandboxPermissionResponseViaMailbox,
-} from '../utils/swarm/permissionSync.js'
+import { sendSandboxPermissionResponseViaMailbox } from '../utils/swarm/permissionSync.js'
 import { setMemberActive } from '../utils/swarm/teamHelpers.js'
 import { getAgentName, getTeamName } from '../utils/teammate.js'
 import { parseTokenBudget } from '../utils/tokenBudget.js'
@@ -204,7 +196,7 @@ const getCoordinatorUserContext: (
   : () => ({})
 
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
-import { randomUUID, type UUID } from 'crypto'
+import { type UUID } from 'crypto'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -213,13 +205,12 @@ import {
 import { Messages } from '../components/Messages.js'
 import { buildPermissionUpdates } from '../components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.js'
 /* eslint-enable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
-import useCanUseTool from '../hooks/useCanUseTool.js'
 import { type IDESelection, useIdeSelection } from '../hooks/useIdeSelection.js'
 import { useInboxPoller } from '../hooks/useInboxPoller.js'
 import { useMailboxBridge } from '../hooks/useMailboxBridge.js'
 import { useMainLoopModel } from '../hooks/useMainLoopModel.js'
 import { useManagePlugins } from '../hooks/useManagePlugins.js'
-import { mergeClients, useMergedClients } from '../hooks/useMergedClients.js'
+import { useMergedClients } from '../hooks/useMergedClients.js'
 import { useMergedCommands } from '../hooks/useMergedCommands.js'
 import { useMergedTools } from '../hooks/useMergedTools.js'
 import { useQueueProcessor } from '../hooks/useQueueProcessor.js'
@@ -230,18 +221,17 @@ import { partialCompactConversation } from '../services/compact/compact.js'
 import { runPostCompactCleanup } from '../services/compact/postCompactCleanup.js'
 import type { MCPServerConnection, ScopedMcpServerConfig } from '../services/mcp/types.js'
 import { useAppState, useAppStateStore, useSetAppState } from '../state/AppState.js'
-import type { Tool, ToolPermissionContext } from '../Tool.js'
+import type { Tool } from '../Tool.js'
 import {
   type InProcessTeammateTaskState,
   isInProcessTeammateTask,
 } from '../tasks/InProcessTeammateTask/types.js'
 import { restoreRemoteAgentTasks } from '../tasks/RemoteAgentTask/RemoteAgentTask.js'
 import type { AgentColorName } from '../tools/AgentTool/agentColorManager.js'
-import { resolveAgentTools } from '../tools/AgentTool/agentToolUtils.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
 import { SLEEP_TOOL_NAME } from '../tools/SleepTool/prompt.js'
 import { WEB_FETCH_TOOL_NAME } from '../tools/WebFetchTool/prompt.js'
-import { assembleToolPool, getTools } from '../tools.js'
+import { getTools } from '../tools.js'
 import type { LogOption } from '../types/logs.js'
 import type {
   HookResultMessage,
@@ -252,7 +242,7 @@ import type {
 } from '../types/message.js'
 import type { AutoUpdaterResult } from '../utils/autoUpdater.js'
 import { hasConsoleBillingAccess } from '../utils/billing.js'
-import { type AttributionState, incrementPromptCount } from '../utils/commitAttribution.js'
+import { incrementPromptCount } from '../utils/commitAttribution.js'
 import {
   isBgSession,
   updateSessionActivity,
@@ -270,7 +260,6 @@ import {
   fileHistoryMakeSnapshot,
   fileHistoryRewind,
 } from '../utils/fileHistory.js'
-import { gracefulShutdownSync } from '../utils/gracefulShutdown.js'
 import { handlePromptSubmit, type PromptInputHelpers } from '../utils/handlePromptSubmit.js'
 import { executeSessionEndHooks, getSessionEndHookTimeoutMs } from '../utils/hooks.js'
 import {
@@ -289,7 +278,6 @@ import {
 } from '../utils/permissions/PermissionUpdate.js'
 import { stripDangerousPermissionsForAutoMode } from '../utils/permissions/permissionSetup.js'
 import { copyPlanForFork, copyPlanForResume, getPlanSlug, setPlanSlug } from '../utils/plans.js'
-import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js'
 import { getQuerySourceForREPL } from '../utils/promptCategory.js'
 import {
   computeStandaloneAgentContext,
@@ -311,7 +299,6 @@ import {
   saveWorktreeState,
 } from '../utils/sessionStorage.js'
 import type { ThinkingConfig } from '../utils/thinking.js'
-import { mergeAndFilterTools } from '../utils/toolPool.js'
 import {
   type ContentReplacementRecord,
   provisionContentReplacementState,
@@ -359,7 +346,6 @@ import {
   getCommandQueueLength,
   type SetAppState,
 } from '../utils/messageQueueManager.js'
-import type { NetworkHostPattern, SandboxAskCallback } from '../utils/sandbox/sandbox-adapter.js'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
 
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
@@ -376,7 +362,6 @@ const UndercoverAutoCallout =
     ? require('../components/UndercoverAutoCallout.js').UndercoverAutoCallout
     : null
 
-import { SANDBOX_NETWORK_ACCESS_TOOL_NAME } from 'src/cli/structuredIO.js'
 import { AUTO_MODE_DESCRIPTION } from 'src/components/AutoModeOptInDialog.js'
 import {
   DesktopUpsellStartup,
@@ -397,7 +382,6 @@ import {
   useKickOffCheckAndDisableBypassPermissionsIfNeeded,
 } from 'src/utils/permissions/bypassPermissionsKillswitch.js'
 import { performStartupChecks } from 'src/utils/plugins/performStartupChecks.js'
-import { SandboxManager } from 'src/utils/sandbox/sandbox-adapter.js'
 import { TungstenLiveMonitor } from '../tools/TungstenTool/TungstenLiveMonitor.js'
 import type { HookProgress } from '../types/hooks.js'
 import { createAbortController } from '../utils/abortController.js'
@@ -1153,398 +1137,54 @@ export function REPL({
       }
     }
   }, [messages, showCostDialog, haveShownCostDialog])
-  const sandboxAskCallback: SandboxAskCallback = useCallback(
-    async (hostPattern: NetworkHostPattern) => {
-      // If running as a swarm worker, forward the request to the leader via mailbox
-      if (isAgentSwarmsEnabled() && isSwarmWorker()) {
-        const requestId = generateSandboxRequestId()
-
-        // Send the request to the leader via mailbox
-        const sent = await sendSandboxPermissionRequestViaMailbox(hostPattern.host, requestId)
-        return new Promise((resolveShouldAllowHost) => {
-          if (!sent) {
-            // If we couldn't send via mailbox, fall back to local handling
-            setSandboxPermissionRequestQueue((prev) => [
-              ...prev,
-              {
-                hostPattern,
-                resolvePromise: resolveShouldAllowHost,
-              },
-            ])
-            return
-          }
-
-          // Register the callback for when the leader responds
-          registerSandboxPermissionCallback({
-            requestId,
-            host: hostPattern.host,
-            resolve: resolveShouldAllowHost,
-          })
-
-          // Update AppState to show pending indicator
-          setAppState((prev) => ({
-            ...prev,
-            pendingSandboxRequest: {
-              requestId,
-              host: hostPattern.host,
-            },
-          }))
-        })
-      }
-
-      // Normal flow for non-workers: show local UI and optionally race
-      // against the REPL bridge (Remote Control) if connected.
-      return new Promise((resolveShouldAllowHost) => {
-        let resolved = false
-        function resolveOnce(allow: boolean): void {
-          if (resolved) return
-          resolved = true
-          resolveShouldAllowHost(allow)
-        }
-
-        // Queue the local sandbox permission dialog
-        setSandboxPermissionRequestQueue((prev) => [
-          ...prev,
-          {
-            hostPattern,
-            resolvePromise: resolveOnce,
-          },
-        ])
-
-        // When the REPL bridge is connected, also forward the sandbox
-        // permission request as a can_use_tool control_request so the
-        // remote user (e.g. on claude.ai) can approve it too.
-        if (feature('BRIDGE_MODE')) {
-          const bridgeCallbacks = store.getState().replBridgePermissionCallbacks
-          if (bridgeCallbacks) {
-            const bridgeRequestId = randomUUID()
-            bridgeCallbacks.sendRequest(
-              bridgeRequestId,
-              SANDBOX_NETWORK_ACCESS_TOOL_NAME,
-              {
-                host: hostPattern.host,
-              },
-              randomUUID(),
-              `Allow network connection to ${hostPattern.host}?`,
-            )
-            const unsubscribe = bridgeCallbacks.onResponse(bridgeRequestId, (response) => {
-              unsubscribe()
-              const allow = response.behavior === 'allow'
-              // Resolve ALL pending requests for the same host, not just
-              // this one — mirrors the local dialog handler pattern.
-              setSandboxPermissionRequestQueue((queue) => {
-                queue
-                  .filter((item) => item.hostPattern.host === hostPattern.host)
-                  .forEach((item) => item.resolvePromise(allow))
-                return queue.filter((item) => item.hostPattern.host !== hostPattern.host)
-              })
-              // Clean up all sibling bridge subscriptions for this host
-              // (other concurrent same-host requests) before deleting.
-              const siblingCleanups = sandboxBridgeCleanupRef.current.get(hostPattern.host)
-              if (siblingCleanups) {
-                for (const fn of siblingCleanups) {
-                  fn()
-                }
-                sandboxBridgeCleanupRef.current.delete(hostPattern.host)
-              }
-            })
-
-            // Register cleanup so the local dialog handler can cancel
-            // the remote prompt and unsubscribe when the local user
-            // responds first.
-            const cleanup = () => {
-              unsubscribe()
-              bridgeCallbacks.cancelRequest(bridgeRequestId)
-            }
-            const existing = sandboxBridgeCleanupRef.current.get(hostPattern.host) ?? []
-            existing.push(cleanup)
-            sandboxBridgeCleanupRef.current.set(hostPattern.host, existing)
-          }
-        }
-      })
-    },
-    [setAppState, store],
-  )
-
-  // #34044: if user explicitly set sandbox.enabled=true but deps are missing,
-  // isSandboxingEnabled() returns false silently. Surface the reason once at
-  // mount so users know their security config isn't being enforced. Full
-  // reason goes to debug log; notification points to /sandbox for details.
-  // addNotification is stable (useCallback) so the effect fires once.
-  useEffect(() => {
-    const reason = SandboxManager.getSandboxUnavailableReason()
-    if (!reason) return
-    if (SandboxManager.isSandboxRequired()) {
-      process.stderr.write(
-        `\nError: sandbox required but unavailable: ${reason}\n` +
-          `  sandbox.failIfUnavailable is set — refusing to start without a working sandbox.\n\n`,
-      )
-      gracefulShutdownSync(1, 'other')
-      return
-    }
-    logForDebugging(`sandbox disabled: ${reason}`, {
-      level: 'warn',
-    })
-    addNotification({
-      key: 'sandbox-unavailable',
-      jsx: (
-        <>
-          <Text color="warning">sandbox disabled</Text>
-          <Text dimColor> · /sandbox</Text>
-        </>
-      ),
-      priority: 'medium',
-    })
-  }, [addNotification])
-  if (SandboxManager.isSandboxingEnabled()) {
-    // If sandboxing is enabled (setting.sandbox is defined, initialise the manager)
-    SandboxManager.initialize(sandboxAskCallback).catch((err) => {
-      // Initialization/validation failed - display error and exit
-      process.stderr.write(`\n❌ Sandbox Error: ${errorMessage(err)}\n`)
-      gracefulShutdownSync(1, 'other')
-    })
-  }
-  const setToolPermissionContext = useCallback(
-    (
-      context: ToolPermissionContext,
-      options?: {
-        preserveMode?: boolean
-      },
-    ) => {
-      setAppState((prev) => ({
-        ...prev,
-        toolPermissionContext: {
-          ...context,
-          // Preserve the coordinator's mode only when explicitly requested.
-          // Workers' getAppState() returns a transformed context with mode
-          // 'acceptEdits' that must not leak into the coordinator's actual
-          // state via permission-rule updates — those call sites pass
-          // { preserveMode: true }. User-initiated mode changes (e.g.,
-          // selecting "allow all edits") must NOT be overridden.
-          mode: options?.preserveMode ? prev.toolPermissionContext.mode : context.mode,
-        },
-      }))
-
-      // When permission context changes, recheck all queued items
-      // This handles the case where approving item1 with "don't ask again"
-      // should auto-approve other queued items that now match the updated rules
-      setImmediate((setToolUseConfirmQueue) => {
-        // Use setToolUseConfirmQueue callback to get current queue state
-        // instead of capturing it in the closure, to avoid stale closure issues
-        setToolUseConfirmQueue((currentQueue) => {
-          currentQueue.forEach((item) => {
-            void item.recheckPermission()
-          })
-          return currentQueue
-        })
-      }, setToolUseConfirmQueue)
-    },
-    [setAppState, setToolUseConfirmQueue],
-  )
-
-  // Register the leader's setToolPermissionContext for in-process teammates
-  useEffect(() => {
-    registerLeaderSetToolPermissionContext(setToolPermissionContext)
-    return () => unregisterLeaderSetToolPermissionContext()
-  }, [setToolPermissionContext])
-  const canUseTool = useCanUseTool(setToolUseConfirmQueue, setToolPermissionContext)
-  const requestPrompt = useCallback(
-    (title: string, toolInputSummary?: string | null) =>
-      (request: PromptRequest): Promise<PromptResponse> =>
-        new Promise<PromptResponse>((resolve, reject) => {
-          setPromptQueue((prev) => [
-            ...prev,
-            {
-              request,
-              title,
-              toolInputSummary,
-              resolve,
-              reject,
-            },
-          ])
-        }),
-    [],
-  )
-  const getToolUseContext = useCallback(
-    (
-      messages: MessageType[],
-      newMessages: MessageType[],
-      abortController: AbortController,
-      mainLoopModel: string,
-    ): ProcessUserInputContext => {
-      // Read mutable values fresh from the store rather than closure-capturing
-      // useAppState() snapshots. Same values today (closure is refreshed by the
-      // render between turns); decouples freshness from React's render cycle for
-      // a future headless conversation loop. Same pattern refreshTools() uses.
-      const s = store.getState()
-
-      // Compute tools fresh from store.getState() rather than the closure-
-      // captured `tools`. useManageMCPConnections populates appState.mcp
-      // async as servers connect — the store may have newer MCP state than
-      // the closure captured at render time. Also doubles as refreshTools()
-      // for mid-query tool list updates.
-      const computeTools = () => {
-        const state = store.getState()
-        const assembled = assembleToolPool(state.toolPermissionContext, state.mcp.tools)
-        const merged = mergeAndFilterTools(
-          combinedInitialTools,
-          assembled,
-          state.toolPermissionContext.mode,
-        )
-        if (!mainThreadAgentDefinition) return merged
-        return resolveAgentTools(mainThreadAgentDefinition, merged, false, true).resolvedTools
-      }
-      return {
-        abortController,
-        options: {
-          commands,
-          tools: computeTools(),
-          debug,
-          verbose: s.verbose,
-          mainLoopModel,
-          thinkingConfig:
-            s.thinkingEnabled !== false
-              ? thinkingConfig
-              : {
-                  type: 'disabled',
-                },
-          // Merge fresh from store rather than closing over useMergedClients'
-          // memoized output. initialMcpClients is a prop (session-constant).
-          mcpClients: mergeClients(initialMcpClients, s.mcp.clients),
-          mcpResources: s.mcp.resources,
-          ideInstallationStatus: ideInstallationStatus,
-          isNonInteractiveSession: false,
-          dynamicMcpConfig,
-          theme,
-          agentDefinitions: allowedAgentTypes
-            ? {
-                ...s.agentDefinitions,
-                allowedAgentTypes,
-              }
-            : s.agentDefinitions,
-          customSystemPrompt,
-          appendSystemPrompt,
-          refreshTools: computeTools,
-        },
-        getAppState: () => store.getState(),
-        setAppState,
-        messages,
-        setMessages,
-        updateFileHistoryState(updater: (prev: FileHistoryState) => FileHistoryState) {
-          // Perf: skip the setState when the updater returns the same reference
-          // (e.g. fileHistoryTrackEdit returns `state` when the file is already
-          // tracked). Otherwise every no-op call would notify all store listeners.
-          setAppState((prev) => {
-            const updated = updater(prev.fileHistory)
-            if (updated === prev.fileHistory) return prev
-            return {
-              ...prev,
-              fileHistory: updated,
-            }
-          })
-        },
-        updateAttributionState(updater: (prev: AttributionState) => AttributionState) {
-          setAppState((prev) => {
-            const updated = updater(prev.attribution)
-            if (updated === prev.attribution) return prev
-            return {
-              ...prev,
-              attribution: updated,
-            }
-          })
-        },
-        openMessageSelector: () => {
-          if (!disabled) {
-            setIsMessageSelectorVisible(true)
-          }
-        },
-        onChangeAPIKey: reverify,
-        readFileState: readFileState.current,
-        setToolJSX,
-        addNotification,
-        appendSystemMessage: (msg) => setMessages((prev) => [...prev, msg]),
-        sendOSNotification: (opts) => {
-          void sendNotification(opts, terminal)
-        },
-        onChangeDynamicMcpConfig,
-        onInstallIDEExtension: setIDEToInstallExtension,
-        nestedMemoryAttachmentTriggers: new Set<string>(),
-        loadedNestedMemoryPaths: loadedNestedMemoryPathsRef.current,
-        dynamicSkillDirTriggers: new Set<string>(),
-        discoveredSkillNames: discoveredSkillNamesRef.current,
-        setResponseLength,
-        pushApiMetricsEntry:
-          'external' === 'ant'
-            ? (ttftMs: number) => {
-                const now = Date.now()
-                const baseline = responseLengthRef.current
-                apiMetricsRef.current.push({
-                  ttftMs,
-                  firstTokenTime: now,
-                  lastTokenTime: now,
-                  responseLengthBaseline: baseline,
-                  endResponseLength: baseline,
-                })
-              }
-            : undefined,
-        setStreamMode,
-        onCompactProgress: (event) => {
-          switch (event.type) {
-            case 'hooks_start':
-              setSpinnerColor('claudeBlue_FOR_SYSTEM_SPINNER')
-              setSpinnerShimmerColor('claudeBlueShimmer_FOR_SYSTEM_SPINNER')
-              setSpinnerMessage(
-                event.hookType === 'pre_compact'
-                  ? 'Running PreCompact hooks\u2026'
-                  : event.hookType === 'post_compact'
-                    ? 'Running PostCompact hooks\u2026'
-                    : 'Running SessionStart hooks\u2026',
-              )
-              break
-            case 'compact_start':
-              setSpinnerMessage('Compacting conversation')
-              break
-            case 'compact_end':
-              setSpinnerMessage(null)
-              setSpinnerColor(null)
-              setSpinnerShimmerColor(null)
-              break
-          }
-        },
-        setInProgressToolUseIDs,
-        setHasInterruptibleToolInProgress: (v: boolean) => {
-          hasInterruptibleToolInProgressRef.current = v
-        },
-        resume,
-        setConversationId,
-        requestPrompt: feature('HOOK_PROMPTS') ? requestPrompt : undefined,
-        contentReplacementState: contentReplacementStateRef.current,
-      }
-    },
-    [
-      commands,
-      combinedInitialTools,
-      mainThreadAgentDefinition,
-      debug,
-      initialMcpClients,
-      ideInstallationStatus,
-      dynamicMcpConfig,
-      theme,
-      allowedAgentTypes,
-      store,
-      setAppState,
-      reverify,
-      addNotification,
-      setMessages,
-      onChangeDynamicMcpConfig,
-      resume,
-      requestPrompt,
-      disabled,
-      customSystemPrompt,
-      appendSystemPrompt,
-      setConversationId,
-    ],
-  )
+  // Sandbox permission requests, tool-permission context, canUseTool gate,
+  // interactive prompt requester, and the getToolUseContext factory
+  // extracted to REPL.hooks.tool-context.tsx (useREPLToolContext).
+  const { setToolPermissionContext, canUseTool, getToolUseContext } = useREPLToolContext({
+    setAppState,
+    store,
+    setSandboxPermissionRequestQueue,
+    sandboxBridgeCleanupRef,
+    setToolUseConfirmQueue,
+    setPromptQueue,
+    addNotification,
+    commands,
+    combinedInitialTools,
+    mainThreadAgentDefinition,
+    debug,
+    initialMcpClients,
+    ideInstallationStatus,
+    dynamicMcpConfig,
+    theme,
+    allowedAgentTypes,
+    customSystemPrompt,
+    appendSystemPrompt,
+    thinkingConfig,
+    messages,
+    setMessages,
+    disabled,
+    setIsMessageSelectorVisible,
+    reverify,
+    readFileState,
+    setToolJSX,
+    terminal,
+    onChangeDynamicMcpConfig,
+    setIDEToInstallExtension,
+    loadedNestedMemoryPathsRef,
+    discoveredSkillNamesRef,
+    setResponseLength,
+    responseLengthRef,
+    apiMetricsRef,
+    setStreamMode,
+    setSpinnerColor,
+    setSpinnerShimmerColor,
+    setSpinnerMessage,
+    setInProgressToolUseIDs,
+    hasInterruptibleToolInProgressRef,
+    resume,
+    setConversationId,
+    contentReplacementStateRef,
+  })
 
   // Session backgrounding (Ctrl+B to background/foreground)
   const handleBackgroundQuery = useCallback(() => {
