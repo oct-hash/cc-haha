@@ -13,6 +13,11 @@ import { useREPLEffects } from "./REPL.hooks.effects.js"
 import { useREPLInputQueue } from "./REPL.hooks.input-queue.js"
 import { useREPLRenderPrep } from "./REPL.hooks.render-prep.js"
 import { useREPLInteraction } from "./REPL.hooks.interaction.js"
+import {
+  useREPLInitialMessage,
+  useREPLSurveys,
+  useREPLTeammateHints,
+} from "./REPL.hooks.misc.js"
 import { feature } from 'bun:bundle'
 import * as React from 'react'
 import {
@@ -99,18 +104,7 @@ import { setMemberActive } from '../utils/swarm/teamHelpers.js'
 import { getAgentName, getTeamName } from '../utils/teammate.js'
 import { parseTokenBudget } from '../utils/tokenBudget.js'
 
-// Dead code elimination: conditional imports
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
-// Frustration detection is ant-only (dogfooding). Conditional require so external
-// builds eliminate the module entirely (including its two O(n) useMemos that run
-// on every messages change, plus the GrowthBook fetch).
-const useFrustrationDetection: typeof import('../components/FeedbackSurvey/useFrustrationDetection.js').useFrustrationDetection =
-  'external' === 'ant'
-    ? require('../components/FeedbackSurvey/useFrustrationDetection.js').useFrustrationDetection
-    : () => ({
-        state: 'closed',
-        handleTranscriptSelect: () => {},
-      })
 // Dead code elimination: conditional import for coordinator mode
 const getCoordinatorUserContext: (
   mcpClients: ReadonlyArray<{
@@ -693,101 +687,18 @@ export function REPL({
 
   // Session backgrounding — hook is below, after getToolUseContext
 
-  const hasRunningTeammates = useMemo(
-    () => getAllInProcessTeammateTasks(tasks).some((t) => t.status === 'running'),
-    [tasks],
-  )
-
-  // Show deferred turn duration message once all swarm teammates finish
-  useEffect(() => {
-    if (!hasRunningTeammates && swarmStartTimeRef.current !== null) {
-      const totalMs = Date.now() - swarmStartTimeRef.current
-      const deferredBudget = swarmBudgetInfoRef.current
-      swarmStartTimeRef.current = null
-      swarmBudgetInfoRef.current = undefined
-      setMessages((prev) => [
-        ...prev,
-        createTurnDurationMessage(
-          totalMs,
-          deferredBudget,
-          // Count only what recordTranscript will persist — ephemeral
-          // progress ticks and non-ant attachments are filtered by
-          // isLoggableMessage and never reach disk. Using raw prev.length
-          // would make checkResumeConsistency report false delta<0 for
-          // every turn that ran a progress-emitting tool.
-          count(prev, isLoggableMessage),
-        ),
-      ])
-    }
-  }, [hasRunningTeammates, setMessages])
-
-  // Show auto permissions warning when entering auto mode
-  // (either via Shift+Tab toggle or on startup). Debounced to avoid
-  // flashing when the user is cycling through modes quickly.
-  // Only shown 3 times total across sessions.
-  const safeYoloMessageShownRef = useRef(false)
-  useEffect(() => {
-    if (feature('TRANSCRIPT_CLASSIFIER')) {
-      if (toolPermissionContext.mode !== 'auto') {
-        safeYoloMessageShownRef.current = false
-        return
-      }
-      if (safeYoloMessageShownRef.current) return
-      const config = getGlobalConfig()
-      const count = config.autoPermissionsNotificationCount ?? 0
-      if (count >= 3) return
-      const timer = setTimeout(
-        (ref, setMessages) => {
-          ref.current = true
-          saveGlobalConfig((prev) => {
-            const prevCount = prev.autoPermissionsNotificationCount ?? 0
-            if (prevCount >= 3) return prev
-            return {
-              ...prev,
-              autoPermissionsNotificationCount: prevCount + 1,
-            }
-          })
-          setMessages((prev) => [...prev, createSystemMessage(AUTO_MODE_DESCRIPTION, 'warning')])
-        },
-        800,
-        safeYoloMessageShownRef,
-        setMessages,
-      )
-      return () => clearTimeout(timer)
-    }
-  }, [toolPermissionContext.mode, setMessages])
-
-  // If worktree creation was slow and sparse-checkout isn't configured,
-  // nudge the user toward settings.worktree.sparsePaths.
-  const worktreeTipShownRef = useRef(false)
-  useEffect(() => {
-    if (worktreeTipShownRef.current) return
-    const wt = getCurrentWorktreeSession()
-    if (!wt?.creationDurationMs || wt.usedSparsePaths) return
-    if (wt.creationDurationMs < 15_000) return
-    worktreeTipShownRef.current = true
-    const secs = Math.round(wt.creationDurationMs / 1000)
-    setMessages((prev) => [
-      ...prev,
-      createSystemMessage(
-        `Worktree creation took ${secs}s. For large repos, set \`worktree.sparsePaths\` in .claude/settings.json to check out only the directories you need — e.g. \`{"worktree": {"sparsePaths": ["src", "packages/foo"]}}\`.`,
-        'info',
-      ),
-    ])
-  }, [setMessages])
-
-  // Hide spinner when the only in-progress tool is Sleep
-  const onlySleepToolActive = useMemo(() => {
-    const lastAssistant = messages.findLast((m) => m.type === 'assistant')
-    if (lastAssistant?.type !== 'assistant') return false
-    const inProgressToolUses = lastAssistant.message.content.filter(
-      (b) => b.type === 'tool_use' && inProgressToolUseIDs.has(b.id),
-    )
-    return (
-      inProgressToolUses.length > 0 &&
-      inProgressToolUses.every((b) => b.type === 'tool_use' && b.name === SLEEP_TOOL_NAME)
-    )
-  }, [messages, inProgressToolUseIDs])
+  // Teammate turn-duration message, auto-permissions warning, worktree
+  // sparse-checkout tip, and sleep-only spinner rule extracted to
+  // REPL.hooks.misc.tsx (useREPLTeammateHints).
+  const { hasRunningTeammates, onlySleepToolActive } = useREPLTeammateHints({
+    tasks,
+    swarmStartTimeRef,
+    swarmBudgetInfoRef,
+    setMessages,
+    toolPermissionContext,
+    messages,
+    inProgressToolUseIDs,
+  })
   const {
     onBeforeQuery: mrOnBeforeQuery,
     onTurnComplete: mrOnTurnComplete,
@@ -820,81 +731,6 @@ export function REPL({
     // but keep it when isBriefOnly suppresses the streaming text display
     (!visibleStreamingText || isBriefOnly)
 
-  // Check if any permission or ask question prompt is currently visible
-  // This is used to prevent the survey from opening while prompts are active
-  const hasActivePrompt =
-    toolUseConfirmQueue.length > 0 ||
-    promptQueue.length > 0 ||
-    sandboxPermissionRequestQueue.length > 0 ||
-    elicitation.queue.length > 0 ||
-    workerSandboxPermissions.queue.length > 0
-  const feedbackSurveyOriginal = useFeedbackSurvey(
-    messages,
-    isLoading,
-    submitCount,
-    'session',
-    hasActivePrompt,
-  )
-  const skillImprovementSurvey = useSkillImprovementSurvey(setMessages)
-  const showIssueFlagBanner = useIssueFlagBanner(messages, submitCount)
-
-  // Wrap feedback survey handler to trigger auto-run /issue
-  const feedbackSurvey = useMemo(
-    () => ({
-      ...feedbackSurveyOriginal,
-      handleSelect: (selected: 'dismissed' | 'bad' | 'fine' | 'good') => {
-        // Reset the ref when a new survey response comes in
-        didAutoRunIssueRef.current = false
-        const showedTranscriptPrompt = feedbackSurveyOriginal.handleSelect(selected)
-        // Auto-run /issue for "bad" if transcript prompt wasn't shown
-        if (
-          selected === 'bad' &&
-          !showedTranscriptPrompt &&
-          shouldAutoRunIssue('feedback_survey_bad')
-        ) {
-          setAutoRunIssueReason('feedback_survey_bad')
-          didAutoRunIssueRef.current = true
-        }
-      },
-    }),
-    [feedbackSurveyOriginal],
-  )
-
-  // Post-compact survey: shown after compaction if feature gate is enabled
-  const postCompactSurvey = usePostCompactSurvey(messages, isLoading, hasActivePrompt, {
-    enabled: !isRemoteSession,
-  })
-
-  // Memory survey: shown when the assistant mentions memory and a memory file
-  // was read this conversation
-  const memorySurvey = useMemorySurvey(messages, isLoading, hasActivePrompt, {
-    enabled: !isRemoteSession,
-  })
-
-  // Frustration detection: show transcript sharing prompt after detecting frustrated messages
-  const frustrationDetection = useFrustrationDetection(
-    messages,
-    isLoading,
-    hasActivePrompt,
-    feedbackSurvey.state !== 'closed' ||
-      postCompactSurvey.state !== 'closed' ||
-      memorySurvey.state !== 'closed',
-  )
-
-  // Initialize IDE integration
-  useIDEIntegration({
-    autoConnectIdeFlag,
-    ideToInstallExtension,
-    setDynamicMcpConfig,
-    setShowIdeOnboarding,
-    setIDEInstallationState: setIDEInstallationStatus,
-  })
-  useFileHistorySnapshotInit(initialFileHistorySnapshots, fileHistory, (fileHistoryState) =>
-    setAppState((prev) => ({
-      ...prev,
-      fileHistory: fileHistoryState,
-    })),
-  )
   // Session resume flow extracted to REPL.hooks.resume.tsx (useREPLResume).
   // The read-file-state / bash-tool caches it consumes are created inline
   // above (shared with useREPLIdleReset).
@@ -924,12 +760,39 @@ export function REPL({
   })
   const { status: apiKeyStatus, reverify } = useApiKeyVerification()
 
-  // Auto-run /issue state
-  const [autoRunIssueReason, setAutoRunIssueReason] = useState<AutoRunIssueReason | null>(null)
-  // Ref to track if autoRunIssue was triggered this survey cycle,
-  // so we can suppress the [1] follow-up prompt even after
-  // autoRunIssueReason is cleared.
-  const didAutoRunIssueRef = useRef(false)
+  // Surveys (feedback, skill-improvement, issue flag, post-compact, memory,
+  // frustration), IDE integration init, file-history snapshot init, and the
+  // auto-run /issue state extracted to REPL.hooks.misc.tsx (useREPLSurveys).
+  const {
+    feedbackSurvey,
+    skillImprovementSurvey,
+    showIssueFlagBanner,
+    postCompactSurvey,
+    memorySurvey,
+    frustrationDetection,
+    autoRunIssueReason,
+    setAutoRunIssueReason,
+    didAutoRunIssueRef,
+  } = useREPLSurveys({
+    toolUseConfirmQueue,
+    promptQueue,
+    sandboxPermissionRequestQueue,
+    elicitation,
+    workerSandboxPermissions,
+    messages,
+    isLoading,
+    submitCount,
+    setMessages,
+    isRemoteSession,
+    autoConnectIdeFlag,
+    ideToInstallExtension,
+    setDynamicMcpConfig,
+    setShowIdeOnboarding,
+    setIDEInstallationStatus,
+    initialFileHistorySnapshots,
+    fileHistory,
+    setAppState,
+  })
 
   // Dialog focus resolution, the Escape/cancel handler, and cancel-request
   // props extracted to REPL.hooks.dialogs.tsx (useREPLDialogs)
@@ -1113,134 +976,6 @@ export function REPL({
     proactiveActive,
   })
 
-  // Handle initial message (from CLI args or plan mode exit with context clear)
-  // This effect runs when isLoading becomes false and there's a pending message
-  const initialMessageRef = useRef(false)
-  useEffect(() => {
-    const pending = initialMessage
-    if (!pending || isLoading || initialMessageRef.current) return
-
-    // Mark as processing to prevent re-entry
-    initialMessageRef.current = true
-    async function processInitialMessage(initialMsg: NonNullable<typeof pending>) {
-      // Clear context if requested (plan mode exit)
-      if (initialMsg.clearContext) {
-        // Preserve the plan slug before clearing context, so the new session
-        // can access the same plan file after regenerateSessionId()
-        const oldPlanSlug = initialMsg.message.planContent ? getPlanSlug() : undefined
-        const { clearConversation } = await import('../commands/clear/conversation.js')
-        await clearConversation({
-          setMessages,
-          readFileState: readFileState.current,
-          discoveredSkillNames: discoveredSkillNamesRef.current,
-          loadedNestedMemoryPaths: loadedNestedMemoryPathsRef.current,
-          getAppState: () => store.getState(),
-          setAppState,
-          setConversationId,
-        })
-        haikuTitleAttemptedRef.current = false
-        setHaikuTitle(undefined)
-        bashTools.current.clear()
-        bashToolsProcessedIdx.current = 0
-
-        // Restore the plan slug for the new session so getPlan() finds the file
-        if (oldPlanSlug) {
-          setPlanSlug(getSessionId(), oldPlanSlug)
-        }
-      }
-
-      // Atomically: clear initial message, set permission mode and rules, and store plan for verification
-      const shouldStorePlanForVerification =
-        initialMsg.message.planContent && 'external' === 'ant' && isEnvTruthy(undefined)
-      setAppState((prev) => {
-        // Build and apply permission updates (mode + allowedPrompts rules)
-        let updatedToolPermissionContext = initialMsg.mode
-          ? applyPermissionUpdates(
-              prev.toolPermissionContext,
-              buildPermissionUpdates(initialMsg.mode, initialMsg.allowedPrompts),
-            )
-          : prev.toolPermissionContext
-        // For auto, override the mode (buildPermissionUpdates maps
-        // it to 'default' via toExternalPermissionMode) and strip dangerous rules
-        if (feature('TRANSCRIPT_CLASSIFIER') && initialMsg.mode === 'auto') {
-          updatedToolPermissionContext = stripDangerousPermissionsForAutoMode({
-            ...updatedToolPermissionContext,
-            mode: 'auto',
-            prePlanMode: undefined,
-          })
-        }
-        return {
-          ...prev,
-          initialMessage: null,
-          toolPermissionContext: updatedToolPermissionContext,
-          ...(shouldStorePlanForVerification && {
-            pendingPlanVerification: {
-              plan: initialMsg.message.planContent!,
-              verificationStarted: false,
-              verificationCompleted: false,
-            },
-          }),
-        }
-      })
-
-      // Create file history snapshot for code rewind
-      if (fileHistoryEnabled()) {
-        void fileHistoryMakeSnapshot((updater: (prev: FileHistoryState) => FileHistoryState) => {
-          setAppState((prev) => ({
-            ...prev,
-            fileHistory: updater(prev.fileHistory),
-          }))
-        }, initialMsg.message.uuid)
-      }
-
-      // Ensure SessionStart hook context is available before the first API
-      // call. onSubmit calls this internally but the onQuery path below
-      // bypasses onSubmit — hoist here so both paths see hook messages.
-      await awaitPendingHooks()
-
-      // Route all initial prompts through onSubmit to ensure UserPromptSubmit hooks fire
-      // TODO: Simplify by always routing through onSubmit once it supports
-      // ContentBlockParam arrays (images) as input
-      const content = initialMsg.message.message.content
-
-      // Route all string content through onSubmit to ensure hooks fire
-      // For complex content (images, etc.), fall back to direct onQuery
-      // Plan messages bypass onSubmit to preserve planContent metadata for rendering
-      if (typeof content === 'string' && !initialMsg.message.planContent) {
-        // Route through onSubmit for proper processing including UserPromptSubmit hooks
-        void onSubmit(content, {
-          setCursorOffset: () => {},
-          clearBuffer: () => {},
-          resetHistory: () => {},
-        })
-      } else {
-        // Plan messages or complex content (images, etc.) - send directly to model
-        // Plan messages use onQuery to preserve planContent metadata for rendering
-        // TODO: Once onSubmit supports ContentBlockParam arrays, remove this branch
-        const newAbortController = createAbortController()
-        setAbortController(newAbortController)
-        void onQuery(
-          [initialMsg.message],
-          newAbortController,
-          true,
-          // shouldQuery
-          [],
-          // additionalAllowedTools
-          mainLoopModel,
-        )
-      }
-
-      // Reset ref after a delay to allow new initial messages
-      setTimeout(
-        (ref) => {
-          ref.current = false
-        },
-        100,
-        initialMessageRef,
-      )
-    }
-    void processInitialMessage(pending)
-  }, [initialMessage, isLoading, setMessages, setAppState, onQuery, mainLoopModel, tools])
   // Input queue execution, incoming-prompt handling, and the onSubmit submit
   // pipeline extracted to REPL.hooks.input-queue.tsx (useREPLInputQueue).
   const { executeQueuedInput, handleIncomingPrompt, onSubmit } = useREPLInputQueue({
@@ -1289,6 +1024,31 @@ export function REPL({
     canUseTool,
     getToolUseContext,
     onQuery,
+  })
+
+  // Pending initial-message handling (CLI args / plan-mode exit) extracted to
+  // REPL.hooks.misc.tsx (useREPLInitialMessage). Called after useREPLInputQueue
+  // so onSubmit is available; the effect itself only runs post-render.
+  useREPLInitialMessage({
+    initialMessage,
+    isLoading,
+    setMessages,
+    setAppState,
+    onQuery,
+    mainLoopModel,
+    tools,
+    readFileState,
+    discoveredSkillNamesRef,
+    loadedNestedMemoryPathsRef,
+    setConversationId,
+    haikuTitleAttemptedRef,
+    setHaikuTitle,
+    bashTools,
+    bashToolsProcessedIdx,
+    store,
+    awaitPendingHooks,
+    onSubmit,
+    setAbortController,
   })
 
   // Agent submit, auto-run/exit/restore handlers, message actions, and the
