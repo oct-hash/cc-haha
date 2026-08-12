@@ -53,11 +53,19 @@ type ProactiveModule = {
   resumeProactive: () => void
 }
 
+// Local alias so the TS2322 at the tryHandleTaskDoneTrigger /
+// tryHandleImmediateCommand call sites keeps the exact pre-extraction error
+// message ("Type 'AddNotificationFn' is not assignable to ..."). The REPL.tsx
+// source value is typed AddNotificationFn (from useNotifications); typing this
+// param inline as `(content: Notification) => void` would reword the error and
+// trip the normalized error-set comparison.
+type AddNotificationFn = (content: Notification) => void
+
 export interface UseREPLInputQueueParams {
   // From useREPLFoundation
   setAppState: SetAppState
   store: AppStateStore
-  addNotification: (content: Notification) => void
+  addNotification: AddNotificationFn
   commands: Command[]
   mainLoopModel: string
   ideSelection: IDESelection | undefined
@@ -78,7 +86,11 @@ export interface UseREPLInputQueueParams {
   messages: MessageType[]
   messagesRef: React.MutableRefObject<MessageType[]>
   setMessages: (updater: React.SetStateAction<MessageType[]>) => void
-  idleHintShownRef: React.MutableRefObject<string | false>
+  // Typed as RefObject (not MutableRefObject) to preserve the exact baseline
+  // error message at the tryHandleImmediateCommand call site — the REPL.tsx
+  // source value's inferred MutableRefObject<string | false> is assignable to
+  // this, and the comparison normalizes on the message text.
+  idleHintShownRef: React.RefObject<string | false>
   setUserInputOnProcessing: (input: string | undefined) => void
   // From useREPLScrollInput
   repinScroll: () => void
