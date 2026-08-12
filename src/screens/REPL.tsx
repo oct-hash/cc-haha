@@ -9,6 +9,7 @@ import { useREPLDialogs } from "./REPL.hooks.dialogs.js"
 import { useREPLToolContext } from "./REPL.hooks.tool-context.js"
 import { useREPLQueryCallbacks } from "./REPL.hooks.query-callbacks.js"
 import { useREPLAgentHandlers } from "./REPL.hooks.agent-handlers.js"
+import { useREPLInputQueue } from "./REPL.hooks.input-queue.js"
 import { feature } from 'bun:bundle'
 import { writeFile } from 'fs/promises'
 import { tmpdir } from 'os'
@@ -28,7 +29,6 @@ import {
   getBudgetContinuationCount,
   getCurrentTurnTokenBudget,
   getLastInteractionTime,
-  getOriginalCwd,
   getProjectRoot,
   getSessionId,
   getTotalInputTokens,
@@ -100,7 +100,7 @@ import type { SSHSession } from '../ssh/createSSHSession.js'
 import { getAllInProcessTeammateTasks } from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
 import { isLocalAgentTask } from '../tasks/LocalAgentTask/LocalAgentTask.js'
 import { asAgentId, asSessionId } from '../types/ids.js'
-import type { PromptInputMode, QueuedCommand, VimMode } from '../types/textInputTypes.js'
+import type { PromptInputMode, VimMode } from '../types/textInputTypes.js'
 import { count } from '../utils/array.js'
 import { startBackgroundHousekeeping } from '../utils/backgroundHousekeeping.js'
 import { getMemoryFiles } from '../utils/claudemd.js'
@@ -125,16 +125,6 @@ import { sendSandboxPermissionResponseViaMailbox } from '../utils/swarm/permissi
 import { setMemberActive } from '../utils/swarm/teamHelpers.js'
 import { getAgentName, getTeamName } from '../utils/teammate.js'
 import { parseTokenBudget } from '../utils/tokenBudget.js'
-import {
-  applySubmitStateReset,
-  handleRemoteSubmit,
-  resolveStashAfterSubmit,
-  resolveStashBeforeSubmit,
-  tryAddToHistory,
-  tryHandleIdleReturnCheck,
-  tryHandleImmediateCommand,
-  tryHandleTaskDoneTrigger,
-} from './REPL.handlers.js'
 import type {
   MainRenderProps,
   ToolJSXValue,
@@ -224,7 +214,6 @@ import type {
 } from '../types/message.js'
 import type { AutoUpdaterResult } from '../utils/autoUpdater.js'
 import { hasConsoleBillingAccess } from '../utils/billing.js'
-import { incrementPromptCount } from '../utils/commitAttribution.js'
 import {
   updateSessionActivity,
   updateSessionName,
@@ -241,12 +230,10 @@ import {
   fileHistoryMakeSnapshot,
   fileHistoryRewind,
 } from '../utils/fileHistory.js'
-import { handlePromptSubmit, type PromptInputHelpers } from '../utils/handlePromptSubmit.js'
 import { executeSessionEndHooks, getSessionEndHookTimeoutMs } from '../utils/hooks.js'
 import {
   createSystemMessage,
   createTurnDurationMessage,
-  createUserMessage,
   getContentText,
   type StreamingThinking,
   type StreamingToolUse,
@@ -258,7 +245,6 @@ import {
 } from '../utils/permissions/PermissionUpdate.js'
 import { stripDangerousPermissionsForAutoMode } from '../utils/permissions/permissionSetup.js'
 import { copyPlanForFork, copyPlanForResume, getPlanSlug, setPlanSlug } from '../utils/plans.js'
-import { getQuerySourceForREPL } from '../utils/promptCategory.js'
 import {
   computeStandaloneAgentContext,
   exitRestoredWorktree,
@@ -273,7 +259,6 @@ import {
   getAgentTranscript,
   getCurrentSessionTitle,
   isLoggableMessage,
-  recordAttributionSnapshot,
   resetSessionFilePointer,
   restoreSessionMetadata,
   saveWorktreeState,
@@ -310,20 +295,11 @@ import { useCommandQueue } from '../hooks/useCommandQueue.js'
 import { useIDEIntegration } from '../hooks/useIDEIntegration.js'
 import { useTaskListWatcher } from '../hooks/useTaskListWatcher.js'
 import { diagnosticTracker } from '../services/diagnosticTracking.js'
-import {
-  type ActiveSpeculationState,
-  handleSpeculationAccept,
-} from '../services/PromptSuggestion/speculation.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { isAgentSwarmsEnabled } from '../utils/agentSwarmsEnabled.js'
 import type { EffortValue } from '../utils/effort.js'
 import type { IDEExtensionInstallationStatus, IdeType } from '../utils/ide.js'
-import {
-  enqueue,
-  getCommandQueue,
-  getCommandQueueLength,
-  type SetAppState,
-} from '../utils/messageQueueManager.js'
+import { enqueue, getCommandQueueLength } from '../utils/messageQueueManager.js'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
 
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
@@ -1340,265 +1316,55 @@ export function REPL({
     }
     void processInitialMessage(pending)
   }, [initialMessage, isLoading, setMessages, setAppState, onQuery, mainLoopModel, tools])
-  const onSubmit = useCallback(
-    async (
-      input: string,
-      helpers: PromptInputHelpers,
-      speculationAccept?: {
-        state: ActiveSpeculationState
-        speculationSessionTimeSavedMs: number
-        setAppState: SetAppState
-      },
-      options?: {
-        fromKeybinding?: boolean
-      },
-    ) => {
-      // Re-pin scroll to bottom on submit so the user always sees the new
-      // exchange (matches OpenCode's auto-scroll behavior).
-      repinScroll()
-
-      // Resume loop mode if paused
-      if (feature('PROACTIVE') || feature('KAIROS')) {
-        proactiveModule?.resumeProactive()
-      }
-
-      // Task-done trigger: check for "任务完成", "done", etc.
-      // Imported dynamically to avoid circular deps and enable tree-shaking.
-      if (
-        await tryHandleTaskDoneTrigger({
-          input,
-          pastedContents,
-          speculationAccept,
-          messagesRef,
-          addNotification,
-          setInputValue,
-          helpers,
-        })
-      ) {
-        return
-      }
-
-      // Handle immediate commands - these bypass the queue and execute right away
-      // even while Claude is processing. Commands opt-in via `immediate: true`.
-      // Commands triggered via keybindings are always treated as immediate.
-      if (!speculationAccept && input.trim().startsWith('/')) {
-        if (
-          await tryHandleImmediateCommand({
-            input,
-            helpers,
-            commands,
-            queryGuard,
-            pastedContents,
-            inputValueRef,
-            stashedPrompt,
-            messagesRef,
-            mainLoopModel,
-            setInputValue,
-            setPastedContents,
-            setStashedPrompt,
-            setToolJSX,
-            setMessages,
-            addNotification,
-            getToolUseContext,
-            idleHintShownRef,
-            lastQueryCompletionTimeRef,
-            options,
-          })
-        ) {
-          return // Always return early - don't add to history or queue
-        }
-      }
-
-      // Remote mode: skip empty input early before any state mutations
-      if (activeRemote.isRemoteMode && !input.trim()) {
-        return
-      }
-
-      // Idle-return: prompt returning users to start fresh when the
-      // conversation is large and the cache is cold. tengu_willow_mode
-      // controls treatment: "dialog" (blocking), "hint" (notification), "off".
-      if (
-        tryHandleIdleReturnCheck({
-          input,
-          speculationAccept,
-          skipIdleCheckRef,
-          lastQueryCompletionTimeRef,
-          setIdleReturnPending,
-          setInputValue,
-          helpers,
-        })
-      ) {
-        return
-      }
-
-      tryAddToHistory({
-        fromKeybinding: options?.fromKeybinding,
-        speculationAccept,
-        input,
-        inputMode,
-        pastedContents,
-      })
-
-      const { isSlashCommand, submitsNow } = resolveStashBeforeSubmit({
-        input,
-        speculationAccept,
-        isLoading,
-        isRemoteMode: activeRemote.isRemoteMode,
-        stashedPrompt,
-        fromKeybinding: options?.fromKeybinding,
-        setInputValue,
-        setCursorOffset: helpers.setCursorOffset,
-        setPastedContents,
-        setStashedPrompt,
-      })
-      applySubmitStateReset({
-        submitsNow,
-        isSlashCommand,
-        inputMode,
-        input,
-        speculationAccept,
-        isRemoteMode: activeRemote.isRemoteMode,
-        setInputMode: (mode: string) => setInputMode(mode as PromptInputMode),
-        setIDESelection,
-        setSubmitCount,
-        clearBuffer: helpers.clearBuffer,
-        tipPickedThisTurnRef,
-        setUserInputOnProcessing,
-        resetTimingRefs,
-        incrementAttribution: feature('COMMIT_ATTRIBUTION')
-          ? () => {
-              setAppState((prev) => ({
-                ...prev,
-                attribution: incrementPromptCount(prev.attribution, (snapshot) => {
-                  void recordAttributionSnapshot(snapshot).catch((error) => {
-                    logForDebugging(`Attribution: Failed to save snapshot: ${error}`)
-                  })
-                }),
-              }))
-            }
-          : undefined,
-      })
-
-      // Handle speculation acceptance
-      if (speculationAccept) {
-        const { queryRequired } = await handleSpeculationAccept(
-          speculationAccept.state,
-          speculationAccept.speculationSessionTimeSavedMs,
-          speculationAccept.setAppState,
-          input,
-          {
-            setMessages,
-            readFileState,
-            cwd: getOriginalCwd(),
-          },
-        )
-        if (queryRequired) {
-          const newAbortController = createAbortController()
-          setAbortController(newAbortController)
-          void onQuery([], newAbortController, true, [], mainLoopModel)
-        }
-        return
-      }
-
-      // Remote mode: send input via stream-json instead of local query.
-      // local-jsx slash commands fall through to local handlePromptSubmit.
-      if (
-        await handleRemoteSubmit({
-          input,
-          isSlashCommand,
-          commands,
-          pastedContents,
-          activeRemote,
-          setMessages,
-        })
-      ) {
-        return
-      }
-
-      // Ensure SessionStart hook context is available before the first API call.
-      await awaitPendingHooks()
-      await handlePromptSubmit({
-        input,
-        helpers,
-        queryGuard,
-        isExternalLoading,
-        mode: inputMode,
-        commands,
-        onInputChange: setInputValue,
-        setPastedContents,
-        setToolJSX,
-        getToolUseContext,
-        messages: messagesRef.current,
-        mainLoopModel,
-        pastedContents,
-        ideSelection,
-        setUserInputOnProcessing,
-        setAbortController,
-        abortController,
-        onQuery,
-        setAppState,
-        querySource: getQuerySourceForREPL(),
-        onBeforeQuery,
-        canUseTool,
-        addNotification,
-        setMessages,
-        // Read via ref so streamMode can be dropped from onSubmit deps —
-        // handlePromptSubmit only uses it for debug log + telemetry event.
-        streamMode: streamModeRef.current,
-        hasInterruptibleToolInProgress: hasInterruptibleToolInProgressRef.current,
-      })
-
-      resolveStashAfterSubmit({
-        isSlashCommand,
-        isLoading,
-        stashedPrompt,
-        setInputValue,
-        setCursorOffset: helpers.setCursorOffset,
-        setPastedContents,
-        setStashedPrompt,
-      })
-    },
-    [
-      queryGuard,
-      // isLoading is read at the !isLoading checks above for input-clearing
-      // and submitCount gating. It's derived from isQueryActive || isExternalLoading,
-      // so including it here ensures the closure captures the fresh value.
-      isLoading,
-      isExternalLoading,
-      inputMode,
-      commands,
-      setInputValue,
-      setInputMode,
-      setPastedContents,
-      setSubmitCount,
-      setIDESelection,
-      setToolJSX,
-      getToolUseContext,
-      // messages is read via messagesRef.current inside the callback to
-      // keep onSubmit stable across message updates (see L2384/L2400/L2662).
-      // Without this, each setMessages call (~30× per turn) recreates
-      // onSubmit, pinning the REPL render scope (1776B) + that render's
-      // messages array in downstream closures (PromptInput, handleAutoRunIssue).
-      // Heap analysis showed ~9 REPL scopes and ~15 messages array versions
-      // accumulating after #20174/#20175, all traced to this dep.
-      mainLoopModel,
-      pastedContents,
-      ideSelection,
-      setUserInputOnProcessing,
-      setAbortController,
-      addNotification,
-      onQuery,
-      stashedPrompt,
-      setStashedPrompt,
-      setAppState,
-      onBeforeQuery,
-      canUseTool,
-      remoteSession,
-      setMessages,
-      awaitPendingHooks,
-      repinScroll,
-    ],
-  )
+  // Input queue execution, incoming-prompt handling, and the onSubmit submit
+  // pipeline extracted to REPL.hooks.input-queue.tsx (useREPLInputQueue).
+  const { executeQueuedInput, handleIncomingPrompt, onSubmit } = useREPLInputQueue({
+    setAppState,
+    store,
+    addNotification,
+    commands,
+    mainLoopModel,
+    ideSelection,
+    setIDESelection,
+    queuedCommands,
+    proactiveModule,
+    queryGuard,
+    isLoading,
+    isExternalLoading,
+    abortController,
+    setAbortController,
+    setToolJSX,
+    streamModeRef,
+    resetTimingRefs,
+    messages,
+    messagesRef,
+    setMessages,
+    idleHintShownRef,
+    setUserInputOnProcessing,
+    repinScroll,
+    awaitPendingHooks,
+    setInputValue,
+    inputValueRef,
+    inputMode,
+    setInputMode,
+    stashedPrompt,
+    setStashedPrompt,
+    pastedContents,
+    setPastedContents,
+    activeRemote,
+    setSubmitCount,
+    hasInterruptibleToolInProgressRef,
+    remoteSession,
+    setIdleReturnPending,
+    skipIdleCheckRef,
+    lastQueryCompletionTimeRef,
+    tipPickedThisTurnRef,
+    readFileState,
+    onBeforeQuery,
+    canUseTool,
+    getToolUseContext,
+    onQuery,
+  })
 
   // Agent submit, auto-run/exit/restore handlers, message actions, and the
   // REPL bridge extracted to REPL.hooks.agent-handlers.tsx (useREPLAgentHandlers).
@@ -1689,74 +1455,6 @@ export function REPL({
 
   useAfterFirstRender()
 
-  // Track prompt queue usage for analytics. Fire once per transition from
-  // empty to non-empty, not on every length change -- otherwise a render loop
-  // (concurrent onQuery thrashing, etc.) spams saveGlobalConfig, which hits
-  // ELOCKED under concurrent sessions and falls back to unlocked writes.
-  // That write storm is the primary trigger for ~/.claude.json corruption
-  // (GH #3117).
-  const hasCountedQueueUseRef = useRef(false)
-  useEffect(() => {
-    if (queuedCommands.length < 1) {
-      hasCountedQueueUseRef.current = false
-      return
-    }
-    if (hasCountedQueueUseRef.current) return
-    hasCountedQueueUseRef.current = true
-    saveGlobalConfig((current) => ({
-      ...current,
-      promptQueueUseCount: (current.promptQueueUseCount ?? 0) + 1,
-    }))
-  }, [queuedCommands.length])
-
-  // Process queued commands when query completes and queue has items
-
-  const executeQueuedInput = useCallback(
-    async (queuedCommands: QueuedCommand[]) => {
-      await handlePromptSubmit({
-        helpers: {
-          setCursorOffset: () => {},
-          clearBuffer: () => {},
-          resetHistory: () => {},
-        },
-        queryGuard,
-        commands,
-        onInputChange: () => {},
-        setPastedContents: () => {},
-        setToolJSX,
-        getToolUseContext,
-        messages,
-        mainLoopModel,
-        ideSelection,
-        setUserInputOnProcessing,
-        setAbortController,
-        onQuery,
-        setAppState,
-        querySource: getQuerySourceForREPL(),
-        onBeforeQuery,
-        canUseTool,
-        addNotification,
-        setMessages,
-        queuedCommands,
-      })
-    },
-    [
-      queryGuard,
-      commands,
-      setToolJSX,
-      getToolUseContext,
-      messages,
-      mainLoopModel,
-      ideSelection,
-      setUserInputOnProcessing,
-      canUseTool,
-      setAbortController,
-      onQuery,
-      addNotification,
-      setAppState,
-      onBeforeQuery,
-    ],
-  )
   useQueueProcessor({
     executeQueuedInput,
     hasActiveLocalJsxUI: isShowingLocalJSXCommand,
@@ -1887,39 +1585,6 @@ export function REPL({
       idleHintShownRef.current = false
     }
   }, [lastQueryCompletionTime, isLoading, addNotification, removeNotification])
-
-  // Submits incoming prompts from teammate messages or tasks mode as new turns
-  // Returns true if submission succeeded, false if a query is already running
-  const handleIncomingPrompt = useCallback(
-    (
-      content: string,
-      options?: {
-        isMeta?: boolean
-      },
-    ): boolean => {
-      if (queryGuard.isActive) return false
-
-      // Defer to user-queued commands — user input always takes priority
-      // over system messages (teammate messages, task list items, etc.)
-      // Read from the module-level store at call time (not the render-time
-      // snapshot) to avoid a stale closure — this callback's deps don't
-      // include the queue.
-      if (getCommandQueue().some((cmd) => cmd.mode === 'prompt' || cmd.mode === 'bash')) {
-        return false
-      }
-      const newAbortController = createAbortController()
-      setAbortController(newAbortController)
-
-      // Create a user message with the formatted content (includes XML wrapper)
-      const userMessage = createUserMessage({
-        content,
-        isMeta: options?.isMeta ? true : undefined,
-      })
-      void onQuery([userMessage], newAbortController, true, [], mainLoopModel)
-      return true
-    },
-    [onQuery, mainLoopModel, store],
-  )
 
   // Voice input integration (VOICE_MODE builds only)
   const voice = feature('VOICE_MODE')
