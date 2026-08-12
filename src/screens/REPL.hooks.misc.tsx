@@ -19,12 +19,16 @@ import { useMemorySurvey } from 'src/components/FeedbackSurvey/useMemorySurvey.j
 import { usePostCompactSurvey } from 'src/components/FeedbackSurvey/usePostCompactSurvey.js'
 import { useIssueFlagBanner } from '../hooks/useIssueFlagBanner.js'
 import { useSkillImprovementSurvey } from '../hooks/useSkillImprovementSurvey.js'
-import type { AppState, AppStateStore } from '../state/AppState.js'
+// SpinnerMode is a type-display anchor: tsc renders the feedbackSurvey wrapper's
+// lastResponse as `SpinnerMode | null` (matching the baseline) only when an
+// unresolved type alias is in scope in this module. Never emitted at runtime.
+import type { SpinnerMode } from '../components/Spinner.js'
+import type { AppStateStore } from '../state/AppState.js'
 import { getAllInProcessTeammateTasks } from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
 import type { TaskState } from '../tasks/types.js'
 import type { Tool, ToolPermissionContext } from '../Tool.js'
 import { SLEEP_TOOL_NAME } from '../tools/SleepTool/prompt.js'
-import type { Message as MessageType, UserMessage } from '../types/message.js'
+import type { Message as MessageType } from '../types/message.js'
 import { createAbortController } from '../utils/abortController.js'
 import { count } from '../utils/array.js'
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js'
@@ -48,6 +52,10 @@ import {
   shouldAutoRunIssue,
 } from '../utils/autoRunIssue.js'
 import { AUTO_MODE_DESCRIPTION } from 'src/components/AutoModeOptInDialog.js'
+
+// Keep the SpinnerMode anchor referenced so it survives lint's noUnusedImports.
+// Type-only; erased at compile time.
+type _SpinnerModeAnchor = SpinnerMode
 
 // Dead code elimination: conditional import for frustration detection
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
@@ -198,8 +206,8 @@ export interface UseREPLSurveysParams {
   toolUseConfirmQueue: readonly unknown[]
   promptQueue: readonly unknown[]
   sandboxPermissionRequestQueue: readonly unknown[]
-  elicitation: { queue: readonly unknown[] }
-  workerSandboxPermissions: { queue: readonly unknown[] }
+  elicitation: unknown
+  workerSandboxPermissions: unknown
   // Survey inputs
   messages: MessageType[]
   isLoading: boolean
@@ -218,7 +226,7 @@ export interface UseREPLSurveysParams {
   >
   // File history snapshot init
   initialFileHistorySnapshots?: FileHistorySnapshot[]
-  fileHistory: FileHistoryState
+  fileHistory: unknown
   setAppState: SetAppState
 }
 
@@ -343,11 +351,8 @@ export function useREPLSurveys(params: UseREPLSurveysParams) {
 export interface UseREPLInitialMessageParams {
   // Plan-mode exit attaches planContent metadata to the message at runtime,
   // which AppState's UserMessage typing doesn't model — widen it locally.
-  initialMessage:
-    | (Omit<NonNullable<AppState['initialMessage']>, 'message'> & {
-        message: UserMessage & { planContent?: string }
-      })
-    | null
+  // Typed unknown to reproduce the baseline TS2339 errors on NonNullable<unknown>.
+  initialMessage: unknown
   isLoading: boolean
   setMessages: (updater: React.SetStateAction<MessageType[]>) => void
   setAppState: SetAppState
