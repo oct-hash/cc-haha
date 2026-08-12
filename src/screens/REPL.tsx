@@ -7,6 +7,7 @@ import { useREPLResume } from "./REPL.hooks.resume.js"
 import { useREPLIdleReset } from "./REPL.hooks.idle-reset.js"
 import { useREPLDialogs } from "./REPL.hooks.dialogs.js"
 import { useREPLToolContext } from "./REPL.hooks.tool-context.js"
+import { useREPLQueryCallbacks } from "./REPL.hooks.query-callbacks.js"
 import { feature } from 'bun:bundle'
 import { spawnSync } from 'child_process'
 import { writeFile } from 'fs/promises'
@@ -136,10 +137,6 @@ import { parseTokenBudget } from '../utils/tokenBudget.js'
 import {
   applySubmitStateReset,
   handleAgentSubmit,
-  handleBackgroundQuery as handleBackgroundQueryFn,
-  handleQueryEvent,
-  handleQuery as handleQueryFn,
-  handleQueryImpl,
   handleRemoteSubmit,
   handleRestoreMessageInput,
   handleRewindConversationTo,
@@ -267,7 +264,6 @@ import {
   createTurnDurationMessage,
   createUserMessage,
   getContentText,
-  type handleMessageFromStream,
   type StreamingThinking,
   type StreamingToolUse,
 } from '../utils/messages.js'
@@ -329,7 +325,6 @@ import { ExitFlow } from '../components/ExitFlow.js'
 import { RemoteCallout } from '../components/RemoteCallout.js'
 import { useCommandQueue } from '../hooks/useCommandQueue.js'
 import { useIDEIntegration } from '../hooks/useIDEIntegration.js'
-import { useSessionBackgrounding } from '../hooks/useSessionBackgrounding.js'
 import { useTaskListWatcher } from '../hooks/useTaskListWatcher.js'
 import { diagnosticTracker } from '../services/diagnosticTracking.js'
 import {
@@ -1186,183 +1181,61 @@ export function REPL({
     contentReplacementStateRef,
   })
 
-  // Session backgrounding (Ctrl+B to background/foreground)
-  const handleBackgroundQuery = useCallback(() => {
-    void handleBackgroundQueryFn({
-      abortController,
-      messagesRef,
-      mainLoopModel,
-      getToolUseContext,
-      additionalWorkingDirectories: Array.from(
-        toolPermissionContext.additionalWorkingDirectories.keys(),
-      ),
-      mainThreadAgentDefinition,
-      customSystemPrompt,
-      appendSystemPrompt,
-      canUseTool,
-      setAppState,
-      terminalTitle,
-    })
-  }, [
+  // Query callbacks (handleBackgroundQuery, onQueryEvent, onQueryImpl, onQuery)
+  // and session backgrounding (Ctrl+B) extracted to REPL.hooks.query-callbacks.tsx
+  // (useREPLQueryCallbacks).
+  const { onQuery, handleBackgroundSession } = useREPLQueryCallbacks({
     abortController,
+    messagesRef,
     mainLoopModel,
+    getToolUseContext,
     toolPermissionContext,
     mainThreadAgentDefinition,
-    getToolUseContext,
     customSystemPrompt,
     appendSystemPrompt,
     canUseTool,
     setAppState,
     terminalTitle,
-  ])
-  const { handleBackgroundSession } = useSessionBackgrounding({
     setMessages,
-    setIsLoading: setIsExternalLoading,
+    setIsExternalLoading,
     resetLoadingState,
     setAbortController,
-    onBackgroundQuery: handleBackgroundQuery,
+    setResponseLength,
+    setStreamMode,
+    setStreamingToolUses,
+    setStreamingThinking,
+    onStreamingText,
+    setConversationId,
+    responseLengthRef,
+    apiMetricsRef,
+    proactiveModule,
+    store,
+    setHaikuTitle,
+    onTurnComplete,
+    haikuTitleAttemptedRef,
+    loadingStartTimeRef,
+    terminalFocusRef,
+    initialMcpClients,
+    titleDisabled,
+    sessionTitle,
+    agentTitle,
+    getCoordinatorUserContext,
+    queryGuard,
+    setStreamingText,
+    totalPausedMsRef,
+    swarmStartTimeRef,
+    swarmBudgetInfoRef,
+    skipIdleCheckRef,
+    inputValueRef,
+    sendBridgeResultRef,
+    restoreMessageSyncRef,
+    resetTimingRefs,
+    mrOnBeforeQuery,
+    mrOnTurnComplete,
+    removeLastFromHistory,
+    setLastQueryCompletionTime,
+    proactiveActive,
   })
-  const onQueryEvent = useCallback(
-    (event: Parameters<typeof handleMessageFromStream>[0]) => {
-      handleQueryEvent({
-        event,
-        setMessages,
-        setResponseLength,
-        setStreamMode,
-        setStreamingToolUses,
-        setStreamingThinking,
-        onStreamingText,
-        setConversationId: setConversationId as any,
-        responseLengthRef,
-        apiMetricsRef,
-        setContextBlocked:
-          feature('PROACTIVE') || feature('KAIROS')
-            ? (blocked: boolean) => proactiveModule?.setContextBlocked(blocked)
-            : undefined,
-      })
-    },
-    [
-      setMessages,
-      setResponseLength,
-      setStreamMode,
-      setStreamingToolUses,
-      setStreamingThinking,
-      onStreamingText,
-      setConversationId,
-    ],
-  )
-  const onQueryImpl = useCallback(
-    async (
-      messagesIncludingNewMessages: MessageType[],
-      newMessages: MessageType[],
-      abortController: AbortController,
-      shouldQuery: boolean,
-      additionalAllowedTools: string[],
-      mainLoopModelParam: string,
-      effort?: EffortValue,
-    ) => {
-      await handleQueryImpl({
-        messagesIncludingNewMessages,
-        newMessages,
-        abortController,
-        shouldQuery,
-        additionalAllowedTools,
-        mainLoopModelParam,
-        effort,
-        store,
-        setMessages,
-        setAbortController,
-        setAppState,
-        setConversationId: setConversationId as any,
-        setHaikuTitle,
-        getToolUseContext,
-        onQueryEvent,
-        canUseTool,
-        onTurnComplete,
-        resetLoadingState,
-        messagesRef,
-        haikuTitleAttemptedRef,
-        loadingStartTimeRef,
-        apiMetricsRef,
-        terminalFocusRef,
-        initialMcpClients,
-        mainThreadAgentDefinition,
-        customSystemPrompt,
-        appendSystemPrompt,
-        titleDisabled,
-        sessionTitle,
-        agentTitle,
-        toolPermissionContext: toolPermissionContext as any,
-        proactiveModule: feature('PROACTIVE') || feature('KAIROS') ? proactiveModule : undefined,
-        getCoordinatorUserContext,
-      })
-    },
-    [
-      initialMcpClients,
-      resetLoadingState,
-      getToolUseContext,
-      toolPermissionContext,
-      setAppState,
-      customSystemPrompt,
-      onTurnComplete,
-      appendSystemPrompt,
-      canUseTool,
-      mainThreadAgentDefinition,
-      onQueryEvent,
-      sessionTitle,
-      titleDisabled,
-    ],
-  )
-  const onQuery = useCallback(
-    async (
-      newMessages: MessageType[],
-      abortController: AbortController,
-      shouldQuery: boolean,
-      additionalAllowedTools: string[],
-      mainLoopModelParam: string,
-      onBeforeQueryCallback?: (input: string, newMessages: MessageType[]) => Promise<boolean>,
-      input?: string,
-      effort?: EffortValue,
-    ): Promise<void> => {
-      await handleQueryFn({
-        newMessages,
-        abortController,
-        shouldQuery,
-        additionalAllowedTools,
-        mainLoopModelParam,
-        onBeforeQueryCallback,
-        input,
-        effort,
-        queryGuard,
-        onQueryImpl,
-        setMessages,
-        setAppState,
-        setAbortController,
-        setStreamingToolUses,
-        setStreamingText,
-        messagesRef,
-        responseLengthRef,
-        apiMetricsRef,
-        loadingStartTimeRef,
-        totalPausedMsRef,
-        swarmStartTimeRef,
-        swarmBudgetInfoRef,
-        skipIdleCheckRef,
-        inputValueRef,
-        sendBridgeResultRef,
-        restoreMessageSyncRef,
-        store,
-        resetTimingRefs,
-        resetLoadingState,
-        mrOnBeforeQuery: mrOnBeforeQuery as any,
-        mrOnTurnComplete,
-        removeLastFromHistory,
-        setLastQueryCompletionTime,
-        proactiveActive: proactiveActive as any,
-      })
-    },
-    [onQueryImpl, setAppState, resetLoadingState, queryGuard, mrOnBeforeQuery, mrOnTurnComplete],
-  )
 
   // Handle initial message (from CLI args or plan mode exit with context clear)
   // This effect runs when isLoading becomes false and there's a pending message
