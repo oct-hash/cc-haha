@@ -236,7 +236,7 @@ export function useREPLAgentHandlers(params: UseREPLAgentHandlersParams) {
     if (exitFlowResult === null) {
       setIsExiting(false)
     }
-  }, [])
+  }, [setIsExiting, setExitFlow])
   const handleShowMessageSelector = useCallback(() => {
     setIsMessageSelectorVisible((prev) => !prev)
   }, [])

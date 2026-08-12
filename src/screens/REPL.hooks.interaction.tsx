@@ -228,16 +228,17 @@ export function useREPLInteraction(params: UseREPLInteractionParams) {
     }
   }, [queuedCommands])
 
-  // Initial load
+  // Initial load — onInit is captured via ref so the effect runs once on
+  // mount but always calls the latest onInit (avoiding stale closures).
+  const onInitRef = useRef(onInit)
+  onInitRef.current = onInit
   useEffect(() => {
-    void onInit()
+    void onInitRef.current()
 
     // Cleanup on unmount
     return () => {
       void diagnosticTracker.shutdown()
     }
-    // TODO: fix this
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Listen for suspend/resume events
