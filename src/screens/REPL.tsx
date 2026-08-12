@@ -8,8 +8,8 @@ import { useREPLIdleReset } from "./REPL.hooks.idle-reset.js"
 import { useREPLDialogs } from "./REPL.hooks.dialogs.js"
 import { useREPLToolContext } from "./REPL.hooks.tool-context.js"
 import { useREPLQueryCallbacks } from "./REPL.hooks.query-callbacks.js"
+import { useREPLAgentHandlers } from "./REPL.hooks.agent-handlers.js"
 import { feature } from 'bun:bundle'
-import { spawnSync } from 'child_process'
 import { writeFile } from 'fs/promises'
 import { tmpdir } from 'os'
 import { dirname, join } from 'path'
@@ -49,11 +49,7 @@ import {
   isCommandEnabled,
   type ResumeEntrypoint,
 } from '../commands.js'
-import {
-  MessageSelector,
-  messagesAfterAreOnlySynthetic,
-  selectableUserMessagesFilter,
-} from '../components/MessageSelector.js'
+import { MessageSelector } from '../components/MessageSelector.js'
 import PromptInput from '../components/PromptInput/PromptInput.js'
 import {
   PermissionRequest,
@@ -83,7 +79,6 @@ import { GlobalKeybindingHandlers } from '../hooks/useGlobalKeybindings.js'
 import { useIdeLogging } from '../hooks/useIdeLogging.js'
 import { useLogMessages } from '../hooks/useLogMessages.js'
 import { useRemoteSession } from '../hooks/useRemoteSession.js'
-import { useReplBridge } from '../hooks/useReplBridge.js'
 import { useSkillImprovementSurvey } from '../hooks/useSkillImprovementSurvey.js'
 import { useSSHSession } from '../hooks/useSSHSession.js'
 import { useSwarmInitialization } from '../hooks/useSwarmInitialization.js'
@@ -103,10 +98,7 @@ import { sendNotification } from '../services/notifier.js'
 import { startPreventSleep, stopPreventSleep } from '../services/preventSleep.js'
 import type { SSHSession } from '../ssh/createSSHSession.js'
 import { getAllInProcessTeammateTasks } from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
-import {
-  isLocalAgentTask,
-  type LocalAgentTaskState,
-} from '../tasks/LocalAgentTask/LocalAgentTask.js'
+import { isLocalAgentTask } from '../tasks/LocalAgentTask/LocalAgentTask.js'
 import { asAgentId, asSessionId } from '../types/ids.js'
 import type { PromptInputMode, QueuedCommand, VimMode } from '../types/textInputTypes.js'
 import { count } from '../utils/array.js'
@@ -116,7 +108,6 @@ import { logForDebugging } from '../utils/debug.js'
 import { consumeEarlyInput } from '../utils/earlyInput.js'
 import { openFileInExternalEditor } from '../utils/editor.js'
 import { isEnvTruthy } from '../utils/envUtils.js'
-import { errorMessage } from '../utils/errors.js'
 import { renderMessagesToPlainText } from '../utils/exportRenderer.js'
 import {
   createFileStateCacheWithSizeLimit,
@@ -136,10 +127,7 @@ import { getAgentName, getTeamName } from '../utils/teammate.js'
 import { parseTokenBudget } from '../utils/tokenBudget.js'
 import {
   applySubmitStateReset,
-  handleAgentSubmit,
   handleRemoteSubmit,
-  handleRestoreMessageInput,
-  handleRewindConversationTo,
   resolveStashAfterSubmit,
   resolveStashBeforeSubmit,
   tryAddToHistory,
@@ -219,10 +207,7 @@ import { runPostCompactCleanup } from '../services/compact/postCompactCleanup.js
 import type { MCPServerConnection, ScopedMcpServerConfig } from '../services/mcp/types.js'
 import { useAppState, useAppStateStore, useSetAppState } from '../state/AppState.js'
 import type { Tool } from '../Tool.js'
-import {
-  type InProcessTeammateTaskState,
-  isInProcessTeammateTask,
-} from '../tasks/InProcessTeammateTask/types.js'
+import { isInProcessTeammateTask } from '../tasks/InProcessTeammateTask/types.js'
 import { restoreRemoteAgentTasks } from '../tasks/RemoteAgentTask/RemoteAgentTask.js'
 import type { AgentColorName } from '../tools/AgentTool/agentColorManager.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
@@ -241,7 +226,6 @@ import type { AutoUpdaterResult } from '../utils/autoUpdater.js'
 import { hasConsoleBillingAccess } from '../utils/billing.js'
 import { incrementPromptCount } from '../utils/commitAttribution.js'
 import {
-  isBgSession,
   updateSessionActivity,
   updateSessionName,
 } from '../utils/concurrentSessions.js'
@@ -321,7 +305,6 @@ const launchUltraplan: any = feature('ULTRAPLAN')
 
 import exit from '../commands/exit/index.js'
 import { EffortCallout, shouldShowEffortCallout } from '../components/EffortCallout.js'
-import { ExitFlow } from '../components/ExitFlow.js'
 import { RemoteCallout } from '../components/RemoteCallout.js'
 import { useCommandQueue } from '../hooks/useCommandQueue.js'
 import { useIDEIntegration } from '../hooks/useIDEIntegration.js'
@@ -384,7 +367,6 @@ import { createAbortController } from '../utils/abortController.js'
 import { activityManager } from '../utils/activityManager.js'
 import {
   type AutoRunIssueReason,
-  getAutoRunCommand,
   shouldAutoRunIssue,
 } from '../utils/autoRunIssue.js'
 
@@ -401,19 +383,12 @@ import {
   FullscreenLayout,
   useUnseenDivider,
 } from '../components/FullscreenLayout.js'
-import {
-  type MessageActionCaps,
-  type MessageActionsNav,
-  type MessageActionsState,
-  useMessageActions,
-} from '../components/messageActions.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { IssueFlagBanner } from '../components/PromptInput/IssueFlagBanner.js'
 import { ScrollKeybindingHandler } from '../components/ScrollKeybindingHandler.js'
 import { useIssueFlagBanner } from '../hooks/useIssueFlagBanner.js'
 import { AlternateScreen } from '../ink/components/AlternateScreen.js'
 import type { ScrollBoxHandle } from '../ink/components/ScrollBox.js'
-import { setClipboard } from '../ink/termio/osc.js'
 // Session manager removed - using AppState now
 import type { RemoteSessionConfig } from '../remote/RemoteSessionManager.js'
 import {
@@ -1625,218 +1600,49 @@ export function REPL({
     ],
   )
 
-  // Callback for when user submits input while viewing a teammate's transcript
-  const onAgentSubmit = useCallback(
-    async (
-      input: string,
-      task: InProcessTeammateTaskState | LocalAgentTaskState,
-      helpers: PromptInputHelpers,
-    ) => {
-      await handleAgentSubmit({
-        input,
-        task,
-        helpers,
-        setAppState,
-        setInputValue,
-        getToolUseContext,
-        canUseTool,
-        mainLoopModel,
-        messagesRef,
-        onResumeFailed: (agentId, errMsg) => {
-          addNotification({
-            key: `resume-agent-failed-${agentId}`,
-            jsx: <Text color="error">Failed to resume agent: {errMsg}</Text>,
-            priority: 'low',
-          })
-        },
-      })
-    },
-    [setAppState, setInputValue, getToolUseContext, canUseTool, mainLoopModel, addNotification],
-  )
-
-  // Handlers for auto-run /issue or /good-claude (defined after onSubmit)
-  const handleAutoRunIssue = useCallback(() => {
-    const command = autoRunIssueReason ? getAutoRunCommand(autoRunIssueReason) : '/issue'
-    setAutoRunIssueReason(null) // Clear the state
-    onSubmit(command, {
-      setCursorOffset: () => {},
-      clearBuffer: () => {},
-      resetHistory: () => {},
-    }).catch((err) => {
-      logForDebugging(`Auto-run ${command} failed: ${errorMessage(err)}`)
-    })
-  }, [onSubmit, autoRunIssueReason])
-  const handleCancelAutoRunIssue = useCallback(() => {
-    setAutoRunIssueReason(null)
-  }, [])
-
-  // Handler for when user presses 1 on survey thanks screen to share details
-  const handleSurveyRequestFeedback = useCallback(() => {
-    const command = 'external' === 'ant' ? '/issue' : '/feedback'
-    onSubmit(command, {
-      setCursorOffset: () => {},
-      clearBuffer: () => {},
-      resetHistory: () => {},
-    }).catch((err) => {
-      logForDebugging(
-        `Survey feedback request failed: ${err instanceof Error ? err.message : String(err)}`,
-      )
-    })
-  }, [onSubmit])
-
-  // onSubmit is unstable (deps include `messages` which changes every turn).
-  // `handleOpenRateLimitOptions` is prop-drilled to every MessageRow, and each
-  // MessageRow fiber pins the closure (and transitively the entire REPL render
-  // scope, ~1.8KB) at mount time. Using a ref keeps this callback stable so
-  // old REPL scopes can be GC'd — saves ~35MB over a 1000-turn session.
-  const onSubmitRef = useRef(onSubmit)
-  onSubmitRef.current = onSubmit
-  const handleOpenRateLimitOptions = useCallback(() => {
-    void onSubmitRef.current('/rate-limit-options', {
-      setCursorOffset: () => {},
-      clearBuffer: () => {},
-      resetHistory: () => {},
-    })
-  }, [])
-  const handleExit = useCallback(async () => {
-    setIsExiting(true)
-    // In bg sessions, always detach instead of kill — even when a worktree is
-    // active. Without this guard, the worktree branch below short-circuits into
-    // ExitFlow (which calls gracefulShutdown) before exit.tsx is ever loaded.
-    if (feature('BG_SESSIONS') && isBgSession()) {
-      spawnSync('tmux', ['detach-client'], {
-        stdio: 'ignore',
-      })
-      setIsExiting(false)
-      return
-    }
-    const showWorktree = getCurrentWorktreeSession() !== null
-    if (showWorktree) {
-      setExitFlow(
-        <ExitFlow
-          showWorktree
-          onDone={() => {}}
-          onCancel={() => {
-            setExitFlow(null)
-            setIsExiting(false)
-          }}
-        />,
-      )
-      return
-    }
-    const exitMod = await exit.load()
-    const exitFlowResult = await exitMod.call(() => {})
-    setExitFlow(exitFlowResult)
-    // If call() returned without killing the process (bg session detach),
-    // clear isExiting so the UI is usable on reattach. No-op on the normal
-    // path — gracefulShutdown's process.exit() means we never get here.
-    if (exitFlowResult === null) {
-      setIsExiting(false)
-    }
-  }, [])
-  const handleShowMessageSelector = useCallback(() => {
-    setIsMessageSelectorVisible((prev) => !prev)
-  }, [])
-
-  // Rewind conversation state to just before `message`: slice messages,
-  // reset conversation ID, microcompact state, permission mode, prompt suggestion.
-  // Does NOT touch the prompt input. Index is computed from messagesRef (always
-  // fresh via the setMessages wrapper) so callers don't need to worry about
-  // stale closures.
-  const rewindConversationTo = useCallback(
-    (message: UserMessage) => {
-      handleRewindConversationTo({
-        message,
-        messagesRef,
-        setMessages,
-        setConversationId,
-        setAppState,
-        onRewind: feature('CONTEXT_COLLAPSE')
-          ? () => {
-              /* eslint-disable @typescript-eslint/no-require-imports */
-              ;(
-                require('../services/contextCollapse/index.js') as typeof import('../services/contextCollapse/index.js')
-              ).resetContextCollapse()
-              /* eslint-enable @typescript-eslint/no-require-imports */
-            }
-          : undefined,
-      })
-    },
-    [setMessages, setAppState, setConversationId],
-  )
-
-  // Synchronous rewind + input population. Used directly by auto-restore on
-  // interrupt (so React batches with the abort's setMessages → single render,
-  // no flicker). MessageSelector wraps this in setImmediate via handleRestoreMessage.
-  const restoreMessageSync = useCallback(
-    (message: UserMessage) => {
-      rewindConversationTo(message)
-      handleRestoreMessageInput({
-        message,
-        setInputValue,
-        setInputMode: (mode: string) => setInputMode(mode as PromptInputMode),
-        setPastedContents,
-      })
-    },
-    [rewindConversationTo, setInputValue],
-  )
-  restoreMessageSyncRef.current = restoreMessageSync
-
-  // MessageSelector path: defer via setImmediate so the "Interrupted" message
-  // renders to static output before rewind — otherwise it remains vestigial
-  // at the top of the screen.
-  const handleRestoreMessage = useCallback(
-    async (message: UserMessage) => {
-      setImmediate((restore, message) => restore(message), restoreMessageSync, message)
-    },
-    [restoreMessageSync],
-  )
-
-  // Not memoized — hook stores caps via ref, reads latest closure at dispatch.
-  // 24-char prefix: deriveUUID preserves first 24, renderable uuid prefix-matches raw source.
-  const findRawIndex = (uuid: string) => {
-    const prefix = uuid.slice(0, 24)
-    return messages.findIndex((m) => m.uuid.slice(0, 24) === prefix)
-  }
-  const messageActionCaps: MessageActionCaps = {
-    copy: (text) =>
-      // setClipboard RETURNS OSC 52 — caller must stdout.write (tmux side-effects load-buffer, but that's tmux-only).
-      void setClipboard(text).then((raw) => {
-        if (raw) process.stdout.write(raw)
-        addNotification({
-          // Same key as text-selection copy — repeated copies replace toast, don't queue.
-          key: 'selection-copied',
-          text: 'copied',
-          color: 'success',
-          priority: 'immediate',
-          timeoutMs: 2000,
-        })
-      }),
-    edit: async (msg) => {
-      // Same skip-confirm check as /rewind: lossless → direct, else confirm dialog.
-      const rawIdx = findRawIndex(msg.uuid)
-      const raw = rawIdx >= 0 ? messages[rawIdx] : undefined
-      if (!raw || !selectableUserMessagesFilter(raw)) return
-      const noFileChanges = !(await fileHistoryHasAnyChanges(fileHistory, raw.uuid))
-      const onlySynthetic = messagesAfterAreOnlySynthetic(messages, rawIdx)
-      if (noFileChanges && onlySynthetic) {
-        // rewindConversationTo's setMessages races stream appends — cancel first (idempotent).
-        onCancel()
-        // handleRestoreMessage also restores pasted images.
-        void handleRestoreMessage(raw)
-      } else {
-        // Dialog path: onPreRestore (= onCancel) fires when user CONFIRMS, not on nevermind.
-        setMessageSelectorPreselect(raw)
-        setIsMessageSelectorVisible(true)
-      }
-    },
-  }
-  const { enter: enterMessageActions, handlers: messageActionHandlers } = useMessageActions(
+  // Agent submit, auto-run/exit/restore handlers, message actions, and the
+  // REPL bridge extracted to REPL.hooks.agent-handlers.tsx (useREPLAgentHandlers).
+  const {
+    onAgentSubmit,
+    handleAutoRunIssue,
+    handleCancelAutoRunIssue,
+    handleSurveyRequestFeedback,
+    handleOpenRateLimitOptions,
+    handleShowMessageSelector,
+    handleRestoreMessage,
+    enterMessageActions,
+    messageActionHandlers,
+    onSubmitRef,
+  } = useREPLAgentHandlers({
+    setAppState,
+    mainLoopModel,
+    addNotification,
+    commands,
+    fileHistory,
+    sendBridgeResultRef,
+    restoreMessageSyncRef,
+    abortControllerRef,
+    messages,
+    messagesRef,
+    setMessages,
+    setInputValue,
+    setInputMode,
+    setPastedContents,
     cursor,
     setCursor,
     cursorNavRef,
-    messageActionCaps,
-  )
+    setConversationId,
+    setIsMessageSelectorVisible,
+    setMessageSelectorPreselect,
+    canUseTool,
+    getToolUseContext,
+    setExitFlow,
+    setIsExiting,
+    onCancel,
+    autoRunIssueReason,
+    setAutoRunIssueReason,
+    onSubmit,
+  })
   async function onInit() {
     // Always verify API key on startup, so we can show the user an error in the
     // bottom right corner of the screen if the API key is invalid.
@@ -1881,16 +1687,6 @@ export function REPL({
   // anything else
   useLogMessages(messages, messages.length === initialMessages?.length)
 
-  // REPL Bridge: replicate user/assistant messages to the bridge session
-  // for remote access via claude.ai. No-op in external builds or when not enabled.
-  const { sendBridgeResult } = useReplBridge(
-    messages,
-    setMessages,
-    abortControllerRef,
-    commands,
-    mainLoopModel,
-  )
-  sendBridgeResultRef.current = sendBridgeResult
   useAfterFirstRender()
 
   // Track prompt queue usage for analytics. Fire once per transition from
