@@ -4,7 +4,7 @@
 
 import { feature } from 'bun:bundle'
 import * as React from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import { getOriginalCwd, setCostStateForRestore, switchSession } from '../bootstrap/state.js'
 import type { ResumeEntrypoint } from '../commands.js'
 import { getStoredSessionCosts, resetCostState, saveCurrentSessionCosts } from '../cost-tracker.js'
@@ -20,10 +20,10 @@ import { updateSessionName } from '../utils/concurrentSessions.js'
 import { deserializeMessages } from '../utils/conversationRecovery.js'
 import { copyFileHistoryForResume } from '../utils/fileHistory.js'
 import {
-  createFileStateCacheWithSizeLimit,
   mergeFileStateCaches,
   READ_FILE_STATE_CACHE_SIZE,
 } from '../utils/fileStateCache.js'
+import type { FileStateCache } from '../utils/fileStateCache.js'
 import { executeSessionEndHooks, getSessionEndHookTimeoutMs } from '../utils/hooks.js'
 import type { SetAppState } from '../utils/messageQueueManager.js'
 import { createSystemMessage } from '../utils/messages.js'
@@ -82,6 +82,13 @@ export interface UseREPLResumeParams {
   setHaikuTitle: React.Dispatch<React.SetStateAction<string | undefined>>
   haikuTitleAttemptedRef: React.MutableRefObject<boolean>
   contentReplacementStateRef: { current: ContentReplacementState | undefined }
+  // Session-scoped caches owned by REPL.tsx (shared with useREPLIdleReset):
+  // read-file-state LRU, bash-tool set, skill-discovery / nested-memory dedup.
+  readFileState: React.MutableRefObject<FileStateCache>
+  bashTools: React.MutableRefObject<Set<string>>
+  bashToolsProcessedIdx: React.MutableRefObject<number>
+  discoveredSkillNamesRef: React.MutableRefObject<Set<string>>
+  loadedNestedMemoryPathsRef: React.MutableRefObject<Set<string>>
 }
 
 export function useREPLResume(params: UseREPLResumeParams) {
@@ -103,6 +110,11 @@ export function useREPLResume(params: UseREPLResumeParams) {
     setHaikuTitle,
     haikuTitleAttemptedRef,
     contentReplacementStateRef,
+    readFileState,
+    bashTools,
+    bashToolsProcessedIdx,
+    discoveredSkillNamesRef,
+    loadedNestedMemoryPathsRef,
   } = params
   const resume = useCallback(
     async (sessionId: UUID, log: LogOption, entrypoint: ResumeEntrypoint) => {
@@ -321,27 +333,6 @@ export function useREPLResume(params: UseREPLResumeParams) {
     [resetLoadingState, setAppState],
   )
 
-  // Lazy init: useRef(createX()) would call createX on every render and
-  // discard the result. LRUCache construction inside FileStateCache is
-  // expensive (~170ms), so we use useState's lazy initializer to create
-  // it exactly once, then feed that stable reference into useRef.
-  const [initialReadFileState] = useState(() =>
-    createFileStateCacheWithSizeLimit(READ_FILE_STATE_CACHE_SIZE),
-  )
-  const readFileState = useRef(initialReadFileState)
-  const bashTools = useRef(new Set<string>())
-  const bashToolsProcessedIdx = useRef(0)
-  // Session-scoped skill discovery tracking (feeds was_discovered on
-  // tengu_skill_tool_invocation). Must persist across getToolUseContext
-  // rebuilds within a session: turn-0 discovery writes via processUserInput
-  // before onQuery builds its own context, and discovery on turn N must
-  // still attribute a SkillTool call on turn N+k. Cleared in clearConversation.
-  const discoveredSkillNamesRef = useRef(new Set<string>())
-  // Session-level dedup for nested_memory CLAUDE.md attachments.
-  // readFileState is a 100-entry LRU; once it evicts a CLAUDE.md path,
-  // the next discovery cycle re-injects it. Cleared in clearConversation.
-  const loadedNestedMemoryPathsRef = useRef(new Set<string>())
-
   // Helper to restore read file state from messages (used for resume flows)
   // This allows Claude to edit files that were read in previous sessions
   const restoreReadFileState = useCallback((messages: MessageType[], cwd: string) => {
@@ -369,11 +360,5 @@ export function useREPLResume(params: UseREPLResumeParams) {
   }, [])
   return {
     resume,
-    restoreReadFileState,
-    readFileState,
-    bashTools,
-    bashToolsProcessedIdx,
-    discoveredSkillNamesRef,
-    loadedNestedMemoryPathsRef,
   }
 }

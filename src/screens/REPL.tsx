@@ -4,6 +4,7 @@ import { useREPLScrollInput } from "./REPL.hooks.scroll.js"
 import { useREPLUiState } from "./REPL.hooks.ui.js"
 import { useREPLMessages } from "./REPL.hooks.messages.js"
 import { useREPLResume } from "./REPL.hooks.resume.js"
+import { useREPLIdleReset } from "./REPL.hooks.idle-reset.js"
 import { feature } from 'bun:bundle'
 import { spawnSync } from 'child_process'
 import { writeFile } from 'fs/promises'
@@ -119,7 +120,6 @@ import { errorMessage } from '../utils/errors.js'
 import { renderMessagesToPlainText } from '../utils/exportRenderer.js'
 import {
   createFileStateCacheWithSizeLimit,
-  mergeFileStateCaches,
   READ_FILE_STATE_CACHE_SIZE,
 } from '../utils/fileStateCache.js'
 import { formatTokens, truncateToWidth } from '../utils/format.js'
@@ -140,7 +140,6 @@ import {
 } from '../utils/swarm/permissionSync.js'
 import { setMemberActive } from '../utils/swarm/teamHelpers.js'
 import { getAgentName, getTeamName } from '../utils/teammate.js'
-import { endInteractionSpan } from '../utils/telemetry/sessionTracing.js'
 import { parseTokenBudget } from '../utils/tokenBudget.js'
 import {
   applySubmitStateReset,
@@ -240,7 +239,6 @@ import { restoreRemoteAgentTasks } from '../tasks/RemoteAgentTask/RemoteAgentTas
 import type { AgentColorName } from '../tools/AgentTool/agentColorManager.js'
 import { resolveAgentTools } from '../tools/AgentTool/agentToolUtils.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
-import { clearSpeculativeChecks } from '../tools/BashTool/bashPermissions.js'
 import { SLEEP_TOOL_NAME } from '../tools/SleepTool/prompt.js'
 import { WEB_FETCH_TOOL_NAME } from '../tools/WebFetchTool/prompt.js'
 import { assembleToolPool, getTools } from '../tools.js'
@@ -295,10 +293,6 @@ import { stripDangerousPermissionsForAutoMode } from '../utils/permissions/permi
 import { copyPlanForFork, copyPlanForResume, getPlanSlug, setPlanSlug } from '../utils/plans.js'
 import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js'
 import { getQuerySourceForREPL } from '../utils/promptCategory.js'
-import {
-  extractBashToolsFromMessages,
-  extractReadFilesFromMessages,
-} from '../utils/queryHelpers.js'
 import {
   computeStandaloneAgentContext,
   exitRestoredWorktree,
@@ -401,14 +395,12 @@ import { useAwaySummary } from 'src/hooks/useAwaySummary.js'
 import { useFileHistorySnapshotInit } from 'src/hooks/useFileHistorySnapshotInit.js'
 import { useNotificationLayer } from 'src/hooks/useNotificationLayer.js'
 import { usePromptsFromClaudeInChrome } from 'src/hooks/usePromptsFromClaudeInChrome.js'
-import { getTipToShowOnSpinner, recordShownTip } from 'src/services/tips/tipScheduler.js'
 import {
   useKickOffCheckAndDisableAutoModeIfNeeded,
   useKickOffCheckAndDisableBypassPermissionsIfNeeded,
 } from 'src/utils/permissions/bypassPermissionsKillswitch.js'
 import { performStartupChecks } from 'src/utils/plugins/performStartupChecks.js'
 import { SandboxManager } from 'src/utils/sandbox/sandbox-adapter.js'
-import type { Theme } from 'src/utils/theme.js'
 import { TungstenLiveMonitor } from '../tools/TungstenTool/TungstenLiveMonitor.js'
 import type { HookProgress } from '../types/hooks.js'
 import { createAbortController } from '../utils/abortController.js'
@@ -816,67 +808,39 @@ export function REPL({
     ultraplanPendingChoice,
   })
 
-  // resetLoadingState runs twice per turn (onQueryImpl tail + onQuery finally).
-  // Without this guard, both calls pick a tip → two recordShownTip → two
-  // saveGlobalConfig writes back-to-back. Reset at submit in onSubmit.
-  const tipPickedThisTurnRef = React.useRef(false)
-  const pickNewSpinnerTip = useCallback(() => {
-    if (tipPickedThisTurnRef.current) return
-    tipPickedThisTurnRef.current = true
-    const newMessages = messagesRef.current.slice(bashToolsProcessedIdx.current)
-    for (const tool of extractBashToolsFromMessages(newMessages)) {
-      bashTools.current.add(tool)
-    }
-    bashToolsProcessedIdx.current = messagesRef.current.length
-    void getTipToShowOnSpinner({
-      theme,
-      readFileState: readFileState.current,
-      bashTools: bashTools.current,
-    }).then(async (tip) => {
-      if (tip) {
-        const content = await tip.content({
-          theme,
-        })
-        setAppState((prev) => ({
-          ...prev,
-          spinnerTip: content,
-        }))
-        recordShownTip(tip)
-      } else {
-        setAppState((prev) => {
-          if (prev.spinnerTip === undefined) return prev
-          return {
-            ...prev,
-            spinnerTip: undefined,
-          }
-        })
-      }
-    })
-  }, [setAppState, theme])
+  // Session-scoped caches shared by the idle-reset and resume hooks:
+  // read-file-state LRU (lets Claude edit files read in past turns), the set
+  // of bash tools seen this session, plus skill-discovery / nested-memory
+  // dedup sets. LRUCache construction is expensive (~170ms), so lazy-init via
+  // useState and hold the stable instance in a ref.
+  const [initialReadFileState] = useState(() =>
+    createFileStateCacheWithSizeLimit(READ_FILE_STATE_CACHE_SIZE),
+  )
+  const readFileState = useRef(initialReadFileState)
+  const bashTools = useRef(new Set<string>())
+  const bashToolsProcessedIdx = useRef(0)
+  const discoveredSkillNamesRef = useRef(new Set<string>())
+  const loadedNestedMemoryPathsRef = useRef(new Set<string>())
 
-  // Resets UI loading state. Does NOT call onTurnComplete - that should be
-  // called explicitly only when a query turn actually completes.
-  const resetLoadingState = useCallback(() => {
-    // isLoading is now derived from queryGuard — no setter call needed.
-    // queryGuard.end() (onQuery finally) or cancelReservation() (executeUserInput
-    // finally) have already transitioned the guard to idle by the time this runs.
-    // External loading (remote/backgrounding) is reset separately by those hooks.
-    setIsExternalLoading(false)
-    setUserInputOnProcessing(undefined)
-    responseLengthRef.current = 0
-    apiMetricsRef.current = []
-    setStreamingText(null)
-    setStreamingToolUses([])
-    setSpinnerMessage(null)
-    setSpinnerColor(null)
-    setSpinnerShimmerColor(null)
-    pickNewSpinnerTip()
-    endInteractionSpan()
-    // Speculative bash classifier checks are only valid for the current
-    // turn's commands — clear after each turn to avoid accumulating
-    // Promise chains for unconsumed checks (denied/aborted paths).
-    clearSpeculativeChecks()
-  }, [pickNewSpinnerTip])
+  // Spinner tip selection + loading-state reset extracted to
+  // REPL.hooks.idle-reset.tsx (useREPLIdleReset)
+  const { resetLoadingState, tipPickedThisTurnRef } = useREPLIdleReset({
+    setAppState,
+    theme,
+    readFileState,
+    bashTools,
+    bashToolsProcessedIdx,
+    messagesRef,
+    setIsExternalLoading,
+    setUserInputOnProcessing,
+    responseLengthRef,
+    apiMetricsRef,
+    setStreamingText,
+    setStreamingToolUses,
+    setSpinnerMessage,
+    setSpinnerColor,
+    setSpinnerShimmerColor,
+  })
 
   // Session backgrounding — hook is below, after getToolUseContext
 
@@ -1082,16 +1046,10 @@ export function REPL({
       fileHistory: fileHistoryState,
     })),
   )
-  // Session resume flow, read-file-state / bash-tool caches extracted to
-  // REPL.hooks.resume.tsx (useREPLResume)
-  const {
-    resume,
-    readFileState,
-    bashTools,
-    bashToolsProcessedIdx,
-    discoveredSkillNamesRef,
-    loadedNestedMemoryPathsRef,
-  } = useREPLResume({
+  // Session resume flow extracted to REPL.hooks.resume.tsx (useREPLResume).
+  // The read-file-state / bash-tool caches it consumes are created inline
+  // above (shared with useREPLIdleReset).
+  const { resume } = useREPLResume({
     initialMessages,
     initialMainThreadAgentDefinition,
     agentDefinitions,
@@ -1109,6 +1067,11 @@ export function REPL({
     setHaikuTitle,
     haikuTitleAttemptedRef,
     contentReplacementStateRef,
+    readFileState,
+    bashTools,
+    bashToolsProcessedIdx,
+    discoveredSkillNamesRef,
+    loadedNestedMemoryPathsRef,
   })
   const { status: apiKeyStatus, reverify } = useApiKeyVerification()
 
