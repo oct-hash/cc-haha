@@ -37,7 +37,7 @@ import type { PastedContent } from '../utils/config.js'
 import { isBgSession } from '../utils/concurrentSessions.js'
 import { logForDebugging } from '../utils/debug.js'
 import { errorMessage } from '../utils/errors.js'
-import { fileHistoryHasAnyChanges, type FileHistoryState } from '../utils/fileHistory.js'
+import { fileHistoryHasAnyChanges } from '../utils/fileHistory.js'
 import type { PromptInputHelpers } from '../utils/handlePromptSubmit.js'
 import type { SetAppState } from '../utils/messageQueueManager.js'
 import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js'
@@ -55,7 +55,10 @@ export interface UseREPLAgentHandlersParams {
   mainLoopModel: string
   addNotification: (content: Notification) => void
   commands: Command[]
-  fileHistory: FileHistoryState
+  // Typed as unknown: fileHistory comes from useAppState and is unknown in
+  // REPL.tsx; it is forwarded to fileHistoryHasAnyChanges (which expects
+  // FileHistoryState), matching the pre-extraction call site's TS2345.
+  fileHistory: unknown
   // From useREPLStreamState
   sendBridgeResultRef: React.RefObject<() => void>
   restoreMessageSyncRef: React.RefObject<(message: UserMessage) => void>
