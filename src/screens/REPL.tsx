@@ -9,6 +9,7 @@ import { useREPLDialogs } from "./REPL.hooks.dialogs.js"
 import { useREPLToolContext } from "./REPL.hooks.tool-context.js"
 import { useREPLQueryCallbacks } from "./REPL.hooks.query-callbacks.js"
 import { useREPLAgentHandlers } from "./REPL.hooks.agent-handlers.js"
+import { useREPLEffects } from "./REPL.hooks.effects.js"
 import { useREPLInputQueue } from "./REPL.hooks.input-queue.js"
 import { useREPLRenderPrep } from "./REPL.hooks.render-prep.js"
 import { useREPLInteraction } from "./REPL.hooks.interaction.js"
@@ -27,10 +28,8 @@ import {
 import {
   getBudgetContinuationCount,
   getCurrentTurnTokenBudget,
-  getLastInteractionTime,
   getProjectRoot,
   getSessionId,
-  getTotalInputTokens,
   getTurnClassifierCount,
   getTurnClassifierDurationMs,
   getTurnHookCount,
@@ -40,7 +39,6 @@ import {
   getTurnToolDurationMs,
   setCostStateForRestore,
   switchSession,
-  updateLastInteractionTime,
 } from '../bootstrap/state.js'
 import {
   type Command,
@@ -52,7 +50,6 @@ import { MessageSelector } from '../components/MessageSelector.js'
 import PromptInput from '../components/PromptInput/PromptInput.js'
 import { SkillImprovementSurvey } from '../components/SkillImprovementSurvey.js'
 import { type SpinnerMode, SpinnerWithVerb } from '../components/Spinner.js'
-import { useFpsMetrics } from '../context/fpsMetrics.js'
 import { useNotifications } from '../context/notifications.js'
 import {
   getStoredSessionCosts,
@@ -60,16 +57,13 @@ import {
   resetCostState,
   saveCurrentSessionCosts,
 } from '../cost-tracker.js'
-import { useCostSummary } from '../costHook.js'
 import { removeLastFromHistory } from '../history.js'
-import { useAfterFirstRender } from '../hooks/useAfterFirstRender.js'
 import { useApiKeyVerification } from '../hooks/useApiKeyVerification.js'
 import { useAssistantHistory } from '../hooks/useAssistantHistory.js'
 import { CancelRequestHandler } from '../hooks/useCancelRequest.js'
 import { useDeferredHookMessages } from '../hooks/useDeferredHookMessages.js'
 import { GlobalKeybindingHandlers } from '../hooks/useGlobalKeybindings.js'
 import { useIdeLogging } from '../hooks/useIdeLogging.js'
-import { useLogMessages } from '../hooks/useLogMessages.js'
 import { useRemoteSession } from '../hooks/useRemoteSession.js'
 import { useSkillImprovementSurvey } from '../hooks/useSkillImprovementSurvey.js'
 import { useSSHSession } from '../hooks/useSSHSession.js'
@@ -81,23 +75,18 @@ import { KeybindingSetup } from '../keybindings/KeybindingProviderSetup.js'
 import { getShortcutDisplay } from '../keybindings/shortcutFormat.js'
 import { useMoreRight } from '../moreright/useMoreRight.js'
 import type { DirectConnectConfig } from '../server/directConnectManager.js'
-import { sendNotification } from '../services/notifier.js'
 import { startPreventSleep, stopPreventSleep } from '../services/preventSleep.js'
 import type { SSHSession } from '../ssh/createSSHSession.js'
 import { getAllInProcessTeammateTasks } from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
 import { asAgentId, asSessionId } from '../types/ids.js'
 import type { PromptInputMode, VimMode } from '../types/textInputTypes.js'
 import { count } from '../utils/array.js'
-import { startBackgroundHousekeeping } from '../utils/backgroundHousekeeping.js'
-import { getMemoryFiles } from '../utils/claudemd.js'
-import { logForDebugging } from '../utils/debug.js'
 import { consumeEarlyInput } from '../utils/earlyInput.js'
 import { isEnvTruthy } from '../utils/envUtils.js'
 import {
   createFileStateCacheWithSizeLimit,
   READ_FILE_STATE_CACHE_SIZE,
 } from '../utils/fileStateCache.js'
-import { formatTokens } from '../utils/format.js'
 import { logError } from '../utils/log.js'
 import { isHumanTurn } from '../utils/messagePredicates.js'
 import { QueryGuard } from '../utils/QueryGuard.js'
@@ -136,11 +125,7 @@ const getCoordinatorUserContext: (
 
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 import { type UUID } from 'crypto'
-import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js'
-import {
-  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+import { logEvent } from 'src/services/analytics/index.js'
 import { Messages } from '../components/Messages.js'
 import { buildPermissionUpdates } from '../components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.js'
 /* eslint-enable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
@@ -150,7 +135,6 @@ import { useManagePlugins } from '../hooks/useManagePlugins.js'
 import { useMergedClients } from '../hooks/useMergedClients.js'
 import { useMergedCommands } from '../hooks/useMergedCommands.js'
 import { useMergedTools } from '../hooks/useMergedTools.js'
-import { useQueueProcessor } from '../hooks/useQueueProcessor.js'
 import { useSkillsChange } from '../hooks/useSkillsChange.js'
 import { useTasksV2WithCollapseEffect } from '../hooks/useTasksV2.js'
 import { query } from '../query.js'
@@ -289,7 +273,6 @@ import { performStartupChecks } from 'src/utils/plugins/performStartupChecks.js'
 import { TungstenLiveMonitor } from '../tools/TungstenTool/TungstenLiveMonitor.js'
 import { createAbortController } from '../utils/abortController.js'
 /* eslint-enable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
-import { activityManager } from '../utils/activityManager.js'
 import {
   type AutoRunIssueReason,
   shouldAutoRunIssue,
@@ -1351,182 +1334,31 @@ export function REPL({
     setAutoRunIssueReason,
     onSubmit,
   })
-  async function onInit() {
-    // Always verify API key on startup, so we can show the user an error in the
-    // bottom right corner of the screen if the API key is invalid.
-    void reverify()
-
-    // Populate readFileState with CLAUDE.md files at startup
-    const memoryFiles = await getMemoryFiles()
-    if (memoryFiles.length > 0) {
-      const fileList = memoryFiles
-        .map(
-          (f) =>
-            `  [${f.type}] ${f.path} (${f.content.length} chars)${f.parent ? ` (included by ${f.parent})` : ''}`,
-        )
-        .join('\n')
-      logForDebugging(`Loaded ${memoryFiles.length} CLAUDE.md/rules files:\n${fileList}`)
-    } else {
-      logForDebugging('No CLAUDE.md/rules files found')
-    }
-    for (const file of memoryFiles) {
-      // When the injected content doesn't match disk (stripped HTML comments,
-      // stripped frontmatter, MEMORY.md truncation), cache the RAW disk bytes
-      // with isPartialView so Edit/Write require a real Read first while
-      // getChangedFiles + nested_memory dedup still work.
-      readFileState.current.set(file.path, {
-        content: file.contentDiffersFromDisk ? (file.rawContent ?? file.content) : file.content,
-        timestamp: Date.now(),
-        offset: undefined,
-        limit: undefined,
-        isPartialView: file.contentDiffersFromDisk,
-      })
-    }
-
-    // Initial message handling is done via the initialMessage effect
-  }
-
-  // Register cost summary tracker
-  useCostSummary(useFpsMetrics())
-
-  // Record transcripts locally, for debugging and conversation recovery
-  // Don't record conversation if we only have initial messages; optimizes
-  // the case where user resumes a conversation then quites before doing
-  // anything else
-  useLogMessages(messages, messages.length === initialMessages?.length)
-
-  useAfterFirstRender()
-
-  useQueueProcessor({
+  // Side effects and misc logic (cost summary, transcript recording,
+  // after-first-render exit, queue processor, last-interaction time +
+  // background housekeeping, idle desktop notification, idle-return hint, and
+  // the onInit startup handler) extracted to REPL.hooks.effects.tsx
+  // (useREPLEffects).
+  const { onInit } = useREPLEffects({
+    focusedInputDialogRef,
+    addNotification,
+    removeNotification,
+    terminal,
+    messages,
+    messagesRef,
+    idleHintShownRef,
     executeQueuedInput,
-    hasActiveLocalJsxUI: isShowingLocalJSXCommand,
+    inputValue,
+    submitCount,
+    isLoading,
+    toolJSX,
+    isShowingLocalJSXCommand,
     queryGuard,
+    lastQueryCompletionTime,
+    reverify,
+    readFileState,
+    initialMessages,
   })
-
-  // We'll use the global lastInteractionTime from state.ts
-
-  // Update last interaction time when input changes.
-  // Must be immediate because useEffect runs after the Ink render cycle flush.
-  useEffect(() => {
-    activityManager.recordUserActivity()
-    updateLastInteractionTime(true)
-  }, [inputValue, submitCount])
-  useEffect(() => {
-    if (submitCount === 1) {
-      startBackgroundHousekeeping()
-    }
-  }, [submitCount])
-
-  // Show notification when Claude is done responding and user is idle
-  useEffect(() => {
-    // Don't set up notification if Claude is busy
-    if (isLoading) return
-
-    // Only enable notifications after the first new interaction in this session
-    if (submitCount === 0) return
-
-    // No query has completed yet
-    if (lastQueryCompletionTime === 0) return
-
-    // Set timeout to check idle state
-    const timer = setTimeout(
-      (lastQueryCompletionTime, isLoading, toolJSX, focusedInputDialogRef, terminal) => {
-        // Check if user has interacted since the response ended
-        const lastUserInteraction = getLastInteractionTime()
-        if (lastUserInteraction > lastQueryCompletionTime) {
-          // User has interacted since Claude finished - they're not idle, don't notify
-          return
-        }
-
-        // User hasn't interacted since response ended, check other conditions
-        const idleTimeSinceResponse = Date.now() - lastQueryCompletionTime
-        if (
-          !isLoading &&
-          !toolJSX &&
-          // Use ref to get current dialog state, avoiding stale closure
-          focusedInputDialogRef.current === undefined &&
-          idleTimeSinceResponse >= getGlobalConfig().messageIdleNotifThresholdMs
-        ) {
-          void sendNotification(
-            {
-              message: 'Claude is waiting for your input',
-              notificationType: 'idle_prompt',
-            },
-            terminal,
-          )
-        }
-      },
-      getGlobalConfig().messageIdleNotifThresholdMs,
-      lastQueryCompletionTime,
-      isLoading,
-      toolJSX,
-      focusedInputDialogRef,
-      terminal,
-    )
-    return () => clearTimeout(timer)
-  }, [isLoading, toolJSX, submitCount, lastQueryCompletionTime, terminal])
-
-  // Idle-return hint: show notification when idle threshold is exceeded.
-  // Timer fires after the configured idle period; notification persists until
-  // dismissed or the user submits.
-  useEffect(() => {
-    if (lastQueryCompletionTime === 0) return
-    if (isLoading) return
-    const willowMode: string = getFeatureValue_CACHED_MAY_BE_STALE('tengu_willow_mode', 'off')
-    if (willowMode !== 'hint' && willowMode !== 'hint_v2') return
-    if (getGlobalConfig().idleReturnDismissed) return
-    const tokenThreshold = Number(process.env.CLAUDE_CODE_IDLE_TOKEN_THRESHOLD ?? 100_000)
-    if (getTotalInputTokens() < tokenThreshold) return
-    const idleThresholdMs = Number(process.env.CLAUDE_CODE_IDLE_THRESHOLD_MINUTES ?? 75) * 60_000
-    const elapsed = Date.now() - lastQueryCompletionTime
-    const remaining = idleThresholdMs - elapsed
-    const timer = setTimeout(
-      (lqct, addNotif, msgsRef, mode, hintRef) => {
-        if (msgsRef.current.length === 0) return
-        const totalTokens = getTotalInputTokens()
-        const formattedTokens = formatTokens(totalTokens)
-        const idleMinutes = (Date.now() - lqct) / 60_000
-        addNotif({
-          key: 'idle-return-hint',
-          jsx:
-            mode === 'hint_v2' ? (
-              <>
-                <Text dimColor>new task? </Text>
-                <Text color="suggestion">/clear</Text>
-                <Text dimColor> to save </Text>
-                <Text color="suggestion">{formattedTokens} tokens</Text>
-              </>
-            ) : (
-              <Text color="warning">new task? /clear to save {formattedTokens} tokens</Text>
-            ),
-          priority: 'medium',
-          // Persist until submit — the hint fires at T+75min idle, user may
-          // not return for hours. removeNotification in useEffect cleanup
-          // handles dismissal. 0x7FFFFFFF = setTimeout max (~24.8 days).
-          timeoutMs: 0x7fffffff,
-        })
-        hintRef.current = mode
-        logEvent('tengu_idle_return_action', {
-          action: 'hint_shown' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          variant: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          idleMinutes: Math.round(idleMinutes),
-          messageCount: msgsRef.current.length,
-          totalInputTokens: totalTokens,
-        })
-      },
-      Math.max(0, remaining),
-      lastQueryCompletionTime,
-      addNotification,
-      messagesRef,
-      willowMode,
-      idleHintShownRef,
-    )
-    return () => {
-      clearTimeout(timer)
-      removeNotification('idle-return-hint')
-      idleHintShownRef.current = false
-    }
-  }, [lastQueryCompletionTime, isLoading, addNotification, removeNotification])
 
   // Voice, inbox/mailbox/scheduled-task pollers, abort/initial-load effects,
   // suspend-resume remount key, stop-hook spinner suffix, transcript
