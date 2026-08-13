@@ -168,7 +168,6 @@ export function useREPLInteraction(params: UseREPLInteractionParams) {
     // useScheduledTasks's effect (not here) since wrapping a hook call in a dynamic
     // condition would break rules-of-hooks.
     const assistantMode = store.getState().kairosEnabled
-    // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
     useScheduledTasks!({
       isLoading,
       assistantMode,

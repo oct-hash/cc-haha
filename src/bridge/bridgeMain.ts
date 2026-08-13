@@ -1793,7 +1793,6 @@ NOTES
   - You must be logged in with a Claude account that has a subscription
   - Run \`claude\` first in the directory to accept the workspace trust dialog
 ${serverNote}`
-  // biome-ignore lint/suspicious/noConsole: intentional help output
   console.log(help)
 }
 
@@ -1958,7 +1957,6 @@ export async function bridgeMain(args: string[]): Promise<void> {
       input: process.stdin,
       output: process.stdout,
     })
-    // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.log(
       '\nRemote Control lets you access this CLI session from the web (claude.ai/code)\nor the Claude app, so you can pick up where you left off on any device.\n\nYou can disconnect remote access anytime by running /remote-control again.\n',
     )
@@ -2081,7 +2079,6 @@ export async function bridgeMain(args: string[]): Promise<void> {
       input: process.stdin,
       output: process.stdout,
     })
-    // biome-ignore lint/suspicious/noConsole: intentional dialog output
     console.log(
       `\nClaude Remote Control is launching in spawn mode which lets you create new sessions in this project from Claude Code on Web or your Mobile app. Learn more here: https://code.claude.com/docs/en/remote-control\n\n` +
         `Spawn mode for this project:\n` +

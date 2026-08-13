@@ -90,7 +90,6 @@ export async function installPlugin(
   scope: InstallableScope = 'user',
 ): Promise<void> {
   try {
-    // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.log(`Installing plugin "${plugin}"...`)
 
     const result = await installPluginOp(plugin, scope)
@@ -99,7 +98,6 @@ export async function installPlugin(
       throw new Error(result.message)
     }
 
-    // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.log(`${figures.tick} ${result.message}`)
 
     // _PROTO_* routes to PII-tagged plugin_name/marketplace_name BQ columns.
@@ -141,7 +139,6 @@ export async function uninstallPlugin(
       throw new Error(result.message)
     }
 
-    // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.log(`${figures.tick} ${result.message}`)
 
     const { name, marketplace } = parsePluginIdentifier(result.pluginId || plugin)
@@ -174,7 +171,6 @@ export async function enablePlugin(plugin: string, scope?: InstallableScope): Pr
       throw new Error(result.message)
     }
 
-    // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.log(`${figures.tick} ${result.message}`)
 
     const { name, marketplace } = parsePluginIdentifier(result.pluginId || plugin)
@@ -207,7 +203,6 @@ export async function disablePlugin(plugin: string, scope?: InstallableScope): P
       throw new Error(result.message)
     }
 
-    // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.log(`${figures.tick} ${result.message}`)
 
     const { name, marketplace } = parsePluginIdentifier(result.pluginId || plugin)
@@ -238,7 +233,6 @@ export async function disableAllPlugins(): Promise<void> {
       throw new Error(result.message)
     }
 
-    // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.log(`${figures.tick} ${result.message}`)
 
     logEvent('tengu_plugin_disabled_all_cli', {})

@@ -513,7 +513,6 @@ export async function verifyApiKey(
           }),
         async (anthropic) => {
           const messages: MessageParam[] = [{ role: 'user', content: 'test' }]
-          // biome-ignore lint/plugin: API key verification is intentionally a minimal direct call
           await anthropic.beta.messages.create({
             model,
             max_tokens: 1,
@@ -802,7 +801,6 @@ export async function* executeNonStreamingRequest(
       const adjustedParams = adjustParamsForNonStreaming(retryParams, MAX_NON_STREAMING_TOKENS)
 
       try {
-        // biome-ignore lint/plugin: non-streaming API call
         return await anthropic.beta.messages.create(
           {
             ...adjustedParams,
@@ -1693,7 +1691,6 @@ async function* queryModel(
         // Use raw stream instead of BetaMessageStream to avoid O(n²) partial JSON parsing
         // BetaMessageStream calls partialParse() on every input_json_delta, which we don't need
         // since we handle tool input accumulation ourselves
-        // biome-ignore lint/plugin: main conversation loop handles attribution separately
         const result = await anthropic.beta.messages
           .create(
             { ...params, stream: true },

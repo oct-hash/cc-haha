@@ -112,7 +112,6 @@ export async function setup(
     if (isAgentSwarmsEnabled()) {
       const restoredIterm2Backup = await checkAndRestoreITerm2Backup()
       if (restoredIterm2Backup.status === 'restored') {
-        // biome-ignore lint/suspicious/noConsole:: intentional console output
         console.log(
           chalk.yellow(
             'Detected an interrupted iTerm2 setup. Your original settings have been restored. You may need to restart iTerm2 for the changes to take effect.',
@@ -132,7 +131,6 @@ export async function setup(
     try {
       const restoredTerminalBackup = await checkAndRestoreTerminalBackup()
       if (restoredTerminalBackup.status === 'restored') {
-        // biome-ignore lint/suspicious/noConsole:: intentional console output
         console.log(
           chalk.yellow(
             'Detected an interrupted Terminal.app setup. Your original settings have been restored. You may need to restart Terminal.app for the changes to take effect.',
@@ -251,7 +249,6 @@ export async function setup(
         worktreeSession.worktreePath,
       )
       if (tmuxResult.created) {
-        // biome-ignore lint/suspicious/noConsole:: intentional console output
         console.log(
           chalk.green(
             `Created tmux session: ${chalk.bold(tmuxSessionName)}\nTo attach: ${chalk.bold(`tmux attach -t ${tmuxSessionName}`)}`,

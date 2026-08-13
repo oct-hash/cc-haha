@@ -92,7 +92,6 @@ export function WorktreeExitDialog({ onDone, onCancel }: Props): React.ReactNode
     }
     void loadChanges()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   }, [worktreeSession])
   useEffect(() => {
     if (status === 'done') {

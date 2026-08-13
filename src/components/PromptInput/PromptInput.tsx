@@ -2334,7 +2334,6 @@ function PromptInput({
   }, [effortNotificationText, addNotification, removeNotification])
   useBuddyNotification()
   const companionSpeaking =
-    // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
     useAppState((s) => s.companionReaction !== undefined)
   const { columns, rows } = useTerminalSize()
   const textInputColumns = columns - 3 - companionReservedColumns(columns, companionSpeaking)
