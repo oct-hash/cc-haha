@@ -113,7 +113,7 @@ export function MCPToolListView(t0) {
         <Select
           options={toolOptions}
           onChange={(value) => {
-            const index_0 = parseInt(value)
+            const index_0 = parseInt(value, 10)
             const tool_0 = serverTools[index_0]
             if (tool_0) {
               onSelectTool(tool_0, index_0)
