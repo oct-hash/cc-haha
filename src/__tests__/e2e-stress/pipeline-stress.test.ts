@@ -132,7 +132,7 @@ describe('L1 — Basic CLI pipeline', () => {
     test('recovery CLI with invalid endpoint fails gracefully', {
       timeout: 60000,
     }, async () => {
-      const { exitCode, stderr } = await spawnHeadlessCLI(
+      const { exitCode } = await spawnHeadlessCLI(
         ['-p', 'reply OK', '--output-format', 'json'],
         { ANTHROPIC_BASE_URL: 'http://127.0.0.1:1' },
         60000,

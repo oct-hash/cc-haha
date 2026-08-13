@@ -152,7 +152,6 @@ export function useREPLToolContext(params: UseREPLToolContextParams) {
     customSystemPrompt,
     appendSystemPrompt,
     thinkingConfig,
-    messages,
     setMessages,
     disabled,
     setIsMessageSelectorVisible,

@@ -227,7 +227,6 @@ export function REPL({
     store,
     terminal,
     mainLoopModel,
-    localCommands,
     setLocalCommands,
     proactiveActive,
     isBriefOnly,
@@ -418,7 +417,6 @@ export function REPL({
   const {
     streamingText,
     setStreamingText,
-    reducedMotion,
     showStreamingText,
     onStreamingText,
     visibleStreamingText,
@@ -453,7 +451,6 @@ export function REPL({
     setIsSearchingHistory,
     isHelpOpen,
     setIsHelpOpen,
-    isTerminalFocused,
     terminalFocusRef,
     theme,
   } = useREPLUiState({
@@ -612,7 +609,6 @@ export function REPL({
     setExitFlow,
     isExiting,
     setIsExiting,
-    showingCostDialog,
     focusedInputDialog,
     hasSuppressedDialogs,
     focusedInputDialogRef,

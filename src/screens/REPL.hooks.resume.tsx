@@ -112,9 +112,6 @@ export function useREPLResume(params: UseREPLResumeParams) {
     contentReplacementStateRef,
     readFileState,
     bashTools,
-    bashToolsProcessedIdx,
-    discoveredSkillNamesRef,
-    loadedNestedMemoryPathsRef,
   } = params
   const resume = useCallback(
     async (sessionId: UUID, log: LogOption, entrypoint: ResumeEntrypoint) => {

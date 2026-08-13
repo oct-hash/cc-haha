@@ -508,7 +508,7 @@ export async function generateTaskReview(
 ): Promise<ReviewResult> {
   const desc = taskDescription || getTaskDescription(messages)
   const { stats, sequence } = extractToolUsage(messages)
-  const { rounds, userMsgs } = getConversationSummary(messages)
+  const { rounds } = getConversationSummary(messages)
 
   const taskType = identifyTaskType(desc)
 

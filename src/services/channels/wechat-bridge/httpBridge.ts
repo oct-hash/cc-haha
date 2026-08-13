@@ -13,13 +13,6 @@ import { getBridgeConfig } from './config.js'
 
 const CONFIG = getBridgeConfig()
 
-interface McpResponse {
-  jsonrpc: string
-  id: number
-  result?: unknown
-  error?: { code: number; message: string }
-}
-
 interface WechatMessage {
   from_user_id: string
   content: string
