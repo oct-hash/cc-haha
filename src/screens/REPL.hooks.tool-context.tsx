@@ -393,7 +393,7 @@ export function useREPLToolContext(params: UseREPLToolContextParams) {
   const getToolUseContext = useCallback(
     (
       messages: MessageType[],
-      newMessages: MessageType[],
+      _newMessages: MessageType[],
       abortController: AbortController,
       mainLoopModel: string,
     ): ProcessUserInputContext => {

@@ -241,7 +241,7 @@ export async function* query(
   // ── Auto-debate routing for decision-type questions ──────────────────────
   const lastUserText = getLastUserMessageText(params.messages)
   if (!params.skipAutoDebate && lastUserText && isDecisionQuestion(lastUserText)) {
-    const queryFn: QueryFn = async function* (prompt, abortController, modelOverride) {
+    const queryFn: QueryFn = async function* (prompt, _abortController, modelOverride) {
       const innerParams: QueryParams = {
         ...params,
         messages: [createUserMessage({ content: prompt })],

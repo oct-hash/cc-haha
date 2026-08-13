@@ -845,15 +845,15 @@ describe('DebateOrchestrator — Auto Mode', () => {
     // Agent responses start with moderate agreement but converge quickly
     let roundNum = 0
     const convergingResponses: Record<AgentKind, ResponseFactory> = {
-      'claude-haha': (msg: string) => {
+      'claude-haha': (_msg: string) => {
         roundNum++
         const r = Math.floor((roundNum - 1) / 3) + 1
         return `Round ${r} proposal.\n\nCONFIDENCE: 0.9\nFINAL ANSWER: Converged solution.`
       },
-      'claude-code': (msg: string) => {
+      'claude-code': (_msg: string) => {
         return `Round critique.\n\nCONFIDENCE: 0.88\nFINAL ANSWER: Good.`
       },
-      codex: (msg: string) => {
+      codex: (_msg: string) => {
         return `Round revision.\n\nCONFIDENCE: 0.92\nFINAL ANSWER: Perfect.`
       },
     }

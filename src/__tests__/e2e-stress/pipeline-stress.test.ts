@@ -239,7 +239,7 @@ describe('L2 — Medium stress', () => {
     test('10 concurrent --help → all succeed', {
       timeout: 60000,
     }, async () => {
-      const results = await runConcurrently(10, async (i) => {
+      const results = await runConcurrently(10, async (_i) => {
         try {
           const { exitCode } = await spawnHeadlessCLI(['--help'])
           return { exitCode }
@@ -254,7 +254,7 @@ describe('L2 — Medium stress', () => {
     test('10 concurrent --version → all succeed', {
       timeout: 60000,
     }, async () => {
-      const results = await runConcurrently(10, async (i) => {
+      const results = await runConcurrently(10, async (_i) => {
         try {
           const { exitCode, stdout } = await spawnHeadlessCLI(['--version'])
           return { exitCode: exitCode === 0 && stdout.includes('999.0.0-local') ? 0 : 1 }
@@ -272,7 +272,7 @@ describe('L2 — Medium stress', () => {
     test('10 concurrent cli.tsx --version → all succeed', {
       timeout: 120000,
     }, async () => {
-      const results = await runConcurrently(10, async (i) => {
+      const results = await runConcurrently(10, async (_i) => {
         try {
           const { exitCode } = await spawnMainCLI(['--version'], {}, 60000)
           return { exitCode }
@@ -341,7 +341,7 @@ describe('L3 — High stress', () => {
     test('30 concurrent --help → survival >= 80%', {
       timeout: 120000,
     }, async () => {
-      const results = await runConcurrently(30, async (i) => {
+      const results = await runConcurrently(30, async (_i) => {
         try {
           const { exitCode } = await spawnHeadlessCLI(['--help'], {}, 30000)
           return { exitCode }
@@ -359,7 +359,7 @@ describe('L3 — High stress', () => {
     test('50 concurrent --version → survival >= 70%', {
       timeout: 180000,
     }, async () => {
-      const results = await runConcurrently(50, async (i) => {
+      const results = await runConcurrently(50, async (_i) => {
         try {
           const { exitCode } = await spawnHeadlessCLI(['--version'], {}, 30000)
           return { exitCode }
@@ -551,7 +551,7 @@ describe('L4 — Extreme stress', () => {
     test('80 concurrent --help → survival >= 60%', {
       timeout: 240000,
     }, async () => {
-      const results = await runConcurrently(80, async (i) => {
+      const results = await runConcurrently(80, async (_i) => {
         try {
           const { exitCode } = await spawnHeadlessCLI(['--help'], {}, 30000)
           return { exitCode }
@@ -569,7 +569,7 @@ describe('L4 — Extreme stress', () => {
     test('100 concurrent --version → survival >= 50%', {
       timeout: 300000,
     }, async () => {
-      const results = await runConcurrently(100, async (i) => {
+      const results = await runConcurrently(100, async (_i) => {
         try {
           const { exitCode } = await spawnHeadlessCLI(['--version'], {}, 30000)
           return { exitCode }
@@ -616,7 +616,7 @@ describe('L4 — Extreme stress', () => {
       timeout: 240000,
     }, async () => {
       // Phase 1: extreme load — 80 concurrent --help
-      await runConcurrently(80, async (i) => {
+      await runConcurrently(80, async (_i) => {
         try {
           await spawnHeadlessCLI(['--help'], {}, 30000)
           return { exitCode: 0 }

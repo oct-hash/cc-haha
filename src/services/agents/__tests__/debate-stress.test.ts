@@ -125,7 +125,7 @@ describe('DebateOrchestrator — Concurrency (L2)', () => {
         },
         async *chatStream(
           _msg: string,
-          abortController: AbortController,
+          _abortController: AbortController,
         ): AsyncGenerator<NormalizedEvent, void, unknown> {
           status = 'running'
           timestamps.push(Date.now())

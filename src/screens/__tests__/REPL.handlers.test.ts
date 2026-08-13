@@ -960,7 +960,7 @@ describe('tryHandleImmediateCommand', () => {
 
   it('executes command and renders JSX when onDone is not called synchronously', async () => {
     const mockJsx = { type: 'div' }
-    const callFn = vi.fn((onDone: any) => {
+    const callFn = vi.fn((_onDone: any) => {
       // Don't call onDone — returns JSX instead
       return mockJsx
     })

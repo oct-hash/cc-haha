@@ -126,7 +126,7 @@ const TOOL_SEQUENCE_RULES = [
     name: '验证后执行',
     check: (sequence: string[]) => {
       const modifyCount = sequence.filter((t) => ['Edit', 'Write', 'Delete'].includes(t)).length
-      const verifyCount = sequence.filter((t) =>
+      const verifyCount = sequence.filter((_t) =>
         ['Bash'].some((b) => b.includes('test') || b.includes('verify')),
       ).length
       if (modifyCount > 2 && verifyCount === 0) {
@@ -256,7 +256,7 @@ function getConversationSummary(messages: Message[]): { rounds: number; userMsgs
  */
 function analyzeToolUsage(
   stats: ToolCall[],
-  sequence: string[],
+  _sequence: string[],
 ): {
   shouldHaveUsed: ReviewResult['toolUsage']['shouldHaveUsed']
   misused: ReviewResult['toolUsage']['misused']

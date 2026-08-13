@@ -836,13 +836,13 @@ async function toggleTeammateVisibility(teammate: TeammateStatus, teamName: stri
  * Hide a teammate pane using the backend abstraction.
  * Only available for ant users (gated for dead code elimination in external builds)
  */
-async function hideTeammate(teammate: TeammateStatus, teamName: string): Promise<void> {}
+async function hideTeammate(_teammate: TeammateStatus, _teamName: string): Promise<void> {}
 
 /**
  * Show a previously hidden teammate pane using the backend abstraction.
  * Only available for ant users (gated for dead code elimination in external builds)
  */
-async function showTeammate(teammate: TeammateStatus, teamName: string): Promise<void> {}
+async function showTeammate(_teammate: TeammateStatus, _teamName: string): Promise<void> {}
 
 /**
  * Send a mode change message to a single teammate

@@ -201,7 +201,7 @@ class WechatBridge {
 
       let stderr = ''
 
-      proc.stdout?.on('data', (data: Buffer) => {
+      proc.stdout?.on('data', (_data: Buffer) => {
         // Success output
       })
 

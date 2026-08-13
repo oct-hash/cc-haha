@@ -74,7 +74,7 @@ function makeSkillCmdArgs(overrides: Record<string, unknown> = {}) {
   }
 }
 
-async function sendInitSequence(client: Transport, server: Transport): Promise<void> {
+async function sendInitSequence(client: Transport, _server: Transport): Promise<void> {
   // Fire-and-forget initialize (server handles via onmessage)
   client.send({
     jsonrpc: '2.0',

@@ -69,7 +69,7 @@ export const goalCommand: Command = {
   contentLength: 0,
   progressMessage: 'processing goal',
   source: 'builtin',
-  async getPromptForCommand(args, context) {
+  async getPromptForCommand(args, _context) {
     const input = args.trim()
     const parts = input.split(/\s+/)
     const subcommand = parts[0]?.toLowerCase()

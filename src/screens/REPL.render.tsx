@@ -1626,13 +1626,13 @@ export function MainRender(props: MainRenderProps): ReactNode {
                     messages={messages}
                     preselectedMessage={messageSelectorPreselect}
                     onPreRestore={onCancel}
-                    onRestoreCode={async (message: UserMessage) => {
+                    onRestoreCode={async (_message: UserMessage) => {
                       // no-op: REPL handles fileHistoryRewind
                     }}
                     onSummarize={async (
-                      message: UserMessage,
-                      feedback?: string,
-                      direction?: string,
+                      _message: UserMessage,
+                      _feedback?: string,
+                      _direction?: string,
                     ) => {
                       // no-op: REPL handles partialCompactConversation
                     }}

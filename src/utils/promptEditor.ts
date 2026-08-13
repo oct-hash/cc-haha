@@ -102,7 +102,7 @@ export function editFileInEditor(filePath: string): EditorResult {
  */
 function recollapsePastedContent(
   editedPrompt: string,
-  originalPrompt: string,
+  _originalPrompt: string,
   pastedContents: Record<number, PastedContent>,
 ): string {
   let collapsed = editedPrompt

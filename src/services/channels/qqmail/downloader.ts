@@ -65,7 +65,7 @@ export class PDFDownloader {
     }
   }
 
-  async downloadMatched(matches: PaperMatch[], date: Date): Promise<SyncResult> {
+  async downloadMatched(matches: PaperMatch[], _date: Date): Promise<SyncResult> {
     const results: SyncResult = {
       downloaded: 0,
       pending: 0,
