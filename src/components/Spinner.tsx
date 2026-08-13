@@ -1,3 +1,4 @@
+// biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { feature } from 'bun:bundle'
 import figures from 'figures'
 import sample from 'lodash-es/sample.js'
@@ -22,7 +23,6 @@ import { useSettings } from '../hooks/useSettings.js'
 import { useTasksV2 } from '../hooks/useTasksV2.js'
 import { useTerminalSize } from '../hooks/useTerminalSize.js'
 import { stringWidth } from '../ink/stringWidth.js'
-// biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { Box, Text, useAnimationFrame } from '../ink.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { useAppState } from '../state/AppState.js'

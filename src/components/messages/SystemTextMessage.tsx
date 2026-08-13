@@ -1,3 +1,4 @@
+// biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { feature } from 'bun:bundle'
 import figures from 'figures'
 import sample from 'lodash-es/sample.js'
@@ -6,7 +7,6 @@ import * as React from 'react'
 import { useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { BLACK_CIRCLE, REFERENCE_MARK, TEARDROP_ASTERISK } from '../../constants/figures.js'
-// biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { Box, Text, type TextProps } from '../../ink.js'
 import { openPath } from '../../utils/browser.js'
 import { FilePathLink } from '../FilePathLink.js'
