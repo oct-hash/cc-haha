@@ -211,7 +211,7 @@ export function DiscoverPlugins({
         const errorResult = formatMarketplaceLoadingErrors(failures, successCount)
         if (errorResult) {
           if (errorResult.type === 'warning') {
-            setWarning(errorResult.message + '. Showing available plugins.')
+            setWarning(`${errorResult.message}. Showing available plugins.`)
           } else {
             throw new Error(errorResult.message)
           }

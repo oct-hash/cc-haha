@@ -861,10 +861,10 @@ export async function runHeadless(
         throw new Error('No messages returned')
       }
       if (options.verbose) {
-        writeToStdout(jsonStringify(messages) + '\n')
+        writeToStdout(`${jsonStringify(messages)}\n`)
         break
       }
-      writeToStdout(jsonStringify(lastMessage) + '\n')
+      writeToStdout(`${jsonStringify(lastMessage)}\n`)
       break
     case 'stream-json':
       // already logged above
@@ -876,7 +876,7 @@ export async function runHeadless(
       switch (lastMessage.subtype) {
         case 'success':
           writeToStdout(
-            lastMessage.result.endsWith('\n') ? lastMessage.result : lastMessage.result + '\n',
+            lastMessage.result.endsWith('\n') ? lastMessage.result : `${lastMessage.result}\n`,
           )
           break
         case 'error_during_execution':
@@ -4483,9 +4483,9 @@ function emitLoadError(message: string, outputFormat: string | undefined): void 
       uuid: randomUUID(),
       errors: [message],
     }
-    process.stdout.write(jsonStringify(errorResult) + '\n')
+    process.stdout.write(`${jsonStringify(errorResult)}\n`)
   } else {
-    process.stderr.write(message + '\n')
+    process.stderr.write(`${message}\n`)
   }
 }
 
@@ -4542,7 +4542,7 @@ async function loadInitialMessages(
         if (feature('COORDINATOR_MODE') && coordinatorModeModule) {
           const warning = coordinatorModeModule.matchSessionMode(result.mode)
           if (warning) {
-            process.stderr.write(warning + '\n')
+            process.stderr.write(`${warning}\n`)
             // Refresh agent definitions to reflect the mode switch
             const { getAgentDefinitionsWithOverrides, getActiveAgentsFromList } =
               // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -4721,7 +4721,7 @@ async function loadInitialMessages(
       if (feature('COORDINATOR_MODE') && coordinatorModeModule) {
         const warning = coordinatorModeModule.matchSessionMode(result.mode)
         if (warning) {
-          process.stderr.write(warning + '\n')
+          process.stderr.write(`${warning}\n`)
           // Refresh agent definitions to reflect the mode switch
           const { getAgentDefinitionsWithOverrides, getActiveAgentsFromList } =
             // eslint-disable-next-line @typescript-eslint/no-require-imports

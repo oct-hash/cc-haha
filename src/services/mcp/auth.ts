@@ -1161,7 +1161,7 @@ export async function performMCPOAuthFlow(
           : {}),
       })
     } else {
-      throw new Error('Unexpected auth result: ' + result)
+      throw new Error(`Unexpected auth result: ${result}`)
     }
   } catch (error) {
     logMCPDebug(serverName, `Error during auth completion: ${error}`)

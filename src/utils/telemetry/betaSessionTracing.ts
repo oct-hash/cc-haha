@@ -109,7 +109,7 @@ export function truncateContent(
   }
 
   return {
-    content: content.slice(0, maxSize) + '\n\n[TRUNCATED - Content exceeds 60KB limit]',
+    content: `${content.slice(0, maxSize)}\n\n[TRUNCATED - Content exceeds 60KB limit]`,
     truncated: true,
   }
 }

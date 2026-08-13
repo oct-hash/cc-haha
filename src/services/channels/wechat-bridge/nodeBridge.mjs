@@ -10,9 +10,9 @@ const CONFIG = {
   weixinAccountId: 'e87c180011fe-im-bot',
   claudeApiKey: process.env.ANTHROPIC_AUTH_TOKEN || '',
   claudeApiUrl:
-    (process.env.ANTHROPIC_BASE_URL?.endsWith('/v1')
+    `${process.env.ANTHROPIC_BASE_URL?.endsWith('/v1')
       ? process.env.ANTHROPIC_BASE_URL
-      : process.env.ANTHROPIC_BASE_URL + '/v1') + '/messages',
+      : `${process.env.ANTHROPIC_BASE_URL}/v1`}/messages`,
   claudeModel: process.env.ANTHROPIC_MODEL || 'MiniMax-M2.7',
   pollIntervalMs: 5000,
   maxResponseTimeMs: 90000,

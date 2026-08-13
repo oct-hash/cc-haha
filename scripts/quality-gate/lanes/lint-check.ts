@@ -159,7 +159,7 @@ export async function runLintCheck(ctx: LaneExecutionContext): Promise<LaneResul
     const stdout = await new Response(proc.stdout).text()
     const stderr = await new Response(proc.stderr).text()
     exitCode = await proc.exited
-    issues = parseBiomeIssues(stdout + '\n' + stderr)
+    issues = parseBiomeIssues(`${stdout}\n${stderr}`)
   } catch (err) {
     return {
       id: 'lint-check',

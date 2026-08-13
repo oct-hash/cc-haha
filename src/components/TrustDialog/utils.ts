@@ -47,7 +47,7 @@ function hasBashPermission(rules: PermissionRule[]): boolean {
     (rule) =>
       rule.ruleBehavior === 'allow' &&
       (rule.ruleValue.toolName === BASH_TOOL_NAME ||
-        rule.ruleValue.toolName.startsWith(BASH_TOOL_NAME + '(')),
+        rule.ruleValue.toolName.startsWith(`${BASH_TOOL_NAME}(`)),
   )
 }
 

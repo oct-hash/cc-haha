@@ -674,7 +674,7 @@ function startRemoteSessionPolling(taskId: string, context: TaskContext): () => 
           })
           .join('\n')
         if (deltaText) {
-          appendTaskOutput(taskId, deltaText + '\n')
+          appendTaskOutput(taskId, `${deltaText}\n`)
         }
       }
       if (response.sessionStatus === 'archived') {

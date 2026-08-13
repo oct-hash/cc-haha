@@ -1081,7 +1081,7 @@ export const connectToServer = memoize(
       const rawInstructions = client.getInstructions()
       let instructions = rawInstructions
       if (rawInstructions && rawInstructions.length > MAX_MCP_DESCRIPTION_LENGTH) {
-        instructions = rawInstructions.slice(0, MAX_MCP_DESCRIPTION_LENGTH) + '… [truncated]'
+        instructions = `${rawInstructions.slice(0, MAX_MCP_DESCRIPTION_LENGTH)}… [truncated]`
         logMCPDebug(
           name,
           `Server instructions truncated from ${rawInstructions.length} to ${MAX_MCP_DESCRIPTION_LENGTH} chars`,
@@ -1664,7 +1664,7 @@ export const fetchToolsForClient = memoizeWithLRU(
             async prompt() {
               const desc = tool.description ?? ''
               return desc.length > MAX_MCP_DESCRIPTION_LENGTH
-                ? desc.slice(0, MAX_MCP_DESCRIPTION_LENGTH) + '… [truncated]'
+                ? `${desc.slice(0, MAX_MCP_DESCRIPTION_LENGTH)}… [truncated]`
                 : desc
             },
             isConcurrencySafe() {
@@ -1910,7 +1910,7 @@ export const fetchCommandsForClient = memoizeWithLRU(
         const argNames = Object.values(prompt.arguments ?? {}).map((k) => k.name)
         return {
           type: 'prompt' as const,
-          name: 'mcp__' + normalizeNameForMCP(client.name) + '__' + prompt.name,
+          name: `mcp__${normalizeNameForMCP(client.name)}__${prompt.name}`,
           description: prompt.description ?? '',
           hasUserSpecifiedDescription: !!prompt.description,
           contentLength: 0, // Dynamic MCP content
@@ -2728,7 +2728,7 @@ export async function callMCPToolWithUrlElicitationRetry({
           )
           if (hookResponse.action !== 'accept') {
             return {
-              content: `URL elicitation was ${hookResponse.action === 'decline' ? 'declined' : hookResponse.action + 'ed'} by a hook. The tool "${tool}" could not complete because it requires the user to open a URL.`,
+              content: `URL elicitation was ${hookResponse.action === 'decline' ? 'declined' : `${hookResponse.action}ed`} by a hook. The tool "${tool}" could not complete because it requires the user to open a URL.`,
             }
           }
           // Hook accepted — skip the UI and proceed to retry
@@ -2803,10 +2803,10 @@ export async function callMCPToolWithUrlElicitationRetry({
         if (finalResult.action !== 'accept') {
           logMCPDebug(
             serverName,
-            `User ${finalResult.action === 'decline' ? 'declined' : finalResult.action + 'ed'} URL elicitation ${elicitationId}`,
+            `User ${finalResult.action === 'decline' ? 'declined' : `${finalResult.action}ed`} URL elicitation ${elicitationId}`,
           )
           return {
-            content: `URL elicitation was ${finalResult.action === 'decline' ? 'declined' : finalResult.action + 'ed'} by the user. The tool "${tool}" could not complete because it requires the user to open a URL.`,
+            content: `URL elicitation was ${finalResult.action === 'decline' ? 'declined' : `${finalResult.action}ed`} by the user. The tool "${tool}" could not complete because it requires the user to open a URL.`,
           }
         }
 

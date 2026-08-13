@@ -1347,7 +1347,7 @@ export function isAllowlistedCommand(cmd: ParsedCommandElement, originalCommand:
       // For cmdlets, normalize Unicode dash to ASCII hyphen for safeFlags
       // comparison (safeFlags entries are always written with ASCII `-`).
       // Native-exe safeFlags are stored with `/` (e.g. '/FO') — don't touch.
-      let paramName = isCmdlet ? '-' + arg.slice(1) : arg
+      let paramName = isCmdlet ? `-${arg.slice(1)}` : arg
       const colonIndex = paramName.indexOf(':')
       if (colonIndex > 0) {
         paramName = paramName.substring(0, colonIndex)

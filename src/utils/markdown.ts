@@ -192,7 +192,7 @@ export function formatToken(
         return token.text
       }
       if (parent?.type === 'list_item') {
-        return `${orderedListNumber === null ? '-' : getListNumber(listDepth, orderedListNumber) + '.'} ${token.tokens ? token.tokens.map((_) => formatToken(_, theme, listDepth, orderedListNumber, token, highlight)).join('') : linkifyIssueReferences(token.text)}${EOL}`
+        return `${orderedListNumber === null ? '-' : `${getListNumber(listDepth, orderedListNumber)}.`} ${token.tokens ? token.tokens.map((_) => formatToken(_, theme, listDepth, orderedListNumber, token, highlight)).join('') : linkifyIssueReferences(token.text)}${EOL}`
       }
       return linkifyIssueReferences(token.text)
     case 'table': {
@@ -223,7 +223,7 @@ export function formatToken(
         const displayText = getDisplayText(header.tokens)
         const width = columnWidths[index]!
         const align = tableToken.align?.[index]
-        tableOutput += padAligned(content, stringWidth(displayText), width, align) + ' | '
+        tableOutput += `${padAligned(content, stringWidth(displayText), width, align)} | `
       })
       tableOutput = tableOutput.trimEnd() + EOL
 
@@ -232,7 +232,7 @@ export function formatToken(
       columnWidths.forEach((width) => {
         // Always use dashes, don't show alignment colons in the output
         const separator = '-'.repeat(width + 2) // +2 for spaces on each side
-        tableOutput += separator + '|'
+        tableOutput += `${separator}|`
       })
       tableOutput += EOL
 
@@ -245,7 +245,7 @@ export function formatToken(
           const displayText = getDisplayText(cell.tokens)
           const width = columnWidths[index]!
           const align = tableToken.align?.[index]
-          tableOutput += padAligned(content, stringWidth(displayText), width, align) + ' | '
+          tableOutput += `${padAligned(content, stringWidth(displayText), width, align)} | `
         })
         tableOutput = tableOutput.trimEnd() + EOL
       })

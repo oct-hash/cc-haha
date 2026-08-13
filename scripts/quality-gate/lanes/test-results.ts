@@ -16,7 +16,7 @@ export async function runTestResults(ctx: LaneExecutionContext): Promise<LaneRes
     const stderr = await new Response(proc.stderr).text()
     const exitCode = await proc.exited
 
-    const details = parseTestOutput(stdout + '\n' + stderr)
+    const details = parseTestOutput(`${stdout}\n${stderr}`)
 
     return {
       id: 'test-results',

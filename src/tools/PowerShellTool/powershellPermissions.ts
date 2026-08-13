@@ -224,7 +224,7 @@ function filterRulesByContentsMatchingInput(
                 if (strEquals(cmd, rule.prefix)) {
                   return true
                 }
-                return strStartsWith(cmd, rule.prefix + ' ')
+                return strStartsWith(cmd, `${rule.prefix} `)
               }
             }
             break
@@ -282,7 +282,7 @@ function filterRulesByContentsMatchingInput(
           } else {
             if (
               strEquals(canonicalCommand, canonicalPrefix) ||
-              strStartsWith(canonicalCommand, canonicalPrefix + ' ')
+              strStartsWith(canonicalCommand, `${canonicalPrefix} `)
             ) {
               return true
             }

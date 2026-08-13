@@ -485,7 +485,7 @@ describe('L4 — 混沌 & 竞态', () => {
   it('L4.7 — 正则 ReDoS 防护 (无回溯爆炸)', () => {
     // 构造可能触发灾难性回溯的输入
     const dangerous =
-      'Should I choose ' + 'a'.repeat(1000) + ' or ' + 'b'.repeat(1000) + ' for this?'
+      `Should I choose ${'a'.repeat(1000)} or ${'b'.repeat(1000)} for this?`
     const start = performance.now()
     const result = detectDecisionQuestion(dangerous)
     const elapsed = performance.now() - start

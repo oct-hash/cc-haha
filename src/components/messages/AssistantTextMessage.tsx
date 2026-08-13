@@ -252,7 +252,7 @@ export function AssistantTextMessage(t0) {
           text === API_ERROR_MESSAGE_PREFIX
             ? `${API_ERROR_MESSAGE_PREFIX}: Please wait a moment and try again.`
             : truncated
-              ? text.slice(0, MAX_API_ERROR_CHARS) + '\u2026'
+              ? `${text.slice(0, MAX_API_ERROR_CHARS)}\u2026`
               : text
         let t3
         if ($[15] !== t2) {

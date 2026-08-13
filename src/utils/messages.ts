@@ -2347,7 +2347,7 @@ function joinTextAtSeam(a: ContentBlockParam[], b: ContentBlockParam[]): Content
   const lastA = a.at(-1)
   const firstB = b[0]
   if (lastA?.type === 'text' && firstB?.type === 'text') {
-    return [...a.slice(0, -1), { ...lastA, text: lastA.text + '\n' }, ...b]
+    return [...a.slice(0, -1), { ...lastA, text: `${lastA.text}\n` }, ...b]
   }
   return [...a, ...b]
 }
@@ -2535,7 +2535,7 @@ export function normalizeContentFromAPI(
                 agentId,
               )
             } catch (error) {
-              logError(new Error('Error normalizing tool input: ' + error))
+              logError(new Error(`Error normalizing tool input: ${error}`))
               // Keep the original input if normalization fails
             }
           }
@@ -3395,7 +3395,7 @@ Read the team config to discover your teammates' names. Check the task list peri
       const maxSelectionLength = 2000
       const content =
         attachment.content.length > maxSelectionLength
-          ? attachment.content.substring(0, maxSelectionLength) + '\n... (truncated)'
+          ? `${attachment.content.substring(0, maxSelectionLength)}\n... (truncated)`
           : attachment.content
 
       return wrapMessagesInSystemReminder([

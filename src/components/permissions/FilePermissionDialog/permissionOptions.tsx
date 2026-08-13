@@ -27,7 +27,7 @@ export function isInClaudeFolder(filePath: string): boolean {
   return (
     normalizedAbsolutePath.startsWith(normalizedClaudeFolderPath + sep.toLowerCase()) ||
     // Also match case where sep is / on posix systems
-    normalizedAbsolutePath.startsWith(normalizedClaudeFolderPath + '/')
+    normalizedAbsolutePath.startsWith(`${normalizedClaudeFolderPath}/`)
   )
 }
 
@@ -43,7 +43,7 @@ export function isInGlobalClaudeFolder(filePath: string): boolean {
   const normalizedGlobalClaudeFolderPath = normalizeCaseForComparison(globalClaudeFolderPath)
   return (
     normalizedAbsolutePath.startsWith(normalizedGlobalClaudeFolderPath + sep.toLowerCase()) ||
-    normalizedAbsolutePath.startsWith(normalizedGlobalClaudeFolderPath + '/')
+    normalizedAbsolutePath.startsWith(`${normalizedGlobalClaudeFolderPath}/`)
   )
 }
 export type PermissionOption =

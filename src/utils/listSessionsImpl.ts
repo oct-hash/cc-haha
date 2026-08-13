@@ -373,7 +373,7 @@ async function gatherProjectCandidates(
       // /root/project matching /root/project-foo.
       const isMatch =
         dirName === prefix ||
-        (prefix.length >= MAX_SANITIZED_LENGTH && dirName.startsWith(prefix + '-'))
+        (prefix.length >= MAX_SANITIZED_LENGTH && dirName.startsWith(`${prefix}-`))
       if (isMatch) {
         seenDirs.add(dirName)
         all.push(...(await listCandidates(join(projectsDir, dirent.name), doStat, wtPath)))

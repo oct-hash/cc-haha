@@ -37,7 +37,7 @@ export function getCharBudget(contextWindowTokens?: number): number {
 function getCommandDescription(cmd: Command): string {
   const desc = cmd.whenToUse ? `${cmd.description} - ${cmd.whenToUse}` : cmd.description
   return desc.length > MAX_LISTING_DESC_CHARS
-    ? desc.slice(0, MAX_LISTING_DESC_CHARS - 1) + '\u2026'
+    ? `${desc.slice(0, MAX_LISTING_DESC_CHARS - 1)}\u2026`
     : desc
 }
 

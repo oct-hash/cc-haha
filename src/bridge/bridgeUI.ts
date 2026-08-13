@@ -281,17 +281,17 @@ export function createBridgeLogger(options: {
       regenerateQr(connectUrl)
 
       if (verbose) {
-        write(chalk.dim(`Remote Control`) + ` v${MACRO.VERSION}\n`)
+        write(`${chalk.dim(`Remote Control`)} v${MACRO.VERSION}\n`)
       }
       if (verbose) {
         if (config.spawnMode !== 'single-session') {
-          write(chalk.dim(`Spawn mode: `) + `${config.spawnMode}\n`)
-          write(chalk.dim(`Max concurrent sessions: `) + `${config.maxSessions}\n`)
+          write(`${chalk.dim(`Spawn mode: `)}${config.spawnMode}\n`)
+          write(`${chalk.dim(`Max concurrent sessions: `)}${config.maxSessions}\n`)
         }
-        write(chalk.dim(`Environment ID: `) + `${environmentId}\n`)
+        write(`${chalk.dim(`Environment ID: `)}${environmentId}\n`)
       }
       if (config.sandbox) {
-        write(chalk.dim(`Sandbox: `) + `${chalk.green('Enabled')}\n`)
+        write(`${chalk.dim(`Sandbox: `)}${chalk.green('Enabled')}\n`)
       }
       write('\n')
 
@@ -324,17 +324,17 @@ export function createBridgeLogger(options: {
     },
 
     logStatus(message: string): void {
-      printLog(chalk.dim(`[${timestamp()}]`) + ` ${message}\n`)
+      printLog(`${chalk.dim(`[${timestamp()}]`)} ${message}\n`)
     },
 
     logVerbose(message: string): void {
       if (verbose) {
-        printLog(chalk.dim(`[${timestamp()}] ${message}`) + '\n')
+        printLog(`${chalk.dim(`[${timestamp()}] ${message}`)}\n`)
       }
     },
 
     logError(message: string): void {
-      printLog(chalk.red(`[${timestamp()}] Error: ${message}`) + '\n')
+      printLog(`${chalk.red(`[${timestamp()}] Error: ${message}`)}\n`)
     },
 
     logReconnected(disconnectedMs: number): void {

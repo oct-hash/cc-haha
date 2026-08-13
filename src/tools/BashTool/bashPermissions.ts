@@ -857,7 +857,7 @@ function filterRulesByContentsMatchingInput(
                 if (cmdToMatch === bashRule.prefix) {
                   return true
                 }
-                if (cmdToMatch.startsWith(bashRule.prefix + ' ')) {
+                if (cmdToMatch.startsWith(`${bashRule.prefix} `)) {
                   return true
                 }
                 // Also match "xargs <prefix>" for bare xargs with no flags.
@@ -865,11 +865,11 @@ function filterRulesByContentsMatchingInput(
                 // and deny rules like Bash(rm:*) to block "xargs rm file".
                 // Natural word-boundary: "xargs -n1 grep" does NOT start with
                 // "xargs grep " so flagged xargs invocations are not matched.
-                const xargsPrefix = 'xargs ' + bashRule.prefix
+                const xargsPrefix = `xargs ${bashRule.prefix}`
                 if (cmdToMatch === xargsPrefix) {
                   return true
                 }
-                return cmdToMatch.startsWith(xargsPrefix + ' ')
+                return cmdToMatch.startsWith(`${xargsPrefix} `)
               }
             }
             return false

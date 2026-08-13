@@ -59,7 +59,7 @@ export function extractDescriptionFromMarkdown(
       const text = headerMatch?.[1] ?? trimmed
 
       // Return the text, limited to reasonable length
-      return text.length > 100 ? text.substring(0, 97) + '...' : text
+      return text.length > 100 ? `${text.substring(0, 97)}...` : text
     }
   }
   return defaultDescription

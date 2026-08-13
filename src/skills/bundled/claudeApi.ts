@@ -125,7 +125,7 @@ function buildPrompt(lang: DetectedLanguage | null, args: string, content: Skill
     const filePaths = getFilesForLanguage(lang, content)
     const readingGuide = INLINE_READING_GUIDE.replace(/\{lang\}/g, lang)
     parts.push(readingGuide)
-    parts.push('---\n\n## Included Documentation\n\n' + buildInlineReference(filePaths, content))
+    parts.push(`---\n\n## Included Documentation\n\n${buildInlineReference(filePaths, content)}`)
   } else {
     // No language detected — include all docs and let the model ask
     parts.push(INLINE_READING_GUIDE.replace(/\{lang\}/g, 'unknown'))

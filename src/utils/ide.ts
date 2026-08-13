@@ -932,7 +932,7 @@ function getVSCodeIDECommandByParentProcess(): string | null {
             const folderPathEnd = appIndex + appName.length
             // These are all known VSCode variants with the same structure
             return (
-              command.substring(0, folderPathEnd) + '/Contents/Resources/app/bin/' + executableName
+              `${command.substring(0, folderPathEnd)}/Contents/Resources/app/bin/${executableName}`
             )
           }
         }
@@ -978,11 +978,11 @@ async function getVSCodeIDECommand(ideType: IdeType): Promise<string | null> {
   const ext = getPlatform() === 'windows' ? '.cmd' : ''
   switch (ideType) {
     case 'vscode':
-      return 'code' + ext
+      return `code${ext}`
     case 'cursor':
-      return 'cursor' + ext
+      return `cursor${ext}`
     case 'windsurf':
-      return 'windsurf' + ext
+      return `windsurf${ext}`
     default:
       break
   }

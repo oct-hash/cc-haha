@@ -54,7 +54,7 @@ export function ExportDialog({
   const handleFilenameSubmit = () => {
     const finalFilename = filename.endsWith('.txt')
       ? filename
-      : filename.replace(/\.[^.]+$/, '') + '.txt'
+      : `${filename.replace(/\.[^.]+$/, '')}.txt`
     const filepath = join(getCwd(), finalFilename)
     try {
       writeFileSync_DEPRECATED(filepath, content, {

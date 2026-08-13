@@ -98,7 +98,7 @@ async function main() {
     `\n  Total renderable agents: ${totalRendered + builtIn.length} (${totalRendered} non-built-in + ${builtIn.length} built-in)`,
   )
 
-  console.log('\n' + '='.repeat(60))
+  console.log(`\n${'='.repeat(60)}`)
   console.log('TEST COMPLETE')
   console.log('='.repeat(60))
 }

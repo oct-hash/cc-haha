@@ -90,7 +90,7 @@ function uninstall(): void {
   const before = existing.slice(0, markerIndex).replace(/\n+$/, '')
 
   if (before.trim()) {
-    writeFileSync(HOOK_PATH, before + '\n')
+    writeFileSync(HOOK_PATH, `${before}\n`)
     console.log('\n  Quality Gate pre-push hook removed. Other hook content preserved.\n')
   } else {
     // Only our hook was there — remove the file
@@ -113,7 +113,7 @@ if (arg === '--uninstall') {
     if (existing.includes(MARKER)) {
       const markerIndex = existing.indexOf(MARKER)
       const before = existing.slice(0, markerIndex).replace(/\n+$/, '')
-      writeFileSync(HOOK_PATH, before ? before + '\n' : '')
+      writeFileSync(HOOK_PATH, before ? `${before}\n` : '')
     }
   }
   install()

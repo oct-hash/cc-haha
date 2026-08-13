@@ -1466,7 +1466,7 @@ export function getVariablesByScope(
   parsed: ParsedPowerShellCommand,
   scope: string,
 ): ParsedVariable[] {
-  const prefix = scope.toLowerCase() + ':'
+  const prefix = `${scope.toLowerCase()}:`
   return parsed.variables.filter((v) => v.path.toLowerCase().startsWith(prefix))
 }
 

@@ -36,7 +36,7 @@ export function extractFirstPrompt(messages: Message[]): string {
   // Take first line only and limit length
   result = result.split('\n')[0] || ''
   if (result.length > 50) {
-    result = result.substring(0, 49) + '…'
+    result = `${result.substring(0, 49)}…`
   }
   return result
 }
@@ -66,7 +66,7 @@ export async function call(
   if (filename) {
     const finalFilename = filename.endsWith('.txt')
       ? filename
-      : filename.replace(/\.[^.]+$/, '') + '.txt'
+      : `${filename.replace(/\.[^.]+$/, '')}.txt`
     const filepath = join(getCwd(), finalFilename)
     try {
       writeFileSync_DEPRECATED(filepath, content, {

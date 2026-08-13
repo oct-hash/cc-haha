@@ -157,7 +157,7 @@ export async function runTypeCheck(ctx: LaneExecutionContext): Promise<LaneResul
     const stdout = await new Response(proc.stdout).text()
     const stderr = await new Response(proc.stderr).text()
     tscExitCode = await proc.exited
-    allErrors = parseTscAll(stdout + '\n' + stderr)
+    allErrors = parseTscAll(`${stdout}\n${stderr}`)
   } catch (err) {
     return {
       id: 'typecheck',

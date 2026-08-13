@@ -96,7 +96,7 @@ export function MemoryStep() {
               getSystemPrompt:
                 isAutoMemoryEnabled() && memory && agentType
                   ? () =>
-                      wizardData.systemPrompt + '\n\n' + loadAgentMemoryPrompt(agentType, memory)
+                      `${wizardData.systemPrompt}\n\n${loadAgentMemoryPrompt(agentType, memory)}`
                   : () => wizardData.systemPrompt,
             }
           : undefined,

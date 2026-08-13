@@ -62,7 +62,7 @@ export function readJSON<T>(path: string): T | null {
 export function writeJSON(path: string, data: unknown): void {
   const dir = dirname(path)
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
-  Bun.write(path, JSON.stringify(data, null, 2) + '\n')
+  Bun.write(path, `${JSON.stringify(data, null, 2)}\n`)
 }
 
 export function readText(path: string): string | null {
@@ -153,5 +153,5 @@ export function runId(): string {
 /** Mask API keys in output */
 export function maskKey(key: string): string {
   if (key.length <= 8) return '***'
-  return key.slice(0, 4) + '...' + key.slice(-4)
+  return `${key.slice(0, 4)}...${key.slice(-4)}`
 }

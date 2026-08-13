@@ -437,7 +437,7 @@ export function parseAgentFromJson(
       ...(disallowedTools !== undefined ? { disallowedTools } : {}),
       getSystemPrompt: () => {
         if (isAutoMemoryEnabled() && parsed.memory) {
-          return systemPrompt + '\n\n' + loadAgentMemoryPrompt(name, parsed.memory)
+          return `${systemPrompt}\n\n${loadAgentMemoryPrompt(name, parsed.memory)}`
         }
         return systemPrompt
       },
@@ -662,7 +662,7 @@ export function parseAgentFromMarkdown(
       getSystemPrompt: () => {
         if (isAutoMemoryEnabled() && memory) {
           const memoryPrompt = loadAgentMemoryPrompt(agentType, memory)
-          return systemPrompt + '\n\n' + memoryPrompt
+          return `${systemPrompt}\n\n${memoryPrompt}`
         }
         return systemPrompt
       },

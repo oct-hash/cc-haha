@@ -495,7 +495,7 @@ function highlightLine(
   theme: Theme,
 ): Block[] {
   // syntect-parity: feed a trailing \n so line comments terminate, then strip
-  const code = line + '\n'
+  const code = `${line}\n`
   if (!state.lang) {
     return [[defaultStyle(theme), code]]
   }

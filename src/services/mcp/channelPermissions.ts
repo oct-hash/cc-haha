@@ -153,7 +153,7 @@ export function shortRequestId(toolUseID: string): string {
 export function truncateForPreview(input: unknown): string {
   try {
     const s = jsonStringify(input)
-    return s.length > 200 ? s.slice(0, 200) + '…' : s
+    return s.length > 200 ? `${s.slice(0, 200)}…` : s
   } catch {
     return '(unserializable)'
   }

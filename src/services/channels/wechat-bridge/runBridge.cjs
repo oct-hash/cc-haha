@@ -7,7 +7,7 @@ const ANTHROPIC_AUTH_TOKEN = process.env.ANTHROPIC_AUTH_TOKEN
 const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.minimaxi.com/anthropic'
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'MiniMax-M2.7'
 const CLAUDE_API_URL =
-  (ANTHROPIC_BASE_URL?.endsWith('/v1') ? ANTHROPIC_BASE_URL : ANTHROPIC_BASE_URL + '/v1') +
+  (ANTHROPIC_BASE_URL?.endsWith('/v1') ? ANTHROPIC_BASE_URL : `${ANTHROPIC_BASE_URL}/v1`) +
   '/messages'
 
 const weixinMcpBin = 'D:/npm-cache/_npx/7e052a239a18d57c/node_modules/weixin-mcp/dist/cli.js'

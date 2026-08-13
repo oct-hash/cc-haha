@@ -210,5 +210,5 @@ export function createContentSummary(content: ContentBlockParam[]): string {
     summary.push(`[${textCount} text ${plural(textCount, 'block')}]`)
   }
 
-  return `MCP Result: ${summary.join(', ')}${parts.length > 0 ? '\n\n' + parts.join('\n\n') : ''}`
+  return `MCP Result: ${summary.join(', ')}${parts.length > 0 ? `\n\n${parts.join('\n\n')}` : ''}`
 }

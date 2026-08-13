@@ -105,7 +105,7 @@ function truncateLine(text: string, maxLen: number): string {
     result += char
     width += charWidth
   }
-  return result + '\u2026'
+  return `${result}\u2026`
 }
 type PickerProps = {
   fullText: string

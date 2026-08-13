@@ -304,7 +304,7 @@ async function immediateFlushHistory(): Promise<void> {
       },
     })
 
-    const jsonLines = pendingEntries.map((entry) => jsonStringify(entry) + '\n')
+    const jsonLines = pendingEntries.map((entry) => `${jsonStringify(entry)}\n`)
     pendingEntries = []
 
     await appendFile(historyPath, jsonLines.join(''), { mode: 0o600 })

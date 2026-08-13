@@ -2134,7 +2134,7 @@ async function run(): Promise<CommanderCommand> {
         }
         if (allErrors.length > 0) {
           const formattedErrors = allErrors
-            .map((err) => `${err.path ? err.path + ': ' : ''}${err.message}`)
+            .map((err) => `${err.path ? `${err.path}: ` : ''}${err.message}`)
             .join('\n')
           logForDebugging(
             `--mcp-config validation failed (${allErrors.length} errors): ${formattedErrors}`,
@@ -3496,7 +3496,7 @@ async function run(): Promise<CommanderCommand> {
         // Validate org restriction for non-interactive sessions
         const orgValidation = await validateForceLoginOrg()
         if (!orgValidation.valid) {
-          process.stderr.write(orgValidation.message + '\n')
+          process.stderr.write(`${orgValidation.message}\n`)
           process.exit(1)
         }
 
@@ -4618,7 +4618,7 @@ async function run(): Promise<CommanderCommand> {
               messages = result.messages
             } catch (error) {
               if (error instanceof TeleportOperationError) {
-                process.stderr.write(error.formattedMessage + '\n')
+                process.stderr.write(`${error.formattedMessage}\n`)
               } else {
                 logError(error)
                 process.stderr.write(chalk.red(`Error: ${errorMessage(error)}\n`))

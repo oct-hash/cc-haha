@@ -221,7 +221,7 @@ export function AddWorkspaceDirectory(t0) {
   let t5
   if ($[6] === Symbol.for('react.memo_cache_sentinel')) {
     t5 = (suggestion) => {
-      const newPath = suggestion.id + '/'
+      const newPath = `${suggestion.id}/`
       setDirectoryInput(newPath)
       setError(null)
     }
@@ -273,7 +273,7 @@ export function AddWorkspaceDirectory(t0) {
           e.preventDefault()
           const suggestion_1 = suggestions[selectedSuggestion]
           if (suggestion_1) {
-            handleSubmit(suggestion_1.id + '/')
+            handleSubmit(`${suggestion_1.id}/`)
           }
           return
         }

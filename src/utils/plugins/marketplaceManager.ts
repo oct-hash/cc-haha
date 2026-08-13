@@ -1297,7 +1297,7 @@ function getCachePathForSource(source: MarketplaceSource): string {
           ? basename(source.path).replace('.json', '')
           : source.source === 'directory'
             ? basename(source.path)
-            : 'temp_' + Date.now()
+            : `temp_${Date.now()}`
   return tempName
 }
 

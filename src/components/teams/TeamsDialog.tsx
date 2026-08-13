@@ -432,7 +432,7 @@ function TeammateListItem(t0) {
   }
   const modeColor = t1
   const t2 = isSelected ? 'suggestion' : undefined
-  const t3 = isSelected ? figures.pointer + ' ' : '  '
+  const t3 = isSelected ? `${figures.pointer} ` : '  '
   let t4
   if ($[3] !== teammate.isHidden) {
     t4 = teammate.isHidden && <Text dimColor={true}>[hidden] </Text>

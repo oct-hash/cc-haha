@@ -175,7 +175,7 @@ export function getRuntimeMainLoopModel(params: {
 export function getDefaultMainLoopModelSetting(): ModelName | ModelAlias {
   // Ants default to defaultModel from flag config, or Opus 1M if not configured
   if (process.env.USER_TYPE === 'ant') {
-    return getAntModelOverrideConfig()?.defaultModel ?? getDefaultOpusModel() + '[1m]'
+    return getAntModelOverrideConfig()?.defaultModel ?? `${getDefaultOpusModel()}[1m]`
   }
 
   // Max users get Opus as default
@@ -336,7 +336,7 @@ export function getPublicModelDisplayName(model: ModelName): string | null {
   switch (model) {
     case getModelStrings().opus46:
       return 'Opus 4.6'
-    case getModelStrings().opus46 + '[1m]':
+    case `${getModelStrings().opus46}[1m]`:
       return 'Opus 4.6 (1M context)'
     case getModelStrings().opus45:
       return 'Opus 4.5'
@@ -344,17 +344,17 @@ export function getPublicModelDisplayName(model: ModelName): string | null {
       return 'Opus 4.1'
     case getModelStrings().opus40:
       return 'Opus 4'
-    case getModelStrings().sonnet46 + '[1m]':
+    case `${getModelStrings().sonnet46}[1m]`:
       return 'Sonnet 4.6 (1M context)'
     case getModelStrings().sonnet46:
       return 'Sonnet 4.6'
-    case getModelStrings().sonnet45 + '[1m]':
+    case `${getModelStrings().sonnet45}[1m]`:
       return 'Sonnet 4.5 (1M context)'
     case getModelStrings().sonnet45:
       return 'Sonnet 4.5'
     case getModelStrings().sonnet40:
       return 'Sonnet 4'
-    case getModelStrings().sonnet40 + '[1m]':
+    case `${getModelStrings().sonnet40}[1m]`:
       return 'Sonnet 4 (1M context)'
     case getModelStrings().sonnet37:
       return 'Sonnet 3.7'
@@ -501,7 +501,7 @@ export function parseUserSpecifiedModel(modelInput: ModelName | ModelAlias): Mod
   // Preserve original case for custom model names (e.g., Azure Foundry deployment IDs)
   // Only strip [1m] suffix if present, maintaining case of the base model
   if (has1mTag) {
-    return modelInputTrimmed.replace(/\[1m\]$/i, '').trim() + '[1m]'
+    return `${modelInputTrimmed.replace(/\[1m\]$/i, '').trim()}[1m]`
   }
   return modelInputTrimmed
 }
@@ -528,7 +528,7 @@ export function resolveSkillModelOverride(skillModel: string, currentModel: stri
   // modelSupports1M matches on canonical IDs ('claude-opus-4-6', 'claude-sonnet-4');
   // a bare 'opus' alias falls through getCanonicalName unmatched. Resolve first.
   if (modelSupports1M(parseUserSpecifiedModel(skillModel))) {
-    return skillModel + '[1m]'
+    return `${skillModel}[1m]`
   }
   return skillModel
 }

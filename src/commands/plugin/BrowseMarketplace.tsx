@@ -181,7 +181,7 @@ export function BrowseMarketplace({
         const errorResult = formatMarketplaceLoadingErrors(failures, successCount)
         if (errorResult) {
           if (errorResult.type === 'warning') {
-            setWarning(errorResult.message + '. Showing available marketplaces.')
+            setWarning(`${errorResult.message}. Showing available marketplaces.`)
           } else {
             throw new Error(errorResult.message)
           }

@@ -382,14 +382,14 @@ function toCompactBlock(
     }
     if (encoded === '') return ''
     if (isJsonlTranscriptEnabled()) {
-      return jsonStringify({ [block.name]: encoded }) + '\n'
+      return `${jsonStringify({ [block.name]: encoded })}\n`
     }
     const s = typeof encoded === 'string' ? encoded : jsonStringify(encoded)
     return `${block.name} ${s}\n`
   }
   if (block.type === 'text' && role === 'user') {
     return isJsonlTranscriptEnabled()
-      ? jsonStringify({ user: block.text }) + '\n'
+      ? `${jsonStringify({ user: block.text })}\n`
       : `User: ${block.text}\n`
   }
   return ''
@@ -1002,7 +1002,7 @@ export async function classifyYoloAction(
     )
     logForDebugging(
       `[auto-mode] new action being classified: ` +
-        `${actionCompact.length > 500 ? actionCompact.slice(0, 500) + '…' : actionCompact}`,
+        `${actionCompact.length > 500 ? `${actionCompact.slice(0, 500)}…` : actionCompact}`,
     )
   }
 

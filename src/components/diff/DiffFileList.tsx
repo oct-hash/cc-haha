@@ -188,7 +188,7 @@ function FileItem(t0) {
     t1 = $[2]
   }
   const displayPath = t1
-  const pointer = isSelected ? figures.pointer + ' ' : '  '
+  const pointer = isSelected ? `${figures.pointer} ` : '  '
   const line = `${pointer}${displayPath}`
   const t2 = isSelected ? 'background' : undefined
   let t3

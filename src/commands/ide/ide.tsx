@@ -781,7 +781,7 @@ export function formatWorkspaceFolders(folders: string[], maxLength: number = 10
     if (folder.length <= maxLengthPerPath) {
       return folder
     }
-    return '…' + folder.slice(-(maxLengthPerPath - 1))
+    return `…${folder.slice(-(maxLengthPerPath - 1))}`
   })
   let result = formattedFolders.join(', ')
   if (hasMore) {

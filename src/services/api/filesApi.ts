@@ -193,7 +193,7 @@ export function buildDownloadPath(
   const uploadsBase = path.join(basePath, sessionId, 'uploads')
   const redundantPrefixes = [
     path.join(basePath, sessionId, 'uploads') + path.sep,
-    path.sep + 'uploads' + path.sep,
+    `${path.sep}uploads${path.sep}`,
   ]
   const matchedPrefix = redundantPrefixes.find((p) => normalized.startsWith(p))
   const cleanPath = matchedPrefix ? normalized.slice(matchedPrefix.length) : normalized

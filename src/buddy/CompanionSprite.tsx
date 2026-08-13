@@ -261,7 +261,7 @@ export function CompanionSprite(): React.ReactNode {
   if (columns < MIN_COLS_FOR_FULL_SPRITE) {
     const quip =
       reaction && reaction.length > NARROW_QUIP_CAP
-        ? reaction.slice(0, NARROW_QUIP_CAP - 1) + '…'
+        ? `${reaction.slice(0, NARROW_QUIP_CAP - 1)}…`
         : reaction
     const label = quip ? `"${quip}"` : focused ? ` ${companion.name} ` : companion.name
     return (

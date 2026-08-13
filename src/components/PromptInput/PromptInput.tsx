@@ -346,7 +346,7 @@ function PromptInput({
       cursorOffset,
       insert: (text: string) => {
         const needsSpace = cursorOffset === input.length && input.length > 0 && !/\s$/.test(input)
-        const insertText = needsSpace ? ' ' + text : text
+        const insertText = needsSpace ? ` ${text}` : text
         const newValue = input.slice(0, cursorOffset) + insertText + input.slice(cursorOffset)
         lastInternalInputRef.current = newValue
         onInputChange(newValue)
@@ -1493,7 +1493,7 @@ function PromptInput({
   const lazySpaceInputFilter = useCallback((input: string, key: Key): string => {
     if (!pendingSpaceAfterPillRef.current) return input
     pendingSpaceAfterPillRef.current = false
-    if (isNonSpacePrintable(input, key)) return ' ' + input
+    if (isNonSpacePrintable(input, key)) return ` ${input}`
     return input
   }, [])
   function insertTextAtCursor(text: string) {
@@ -1570,7 +1570,7 @@ function PromptInput({
   // Handler for chat:newline - insert a newline at the cursor position
   const handleNewline = useCallback(() => {
     pushToBuffer(input, cursorOffset, pastedContents)
-    const newInput = input.slice(0, cursorOffset) + '\n' + input.slice(cursorOffset)
+    const newInput = `${input.slice(0, cursorOffset)}\n${input.slice(cursorOffset)}`
     trackAndSetInput(newInput)
     setCursorOffset(cursorOffset + 1)
   }, [input, cursorOffset, trackAndSetInput, setCursorOffset, pushToBuffer, pastedContents])
@@ -2184,7 +2184,7 @@ function PromptInput({
           // When the selected row IS the viewed agent, 'x' types into the
           // steering input. Any other row — dismiss it.
           if (viewSelectionMode === 'viewing-agent' && task.id === viewingAgentTaskId) {
-            onChange(input.slice(0, cursorOffset) + 'x' + input.slice(cursorOffset))
+            onChange(`${input.slice(0, cursorOffset)}x${input.slice(cursorOffset)}`)
             setCursorOffset(cursorOffset + 1)
             return
           }

@@ -437,14 +437,14 @@ export async function isToolSearchEnabled(
 
       if (enabled) {
         logForDebugging(
-          `Auto tool search enabled: ${debugDescription}` + (source ? ` [source: ${source}]` : ''),
+          `Auto tool search enabled: ${debugDescription}${source ? ` [source: ${source}]` : ''}`,
         )
         logModeDecision(true, mode, 'auto_above_threshold', metrics)
         return true
       }
 
       logForDebugging(
-        `Auto tool search disabled: ${debugDescription}` + (source ? ` [source: ${source}]` : ''),
+        `Auto tool search disabled: ${debugDescription}${source ? ` [source: ${source}]` : ''}`,
       )
       logModeDecision(false, mode, 'auto_below_threshold', metrics)
       return false

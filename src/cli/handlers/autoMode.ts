@@ -15,7 +15,7 @@ import { sideQuery } from '../../utils/sideQuery.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 
 function writeRules(rules: AutoModeRules): void {
-  process.stdout.write(jsonStringify(rules, null, 2) + '\n')
+  process.stdout.write(`${jsonStringify(rules, null, 2)}\n`)
 }
 
 export function autoModeDefaultsHandler(): void {
@@ -114,14 +114,14 @@ export async function autoModeCritiqueHandler(options: { model?: string }): Prom
       ],
     })
   } catch (error) {
-    process.stderr.write('Failed to analyze rules: ' + errorMessage(error) + '\n')
+    process.stderr.write(`Failed to analyze rules: ${errorMessage(error)}\n`)
     process.exitCode = 1
     return
   }
 
   const textBlock = response.content.find((block) => block.type === 'text')
   if (textBlock?.type === 'text') {
-    process.stdout.write(textBlock.text + '\n')
+    process.stdout.write(`${textBlock.text}\n`)
   } else {
     process.stdout.write('No critique was generated. Please try again.\n')
   }
@@ -133,8 +133,8 @@ function formatRulesForCritique(
   defaultRules: string[],
 ): string {
   if (userRules.length === 0) return ''
-  const customLines = userRules.map((r) => '- ' + r).join('\n')
-  const defaultLines = defaultRules.map((r) => '- ' + r).join('\n')
+  const customLines = userRules.map((r) => `- ${r}`).join('\n')
+  const defaultLines = defaultRules.map((r) => `- ${r}`).join('\n')
   return (
     '## ' +
     section +

@@ -42,7 +42,7 @@ export function logForDiagnosticsNoPII(
   }
 
   const fs = getFsImplementation()
-  const line = jsonStringify(entry) + '\n'
+  const line = `${jsonStringify(entry)}\n`
   try {
     fs.appendFileSync(logFile, line)
   } catch {

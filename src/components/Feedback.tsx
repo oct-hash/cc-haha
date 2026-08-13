@@ -700,7 +700,7 @@ async function submitFeedback(
         success: false,
       }
     }
-    sanitizeAndLogError(new Error('Failed to submit feedback:' + response.status))
+    sanitizeAndLogError(new Error(`Failed to submit feedback:${response.status}`))
     return {
       success: false,
     }

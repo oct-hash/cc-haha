@@ -67,7 +67,7 @@ function ModelPickerWrapper(t0) {
       }))
       let message = `Set model to ${chalk.bold(renderModelLabel(model))}`
       if (effort !== undefined) {
-        message = message + ` with ${chalk.bold(effort)} effort`
+        message = `${message} with ${chalk.bold(effort)} effort`
       }
       let wasFastModeToggledOn
       if (isFastModeEnabled()) {
@@ -77,16 +77,16 @@ function ModelPickerWrapper(t0) {
           wasFastModeToggledOn = false
         } else {
           if (isFastModeSupportedByModel(model) && isFastModeAvailable() && isFastMode) {
-            message = message + ' \xB7 Fast mode ON'
+            message = `${message} \xB7 Fast mode ON`
             wasFastModeToggledOn = true
           }
         }
       }
       if (isBilledAsExtraUsage(model, wasFastModeToggledOn === true, isOpus1mMergeEnabled())) {
-        message = message + ' \xB7 Billed as extra usage'
+        message = `${message} \xB7 Billed as extra usage`
       }
       if (wasFastModeToggledOn === false) {
-        message = message + ' \xB7 Fast mode OFF'
+        message = `${message} \xB7 Fast mode OFF`
       }
       onDone(message)
     }

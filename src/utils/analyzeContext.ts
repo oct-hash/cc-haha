@@ -258,7 +258,7 @@ function extractSectionName(content: string): string {
   }
   // Fall back to a truncated preview of the first non-empty line
   const firstLine = content.split('\n').find((l) => l.trim().length > 0) ?? ''
-  return firstLine.length > 40 ? firstLine.slice(0, 40) + '…' : firstLine
+  return firstLine.length > 40 ? `${firstLine.slice(0, 40)}…` : firstLine
 }
 
 async function countSystemTokens(effectiveSystemPrompt: readonly string[]): Promise<{

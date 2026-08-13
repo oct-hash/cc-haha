@@ -210,7 +210,7 @@ function formatModelUsage(): string {
       `${formatNumber(usage.cacheCreationInputTokens)} cache write` +
       (usage.webSearchRequests > 0 ? `, ${formatNumber(usage.webSearchRequests)} web search` : '') +
       ` (${formatCost(usage.costUSD)})`
-    result += `\n` + `${shortName}:`.padStart(21) + usageString
+    result += `\n${`${shortName}:`.padStart(21)}${usageString}`
   }
   return result
 }

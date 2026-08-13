@@ -129,7 +129,7 @@ async function testAnthropicEndpoint(
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 15000)
 
-    const url = baseUrl.replace(/\/$/, '') + '/v1/messages'
+    const url = `${baseUrl.replace(/\/$/, '')}/v1/messages`
     const start = Date.now()
 
     // Send a minimal messages request — validates the full API pipeline
@@ -201,7 +201,7 @@ async function testOpenAiEndpoint(
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 15000)
 
-    const url = baseUrl.replace(/\/$/, '') + '/v1/models'
+    const url = `${baseUrl.replace(/\/$/, '')}/v1/models`
     const start = Date.now()
     const response = await fetch(url, {
       method: 'GET',

@@ -4,7 +4,7 @@ import { stripBOM } from '../jsonRead'
 describe('stripBOM', () => {
   it('strips UTF-8 BOM from beginning of string', () => {
     const bom = '\uFEFF'
-    const input = bom + '{"key": "value"}'
+    const input = `${bom}{"key": "value"}`
     expect(stripBOM(input)).toBe('{"key": "value"}')
   })
 
@@ -18,7 +18,7 @@ describe('stripBOM', () => {
 
   it('does not strip BOM if not at start', () => {
     const bom = '\uFEFF'
-    expect(stripBOM('a' + bom + 'b')).toBe('a' + bom + 'b')
+    expect(stripBOM(`a${bom}b`)).toBe(`a${bom}b`)
   })
 
   it('returns string unchanged for BOM-only string', () => {

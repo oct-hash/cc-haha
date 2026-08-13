@@ -194,7 +194,7 @@ export function mapNotebookCellsToToolResult(
       const prev = acc[acc.length - 1]
       if (prev && prev.type === 'text' && curr.type === 'text') {
         // Merge the text blocks
-        prev.text += '\n' + curr.text
+        prev.text += `\n${curr.text}`
         return acc
       }
 

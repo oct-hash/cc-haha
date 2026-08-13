@@ -147,7 +147,7 @@ export function findMidInputSlashCommand(
   }
 
   return {
-    token: '/' + fullCommand,
+    token: `/${fullCommand}`,
     startPos: slashPos,
     partialCommand: fullCommand,
   }
@@ -170,7 +170,7 @@ export function getBestCommandMatch(
   }
 
   // Use existing suggestion logic
-  const suggestions = generateCommandSuggestions('/' + partialCommand, commands)
+  const suggestions = generateCommandSuggestions(`/${partialCommand}`, commands)
   if (suggestions.length === 0) {
     return null
   }

@@ -131,7 +131,7 @@ export function substituteArguments(
   // If no placeholders were found and appendIfNoPlaceholder is true, append
   // But only if args is non-empty (empty string means command invoked with no args)
   if (content === originalContent && appendIfNoPlaceholder && args) {
-    content = content + `\n\nARGUMENTS: ${args}`
+    content = `${content}\n\nARGUMENTS: ${args}`
   }
 
   return content

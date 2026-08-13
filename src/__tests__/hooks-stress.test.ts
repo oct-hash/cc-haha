@@ -718,7 +718,7 @@ describe('L2 — Medium stress', () => {
     afterEach(resetGateDir)
 
     test('very long file_path (2000 chars) → does not crash', async () => {
-      const longPath = 'src/' + 'a'.repeat(1980) + '.ts'
+      const longPath = `src/${'a'.repeat(1980)}.ts`
       const { stderr, exitCode } = await runHook(
         'post-edit-remind.sh',
         JSON.stringify({ file_path: longPath }),

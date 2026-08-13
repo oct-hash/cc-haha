@@ -784,7 +784,7 @@ export function useVoice({
               // Show accumulated finals + current interim as live preview
               const interim = text.trim()
               const preview = accumulatedRef.current
-                ? accumulatedRef.current + (interim ? ' ' + interim : '')
+                ? accumulatedRef.current + (interim ? ` ${interim}` : '')
                 : interim
               setVoiceState((prev) => {
                 if (prev.voiceInterimTranscript === preview) return prev

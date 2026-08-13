@@ -7,7 +7,7 @@ export function useCostSummary(getFpsMetrics?: () => FpsMetrics | undefined): vo
   useEffect(() => {
     const f = () => {
       if (hasConsoleBillingAccess()) {
-        process.stdout.write('\n' + formatTotalCost() + '\n')
+        process.stdout.write(`\n${formatTotalCost()}\n`)
       }
 
       saveCurrentSessionCosts(getFpsMetrics?.())

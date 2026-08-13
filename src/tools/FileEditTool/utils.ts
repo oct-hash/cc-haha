@@ -200,10 +200,10 @@ export function applyEditToFile(
   }
 
   const stripTrailingNewline =
-    !oldString.endsWith('\n') && originalContent.includes(oldString + '\n')
+    !oldString.endsWith('\n') && originalContent.includes(`${oldString}\n`)
 
   return stripTrailingNewline
-    ? f(originalContent, oldString + '\n', newString)
+    ? f(originalContent, `${oldString}\n`, newString)
     : f(originalContent, oldString, newString)
 }
 

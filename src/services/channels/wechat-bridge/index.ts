@@ -292,7 +292,7 @@ class WechatBridge {
       }
 
       this.weixinProcess.stdout.on('line', handleLine)
-      this.weixinProcess.stdin.write(JSON.stringify(request) + '\n')
+      this.weixinProcess.stdin.write(`${JSON.stringify(request)}\n`)
     })
   }
 

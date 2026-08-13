@@ -439,7 +439,7 @@ function parseHttpHookOutput(body: string): {
   }
 
   if (!trimmed.startsWith('{')) {
-    const validationError = `HTTP hook must return JSON, but got non-JSON response body: ${trimmed.length > 200 ? trimmed.slice(0, 200) + '\u2026' : trimmed}`
+    const validationError = `HTTP hook must return JSON, but got non-JSON response body: ${trimmed.length > 200 ? `${trimmed.slice(0, 200)}\u2026` : trimmed}`
     logForDebugging(validationError)
     return { validationError }
   }
@@ -951,7 +951,7 @@ async function execCommandHook(
     // bash `read -r line` returns exit 1 (EOF before delimiter) — the
     // variable IS populated but `if read -r line; then ...` skips the
     // branch. See gh-30509 / CC-161.
-    child.stdin.write(jsonInput + '\n', 'utf8')
+    child.stdin.write(`${jsonInput}\n`, 'utf8')
     child.stdin.end()
     stdinWritten = true
 
@@ -1034,7 +1034,7 @@ async function execCommandHook(
             promptChain = promptChain.then(async () => {
               try {
                 const response = await reqPrompt(promptReq)
-                child.stdin.write(jsonStringify(response) + '\n', 'utf8')
+                child.stdin.write(`${jsonStringify(response)}\n`, 'utf8')
               } catch (err) {
                 logForDebugging(`Hooks: Prompt request handling failed: ${err}`)
                 // User cancelled or prompt failed — close stdin so the hook
@@ -1139,7 +1139,7 @@ async function execCommandHook(
           }
         })
         // Explicitly specify UTF-8 encoding to ensure proper handling of Unicode characters
-        child.stdin.write(jsonInput + '\n', 'utf8')
+        child.stdin.write(`${jsonInput}\n`, 'utf8')
         // When requestPrompt is provided, keep stdin open for prompt responses
         if (!requestPrompt) {
           child.stdin.end()

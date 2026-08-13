@@ -404,7 +404,7 @@ TOPIC: ${topic}
 AGENT RESPONSES:
 ${summaries}
 
-${groupthinkWarnings.length > 0 ? '⚠️ GROUPTHINK WARNINGS:\n' + groupthinkWarnings.map((w) => '- ' + w).join('\n') + '\n\n' : ''}Instructions:
+${groupthinkWarnings.length > 0 ? `⚠️ GROUPTHINK WARNINGS:\n${groupthinkWarnings.map((w) => `- ${w}`).join('\n')}\n\n` : ''}Instructions:
 1. Evaluate each response for correctness, completeness, and reasoning quality.
 2. Factor in the confidence scores — high confidence with poor reasoning is a red flag.
 3. A confidence of exactly 0.50 may mean the agent did not provide a structured CONFIDENCE marker.

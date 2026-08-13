@@ -113,7 +113,7 @@ export function renderToolUseMessage(
       const label = extractBashCommentLabel(command)
       if (label) {
         return label.length > MAX_COMMAND_DISPLAY_CHARS
-          ? label.slice(0, MAX_COMMAND_DISPLAY_CHARS) + '…'
+          ? `${label.slice(0, MAX_COMMAND_DISPLAY_CHARS)}…`
           : label
       }
     }

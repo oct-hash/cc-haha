@@ -129,7 +129,7 @@ export function getFastModeUnavailableReason(): string | null {
 export const FAST_MODE_MODEL_DISPLAY = 'Opus 4.6'
 
 export function getFastModeModel(): string {
-  return 'opus' + (isOpus1mMergeEnabled() ? '[1m]' : '')
+  return `opus${isOpus1mMergeEnabled() ? '[1m]' : ''}`
 }
 
 export function getInitialFastModeSetting(model: ModelSetting): boolean {

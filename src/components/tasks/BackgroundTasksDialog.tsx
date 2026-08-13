@@ -882,7 +882,7 @@ function Item(t0) {
   }
   const useGreyPointer = t1
   const t2 = useGreyPointer && isSelected
-  const t3 = isSelected ? figures.pointer + ' ' : '  '
+  const t3 = isSelected ? `${figures.pointer} ` : '  '
   let t4
   if ($[1] !== t2 || $[2] !== t3) {
     t4 = <Text dimColor={t2}>{t3}</Text>

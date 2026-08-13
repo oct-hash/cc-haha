@@ -111,7 +111,7 @@ export function SkillPermissionRequest(props) {
       const spaceIndex = skill.indexOf(' ')
       if (spaceIndex > 0) {
         const commandPrefix = skill.substring(0, spaceIndex)
-        const t8 = commandPrefix + ':*'
+        const t8 = `${commandPrefix}:*`
         let t9
         if ($[11] !== t8) {
           t9 = <Text bold={true}>{t8}</Text>

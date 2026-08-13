@@ -38,7 +38,7 @@ export async function update() {
   // Check for multiple installations
   if (diagnostic.multipleInstallations.length > 1) {
     writeToStdout('\n')
-    writeToStdout(chalk.yellow('Warning: Multiple installations found') + '\n')
+    writeToStdout(`${chalk.yellow('Warning: Multiple installations found')}\n`)
     for (const install of diagnostic.multipleInstallations) {
       const current = diagnostic.installationType === install.type ? ' (currently running)' : ''
       writeToStdout(`- ${install.type} at ${install.path}${current}\n`)
@@ -93,7 +93,7 @@ export async function update() {
   // Check if running from development build
   if (diagnostic.installationType === 'development') {
     writeToStdout('\n')
-    writeToStdout(chalk.yellow('Warning: Cannot update development build') + '\n')
+    writeToStdout(`${chalk.yellow('Warning: Cannot update development build')}\n`)
     await gracefulShutdown(1)
   }
 
@@ -109,7 +109,7 @@ export async function update() {
         writeToStdout(`Update available: ${MACRO.VERSION} → ${latest}\n`)
         writeToStdout('\n')
         writeToStdout('To update, run:\n')
-        writeToStdout(chalk.bold('  brew upgrade claude-code') + '\n')
+        writeToStdout(`${chalk.bold('  brew upgrade claude-code')}\n`)
       } else {
         writeToStdout('Claude is up to date!\n')
       }
@@ -120,7 +120,7 @@ export async function update() {
         writeToStdout(`Update available: ${MACRO.VERSION} → ${latest}\n`)
         writeToStdout('\n')
         writeToStdout('To update, run:\n')
-        writeToStdout(chalk.bold('  winget upgrade Anthropic.ClaudeCode') + '\n')
+        writeToStdout(`${chalk.bold('  winget upgrade Anthropic.ClaudeCode')}\n`)
       } else {
         writeToStdout('Claude is up to date!\n')
       }
@@ -131,7 +131,7 @@ export async function update() {
         writeToStdout(`Update available: ${MACRO.VERSION} → ${latest}\n`)
         writeToStdout('\n')
         writeToStdout('To update, run:\n')
-        writeToStdout(chalk.bold('  apk upgrade claude-code') + '\n')
+        writeToStdout(`${chalk.bold('  apk upgrade claude-code')}\n`)
       } else {
         writeToStdout('Claude is up to date!\n')
       }
@@ -168,11 +168,11 @@ export async function update() {
 
     if (normalizedRunningType !== configExpects && configExpects !== 'unknown') {
       writeToStdout('\n')
-      writeToStdout(chalk.yellow('Warning: Configuration mismatch') + '\n')
+      writeToStdout(`${chalk.yellow('Warning: Configuration mismatch')}\n`)
       writeToStdout(`Config expects: ${configExpects} installation\n`)
       writeToStdout(`Currently running: ${runningType}\n`)
       writeToStdout(
-        chalk.yellow(`Updating the ${runningType} installation you are currently using`) + '\n',
+        `${chalk.yellow(`Updating the ${runningType} installation you are currently using`)}\n`,
       )
 
       // Update config to match reality
@@ -196,9 +196,9 @@ export async function update() {
       if (result.lockFailed) {
         const pidInfo = result.lockHolderPid ? ` (PID ${result.lockHolderPid})` : ''
         writeToStdout(
-          chalk.yellow(
+          `${chalk.yellow(
             `Another Claude process${pidInfo} is currently running. Please try again in a moment.`,
-          ) + '\n',
+          )}\n`,
         )
         await gracefulShutdown(0)
       }
@@ -209,19 +209,19 @@ export async function update() {
       }
 
       if (result.latestVersion === MACRO.VERSION) {
-        writeToStdout(chalk.green(`Claude Code is up to date (${MACRO.VERSION})`) + '\n')
+        writeToStdout(`${chalk.green(`Claude Code is up to date (${MACRO.VERSION})`)}\n`)
       } else {
         writeToStdout(
-          chalk.green(
+          `${chalk.green(
             `Successfully updated from ${MACRO.VERSION} to version ${result.latestVersion}`,
-          ) + '\n',
+          )}\n`,
         )
         await regenerateCompletionCache()
       }
       await gracefulShutdown(0)
     } catch (error) {
       process.stderr.write('Error: Failed to install native update\n')
-      process.stderr.write(String(error) + '\n')
+      process.stderr.write(`${String(error)}\n`)
       process.stderr.write('Try running "claude doctor" for diagnostics\n')
       await gracefulShutdown(1)
     }
@@ -244,7 +244,7 @@ export async function update() {
 
   if (!latestVersion) {
     logForDebugging('update: Failed to get latest version from npm registry')
-    process.stderr.write(chalk.red('Failed to check for updates') + '\n')
+    process.stderr.write(`${chalk.red('Failed to check for updates')}\n`)
     process.stderr.write('Unable to fetch latest version from npm registry\n')
     process.stderr.write('\n')
     process.stderr.write('Possible causes:\n')
@@ -269,7 +269,7 @@ export async function update() {
 
   // Check if versions match exactly, including any build metadata (like SHA)
   if (latestVersion === MACRO.VERSION) {
-    writeToStdout(chalk.green(`Claude Code is up to date (${MACRO.VERSION})`) + '\n')
+    writeToStdout(`${chalk.green(`Claude Code is up to date (${MACRO.VERSION})`)}\n`)
     await gracefulShutdown(0)
   }
 
@@ -294,7 +294,7 @@ export async function update() {
       const isLocal = await localInstallationExists()
       useLocalUpdate = isLocal
       updateMethodName = isLocal ? 'local' : 'global'
-      writeToStdout(chalk.yellow('Warning: Could not determine installation type') + '\n')
+      writeToStdout(`${chalk.yellow('Warning: Could not determine installation type')}\n`)
       writeToStdout(`Attempting ${updateMethodName} update based on file detection...\n`)
       break
     }

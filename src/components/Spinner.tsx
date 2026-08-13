@@ -192,11 +192,11 @@ function SpinnerWithVerbInner({
     foregroundedTeammate && !foregroundedTeammate.isIdle
       ? (foregroundedTeammate.spinnerVerb ?? randomVerb)
       : leaderVerb
-  const message = effectiveVerb + '…'
+  const message = `${effectiveVerb}…`
 
   // Track CLI activity when spinner is active
   useEffect(() => {
-    const operationId = 'spinner-' + mode
+    const operationId = `spinner-${mode}`
     activityManager.startCLIActivity(operationId)
     return () => {
       activityManager.endCLIActivity(operationId)
@@ -420,7 +420,7 @@ function BriefSpinner(t0) {
   let t2
   if ($[0] !== mode) {
     t1 = () => {
-      const operationId = 'spinner-' + mode
+      const operationId = `spinner-${mode}`
       activityManager.startCLIActivity(operationId)
       return () => {
         activityManager.endCLIActivity(operationId)

@@ -196,7 +196,7 @@ export function BridgeDialog(t0) {
     } else {
       contextParts = $[44]
     }
-    const contextSuffix = contextParts.length > 0 ? ' \xB7 ' + contextParts.join(' \xB7 ') : ''
+    const contextSuffix = contextParts.length > 0 ? ` \xB7 ${contextParts.join(' \xB7 ')}` : ''
     let t18
     if ($[45] !== displayUrl || $[46] !== error || $[47] !== sessionActive) {
       t18 = error
