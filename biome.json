@@ -458,7 +458,8 @@
           "style": { "useConst": "off" },
           "correctness": {
             "noUnusedVariables": "off",
-            "useExhaustiveDependencies": "off"
+            "useExhaustiveDependencies": "off",
+            "useHookAtTopLevel": "off"
           },
           "complexity": { "noExcessiveCognitiveComplexity": "off" }
         }
