@@ -384,7 +384,7 @@ async function processUserInputBase(
   // known-but-unsafe command (local-jsx UI or terminal-only), short-circuit
   // with a helpful message rather than letting the model see raw "/config".
   let effectiveSkipSlash = skipSlashCommands
-  if (bridgeOrigin && inputString !== null && inputString.startsWith('/')) {
+  if (bridgeOrigin && inputString?.startsWith('/')) {
     const parsed = parseSlashCommand(inputString)
     const cmd = parsed ? findCommand(parsed.commandName, context.options.commands) : undefined
     if (cmd) {

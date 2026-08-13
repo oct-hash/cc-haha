@@ -1570,7 +1570,7 @@ export function Config({
   // Only active when not in search mode and no submenu is open.
   const toggleSetting = useCallback(() => {
     const setting_0 = filteredSettingsItems[selectedIndex]
-    if (!setting_0 || !setting_0.onChange) {
+    if (!setting_0?.onChange) {
       return
     }
     if (setting_0.type === 'boolean') {

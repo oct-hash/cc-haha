@@ -193,8 +193,7 @@ export function MCPToolDetailView(t0) {
   }
   let t16
   if ($[32] !== tool.inputJSONSchema) {
-    t16 = tool.inputJSONSchema &&
-      tool.inputJSONSchema.properties &&
+    t16 = tool.inputJSONSchema?.properties &&
       Object.keys(tool.inputJSONSchema.properties).length > 0 && (
         <Box flexDirection="column" marginTop={1}>
           <Text bold={true}>Parameters:</Text>

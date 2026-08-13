@@ -933,7 +933,7 @@ export function useTypeahead({
       if (hasAtSymbol && mode !== 'bash') {
         // Get the @ token (including the @ symbol)
         const completionToken = extractCompletionToken(value, effectiveCursorOffset, true)
-        if (completionToken && completionToken.token.startsWith('@')) {
+        if (completionToken?.token.startsWith('@')) {
           const searchToken = extractSearchToken(completionToken)
 
           // If the token after @ is path-like, use path completion instead of fuzzy search

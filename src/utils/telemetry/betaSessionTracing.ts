@@ -145,7 +145,7 @@ const SYSTEM_REMINDER_REGEX = /^<system-reminder>\n?([\s\S]*?)\n?<\/system-remin
  */
 function extractSystemReminderContent(text: string): string | null {
   const match = text.trim().match(SYSTEM_REMINDER_REGEX)
-  return match && match[1] ? match[1].trim() : null
+  return match?.[1] ? match[1].trim() : null
 }
 
 /**

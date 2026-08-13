@@ -1688,7 +1688,7 @@ function PromptInput({
       const teammateTaskId = viewingAgentTaskId
       setAppState((prev) => {
         const task = prev.tasks[teammateTaskId]
-        if (!task || task.type !== 'in_process_teammate') {
+        if (task?.type !== 'in_process_teammate') {
           return prev
         }
         if (task.permissionMode === nextMode) {

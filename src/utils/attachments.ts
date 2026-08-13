@@ -1828,7 +1828,7 @@ async function processMcpResourceAttachments(
 
         // Find the MCP client
         const client = mcpClients.find((c) => c.name === serverName)
-        if (!client || client.type !== 'connected') {
+        if (client?.type !== 'connected') {
           logEvent('tengu_at_mention_mcp_resource_error', {})
           return null
         }

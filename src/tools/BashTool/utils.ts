@@ -58,7 +58,7 @@ const DATA_URI_RE = /^data:([^;]+);base64,(.+)$/
  */
 export function parseDataUri(s: string): { mediaType: string; data: string } | null {
   const match = s.trim().match(DATA_URI_RE)
-  if (!match || !match[1] || !match[2]) return null
+  if (!match?.[1] || !match[2]) return null
   return { mediaType: match[1], data: match[2] }
 }
 

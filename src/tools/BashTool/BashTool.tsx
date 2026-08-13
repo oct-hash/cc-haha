@@ -866,7 +866,7 @@ export const BashTool = buildTool({
       )
 
       // Check for git index.lock error (stderr is in stdout now)
-      if (result.stdout && result.stdout.includes(".git/index.lock': File exists")) {
+      if (result.stdout?.includes(".git/index.lock': File exists")) {
         logEvent('tengu_git_index_lock_error', {})
       }
       if (interpretationResult.isError && !isInterrupt) {

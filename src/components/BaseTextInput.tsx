@@ -71,7 +71,7 @@ export function BaseTextInput(t0) {
   })
   const commandWithoutArgs =
     (props.value && props.value.trim().indexOf(' ') === -1) ||
-    (props.value && props.value.endsWith(' '))
+    (props.value?.endsWith(' '))
   const showArgumentHint = Boolean(
     props.argumentHint && props.value && commandWithoutArgs && props.value.startsWith('/'),
   )

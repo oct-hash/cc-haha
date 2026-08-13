@@ -135,7 +135,7 @@ async function getOtlpReaders() {
 
       consoleExporter.export = (metrics, callback) => {
         // Log resource attributes once at the start
-        if (metrics.resource && metrics.resource.attributes) {
+        if (metrics.resource?.attributes) {
           // The console exporter is for debugging, so console output is intentional here
 
           logForDebugging('\n=== Resource Attributes ===')

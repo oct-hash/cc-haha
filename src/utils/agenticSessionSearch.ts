@@ -262,7 +262,7 @@ Find the sessions that are most relevant to this query.`
 
     // Extract the text content from the response
     const textContent = response.content.find((block) => block.type === 'text')
-    if (!textContent || textContent.type !== 'text') {
+    if (textContent?.type !== 'text') {
       logForDebugging('No text content in agentic search response')
       return []
     }

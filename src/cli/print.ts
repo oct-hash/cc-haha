@@ -687,7 +687,7 @@ export async function runHeadless(
     // so we require the target to be a user message
     const targetMessage = initialMessages.find((m) => m.uuid === options.rewindFiles)
 
-    if (!targetMessage || targetMessage.type !== 'user') {
+    if (targetMessage?.type !== 'user') {
       process.stderr.write(
         `Error: --rewind-files requires a user message UUID, but ${options.rewindFiles} is not a user message in this session\n`,
       )
@@ -857,7 +857,7 @@ export async function runHeadless(
 
   switch (options.outputFormat) {
     case 'json':
-      if (!lastMessage || lastMessage.type !== 'result') {
+      if (lastMessage?.type !== 'result') {
         throw new Error('No messages returned')
       }
       if (options.verbose) {
@@ -870,7 +870,7 @@ export async function runHeadless(
       // already logged above
       break
     default:
-      if (!lastMessage || lastMessage.type !== 'result') {
+      if (lastMessage?.type !== 'result') {
         throw new Error('No messages returned')
       }
       switch (lastMessage.subtype) {
@@ -4324,7 +4324,7 @@ function handleChannelEnable(
   // Only a 'connected' client has .capabilities and .client to register the
   // handler on. The pool spread at the call site matches mcp_status.
   const connection = connectionPool.find((c) => c.name === serverName && c.type === 'connected')
-  if (!connection || connection.type !== 'connected') {
+  if (connection?.type !== 'connected') {
     respondError(`server ${serverName} is not connected`)
     return
   }

@@ -102,7 +102,7 @@ export function detectFileCount(task: string): number {
 
   for (const pattern of patterns) {
     const match = task.match(pattern)
-    if (match && match[1]) {
+    if (match?.[1]) {
       return parseInt(match[1], 10)
     }
   }

@@ -570,7 +570,7 @@ export function createCliExecutor(opts: {
 
     async getFrontmostApp(): Promise<FrontmostApp | null> {
       const info = requireComputerUseInput().getFrontmostAppInfo()
-      if (!info || !info.bundleId) return null
+      if (!info?.bundleId) return null
       return { bundleId: info.bundleId, displayName: info.appName }
     },
 

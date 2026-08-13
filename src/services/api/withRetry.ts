@@ -504,7 +504,7 @@ export function parseMaxTokensContextOverflowError(error: APIError):
   const regex = /input length and `max_tokens` exceed context limit: (\d+) \+ (\d+) > (\d+)/
   const match = error.message.match(regex)
 
-  if (!match || match.length !== 4) {
+  if (match?.length !== 4) {
     return undefined
   }
 

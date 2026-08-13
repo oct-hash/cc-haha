@@ -22,7 +22,7 @@ import { tryParseShellCommand } from './bash/shellQuote.js'
  * - "foo 'hello world' baz" => ["foo", "hello world", "baz"]
  */
 export function parseArguments(args: string): string[] {
-  if (!args || !args.trim()) {
+  if (!args?.trim()) {
     return []
   }
 

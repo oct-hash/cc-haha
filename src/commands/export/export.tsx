@@ -19,7 +19,7 @@ function formatTimestamp(date: Date): string {
 }
 export function extractFirstPrompt(messages: Message[]): string {
   const firstUserMessage = messages.find((msg) => msg.type === 'user')
-  if (!firstUserMessage || firstUserMessage.type !== 'user') {
+  if (firstUserMessage?.type !== 'user') {
     return ''
   }
   const content = firstUserMessage.message?.content

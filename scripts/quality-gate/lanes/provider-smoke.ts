@@ -150,7 +150,7 @@ async function testAnthropicEndpoint(
     clearTimeout(timeout)
     const latency = Date.now() - start
 
-    if (response && response.ok) {
+    if (response?.ok) {
       const maskedToken = token ? maskKey(token) : 'none'
       details.push({
         label: `${name}: OK`,
@@ -213,7 +213,7 @@ async function testOpenAiEndpoint(
     clearTimeout(timeout)
     const latency = Date.now() - start
 
-    if (response && response.ok) {
+    if (response?.ok) {
       const maskedToken = token ? maskKey(token) : 'none'
       details.push({
         label: `${name}: OK`,

@@ -4397,7 +4397,7 @@ export async function executeStatusLineCommand(
     statusLine = getSettings_DEPRECATED()?.statusLine
   }
 
-  if (!statusLine || statusLine.type !== 'command') {
+  if (statusLine?.type !== 'command') {
     return undefined
   }
 
@@ -4484,7 +4484,7 @@ export async function executeFileSuggestionCommand(
     fileSuggestion = getSettings_DEPRECATED()?.fileSuggestion
   }
 
-  if (!fileSuggestion || fileSuggestion.type !== 'command') {
+  if (fileSuggestion?.type !== 'command') {
     return []
   }
 

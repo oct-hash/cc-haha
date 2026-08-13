@@ -71,7 +71,7 @@ export function useCopyOnSelect(
       const text = selection.copySelectionNoClear()
       // Whitespace-only (e.g., blank-line multi-click) — not worth a
       // clipboard write or toast. Still set copiedRef so we don't retry.
-      if (!text || !text.trim()) {
+      if (!text?.trim()) {
         copiedRef.current = true
         return
       }

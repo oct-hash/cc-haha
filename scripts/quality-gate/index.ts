@@ -200,7 +200,7 @@ async function main(): Promise<void> {
   }
 
   // Extract triggered lane IDs from impact-report details
-  if (impactResult && impactResult.details) {
+  if (impactResult?.details) {
     // Look for the "Required lanes" detail to get the canonical list
     const requiredDetail = impactResult.details.find((d) => d.label === 'Required lanes')
     if (requiredDetail?.message && requiredDetail.message !== 'none (docs-only change)') {

@@ -650,7 +650,7 @@ function startRemoteSessionPolling(taskId: string, context: TaskContext): () => 
     try {
       const appState = context.getAppState()
       const task = appState.tasks?.[taskId] as RemoteAgentTaskState | undefined
-      if (!task || task.status !== 'running') {
+      if (task?.status !== 'running') {
         // Task was killed externally (TaskStopTool) or already terminal.
         // Session left alive so the claude.ai URL stays valid — the run_hunt.sh
         // post_stage() calls land as assistant events there, and the user may

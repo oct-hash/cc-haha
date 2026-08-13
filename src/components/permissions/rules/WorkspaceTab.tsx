@@ -72,7 +72,7 @@ export function WorkspaceTab(t0) {
         return
       }
       const directory = additionalDirectories.find((d) => d.path === selectedValue)
-      if (directory && directory.isDeletable) {
+      if (directory?.isDeletable) {
         onRequestRemoveDirectory(directory.path)
       }
     }

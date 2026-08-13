@@ -1328,7 +1328,7 @@ async function installFromArtifactory(command: string): Promise<string> {
       const match = line.match(
         /\/\/artifactory\.infra\.ant\.dev\/artifactory\/api\/npm\/npm-all\/:_authToken=(.+)/,
       )
-      if (match && match[1]) {
+      if (match?.[1]) {
         authToken = match[1].trim()
         break
       }

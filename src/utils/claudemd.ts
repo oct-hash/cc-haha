@@ -625,7 +625,7 @@ export async function processMemoryFile(
     type,
     resolvedPath,
   )
-  if (!memoryFile || !memoryFile.content.trim()) {
+  if (!memoryFile?.content.trim()) {
     return []
   }
 

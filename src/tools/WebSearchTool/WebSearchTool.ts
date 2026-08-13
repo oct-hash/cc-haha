@@ -319,7 +319,7 @@ export const WebSearchTool = buildTool({
           try {
             // Look for a complete query field
             const queryMatch = currentToolUseJson.match(/"query"\s*:\s*"((?:[^"\\]|\\.)*)"/)
-            if (queryMatch && queryMatch[1]) {
+            if (queryMatch?.[1]) {
               // The regex properly handles escaped characters
               const query = jsonParse(`"${queryMatch[1]}"`)
 

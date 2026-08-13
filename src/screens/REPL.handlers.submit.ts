@@ -465,7 +465,7 @@ export async function tryHandleTaskDoneTrigger(
   const trimmedInput = expandPastedTextRefs(input, pastedContents).trim()
   if (!speculationAccept && !input.trim().startsWith('/')) {
     const { checkTaskDoneTrigger } = await import('../hooks/taskDoneTrigger.js')
-    if (checkTaskDoneTrigger && checkTaskDoneTrigger(trimmedInput)) {
+    if (checkTaskDoneTrigger?.(trimmedInput)) {
       const { processTaskDoneTrigger } = await import('../hooks/taskDoneTrigger.js')
       if (processTaskDoneTrigger) {
         const reviewText = await processTaskDoneTrigger({

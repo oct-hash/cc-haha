@@ -476,7 +476,7 @@ export function MessageSelector({
                   const isCurrent = msg.uuid === currentUUID
                   const metadataLoaded = optionIndex in fileHistoryMetadata
                   const metadata = fileHistoryMetadata[optionIndex]
-                  const numFilesChanged = metadata?.filesChanged && metadata.filesChanged.length
+                  const numFilesChanged = metadata?.filesChanged?.length
                   return (
                     <Box
                       key={msg.uuid}
@@ -620,7 +620,7 @@ function RestoreCodeConfirmation(t0) {
   if (diffStatsForRestore === undefined) {
     return
   }
-  if (!diffStatsForRestore.filesChanged || !diffStatsForRestore.filesChanged[0]) {
+  if (!diffStatsForRestore.filesChanged?.[0]) {
     let t1
     if ($[0] === Symbol.for('react.memo_cache_sentinel')) {
       t1 = <Text dimColor={true}>The code has not changed (nothing will be restored).</Text>
@@ -704,7 +704,7 @@ function RestoreCodeConfirmation(t0) {
 function DiffStatsText(t0) {
   const $ = _c(7)
   const { diffStats } = t0
-  if (!diffStats || !diffStats.filesChanged) {
+  if (!diffStats?.filesChanged) {
     return
   }
   let t1
@@ -952,7 +952,7 @@ function computeDiffStatsBetweenMessages(
       continue
     }
     const result = msg.toolUseResult as FileEditOutput | FileWriteToolOutput
-    if (!result || !result.filePath || !result.structuredPatch) {
+    if (!result?.filePath || !result.structuredPatch) {
       continue
     }
     if (!filesChanged.includes(result.filePath)) {

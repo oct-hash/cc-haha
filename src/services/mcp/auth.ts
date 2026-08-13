@@ -1515,8 +1515,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
     // SDK skips refresh and falls through to the PKCE flow.
     const currentScopes = tokenData.scope?.split(' ') ?? []
     const needsStepUp =
-      this._pendingStepUpScope !== undefined &&
-      this._pendingStepUpScope.split(' ').some((s) => !currentScopes.includes(s))
+      this._pendingStepUpScope?.split(' ').some((s) => !currentScopes.includes(s))
     if (needsStepUp) {
       logMCPDebug(
         this.serverName,

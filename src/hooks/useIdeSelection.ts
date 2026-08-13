@@ -117,8 +117,7 @@ export function useIdeSelection(
 
         // Process selection data - validate it has required properties
         if (
-          selectionData.selection &&
-          selectionData.selection.start &&
+          selectionData.selection?.start &&
           selectionData.selection.end
         ) {
           // Handle selection changes

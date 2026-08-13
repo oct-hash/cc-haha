@@ -239,7 +239,7 @@ async function showDiffInIDE(
       edits,
     })
 
-    if (!ideClient || ideClient.type !== 'connected') {
+    if (ideClient?.type !== 'connected') {
       throw new Error('IDE client not available')
     }
     let ideOldPath = oldFilePath
@@ -303,7 +303,7 @@ async function closeTabInIDE(
   ideClient?: MCPServerConnection | undefined,
 ): Promise<void> {
   try {
-    if (!ideClient || ideClient.type !== 'connected') {
+    if (ideClient?.type !== 'connected') {
       throw new Error('IDE client not available')
     }
 

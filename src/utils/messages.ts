@@ -906,7 +906,7 @@ export function reorderMessagesInUI(
       if (toolUseID && !processedToolUses.has(toolUseID)) {
         processedToolUses.add(toolUseID)
         const group = toolUseGroups.get(toolUseID)
-        if (group && group.toolUse) {
+        if (group?.toolUse) {
           // Output in order: tool use, pre hooks, tool result, post hooks
           result.push(group.toolUse)
           result.push(...group.preHooks)
@@ -3637,7 +3637,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
     case 'mcp_resource': {
       // Format the resource content similar to how file attachments work
       const content = attachment.content
-      if (!content || !content.contents || content.contents.length === 0) {
+      if (!content?.contents || content.contents.length === 0) {
         return wrapMessagesInSystemReminder([
           createUserMessage({
             content: `<mcp-resource server="${attachment.server}" uri="${attachment.uri}">(No content)</mcp-resource>`,
@@ -4499,7 +4499,7 @@ function filterTrailingThinkingFromLastAssistant(
   messages: (UserMessage | AssistantMessage)[],
 ): (UserMessage | AssistantMessage)[] {
   const lastMessage = messages.at(-1)
-  if (!lastMessage || lastMessage.type !== 'assistant') {
+  if (lastMessage?.type !== 'assistant') {
     // Last message is not assistant, nothing to filter
     return messages
   }
@@ -5147,7 +5147,7 @@ export function stripAdvisorBlocks(
         (b) =>
           b.type === 'thinking' ||
           b.type === 'redacted_thinking' ||
-          (b.type === 'text' && (!b.text || !b.text.trim())),
+          (b.type === 'text' && (!b.text?.trim())),
       )
     ) {
       filtered.push({

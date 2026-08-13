@@ -80,6 +80,7 @@ export class TaskOutput {
    */
   static startPolling(taskId: string): void {
     const instance = TaskOutput.#registry.get(taskId)
+    // biome-ignore lint/complexity/useOptionalChain: optional chain cannot target private field #onProgress (TS18030)
     if (!instance || !instance.#onProgress) {
       return
     }

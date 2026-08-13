@@ -256,7 +256,7 @@ export function firstPartyNameToCanonical(name: ModelName): ModelShortName {
     return 'claude-3-haiku'
   }
   const match = name.match(/(claude-(\d+-\d+-)?\w+)/)
-  if (match && match[1]) {
+  if (match?.[1]) {
     return match[1]
   }
   // Fall back to the original name if no pattern matches

@@ -31,7 +31,7 @@ const MAX_IMPRESSIONS = 3
  */
 export function isEligibleForOverageCreditGrant(): boolean {
   const info = getCachedOverageCreditGrant()
-  if (!info || !info.available || info.granted) return false
+  if (!info?.available || info.granted) return false
   return formatGrantAmount(info) !== null
 }
 export function shouldShowOverageCreditUpsell(): boolean {

@@ -116,7 +116,7 @@ export function useTurnDiffs(messages: Message[]): TurnDiff[] {
     // Process only new messages
     for (let i = c.lastProcessedIndex; i < messages.length; i++) {
       const message = messages[i]
-      if (!message || message.type !== 'user') continue
+      if (message?.type !== 'user') continue
 
       // Check if this is a user prompt (not a tool result)
       const isToolResult =

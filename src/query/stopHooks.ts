@@ -217,8 +217,8 @@ export async function* handleStopHooks(
             } else if (attachment.type === 'hook_success') {
               // Check if successful hook produced any stdout/stderr
               if (
-                (attachment.stdout && attachment.stdout.trim()) ||
-                (attachment.stderr && attachment.stderr.trim())
+                (attachment.stdout?.trim()) ||
+                (attachment.stderr?.trim())
               ) {
                 hasOutput = true
               }
