@@ -10,6 +10,9 @@
       },
       "suspicious": {
         "noExplicitAny": "warn",
+        "noImplicitAnyLet": "warn",
+        "noAssignInExpressions": "warn",
+        "noArrayIndexKey": "warn",
         "noDebugger": "error",
         "noConsole": { "level": "warn", "options": { "allow": ["log"] } }
       },
