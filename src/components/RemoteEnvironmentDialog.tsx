@@ -23,7 +23,7 @@ const SETUP_HINT = `Configure environments at: https://claude.ai/code`
 type Props = {
   onDone: (message?: string) => void
 }
-type LoadingState = 'loading' | 'updating' | null
+type LoadingStatus = 'loading' | 'updating' | null
 export function RemoteEnvironmentDialog(t0) {
   const $ = _c(27)
   const { onDone } = t0
