@@ -1,4 +1,4 @@
-import { resolve as resolvePath } from 'path'
+import { resolve as resolvePath } from 'node:path'
 import { useEffect, useRef, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { useRegisterOverlay } from '../context/overlayContext.js'

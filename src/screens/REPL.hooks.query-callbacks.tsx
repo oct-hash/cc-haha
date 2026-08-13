@@ -6,7 +6,7 @@
 // here directly.
 
 import { feature } from 'bun:bundle'
-import type { UUID } from 'crypto'
+import type { UUID } from 'node:crypto'
 import type * as React from 'react'
 import { useCallback } from 'react'
 import type { SpinnerMode } from '../components/Spinner.js'

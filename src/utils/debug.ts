@@ -1,6 +1,6 @@
-import { appendFile, mkdir, symlink, unlink } from 'fs/promises'
+import { appendFile, mkdir, symlink, unlink } from 'node:fs/promises'
 import memoize from 'lodash-es/memoize.js'
-import { dirname, join } from 'path'
+import { dirname, join } from 'node:path'
 import { getSessionId } from 'src/bootstrap/state.js'
 
 import { type BufferedWriter, createBufferedWriter } from './bufferedWriter.js'

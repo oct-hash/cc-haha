@@ -1,7 +1,7 @@
 import { feature } from 'bun:bundle'
 import type { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
 import uniqBy from 'lodash-es/uniqBy.js'
-import { dirname } from 'path'
+import { dirname } from 'node:path'
 import { getProjectRoot } from 'src/bootstrap/state.js'
 import { builtInCommandNames, findCommand, getCommands, type PromptCommand } from 'src/commands.js'
 import type {

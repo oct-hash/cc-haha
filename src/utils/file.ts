@@ -1,6 +1,6 @@
-import { chmodSync, writeFileSync as fsWriteFileSync } from 'fs'
-import { realpath, stat } from 'fs/promises'
-import { homedir } from 'os'
+import { chmodSync, writeFileSync as fsWriteFileSync } from 'node:fs'
+import { realpath, stat } from 'node:fs/promises'
+import { homedir } from 'node:os'
 import {
   basename,
   dirname,
@@ -11,7 +11,7 @@ import {
   relative,
   resolve,
   sep,
-} from 'path'
+} from 'node:path'
 import { logEvent } from 'src/services/analytics/index.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { getCwd } from '../utils/cwd.js'

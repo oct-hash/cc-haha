@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { isDeepStrictEqual } from 'util'
+import { isDeepStrictEqual } from 'node:util'
 import OptionMap from './option-map.js'
 import type { OptionWithDescription } from './select.js'
 

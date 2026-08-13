@@ -1,5 +1,5 @@
 import { feature } from 'bun:bundle'
-import { basename } from 'path'
+import { basename } from 'node:path'
 import { useCallback, useEffect, useRef } from 'react'
 import { getSessionId } from '../../bootstrap/state.js'
 import type { Command } from '../../commands.js'

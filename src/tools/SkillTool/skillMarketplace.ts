@@ -262,4 +262,4 @@ export function getMarketplace(): SkillMarketplace {
   return globalMarketplace
 }
 
-import { join } from 'path'
+import { join } from 'node:path'

@@ -1,4 +1,4 @@
-import { basename, relative } from 'path'
+import { basename, relative } from 'node:path'
 import { Suspense, use, } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { FileEditToolDiff } from 'src/components/FileEditToolDiff.js'

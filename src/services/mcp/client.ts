@@ -233,8 +233,8 @@ const isComputerUseMCPServer = feature('CHICAGO_MCP')
     ).isComputerUseMCPServer
   : undefined
 
-import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
-import { dirname, join } from 'path'
+import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { jsonParse, jsonStringify } from '../../utils/slowOperations.js'

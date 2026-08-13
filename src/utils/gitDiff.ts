@@ -1,6 +1,6 @@
 import type { StructuredPatchHunk } from 'diff'
-import { access, readFile } from 'fs/promises'
-import { dirname, join, relative, sep } from 'path'
+import { access, readFile } from 'node:fs/promises'
+import { dirname, join, relative, sep } from 'node:path'
 import { getCwd } from './cwd.js'
 import { getCachedRepository } from './detectRepository.js'
 import { execFileNoThrow, execFileNoThrowWithCwd } from './execFileNoThrow.js'

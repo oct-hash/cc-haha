@@ -1,4 +1,4 @@
-import { unlink } from 'fs/promises'
+import { unlink } from 'node:fs/promises'
 import { CircularBuffer } from '../CircularBuffer.js'
 import { logForDebugging } from '../debug.js'
 import { readFileRange, tailFile } from '../fsOperations.js'

@@ -1,5 +1,5 @@
 import memoize from 'lodash-es/memoize.js'
-import { join } from 'path'
+import { join } from 'node:path'
 import { getPlatform } from '../platform.js'
 
 /**

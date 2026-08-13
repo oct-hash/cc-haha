@@ -7,8 +7,8 @@ import {
   type ListToolsResult,
   type Tool,
 } from '@modelcontextprotocol/sdk/types.js'
-import { randomUUID, timingSafeEqual } from 'crypto'
-import { createServer } from 'http'
+import { randomUUID, timingSafeEqual } from 'node:crypto'
+import { createServer } from 'node:http'
 import { getDefaultAppState } from 'src/state/AppStateStore.js'
 import { shutdownDatadog } from '../services/analytics/datadog.js'
 import { shutdown1PEventLogging } from '../services/analytics/firstPartyEventLogger.js'

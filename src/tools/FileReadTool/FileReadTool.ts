@@ -1,7 +1,7 @@
 import type { Base64ImageSource } from '@anthropic-ai/sdk/resources/index.mjs'
-import { readdir, readFile as readFileAsync } from 'fs/promises'
-import * as path from 'path'
-import { posix, win32 } from 'path'
+import { readdir, readFile as readFileAsync } from 'node:fs/promises'
+import * as path from 'node:path'
+import { posix, win32 } from 'node:path'
 import { z } from 'zod/v4'
 import {
   PDF_AT_MENTION_INLINE_THRESHOLD,

@@ -43,9 +43,9 @@ import {
   rmdir,
   stat,
   symlink,
-} from 'fs/promises'
+} from 'node:fs/promises'
 import memoize from 'lodash-es/memoize.js'
-import { basename, dirname, join, relative, resolve, sep } from 'path'
+import { basename, dirname, join, relative, resolve, sep } from 'node:path'
 import { getInlinePlugins } from '../../bootstrap/state.js'
 import { BUILTIN_MARKETPLACE_NAME, getBuiltinPlugins } from '../../plugins/builtinPlugins.js'
 import type {

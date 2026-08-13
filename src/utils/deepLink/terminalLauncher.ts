@@ -11,8 +11,8 @@
  *   Windows — Windows Terminal (wt.exe), PowerShell, cmd.exe
  */
 
-import { spawn } from 'child_process'
-import { basename } from 'path'
+import { spawn } from 'node:child_process'
+import { basename } from 'node:path'
 import { getGlobalConfig } from '../config.js'
 import { logForDebugging } from '../debug.js'
 import { execFileNoThrow } from '../execFileNoThrow.js'

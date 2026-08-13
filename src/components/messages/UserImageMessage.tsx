@@ -1,6 +1,6 @@
 
 import { c as _c } from 'react/compiler-runtime'
-import { pathToFileURL } from 'url'
+import { pathToFileURL } from 'node:url'
 import Link from '../../ink/components/Link.js'
 import { supportsHyperlinks } from '../../ink/supports-hyperlinks.js'
 import { Box, Text } from '../../ink.js'

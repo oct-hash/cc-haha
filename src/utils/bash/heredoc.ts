@@ -24,7 +24,7 @@
  * @module
  */
 
-import { randomBytes } from 'crypto'
+import { randomBytes } from 'node:crypto'
 
 const HEREDOC_PLACEHOLDER_PREFIX = '__HEREDOC_'
 const HEREDOC_PLACEHOLDER_SUFFIX = '__'

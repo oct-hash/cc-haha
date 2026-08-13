@@ -1,4 +1,4 @@
-import { readdir } from 'fs/promises'
+import { readdir } from 'node:fs/promises'
 import { getCwd } from '../../utils/cwd.js'
 import { registerBundledSkill } from '../bundledSkills.js'
 

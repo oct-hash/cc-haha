@@ -1,5 +1,5 @@
-import * as path from 'path'
-import { pathToFileURL } from 'url'
+import * as path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { logForDebugging } from '../../utils/debug.js'
 import { errorMessage } from '../../utils/errors.js'
 import { logError } from '../../utils/log.js'

@@ -1,9 +1,9 @@
 import { feature } from 'bun:bundle'
-import { statSync } from 'fs'
-import { lstat, readdir, readFile, realpath, stat } from 'fs/promises'
+import { statSync } from 'node:fs'
+import { lstat, readdir, readFile, realpath, stat } from 'node:fs/promises'
 import memoize from 'lodash-es/memoize.js'
-import { homedir } from 'os'
-import { dirname, join, resolve, sep } from 'path'
+import { homedir } from 'node:os'
+import { dirname, join, resolve, sep } from 'node:path'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,

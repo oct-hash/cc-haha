@@ -1,6 +1,6 @@
 import type { AddressFamily, LookupAddress as AxiosLookupAddress } from 'axios'
-import { lookup as dnsLookup } from 'dns'
-import { isIP } from 'net'
+import { lookup as dnsLookup } from 'node:dns'
+import { isIP } from 'node:net'
 
 /**
  * SSRF guard for HTTP hooks.

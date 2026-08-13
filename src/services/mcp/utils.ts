@@ -1,5 +1,5 @@
-import { createHash } from 'crypto'
-import { join } from 'path'
+import { createHash } from 'node:crypto'
+import { join } from 'node:path'
 import { getIsNonInteractiveSession } from '../../bootstrap/state.js'
 import type { Command } from '../../commands.js'
 import type { AgentMcpServerInfo } from '../../components/mcp/types.js'

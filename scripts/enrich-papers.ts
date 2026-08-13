@@ -4,8 +4,8 @@
  * 用法: bun scripts/enrich-papers.ts
  */
 
-import { readFileSync, writeFileSync } from 'fs'
-import { setTimeout } from 'timers/promises'
+import { readFileSync, writeFileSync } from 'node:fs'
+import { setTimeout } from 'node:timers/promises'
 
 const INDEX_PATH = 'D:/hermes-kb/wiki/papertree/index.json'
 const http = globalThis.fetch || (await import('node-fetch').then((m) => m.default))

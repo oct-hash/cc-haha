@@ -1,7 +1,7 @@
 import { feature } from 'bun:bundle'
-import { randomUUID } from 'crypto'
-import { hostname, tmpdir } from 'os'
-import { basename, join, resolve } from 'path'
+import { randomUUID } from 'node:crypto'
+import { hostname, tmpdir } from 'node:os'
+import { basename, join, resolve } from 'node:path'
 import { getRemoteSessionUrl } from '../constants/product.js'
 import { shutdownDatadog } from '../services/analytics/datadog.js'
 import { shutdown1PEventLogging } from '../services/analytics/firstPartyEventLogger.js'
@@ -1953,7 +1953,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
   const { getGlobalConfig, saveGlobalConfig, getCurrentProjectConfig, saveCurrentProjectConfig } =
     await import('../utils/config.js')
   if (!getGlobalConfig().remoteDialogSeen) {
-    const readline = await import('readline')
+    const readline = await import('node:readline')
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -2076,7 +2076,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     !resumeSessionId &&
     process.stdin.isTTY
   ) {
-    const readline = await import('readline')
+    const readline = await import('node:readline')
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,

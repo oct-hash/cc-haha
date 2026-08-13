@@ -1,4 +1,4 @@
-import { extname } from 'path'
+import { extname } from 'node:path'
 import { Suspense, use, } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Ansi, Text } from '../../ink.js'

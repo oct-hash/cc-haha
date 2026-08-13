@@ -1,6 +1,6 @@
 // Extracted from REPL.handlers.ts — stream domain
 
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import type { RefObject } from 'react'
 import type { SpinnerMode } from '../components/Spinner.js'
 import { getSessionManager } from '../services/agents/session-manager.js'

@@ -1,5 +1,5 @@
 // Simple Bridge - WeChat to Claude
-const { execSync } = require('child_process')
+const { execSync } = require('node:child_process')
 const axios = require('axios')
 
 const WEIXIN_ACCOUNT_ID = 'e87c180011fe-im-bot'

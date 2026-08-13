@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { tmpdir } from 'os'
+import { tmpdir } from 'node:os'
 import { generateTempFilePath } from '../tempfile'
 
 describe('generateTempFilePath', () => {

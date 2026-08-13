@@ -14,7 +14,7 @@
  */
 
 import { feature } from 'bun:bundle'
-import { hostname } from 'os'
+import { hostname } from 'node:os'
 import { getOriginalCwd, getSessionId } from '../bootstrap/state.js'
 import type { SDKMessage } from '../entrypoints/agentSdkTypes.js'
 import type { SDKControlResponse } from '../entrypoints/sdk/controlTypes.js'

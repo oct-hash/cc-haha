@@ -5,7 +5,7 @@ import { c as _c } from 'react/compiler-runtime'
  */
 /* eslint-disable custom-rules/no-process-exit -- CLI subcommand handlers intentionally exit */
 
-import { cwd } from 'process'
+import { cwd } from 'node:process'
 import React from 'react'
 import { WelcomeV2 } from '../../components/LogoV2/WelcomeV2.js'
 import { useManagePlugins } from '../../hooks/useManagePlugins.js'

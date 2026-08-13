@@ -3,13 +3,13 @@
  * Hooks are user-defined shell commands that can be executed at various points
  * in Claude Code's lifecycle.
  */
-import { basename } from 'path'
-import { spawn, type ChildProcessWithoutNullStreams } from 'child_process'
+import { basename } from 'node:path'
+import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
 import { pathExists } from './file.js'
 import { wrapSpawn } from './ShellCommand.js'
 import { TaskOutput } from './task/TaskOutput.js'
 import { getCwd } from './cwd.js'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import { formatShellPrefixCommand } from './bash/shellPrefix.js'
 import { getHookEnvFilePath, invalidateSessionEnvCache } from './sessionEnvironment.js'
 import { subprocessEnv } from './subprocessEnv.js'

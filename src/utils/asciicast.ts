@@ -1,5 +1,5 @@
-import { appendFile, rename } from 'fs/promises'
-import { basename, dirname, join } from 'path'
+import { appendFile, rename } from 'node:fs/promises'
+import { basename, dirname, join } from 'node:path'
 import { getOriginalCwd, getSessionId } from '../bootstrap/state.js'
 import { createBufferedWriter } from './bufferedWriter.js'
 import { registerCleanup } from './cleanupRegistry.js'

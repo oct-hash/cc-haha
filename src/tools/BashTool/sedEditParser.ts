@@ -3,7 +3,7 @@
  * Extracts file paths and substitution patterns to enable file-edit-style rendering
  */
 
-import { randomBytes } from 'crypto'
+import { randomBytes } from 'node:crypto'
 import { tryParseShellCommand } from '../../utils/bash/shellQuote.js'
 
 // BRE→ERE conversion placeholders (null-byte sentinels, never appear in user input)

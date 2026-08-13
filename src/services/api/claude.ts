@@ -19,7 +19,7 @@ import type {
 } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
 import type { TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
 import type { Stream } from '@anthropic-ai/sdk/streaming.mjs'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import { getAPIProvider, isFirstPartyAnthropicBaseUrl } from 'src/utils/model/providers.js'
 import { getAttributionHeader, getCLISyspromptPrefix } from '../../constants/system.js'
 import {

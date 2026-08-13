@@ -1,5 +1,5 @@
-import { appendFile, writeFile } from 'fs/promises'
-import { join } from 'path'
+import { appendFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { getProjectRoot, getSessionId } from './bootstrap/state.js'
 import { registerCleanup } from './utils/cleanupRegistry.js'
 import type { HistoryEntry, PastedContent } from './utils/config.js'

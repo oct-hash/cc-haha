@@ -25,9 +25,9 @@
  */
 
 import axios from 'axios'
-import { createHash } from 'crypto'
-import { mkdir, readdir, readFile, stat, writeFile } from 'fs/promises'
-import { join, relative, sep } from 'path'
+import { createHash } from 'node:crypto'
+import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises'
+import { join, relative, sep } from 'node:path'
 import {
   CLAUDE_AI_INFERENCE_SCOPE,
   CLAUDE_AI_PROFILE_SCOPE,

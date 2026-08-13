@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, } from 'bun:test'
-import type * as fs from 'fs'
-import nodePath from 'path'
+import type * as fs from 'node:fs'
+import nodePath from 'node:path'
 import {
   type FsOperations,
   getFsImplementation,

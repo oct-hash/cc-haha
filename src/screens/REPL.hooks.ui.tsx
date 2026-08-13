@@ -2,7 +2,7 @@
 // focus, and theme. useREPLUiState is the fourth state block of the REPL
 // component body.
 
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Theme } from 'src/utils/theme.js'
 import { hasCursorUpViewportYankBug } from '../ink/terminal.js'

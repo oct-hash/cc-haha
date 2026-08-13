@@ -6,9 +6,9 @@
  * extension (packages/claude-vscode/src/common-host/sessionStorage.ts).
  */
 
-import type { UUID } from 'crypto'
-import { open as fsOpen, readdir, realpath, stat } from 'fs/promises'
-import { join } from 'path'
+import type { UUID } from 'node:crypto'
+import { open as fsOpen, readdir, realpath, stat } from 'node:fs/promises'
+import { join } from 'node:path'
 import { getClaudeConfigHomeDir } from './envUtils.js'
 import { getWorktreePathsPortable } from './getWorktreePathsPortable.js'
 import { djb2Hash } from './hash.js'

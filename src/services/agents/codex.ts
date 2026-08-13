@@ -8,7 +8,7 @@
  */
 
 import type { Subprocess } from 'bun'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import type { AgentAdapter } from './adapter.js'
 import type { AgentConfig, AgentKind, AgentStatus, NormalizedEvent } from './types.js'
 

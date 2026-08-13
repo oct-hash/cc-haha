@@ -4,7 +4,7 @@
  */
 /* eslint-disable custom-rules/no-process-exit -- CLI subcommand handlers intentionally exit */
 import figures from 'figures'
-import { basename, dirname } from 'path'
+import { basename, dirname } from 'node:path'
 import { setUseCoworkPlugins } from '../../bootstrap/state.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,

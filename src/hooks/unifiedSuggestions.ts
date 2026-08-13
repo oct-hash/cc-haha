@@ -1,5 +1,5 @@
 import Fuse from 'fuse.js'
-import { basename } from 'path'
+import { basename } from 'node:path'
 import type { SuggestionItem } from 'src/components/PromptInput/PromptInputFooterSuggestions.js'
 import { generateFileSuggestions } from 'src/hooks/fileSuggestions.js'
 import type { ServerResource } from 'src/services/mcp/types.js'

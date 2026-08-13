@@ -1,6 +1,6 @@
 import { feature } from 'bun:bundle'
 import type { ContentBlockParam, TextBlockParam } from '@anthropic-ai/sdk/resources'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import { setPromptId } from 'src/bootstrap/state.js'
 import {
   builtInCommandNames,

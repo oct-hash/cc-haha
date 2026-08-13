@@ -1,5 +1,5 @@
 import codeExcerpt, { type CodeExcerpt } from 'code-excerpt'
-import { readFileSync } from 'fs'
+import { readFileSync } from 'node:fs'
 import StackUtils from 'stack-utils'
 import Box from './Box.js'
 import Text from './Text.js'

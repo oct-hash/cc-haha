@@ -1,5 +1,5 @@
 import chokidar, { type FSWatcher } from 'chokidar'
-import * as platformPath from 'path'
+import * as platformPath from 'node:path'
 import { getAdditionalDirectoriesForClaudeMd } from '../../bootstrap/state.js'
 import { clearCommandMemoizationCaches, clearCommandsCache } from '../../commands.js'
 import {

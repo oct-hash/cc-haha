@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import * as path from 'path'
+import * as path from 'node:path'
 import type React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'

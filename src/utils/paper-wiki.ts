@@ -12,8 +12,8 @@
  *   const related = await wiki.getRelated(paperId)
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 import {
   addEntitiesAndRelations,
   getPaperId,

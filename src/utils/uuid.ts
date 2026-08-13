@@ -1,4 +1,4 @@
-import { randomBytes, type UUID } from 'crypto'
+import { randomBytes, type UUID } from 'node:crypto'
 import type { AgentId } from 'src/types/ids.js'
 
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

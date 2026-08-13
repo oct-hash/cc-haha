@@ -3,7 +3,7 @@
  * for case-insensitive cmdlet matching.
  */
 
-import { resolve } from 'path'
+import { resolve } from 'node:path'
 import type { ToolPermissionContext, ToolUseContext } from '../../Tool.js'
 import type { PermissionDecisionReason, PermissionResult } from '../../types/permissions.js'
 import { getCwd } from '../../utils/cwd.js'

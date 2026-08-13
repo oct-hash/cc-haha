@@ -1,6 +1,6 @@
 import memoize from 'lodash-es/memoize.js'
-import { homedir } from 'os'
-import { isAbsolute, join, normalize, sep } from 'path'
+import { homedir } from 'node:os'
+import { isAbsolute, join, normalize, sep } from 'node:path'
 import { getIsNonInteractiveSession, getProjectRoot } from '../bootstrap/state.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { getClaudeConfigHomeDir, isEnvDefinedFalsy, isEnvTruthy } from '../utils/envUtils.js'

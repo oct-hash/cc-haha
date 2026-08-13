@@ -1,5 +1,5 @@
 import { feature } from 'bun:bundle'
-import { basename } from 'path'
+import { basename } from 'node:path'
 import type React from 'react'
 import { useRef } from 'react'
 import { c as _c } from 'react/compiler-runtime'

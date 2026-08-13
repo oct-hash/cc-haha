@@ -10,9 +10,9 @@
  */
 
 import chokidar, { type FSWatcher } from 'chokidar'
-import { readFileSync } from 'fs'
-import { readFile, stat } from 'fs/promises'
-import { dirname, join } from 'path'
+import { readFileSync } from 'node:fs'
+import { readFile, stat } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { logEvent } from '../services/analytics/index.js'
 import { registerCleanup } from '../utils/cleanupRegistry.js'

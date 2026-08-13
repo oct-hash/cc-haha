@@ -1,5 +1,5 @@
 import type { StructuredPatchHunk } from 'diff'
-import { relative } from 'path'
+import { relative } from 'node:path'
 import { c as _c } from 'react/compiler-runtime'
 import { useTerminalSize } from 'src/hooks/useTerminalSize.js'
 import { getCwd } from 'src/utils/cwd.js'

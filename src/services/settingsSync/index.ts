@@ -11,9 +11,9 @@
 
 import { feature } from 'bun:bundle'
 import axios from 'axios'
-import { mkdir, readFile, stat, writeFile } from 'fs/promises'
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import pickBy from 'lodash-es/pickBy.js'
-import { dirname } from 'path'
+import { dirname } from 'node:path'
 import { getIsInteractive } from '../../bootstrap/state.js'
 import {
   CLAUDE_AI_INFERENCE_SCOPE,

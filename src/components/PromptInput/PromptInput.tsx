@@ -1,6 +1,6 @@
 import { feature } from 'bun:bundle'
 import chalk from 'chalk'
-import * as path from 'path'
+import * as path from 'node:path'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useNotifications } from 'src/context/notifications.js'

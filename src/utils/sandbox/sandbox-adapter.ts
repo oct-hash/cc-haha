@@ -20,10 +20,10 @@ import {
   SandboxRuntimeConfigSchema,
   SandboxViolationStore,
 } from '@anthropic-ai/sandbox-runtime'
-import { rmSync, statSync } from 'fs'
-import { readFile } from 'fs/promises'
+import { rmSync, statSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import { memoize } from 'lodash-es'
-import { join, resolve, sep } from 'path'
+import { join, resolve, sep } from 'node:path'
 import {
   getAdditionalDirectoriesForClaudeMd,
   getCwdState,

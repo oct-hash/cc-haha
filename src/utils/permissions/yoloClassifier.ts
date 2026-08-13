@@ -1,8 +1,8 @@
 import { feature } from 'bun:bundle'
 import type Anthropic from '@anthropic-ai/sdk'
 import type { BetaToolUnion } from '@anthropic-ai/sdk/resources/beta/messages.js'
-import { mkdir, writeFile } from 'fs/promises'
-import { dirname, join } from 'path'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { z } from 'zod/v4'
 import {
   getCachedClaudeMdContent,

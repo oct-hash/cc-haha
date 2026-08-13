@@ -8,9 +8,9 @@
  */
 
 import axios from 'axios'
-import { randomUUID } from 'crypto'
-import * as fs from 'fs/promises'
-import * as path from 'path'
+import { randomUUID } from 'node:crypto'
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
 import { count } from '../../utils/array.js'
 import { getCwd } from '../../utils/cwd.js'
 import { logForDebugging } from '../../utils/debug.js'

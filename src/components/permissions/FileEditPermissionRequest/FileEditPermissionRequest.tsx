@@ -1,4 +1,4 @@
-import { basename, relative } from 'path'
+import { basename, relative } from 'node:path'
 import { c as _c } from 'react/compiler-runtime'
 import { FileEditToolDiff } from 'src/components/FileEditToolDiff.js'
 import { getCwd } from 'src/utils/cwd.js'

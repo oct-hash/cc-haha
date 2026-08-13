@@ -3,8 +3,8 @@
  */
 
 import type { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
-import { mkdir, writeFile } from 'fs/promises'
-import { join } from 'path'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { getOriginalCwd, getSessionId } from '../bootstrap/state.js'
 import {
   BYTES_PER_TOKEN,

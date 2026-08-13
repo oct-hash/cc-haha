@@ -11,7 +11,7 @@ import React, {
   useSyncExternalStore,
 } from 'react'
 import { c as _c } from 'react/compiler-runtime'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 import { ModalContext } from '../context/modalContext.js'
 import {
   PromptOverlayProvider,

@@ -1,6 +1,6 @@
 import { execa } from 'execa'
-import { readFile } from 'fs/promises'
-import { join } from 'path'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import type * as React from 'react'
 import { useEffect, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'

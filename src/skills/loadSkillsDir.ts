@@ -1,7 +1,7 @@
-import { realpath } from 'fs/promises'
+import { realpath } from 'node:fs/promises'
 import ignore from 'ignore'
 import memoize from 'lodash-es/memoize.js'
-import { basename, dirname, isAbsolute, join, sep as pathSep, relative } from 'path'
+import { basename, dirname, isAbsolute, join, sep as pathSep, relative } from 'node:path'
 import { getAdditionalDirectoriesForClaudeMd, getSessionId } from '../bootstrap/state.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,

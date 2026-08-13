@@ -1,4 +1,4 @@
-import { join } from 'path'
+import { join } from 'node:path'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 import { getFsImplementation } from '../../utils/fsOperations.js'
 

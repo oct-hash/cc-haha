@@ -4,7 +4,7 @@
 // (useREPLToolContext).
 
 import { feature } from 'bun:bundle'
-import { randomUUID, type UUID } from 'crypto'
+import { randomUUID, type UUID } from 'node:crypto'
 import type * as React from 'react'
 import { useCallback, useEffect } from 'react'
 import { SANDBOX_NETWORK_ACCESS_TOOL_NAME } from 'src/cli/structuredIO.js'

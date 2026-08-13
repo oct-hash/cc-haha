@@ -3,8 +3,8 @@
 // undici is lazy-required inside getProxyAgent/configureGlobalAgents to defer
 // ~1.5MB when no HTTPS_PROXY/mTLS env vars are set (the common case).
 import axios, { type AxiosInstance } from 'axios'
-import type { LookupOptions } from 'dns'
-import type { Agent } from 'http'
+import type { LookupOptions } from 'node:dns'
+import type { Agent } from 'node:http'
 import { HttpsProxyAgent, type HttpsProxyAgentOptions } from 'https-proxy-agent'
 import memoize from 'lodash-es/memoize.js'
 import type * as undici from 'undici'

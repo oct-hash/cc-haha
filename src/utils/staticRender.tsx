@@ -1,7 +1,7 @@
 import type * as React from 'react'
 import { useLayoutEffect } from 'react'
 import { c as _c } from 'react/compiler-runtime'
-import { PassThrough } from 'stream'
+import { PassThrough } from 'node:stream'
 import stripAnsi from 'strip-ansi'
 import { render, useApp } from '../ink.js'
 

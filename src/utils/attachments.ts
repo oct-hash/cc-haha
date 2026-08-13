@@ -20,7 +20,7 @@ import { expandPath } from './path.js'
 import { countCharInString } from './stringUtils.js'
 import { uniq } from './array.js'
 import { getFsImplementation } from './fsOperations.js'
-import { readdir, stat } from 'fs/promises'
+import { readdir, stat } from 'node:fs/promises'
 import type { IDESelection } from '../hooks/useIdeSelection.js'
 import { TODO_WRITE_TOOL_NAME } from '../tools/TodoWriteTool/constants.js'
 import { TASK_CREATE_TOOL_NAME } from '../tools/TaskCreateTool/constants.js'
@@ -37,7 +37,7 @@ import {
   getConditionalRulesForCwdLevelDirectory,
   type MemoryFileInfo,
 } from './claudemd.js'
-import { dirname, parse, relative, resolve } from 'path'
+import { dirname, parse, relative, resolve } from 'node:path'
 import { getCwd } from 'src/utils/cwd.js'
 import { getViewedTeammateTask } from '../state/selectors.js'
 import { logError } from './log.js'
@@ -51,7 +51,7 @@ import {
   getImagePasteIds,
   isValidImagePaste,
 } from 'src/types/textInputTypes.js'
-import { randomUUID, type UUID } from 'crypto'
+import { randomUUID, type UUID } from 'node:crypto'
 import { getSettings_DEPRECATED } from './settings/settings.js'
 import { getSnippetForTwoFileDiff } from 'src/tools/FileEditTool/utils.js'
 import type {

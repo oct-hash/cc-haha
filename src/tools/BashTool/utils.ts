@@ -3,7 +3,7 @@ import type {
   ContentBlockParam,
   ToolResultBlockParam,
 } from '@anthropic-ai/sdk/resources/index.mjs'
-import { readFile, stat } from 'fs/promises'
+import { readFile, stat } from 'node:fs/promises'
 import { getOriginalCwd } from 'src/bootstrap/state.js'
 import { logEvent } from 'src/services/analytics/index.js'
 import type { ToolPermissionContext } from 'src/Tool.js'

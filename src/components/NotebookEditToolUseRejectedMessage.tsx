@@ -1,4 +1,4 @@
-import { relative } from 'path'
+import { relative } from 'node:path'
 import { c as _c } from 'react/compiler-runtime'
 import { getCwd } from 'src/utils/cwd.js'
 import { Box, Text } from '../ink.js'

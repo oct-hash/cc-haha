@@ -1,7 +1,7 @@
 // Extracted from REPL.handlers.ts — agents domain
 
 import type { ContentBlockParam, ImageBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import type { RefObject } from 'react'
 import { logEvent } from 'src/services/analytics/index.js'
 import { getSystemPrompt } from '../constants/prompts.js'

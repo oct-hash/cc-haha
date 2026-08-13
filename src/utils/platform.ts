@@ -1,6 +1,6 @@
-import { readdir, readFile } from 'fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import memoize from 'lodash-es/memoize.js'
-import { release as osRelease } from 'os'
+import { release as osRelease } from 'node:os'
 import { getFsImplementation } from './fsOperations.js'
 import { logError } from './log.js'
 

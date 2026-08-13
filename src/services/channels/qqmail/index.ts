@@ -14,7 +14,7 @@ const SERVER_VERSION = '1.0.0'
 
 // Fallback: load .env from known absolute path (handles MCP spawn env issues)
 try {
-  const envText = require('fs').readFileSync('D:/claude-code-haha/.env', 'utf-8')
+  const envText = require('node:fs').readFileSync('D:/claude-code-haha/.env', 'utf-8')
   for (const line of envText.split('\n')) {
     const t = line.trim()
     if (!t || t.startsWith('#')) continue
@@ -37,7 +37,7 @@ const KB_INDEX_PATH = process.env.KB_INDEX_PATH || 'D:/hermes-kb/wiki/papertree/
 const KB_GRAPH_PATH = process.env.KB_GRAPH_PATH || 'D:/hermes-kb/wiki/papertree/graph.json'
 
 // Debug: log env vars at startup
-const fs = require('fs')
+const fs = require('node:fs')
 fs.writeFileSync(
   'D:/qqmail-debug.log',
   `[qqmail] QQ_USER=${QQ_USER ? 'OK' : 'MISSING'} AUTH_CODE=${QQ_AUTH_CODE ? 'OK' : 'MISSING'} KB_INDEX=${KB_INDEX_PATH} CWD=${process.cwd()}\n`,

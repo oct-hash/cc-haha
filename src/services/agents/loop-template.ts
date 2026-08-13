@@ -11,8 +11,8 @@
  *   await Bun.write('.claude/loop.md', loopMd)
  */
 
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 const TEMPLATE_PATH = join(import.meta.dir, 'loop-haha.md')
 

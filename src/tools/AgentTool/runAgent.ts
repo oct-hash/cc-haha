@@ -1,6 +1,6 @@
 import { feature } from 'bun:bundle'
-import type { UUID } from 'crypto'
-import { randomUUID } from 'crypto'
+import type { UUID } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import uniqBy from 'lodash-es/uniqBy.js'
 import { logForDebugging } from 'src/utils/debug.js'
 import { getProjectRoot, getSessionId } from '../../bootstrap/state.js'

@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import type { UUID } from 'crypto'
+import type { UUID } from 'node:crypto'
 import figures from 'figures'
 import * as React from 'react'
 import { c as _c } from 'react/compiler-runtime'

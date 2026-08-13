@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import figures from 'figures'
 import type * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'

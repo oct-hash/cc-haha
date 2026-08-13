@@ -1,4 +1,4 @@
-import * as path from 'path'
+import * as path from 'node:path'
 import { useEffect, useRef, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { useRegisterOverlay } from '../context/overlayContext.js'

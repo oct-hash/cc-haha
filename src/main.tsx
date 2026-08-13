@@ -31,7 +31,7 @@ import {
   Option,
 } from '@commander-js/extra-typings'
 import chalk from 'chalk'
-import { readFileSync } from 'fs'
+import { readFileSync } from 'node:fs'
 import mapValues from 'lodash-es/mapValues.js'
 import pickBy from 'lodash-es/pickBy.js'
 import uniqBy from 'lodash-es/uniqBy.js'
@@ -145,7 +145,7 @@ const kairosGate = feature('KAIROS')
   ? (require('./assistant/gate.js') as typeof import('./assistant/gate.js'))
   : null
 
-import { relative, resolve } from 'path'
+import { relative, resolve } from 'node:path'
 import { isAnalyticsDisabled } from 'src/services/analytics/config.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js'
 import {
@@ -5222,7 +5222,7 @@ async function run(): Promise<CommanderCommand> {
           idleTimeout: string
           maxSessions: string
         }) => {
-          const { randomBytes } = await import('crypto')
+          const { randomBytes } = await import('node:crypto')
           const { startServer } = await import('./server/server.js')
           const { SessionManager } = await import('./server/sessionManager.js')
           const { DangerousBackend } = await import('./server/backends/dangerousBackend.js')

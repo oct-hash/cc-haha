@@ -1,5 +1,5 @@
 import { coerce } from 'semver'
-import type { Writable } from 'stream'
+import type { Writable } from 'node:stream'
 import { env } from '../utils/env.js'
 import { gte } from '../utils/semver.js'
 import { getClearTerminalSequence } from './clearTerminal.js'

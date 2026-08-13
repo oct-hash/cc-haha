@@ -1,5 +1,5 @@
 import figures from 'figures'
-import { join } from 'path'
+import { join } from 'node:path'
 import { Suspense, use, useEffect, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { KeybindingWarnings } from 'src/components/KeybindingWarnings.js'

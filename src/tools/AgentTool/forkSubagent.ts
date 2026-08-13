@@ -1,6 +1,6 @@
 import { feature } from 'bun:bundle'
 import type { BetaToolUseBlock } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import { getIsNonInteractiveSession } from '../../bootstrap/state.js'
 import { FORK_BOILERPLATE_TAG, FORK_DIRECTIVE_PREFIX } from '../../constants/xml.js'
 import { isCoordinatorMode } from '../../coordinator/coordinatorMode.js'

@@ -11,7 +11,7 @@
  * - Return result objects indicating success/failure with messages
  * - Can throw errors for unexpected failures
  */
-import { dirname, join } from 'path'
+import { dirname, join } from 'node:path'
 import { getOriginalCwd } from '../../bootstrap/state.js'
 import { isBuiltinPluginId } from '../../plugins/builtinPlugins.js'
 import type { LoadedPlugin, PluginManifest } from '../../types/plugin.js'

@@ -1,9 +1,9 @@
 import type { BetaContentBlock } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
-import { createHash, randomUUID, type UUID } from 'crypto'
-import { mkdir, readFile, writeFile } from 'fs/promises'
+import { createHash, randomUUID, type UUID } from 'node:crypto'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import isPlainObject from 'lodash-es/isPlainObject.js'
 import mapValues from 'lodash-es/mapValues.js'
-import { dirname, join } from 'path'
+import { dirname, join } from 'node:path'
 import { addToTotalSessionCost } from 'src/cost-tracker.js'
 import { calculateUSDCost } from 'src/utils/modelCost.js'
 import type {

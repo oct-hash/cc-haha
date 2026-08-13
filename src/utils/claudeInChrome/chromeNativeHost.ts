@@ -6,10 +6,10 @@
  * previously implemented as a Rust NAPI binding but now in pure TypeScript.
  */
 
-import { appendFile, chmod, mkdir, readdir, rmdir, stat, unlink } from 'fs/promises'
-import { createServer, type Server, type Socket } from 'net'
-import { homedir, platform } from 'os'
-import { join } from 'path'
+import { appendFile, chmod, mkdir, readdir, rmdir, stat, unlink } from 'node:fs/promises'
+import { createServer, type Server, type Socket } from 'node:net'
+import { homedir, platform } from 'node:os'
+import { join } from 'node:path'
 import { z } from 'zod'
 import { lazySchema } from '../lazySchema.js'
 import { jsonParse, jsonStringify } from '../slowOperations.js'

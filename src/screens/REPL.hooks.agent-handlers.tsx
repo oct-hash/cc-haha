@@ -7,7 +7,7 @@
 // handler/component imports are resolved here directly.
 
 import { feature } from 'bun:bundle'
-import { spawnSync } from 'child_process'
+import { spawnSync } from 'node:child_process'
 import type * as React from 'react'
 import { useCallback, useRef } from 'react'
 import exit from '../commands/exit/index.js'

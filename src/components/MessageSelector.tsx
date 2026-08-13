@@ -1,5 +1,5 @@
 import type { ContentBlockParam, TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
-import { randomUUID, type UUID } from 'crypto'
+import { randomUUID, type UUID } from 'node:crypto'
 import figures from 'figures'
 import type * as React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -35,7 +35,7 @@ function isTextBlock(block: ContentBlockParam): block is TextBlockParam {
   return block.type === 'text'
 }
 
-import * as path from 'path'
+import * as path from 'node:path'
 import { useTerminalSize } from 'src/hooks/useTerminalSize.js'
 import type { FileEditOutput } from 'src/tools/FileEditTool/types.js'
 import type { Output as FileWriteToolOutput } from 'src/tools/FileWriteTool/FileWriteTool.js'

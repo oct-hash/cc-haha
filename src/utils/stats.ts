@@ -1,6 +1,6 @@
 import { feature } from 'bun:bundle'
-import { open } from 'fs/promises'
-import { basename, dirname, join, sep } from 'path'
+import { open } from 'node:fs/promises'
+import { basename, dirname, join, sep } from 'node:path'
 import type { ModelUsage } from 'src/entrypoints/agentSdkTypes.js'
 import type { Entry, TranscriptMessage } from '../types/logs.js'
 import { logForDebugging } from './debug.js'

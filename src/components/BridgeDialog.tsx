@@ -1,4 +1,4 @@
-import { basename } from 'path'
+import { basename } from 'node:path'
 import { toString as qrToString } from 'qrcode'
 import { useEffect, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'

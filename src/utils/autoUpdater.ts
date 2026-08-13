@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { constants as fsConstants } from 'fs'
-import { access, writeFile } from 'fs/promises'
-import { homedir } from 'os'
-import { join } from 'path'
+import { constants as fsConstants } from 'node:fs'
+import { access, writeFile } from 'node:fs/promises'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
 import { getDynamicConfig_BLOCKS_ON_INIT } from 'src/services/analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,

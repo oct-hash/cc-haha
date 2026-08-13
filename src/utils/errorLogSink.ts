@@ -11,7 +11,7 @@
  */
 
 import axios from 'axios'
-import { dirname, join } from 'path'
+import { dirname, join } from 'node:path'
 import { getSessionId } from '../bootstrap/state.js'
 import { createBufferedWriter } from './bufferedWriter.js'
 import { CACHE_PATHS } from './cachePaths.js'

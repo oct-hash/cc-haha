@@ -1,5 +1,5 @@
-import { homedir } from 'os'
-import { relative } from 'path'
+import { homedir } from 'node:os'
+import { relative } from 'node:path'
 import { c as _c } from 'react/compiler-runtime'
 import { Box, Text } from '../../ink.js'
 import { getCwd } from '../../utils/cwd.js'

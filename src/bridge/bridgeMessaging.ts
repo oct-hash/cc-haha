@@ -10,7 +10,7 @@
  * as params.
  */
 
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import type { SDKMessage } from '../entrypoints/agentSdkTypes.js'
 import type { SDKControlRequest, SDKControlResponse } from '../entrypoints/sdk/controlTypes.js'
 import type { SDKResultSuccess } from '../entrypoints/sdk/coreTypes.js'

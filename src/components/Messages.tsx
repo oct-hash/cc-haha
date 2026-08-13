@@ -1,6 +1,6 @@
 import { feature } from 'bun:bundle'
 import chalk from 'chalk'
-import type { UUID } from 'crypto'
+import type { UUID } from 'node:crypto'
 import type { RefObject } from 'react'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'

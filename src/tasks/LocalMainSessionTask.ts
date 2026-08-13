@@ -9,8 +9,8 @@
  * This reuses the LocalAgentTask state structure since the behavior is similar.
  */
 
-import type { UUID } from 'crypto'
-import { randomBytes } from 'crypto'
+import type { UUID } from 'node:crypto'
+import { randomBytes } from 'node:crypto'
 import {
   OUTPUT_FILE_TAG,
   STATUS_TAG,

@@ -12,9 +12,9 @@
 
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 import axios from 'axios'
-import { randomUUID } from 'crypto'
-import { mkdir, writeFile } from 'fs/promises'
-import { basename, join } from 'path'
+import { randomUUID } from 'node:crypto'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { basename, join } from 'node:path'
 import { z } from 'zod/v4'
 import { getSessionId } from '../bootstrap/state.js'
 import { logForDebugging } from '../utils/debug.js'

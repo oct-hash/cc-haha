@@ -297,4 +297,4 @@ export async function saveRegistry(registry: SkillRegistry): Promise<void> {
   }
 }
 
-import { dirname, join } from 'path'
+import { dirname, join } from 'node:path'

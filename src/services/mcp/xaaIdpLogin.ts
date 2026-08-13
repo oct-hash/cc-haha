@@ -12,9 +12,9 @@ import {
   type OpenIdProviderDiscoveryMetadata,
   OpenIdProviderDiscoveryMetadataSchema,
 } from '@modelcontextprotocol/sdk/shared/auth.js'
-import { randomBytes } from 'crypto'
-import { createServer, type Server } from 'http'
-import { parse } from 'url'
+import { randomBytes } from 'node:crypto'
+import { createServer, type Server } from 'node:http'
+import { parse } from 'node:url'
 import xss from 'xss'
 import { openBrowser } from '../../utils/browser.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'

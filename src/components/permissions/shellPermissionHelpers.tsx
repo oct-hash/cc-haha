@@ -1,4 +1,4 @@
-import { basename, sep } from 'path'
+import { basename, sep } from 'node:path'
 import { type ReactNode } from 'react'
 import { getOriginalCwd } from '../../bootstrap/state.js'
 import { Text } from '../../ink.js'

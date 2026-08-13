@@ -1,6 +1,6 @@
 import memoize from 'lodash-es/memoize.js'
-import { homedir } from 'os'
-import { dirname, isAbsolute, resolve } from 'path'
+import { homedir } from 'node:os'
+import { dirname, isAbsolute, resolve } from 'node:path'
 import type { ToolPermissionContext } from '../../Tool.js'
 import { getPlatform } from '../../utils/platform.js'
 import {

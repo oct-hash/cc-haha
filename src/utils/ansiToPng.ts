@@ -18,7 +18,7 @@
  *   bun scripts/generate-bitmap-font.ts
  */
 
-import { deflateSync } from 'zlib'
+import { deflateSync } from 'node:zlib'
 import { stringWidth } from '../ink/stringWidth.js'
 import { type AnsiColor, DEFAULT_BG, type ParsedLine, parseAnsi } from './ansiToSvg.js'
 

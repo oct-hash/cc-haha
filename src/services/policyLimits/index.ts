@@ -13,10 +13,10 @@
  */
 
 import axios from 'axios'
-import { createHash } from 'crypto'
-import { readFileSync as fsReadFileSync } from 'fs'
-import { unlink, writeFile } from 'fs/promises'
-import { join } from 'path'
+import { createHash } from 'node:crypto'
+import { readFileSync as fsReadFileSync } from 'node:fs'
+import { unlink, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import {
   CLAUDE_AI_INFERENCE_SCOPE,
   getOauthConfig,

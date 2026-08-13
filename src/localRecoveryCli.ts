@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { readFileSync } from 'fs'
-import { createInterface } from 'readline'
+import { readFileSync } from 'node:fs'
+import { createInterface } from 'node:readline'
 
 type OutputFormat = 'text' | 'json'
 

@@ -19,7 +19,7 @@
 
 import { diffArrays } from 'diff'
 import type * as hljsNamespace from 'highlight.js'
-import { basename, extname } from 'path'
+import { basename, extname } from 'node:path'
 
 // Lazy: defers loading highlight.js until first render. The full bundle
 // registers 190+ language grammars at require time (~50MB, 100-200ms on

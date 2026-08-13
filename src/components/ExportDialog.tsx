@@ -1,4 +1,4 @@
-import { join } from 'path'
+import { join } from 'node:path'
 import type React from 'react'
 import { useCallback, useState } from 'react'
 import type { ExitState } from '../hooks/useExitOnCtrlCDWithKeybindings.js'

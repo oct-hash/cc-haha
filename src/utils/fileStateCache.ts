@@ -1,5 +1,5 @@
 import { LRUCache } from 'lru-cache'
-import { normalize } from 'path'
+import { normalize } from 'node:path'
 
 export type FileState = {
   content: string

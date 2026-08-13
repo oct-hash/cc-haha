@@ -7,7 +7,7 @@
  *    malicious hooks.
  */
 
-import { basename, posix, resolve, sep } from 'path'
+import { basename, posix, resolve, sep } from 'node:path'
 import { getCwd } from '../../utils/cwd.js'
 import { PS_TOKENIZER_DASH_CHARS } from '../../utils/powershell/parser.js'
 

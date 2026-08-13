@@ -1,7 +1,7 @@
 import { execa } from 'execa'
-import { readFile, realpath } from 'fs/promises'
-import { homedir } from 'os'
-import { delimiter, join, posix, win32 } from 'path'
+import { readFile, realpath } from 'node:fs/promises'
+import { homedir } from 'node:os'
+import { delimiter, join, posix, win32 } from 'node:path'
 import { checkGlobalInstallPermissions } from './autoUpdater.js'
 import { isInBundledMode } from './bundledMode.js'
 import {

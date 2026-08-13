@@ -1,4 +1,4 @@
-import { join } from 'path'
+import { join } from 'node:path'
 import { expandEnvVarsInString } from '../../services/mcp/envExpansion.js'
 import {
   type McpServerConfig,

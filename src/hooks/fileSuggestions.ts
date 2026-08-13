@@ -1,6 +1,6 @@
-import { statSync } from 'fs'
+import { statSync } from 'node:fs'
 import ignore from 'ignore'
-import * as path from 'path'
+import * as path from 'node:path'
 import {
   CLAUDE_CONFIG_DIRECTORIES,
   loadMarkdownFilesForSubdir,

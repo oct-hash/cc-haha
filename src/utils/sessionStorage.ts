@@ -1,10 +1,10 @@
 import { feature } from 'bun:bundle'
-import type { UUID } from 'crypto'
-import type { Dirent } from 'fs'
+import type { UUID } from 'node:crypto'
+import type { Dirent } from 'node:fs'
 // Sync fs primitives for readFileTailSync — separate from fs/promises
 // imports above. Named (not wildcard) per CLAUDE.md style; no collisions
 // with the async-suffixed names.
-import { closeSync, fstatSync, openSync, readSync } from 'fs'
+import { closeSync, fstatSync, openSync, readSync } from 'node:fs'
 import {
   appendFile as fsAppendFile,
   open as fsOpen,
@@ -14,9 +14,9 @@ import {
   stat,
   unlink,
   writeFile,
-} from 'fs/promises'
+} from 'node:fs/promises'
 import memoize from 'lodash-es/memoize.js'
-import { basename, dirname, join } from 'path'
+import { basename, dirname, join } from 'node:path'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
@@ -2999,7 +2999,7 @@ function resolveMetadataBuf(carry: Buffer | null, chunkBuf: Buffer): Buffer | nu
  * are <50 per session), the entire chunk is skipped without line splitting.
  */
 async function scanPreBoundaryMetadata(filePath: string, endOffset: number): Promise<string[]> {
-  const { createReadStream } = await import('fs')
+  const { createReadStream } = await import('node:fs')
   const NEWLINE = 0x0a
 
   const stream = createReadStream(filePath, { end: endOffset - 1 })

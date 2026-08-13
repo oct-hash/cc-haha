@@ -8,7 +8,7 @@
  */
 
 import isEqual from 'lodash-es/isEqual.js'
-import { isAbsolute, resolve } from 'path'
+import { isAbsolute, resolve } from 'node:path'
 import { getOriginalCwd } from '../../bootstrap/state.js'
 import { logForDebugging } from '../debug.js'
 import { errorMessage } from '../errors.js'

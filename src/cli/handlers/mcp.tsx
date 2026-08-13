@@ -3,9 +3,9 @@
  * These are dynamically imported only when the corresponding `claude mcp *` command runs.
  */
 
-import { stat } from 'fs/promises'
+import { stat } from 'node:fs/promises'
 import pMap from 'p-map'
-import { cwd } from 'process'
+import { cwd } from 'node:process'
 import { MCPServerDesktopImportDialog } from '../../components/MCPServerDesktopImportDialog.js'
 import { render } from '../../ink.js'
 import { KeybindingSetup } from '../../keybindings/KeybindingProviderSetup.js'

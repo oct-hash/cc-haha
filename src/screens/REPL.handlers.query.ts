@@ -1,7 +1,7 @@
 // Extracted from REPL.handlers.ts — query domain
 
 import { feature } from 'bun:bundle'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import type { RefObject } from 'react'
 import { logEvent } from 'src/services/analytics/index.js'
 import {

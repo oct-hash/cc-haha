@@ -1,6 +1,6 @@
 import type { StdoutMessage } from 'src/entrypoints/sdk/controlTypes.js'
-import { PassThrough } from 'stream'
-import { URL } from 'url'
+import { PassThrough } from 'node:stream'
+import { URL } from 'node:url'
 import { getSessionId } from '../bootstrap/state.js'
 import { getPollIntervalConfig } from '../bridge/pollConfig.js'
 import { registerCleanup } from '../utils/cleanupRegistry.js'

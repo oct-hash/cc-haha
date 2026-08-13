@@ -1,6 +1,6 @@
-import { type SpawnOptions, type SpawnSyncOptions, spawn, spawnSync } from 'child_process'
+import { type SpawnOptions, type SpawnSyncOptions, spawn, spawnSync } from 'node:child_process'
 import memoize from 'lodash-es/memoize.js'
-import { basename } from 'path'
+import { basename } from 'node:path'
 import instances from '../ink/instances.js'
 import { logForDebugging } from './debug.js'
 import { whichSync } from './which.js'

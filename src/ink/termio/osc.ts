@@ -2,7 +2,7 @@
  * OSC (Operating System Command) Types and Parser
  */
 
-import { Buffer } from 'buffer'
+import { Buffer } from 'node:buffer'
 import { env } from '../../utils/env.js'
 import { execFileNoThrow } from '../../utils/execFileNoThrow.js'
 import { BEL, ESC, ESC_TYPE, SEP } from './ansi.js'

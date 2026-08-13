@@ -4,7 +4,7 @@
  * Uses the termio tokenizer for escape sequence boundary detection,
  * then interprets sequences as keypresses.
  */
-import { Buffer } from 'buffer'
+import { Buffer } from 'node:buffer'
 import { PASTE_END, PASTE_START } from './termio/csi.js'
 import { createTokenizer, type Tokenizer } from './termio/tokenize.js'
 

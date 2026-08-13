@@ -7,9 +7,9 @@
 // module-scope handler/component imports are resolved here directly.
 
 import { feature } from 'bun:bundle'
-import { writeFile } from 'fs/promises'
-import { tmpdir } from 'os'
-import { join } from 'path'
+import { writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { JumpHandle } from '../components/VirtualMessageList.js'

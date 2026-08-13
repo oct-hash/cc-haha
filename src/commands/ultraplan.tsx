@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs'
+import { readFileSync } from 'node:fs'
 import { REMOTE_CONTROL_DISCONNECTED_MSG } from '../bridge/types.js'
 import type { Command } from '../commands.js'
 import { DIAMOND_OPEN } from '../constants/figures.js'

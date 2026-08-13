@@ -1,4 +1,4 @@
-import type { UUID } from 'crypto'
+import type { UUID } from 'node:crypto'
 import React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Box, Text } from '../ink.js'

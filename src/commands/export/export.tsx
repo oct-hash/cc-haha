@@ -1,4 +1,4 @@
-import { join } from 'path'
+import { join } from 'node:path'
 import type React from 'react'
 import { ExportDialog } from '../../components/ExportDialog.js'
 import type { ToolUseContext } from '../../Tool.js'

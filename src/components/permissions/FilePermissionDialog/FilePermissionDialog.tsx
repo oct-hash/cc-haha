@@ -1,4 +1,4 @@
-import { relative } from 'path'
+import { relative } from 'node:path'
 import type React from 'react'
 import { useMemo } from 'react'
 import { useDiffInIDE } from '../../../hooks/useDiffInIDE.js'

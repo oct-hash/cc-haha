@@ -18,7 +18,7 @@
  *   settings.ts  — parsing, caching, first-source-wins logic (this file)
  */
 
-import { join } from 'path'
+import { join } from 'node:path'
 import { logForDebugging } from '../../debug.js'
 import { logForDiagnosticsNoPII } from '../../diagLogs.js'
 import { readFileSync } from '../../fileRead.js'

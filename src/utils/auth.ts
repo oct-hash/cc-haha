@@ -1,9 +1,9 @@
 import chalk from 'chalk'
-import { exec } from 'child_process'
+import { exec } from 'node:child_process'
 import { execa } from 'execa'
-import { mkdir, stat } from 'fs/promises'
+import { mkdir, stat } from 'node:fs/promises'
 import memoize from 'lodash-es/memoize.js'
-import { join } from 'path'
+import { join } from 'node:path'
 import { CLAUDE_AI_PROFILE_SCOPE } from 'src/constants/oauth.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,

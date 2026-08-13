@@ -1,4 +1,4 @@
-import { basename } from 'path'
+import { basename } from 'node:path'
 import { c as _c } from 'react/compiler-runtime'
 import type { z } from 'zod/v4'
 import { Text } from '../../../ink.js'
