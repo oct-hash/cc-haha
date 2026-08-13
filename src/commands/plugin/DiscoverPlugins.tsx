@@ -945,7 +945,6 @@ function EmptyStateMessage(t0) {
       }
       return t1
     }
-    case 'no-marketplaces-configured':
     default: {
       let t1
       if ($[5] === Symbol.for('react.memo_cache_sentinel')) {

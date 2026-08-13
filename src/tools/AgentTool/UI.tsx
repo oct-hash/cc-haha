@@ -360,7 +360,7 @@ function VerboseAgentTranscript(t0) {
   }
   let t3
   if ($[13] !== t2) {
-    t3 = <>{t2}</>
+    t3 = t2
     $[13] = t2
     $[14] = t3
   } else {

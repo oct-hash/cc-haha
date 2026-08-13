@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import type { Theme } from '../../utils/theme.js'
 import { Dialog } from '../design-system/Dialog.js'

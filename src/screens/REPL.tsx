@@ -5,8 +5,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import {
-  type Command,
+import type {
+  Command,
 } from '../commands.js'
 import {
   getTotalCost,
@@ -60,12 +60,12 @@ import type {
   Message as MessageType,
 } from '../types/message.js'
 import { hasConsoleBillingAccess } from '../utils/billing.js'
-import {
-  type FileHistorySnapshot,
+import type {
+  FileHistorySnapshot,
 } from '../utils/fileHistory.js'
 import type { ThinkingConfig } from '../utils/thinking.js'
-import {
-  type ContentReplacementRecord,
+import type {
+  ContentReplacementRecord,
 } from '../utils/toolResultStorage.js'
 
 // Dead code elimination: conditional import for loop mode

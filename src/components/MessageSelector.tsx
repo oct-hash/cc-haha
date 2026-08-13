@@ -403,14 +403,10 @@ export function MessageSelector({
         </Text>
 
         {error && (
-          <>
-            <Text color="error">Error: {error}</Text>
-          </>
+          <Text color="error">Error: {error}</Text>
         )}
         {!hasMessagesToSelect && (
-          <>
-            <Text>Nothing to rewind to yet.</Text>
-          </>
+          <Text>Nothing to rewind to yet.</Text>
         )}
         {!error && messageToRestore && hasMessagesToSelect && (
           <>
@@ -506,8 +502,7 @@ export function MessageSelector({
                         {isFileHistoryEnabled && metadataLoaded && (
                           <Box height={1} flexDirection="row">
                             {metadata ? (
-                              <>
-                                <Text dimColor={!isSelected} color="inactive">
+                              <Text dimColor={!isSelected} color="inactive">
                                   {numFilesChanged ? (
                                     <>
                                       {numFilesChanged === 1 && metadata.filesChanged![0]
@@ -519,7 +514,6 @@ export function MessageSelector({
                                     <>No code changes</>
                                   )}
                                 </Text>
-                              </>
                             ) : (
                               <Text dimColor color="warning">
                                 {figures.warning} No code restore
@@ -687,11 +681,9 @@ function RestoreCodeConfirmation(t0) {
   let t2
   if ($[11] !== fileLabel || $[12] !== t1) {
     t2 = (
-      <>
-        <Text dimColor={true}>
+      <Text dimColor={true}>
           The code will be restored {t1} in {fileLabel}.
         </Text>
-      </>
     )
     $[11] = fileLabel
     $[12] = t1

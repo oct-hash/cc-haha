@@ -657,8 +657,7 @@ Questions asked and answers provided:\n${questionsWithAnswers_0}`
       $[105] !== updateQuestionState
     ) {
       t26 = (
-        <>
-          <QuestionView
+        <QuestionView
             question={currentQuestion}
             questions={questions}
             currentQuestionIndex={currentQuestionIndex}
@@ -681,7 +680,6 @@ Questions asked and answers provided:\n${questionsWithAnswers_0}`
             pastedContents={t24}
             onRemoveImage={t25}
           />
-        </>
       )
       $[85] = answers
       $[86] = currentQuestion
@@ -722,8 +720,7 @@ Questions asked and answers provided:\n${questionsWithAnswers_0}`
       $[113] !== toolUseConfirm.permissionResult
     ) {
       t23 = (
-        <>
-          <SubmitQuestionsView
+        <SubmitQuestionsView
             questions={questions}
             currentQuestionIndex={currentQuestionIndex}
             answers={answers}
@@ -732,7 +729,6 @@ Questions asked and answers provided:\n${questionsWithAnswers_0}`
             minContentHeight={globalContentHeight}
             onFinalResponse={handleFinalResponse}
           />
-        </>
       )
       $[107] = allQuestionsAnswered
       $[108] = answers

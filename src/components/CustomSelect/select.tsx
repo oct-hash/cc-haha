@@ -628,7 +628,7 @@ export function Select(t0) {
                     shouldShowDownArrow={areMoreOptionsBelow_0 && isLastVisibleOption_0}
                     shouldShowUpArrow={areMoreOptionsAbove_0 && isFirstVisibleOption_0}
                   >
-                    <>
+                    
                       {!hideIndexes && (
                         <Text dimColor={true}>{`${i_0}.`.padEnd(maxIndexWidth_0 + 1)}</Text>
                       )}
@@ -646,7 +646,7 @@ export function Select(t0) {
                       >
                         {label_0}
                       </Text>
-                    </>
+                    
                   </SelectOption>
                   {option_2.description && (
                     <Box paddingLeft={hideIndexes ? 4 : maxIndexWidth_0 + 4}>

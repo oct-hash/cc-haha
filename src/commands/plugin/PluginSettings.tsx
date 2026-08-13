@@ -840,7 +840,6 @@ function getInitialViewState(parsedCommand: ParsedCommand): ViewState {
       return {
         type: 'marketplace-menu',
       }
-    case 'menu':
     default:
       // Default to discover view showing all plugins
       return {

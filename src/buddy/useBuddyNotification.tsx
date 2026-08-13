@@ -23,7 +23,7 @@ function RainbowText(t0) {
   const { text } = t0
   let t1
   if ($[0] !== text) {
-    t1 = <>{[...text].map(_temp)}</>
+    t1 = [...text].map(_temp)
     $[0] = text
     $[1] = t1
   } else {

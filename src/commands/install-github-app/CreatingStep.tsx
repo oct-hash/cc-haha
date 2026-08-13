@@ -71,8 +71,7 @@ export function CreatingStep(t0) {
   let t4
   if ($[7] !== currentWorkflowInstallStep || $[8] !== progressSteps) {
     t4 = (
-      <>
-        <Box flexDirection="column" borderStyle="round" paddingX={1}>
+      <Box flexDirection="column" borderStyle="round" paddingX={1}>
           {t3}
           {progressSteps.map((stepText, index) => {
             let status = 'pending'
@@ -102,7 +101,6 @@ export function CreatingStep(t0) {
             )
           })}
         </Box>
-      </>
     )
     $[7] = currentWorkflowInstallStep
     $[8] = progressSteps

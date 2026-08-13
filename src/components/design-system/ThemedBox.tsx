@@ -1,4 +1,4 @@
-import { type Ref } from 'react'
+import type { Ref } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import Box from '../../ink/components/Box.js'
 import type { DOMElement } from '../../ink/dom.js'

@@ -37,7 +37,7 @@ function RenderOnceAndExit(t0) {
   useLayoutEffect(t1, t2)
   let t3
   if ($[3] !== children) {
-    t3 = <>{children}</>
+    t3 = children
     $[3] = children
     $[4] = t3
   } else {

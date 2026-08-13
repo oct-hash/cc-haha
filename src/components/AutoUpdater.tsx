@@ -205,13 +205,11 @@ export function AutoUpdater({
         </Text>
       )}
       {isUpdating ? (
-        <>
-          <Box>
+        <Box>
             <Text color="text" dimColor wrap="truncate">
               Auto-updating…
             </Text>
           </Box>
-        </>
       ) : (
         autoUpdaterResult?.status === 'success' &&
         showSuccessMessage &&

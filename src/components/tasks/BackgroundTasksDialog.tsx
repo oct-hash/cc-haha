@@ -1,6 +1,7 @@
 import { feature } from 'bun:bundle'
 import figures from 'figures'
-import React, { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import type React from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { isCoordinatorMode } from 'src/coordinator/coordinatorMode.js'
 import { useTerminalSize } from 'src/hooks/useTerminalSize.js'
@@ -633,7 +634,7 @@ export function BackgroundTasksDialog({
     <Box flexDirection="column" tabIndex={0} autoFocus onKeyDown={handleKeyDown}>
       <Dialog
         title="Background tasks"
-        subtitle={<>{subtitle}</>}
+        subtitle={subtitle}
         onCancel={handleCancel}
         color="background"
         inputGuide={renderInputGuide}
@@ -952,8 +953,7 @@ function TeammateTaskGroups(t0) {
     }
     const teamEntries = [...teams.entries()]
     t1 = (
-      <>
-        {teamEntries.map((t2) => {
+      teamEntries.map((t2) => {
           const [teamName_0, items] = t2
           const memberCount = items.length + leaderItems.length
           return (
@@ -973,8 +973,7 @@ function TeammateTaskGroups(t0) {
               ))}
             </Box>
           )
-        })}
-      </>
+        })
     )
     $[0] = currentSelectionId
     $[1] = teammateTasks

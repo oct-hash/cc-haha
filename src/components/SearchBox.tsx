@@ -42,8 +42,7 @@ export function SearchBox(t0) {
     $[4] !== query
   ) {
     t9 = isFocused ? (
-      <>
-        {query ? (
+      query ? (
           isTerminalFocused ? (
             <>
               <Text>{query.slice(0, offset)}</Text>
@@ -60,8 +59,7 @@ export function SearchBox(t0) {
           </>
         ) : (
           <Text dimColor={true}>{placeholder}</Text>
-        )}
-      </>
+        )
     ) : query ? (
       <Text>{query}</Text>
     ) : (

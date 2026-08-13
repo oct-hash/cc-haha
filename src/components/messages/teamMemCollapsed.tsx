@@ -157,7 +157,7 @@ export function TeamMemCountParts(t0) {
       }
       nodes.push(t4)
     }
-    t1 = <>{nodes}</>
+    t1 = nodes
     $[0] = hasPrecedingParts
     $[1] = isActiveGroup
     $[2] = tmReadCount

@@ -60,13 +60,11 @@ function RainbowText(t0) {
   let t3
   if ($[2] !== phase || $[3] !== t2) {
     t3 = (
-      <>
-        {t2.map((ch, i) => (
+      t2.map((ch, i) => (
           <Text key={i} color={getRainbowColor(i + phase)}>
             {ch}
           </Text>
-        ))}
-      </>
+        ))
     )
     $[2] = phase
     $[3] = t2

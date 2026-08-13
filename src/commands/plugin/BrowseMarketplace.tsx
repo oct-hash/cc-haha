@@ -770,8 +770,7 @@ export function BrowseMarketplace({
             !selectedPlugin.entry.agents &&
             !selectedPlugin.entry.hooks &&
             !selectedPlugin.entry.mcpServers && (
-              <>
-                {typeof selectedPlugin.entry.source === 'object' &&
+              typeof selectedPlugin.entry.source === 'object' &&
                 'source' in selectedPlugin.entry.source &&
                 (selectedPlugin.entry.source.source === 'github' ||
                   selectedPlugin.entry.source.source === 'url' ||
@@ -786,8 +785,7 @@ export function BrowseMarketplace({
                   // - hooks/ directory and list files
                   // - .mcp.json or mcp-servers.json files
                   <Text dimColor>· Components will be discovered at installation</Text>
-                )}
-              </>
+                )
             )}
         </Box>
 
