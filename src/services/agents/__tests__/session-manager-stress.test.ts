@@ -222,6 +222,7 @@ describe('维度 3 — 错误恢复并发', () => {
       sm.createSession('claude-haha', {
         queryExecutor: async function* () {
           throw new Error('always fail')
+          // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
           yield* []
         },
       }),
@@ -287,6 +288,7 @@ describe('维度 4 — 配置热重载并发', () => {
       queryExecutor: async function* () {
         calls++
         throw new Error('fail')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })
@@ -301,6 +303,7 @@ describe('维度 4 — 配置热重载并发', () => {
       queryExecutor: async function* () {
         calls++
         throw new Error('fail')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })
@@ -317,6 +320,7 @@ describe('维度 4 — 配置热重载并发', () => {
       queryExecutor: async function* () {
         calls1++
         throw new Error('fail')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })
@@ -328,6 +332,7 @@ describe('维度 4 — 配置热重载并发', () => {
       queryExecutor: async function* () {
         calls2++
         throw new Error('fail')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })

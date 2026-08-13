@@ -259,6 +259,7 @@ describe('Status state machine', () => {
     const adapter = createAgentAdapter('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('early failure')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     } as AgentConfig)
@@ -318,6 +319,7 @@ describe('Concurrent call rejection', () => {
     const adapter = createAgentAdapter('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('fail')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     } as AgentConfig)

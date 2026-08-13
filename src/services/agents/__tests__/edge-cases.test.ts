@@ -207,6 +207,7 @@ describe('B — Adapter 生命周期', () => {
     const h = sm.createSession('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('fail-fast')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })
@@ -272,6 +273,7 @@ describe('C — Retry 机制', () => {
     const h = sm.createSession('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('always-fail')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })
@@ -289,6 +291,7 @@ describe('C — Retry 机制', () => {
     const h = sm.createSession('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('no-retry')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })
@@ -307,6 +310,7 @@ describe('C — Retry 机制', () => {
     const h = sm.createSession('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('always')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })

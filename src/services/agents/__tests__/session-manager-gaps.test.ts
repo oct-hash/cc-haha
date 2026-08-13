@@ -183,6 +183,7 @@ describe('Gap 4 — Error Recovery (retry)', () => {
       queryExecutor: async function* () {
         calls++
         throw new Error('fail once')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })
@@ -462,6 +463,7 @@ describe('Gap 7 — Config Hot-Reload', () => {
       queryExecutor: async function* () {
         calls++
         throw new Error('fail')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })
@@ -477,6 +479,7 @@ describe('Gap 7 — Config Hot-Reload', () => {
       queryExecutor: async function* () {
         calls++
         throw new Error('fail')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })
@@ -567,6 +570,7 @@ describe('Gap 5 — Background Bridge (SessionHandle lifecycle)', () => {
     const handle = sm.createSession('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('Connection refused')
+        // biome-ignore lint/correctness/noUnreachable: yield* required for async generator signature (function throws first)
         yield* []
       },
     })
