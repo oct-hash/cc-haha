@@ -4,8 +4,8 @@
  * Analyzes the task execution and generates comprehensive review report.
  */
 import type { Command, LocalCommandModule, LocalCommandResult } from '../../commands.js'
-import type { Message } from '../../types/message.js'
 import type { LocalJSXCommandContext } from '../../types/command.js'
+import type { Message } from '../../types/message.js'
 
 const taskDone = {
   type: 'local',

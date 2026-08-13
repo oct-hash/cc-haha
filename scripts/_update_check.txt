@@ -1,0 +1,62 @@
+==== figures/*.png ====
+   Figure1_cell_atlas.png
+   Figure1_cell_atlas_Rv1.png  <-- Rv1 (R更新)
+   Figure2_temporal_coordination.png
+   Figure2_temporal_coordination_Rv1.png  <-- Rv1 (R更新)
+   Figure3_coexpression_network_Rv1.png  <-- Rv1 (R更新)
+   Figure3_metabolic_flux.png
+   Figure3_metabolic_flux_Rv1.png  <-- Rv1 (R更新)
+   Figure4_coexpression_network.png
+   Figure5_boolean_network.png
+   Figure6_drug_connectivity.png
+   Figure6_drug_screening.png
+   Figure7_drug_detail.png
+   Figure8_cross_organ.png
+
+Rv1(R更新)的图:
+   Figure1_cell_atlas_Rv1.png
+   Figure2_temporal_coordination_Rv1.png
+   Figure3_coexpression_network_Rv1.png
+   Figure3_metabolic_flux_Rv1.png
+
+==== R5 vs R6 text diff (exists R5=True R6=True) ====
+R5 lines=169  R6 lines=169
+
+--- 
++++ 
+@@ -5 +5 @@
+-Results: (1) I/R induces coordinated temporal waves — Hmox1, Gclc, and Fth1 upregulation — spanning epithelial, endothelial, stromal, and immune compartments, confirmed across three independent datas
++Results: (1) I/R induces coordinated temporal waves — Hmox1, Gclc, and Fth1 upregulation — spanning epithelial, endothelial, stromal, and immune compartments, confirmed across three independent datas
+@@ -50 +50 @@
+-All three genes showed moderate-to-strong temporal coordination across cell types (mean pairwise Spearman ρ: Hmox1 = 0.77, Ogt = 0.81, Gclc = 0.80, Fth1 = 0.84, Nfe2l2 = 0.76). This indicates that st
++The five stress genes showed heterogeneous temporal coordination across cell types (mean pairwise Spearman ρ: Fth1 = 0.84, Ogt = 0.62, Gclc = 0.32, Hmox1 = 0.26, Nfe2l2 = 0.26). Only the abundant fer
+@@ -53 +53 @@
+-Figure 2. Temporal coordination of the renal stress program and cross-dataset validation. (Top) Three temporal waves of gene induction after I/R: Hmox1/Gclc (4 h), Fth1 (12 h), and Ogt (2 d), with me
++Figure 2. Temporal coordination of the renal stress program and cross-dataset validation. (Top) Three temporal waves of gene induction after I/R: Hmox1/Gclc (4 h), Fth1 (12 h), and Ogt (2 d), with me
+@@ -55 +55 @@
+-Gene-gene co-expression analysis across cell types revealed dynamic network reorganization during I/R progression. At Control, Ogt-Nfe2l2 showed significant co-expression (ρ = 0.50, p < 0.01), alongs
++Gene-gene co-expression analysis across cell types revealed dynamic network reorganization during I/R progression, with the number of significant edges (|ρ| ≥ 0.45) rising from 4 at Control to a peak
+@@ -57 +57 @@
+-Figure 3. Co-expression network dynamics during I/R progression. Gene-gene Spearman correlation networks at Control, 4 h, 12 h, and 2 d. Baseline Ogt-Nfe2l2 co-expression (ρ=0.50) yields to Nfe2l2-Ke
++Figure 3. Co-expression network dynamics during I/R progression. Gene-gene Spearman correlation networks at Control, 4 h, 12 h, and 2 d. Baseline Ogt anticorrelation with ferritin/antioxidant genes (
+@@ -59,2 +59,2 @@
+-To determine whether the transcriptional coordination extends to the metabolic level, we performed pathway-level metabolic scoring across nine pathways using a curated set of 77 metabolic genes. Thre
+-In proximal tubule cells, the GSH synthesis pathway showed a 3.4-fold increase at 4 h post-IRI (from 0.074 to 0.250), followed by a gradual decline. Iron homeostasis exhibited an even stronger respon
++To determine whether the transcriptional coordination extends to the metabolic level, we performed pathway-level metabolic scoring across nine pathways using a curated set of 77 metabolic genes. Iron
++In proximal tubule cells, the GSH synthesis pathway showed a 5.1-fold increase at 4 h post-IRI (from 0.047 to 0.240), followed by a gradual decline (0.152 at 12 h). Iron homeostasis rose more modestl
+@@ -63 +63 @@
+-Figure 4. Virtual metabolic flux reprogramming. Pathway-level scores (77 metabolic genes, 9 pathways) across timepoints. GSH synthesis (ρ=0.831), iron homeostasis (ρ=0.813), and lipid peroxidation (ρ
++Figure 4. Virtual metabolic flux reprogramming. Pathway-level scores (77 metabolic genes, 9 pathways) across timepoints. iron homeostasis (ρ=0.40), GSH synthesis (ρ=0.39), and lipid peroxidation (ρ=0
+@@ -87 +87 @@
+-The central finding of this study — that I/R induces a coordinated multi-cellular stress program rather than cell-autonomous responses — challenges the prevailing view of ferroptosis as a cell-autono
++The central finding of this study — that I/R induces a coordinated multi-cellular stress program rather than cell-autonomous responses — challenges the prevailing view of ferroptosis as a cell-autono
+@@ -94,2 +94,2 @@
+-4.4 The 12-Hour "Disorganization Window"
+-The transient loss of gene-gene co-expression correlations at 12 h post-IRI is noteworthy. This coincides with the peak of Fth1 induction and may represent a period of maximal cellular stress where n
++4.4 The 12-Hour Co-Regulation Peak
++The gene-gene co-expression network reaches its densest connectivity at 12 h post-IRI (13 significant edges versus 4 at baseline), coinciding with the peak of Fth1 induction and of intercellular SPP1
+@@ -107 +107 @@
+-2. Renal I/R ferroptosis defense is temporally coordinated across cell types (mean cross-cell-type ρ = 0.76–0.84, permutation p < 0.001), consistent with a tissue-level program rather than purely cel
++2. Renal I/R ferroptosis defense shows gene-dependent temporal coordination across cell types (mean cross-cell-type ρ = 0.26–0.84), strongest for the dominant iron-sequestration gene Fth1 (ρ = 0.84),
+
+changed lines total: 24

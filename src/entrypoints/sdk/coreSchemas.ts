@@ -46,9 +46,7 @@ export const JsonSchemaOutputFormatSchema = lazySchema(() =>
   }),
 )
 
-export const OutputFormatSchema = lazySchema(() =>
-  JsonSchemaOutputFormatSchema(),
-)
+export const OutputFormatSchema = lazySchema(() => JsonSchemaOutputFormatSchema())
 
 // ============================================================================
 // Config Types
@@ -62,9 +60,7 @@ export const ConfigScopeSchema = lazySchema(() =>
   z.enum(['local', 'user', 'project']).describe('Config scope for settings.'),
 )
 
-export const SdkBetaSchema = lazySchema(() =>
-  z.literal('context-1m-2025-08-07'),
-)
+export const SdkBetaSchema = lazySchema(() => z.literal('context-1m-2025-08-07'))
 
 export const ThinkingAdaptiveSchema = lazySchema(() =>
   z
@@ -93,11 +89,7 @@ export const ThinkingDisabledSchema = lazySchema(() =>
 
 export const ThinkingConfigSchema = lazySchema(() =>
   z
-    .union([
-      ThinkingAdaptiveSchema(),
-      ThinkingEnabledSchema(),
-      ThinkingDisabledSchema(),
-    ])
+    .union([ThinkingAdaptiveSchema(), ThinkingEnabledSchema(), ThinkingDisabledSchema()])
     .describe(
       "Controls Claude's thinking/reasoning behavior. When set, takes precedence over the deprecated maxThinkingTokens.",
     ),
@@ -158,10 +150,7 @@ export const McpClaudeAIProxyServerConfigSchema = lazySchema(() =>
 
 // Broader config type for status responses (includes claudeai-proxy which is output-only)
 export const McpServerStatusConfigSchema = lazySchema(() =>
-  z.union([
-    McpServerConfigForProcessTransportSchema(),
-    McpClaudeAIProxyServerConfigSchema(),
-  ]),
+  z.union([McpServerConfigForProcessTransportSchema(), McpClaudeAIProxyServerConfigSchema()]),
 )
 
 export const McpServerStatusSchema = lazySchema(() =>
@@ -178,19 +167,14 @@ export const McpServerStatusSchema = lazySchema(() =>
         })
         .optional()
         .describe('Server information (available when connected)'),
-      error: z
-        .string()
-        .optional()
-        .describe("Error message (available when status is 'failed')"),
+      error: z.string().optional().describe("Error message (available when status is 'failed')"),
       config: McpServerStatusConfigSchema()
         .optional()
         .describe('Server configuration (includes URL for HTTP/SSE servers)'),
       scope: z
         .string()
         .optional()
-        .describe(
-          'Configuration scope (e.g., project, user, local, claudeai, managed)',
-        ),
+        .describe('Configuration scope (e.g., project, user, local, claudeai, managed)'),
       tools: z
         .array(
           z.object({
@@ -223,14 +207,10 @@ export const McpSetServersResultSchema = lazySchema(() =>
   z
     .object({
       added: z.array(z.string()).describe('Names of servers that were added'),
-      removed: z
-        .array(z.string())
-        .describe('Names of servers that were removed'),
+      removed: z.array(z.string()).describe('Names of servers that were removed'),
       errors: z
         .record(z.string(), z.string())
-        .describe(
-          'Map of server names to error messages for servers that failed to connect',
-        ),
+        .describe('Map of server names to error messages for servers that failed to connect'),
     })
     .describe('Result of a setMcpServers operation.'),
 )
@@ -240,18 +220,10 @@ export const McpSetServersResultSchema = lazySchema(() =>
 // ============================================================================
 
 export const PermissionUpdateDestinationSchema = lazySchema(() =>
-  z.enum([
-    'userSettings',
-    'projectSettings',
-    'localSettings',
-    'session',
-    'cliArg',
-  ]),
+  z.enum(['userSettings', 'projectSettings', 'localSettings', 'session', 'cliArg']),
 )
 
-export const PermissionBehaviorSchema = lazySchema(() =>
-  z.enum(['allow', 'deny', 'ask']),
-)
+export const PermissionBehaviorSchema = lazySchema(() => z.enum(['allow', 'deny', 'ask']))
 
 export const PermissionRuleValueSchema = lazySchema(() =>
   z.object({
@@ -320,16 +292,14 @@ export const PermissionResultSchema = lazySchema(() =>
       updatedInput: z.record(z.string(), z.unknown()).optional(),
       updatedPermissions: z.array(PermissionUpdateSchema()).optional(),
       toolUseID: z.string().optional(),
-      decisionClassification:
-        PermissionDecisionClassificationSchema().optional(),
+      decisionClassification: PermissionDecisionClassificationSchema().optional(),
     }),
     z.object({
       behavior: z.literal('deny'),
       message: z.string(),
       interrupt: z.boolean().optional(),
       toolUseID: z.string().optional(),
-      decisionClassification:
-        PermissionDecisionClassificationSchema().optional(),
+      decisionClassification: PermissionDecisionClassificationSchema().optional(),
     }),
   ]),
 )
@@ -346,7 +316,6 @@ export const PermissionModeSchema = lazySchema(() =>
         "'dontAsk' - Don't prompt for permissions, deny if not pre-approved.",
     ),
 )
-
 
 // ============================================================================
 // Hook Types
@@ -581,9 +550,7 @@ export const PostCompactHookInputSchema = lazySchema(() =>
     z.object({
       hook_event_name: z.literal('PostCompact'),
       trigger: z.enum(['manual', 'auto']),
-      compact_summary: z
-        .string()
-        .describe('The conversation summary produced by compaction'),
+      compact_summary: z.string().describe('The conversation summary produced by compaction'),
     }),
   ),
 )
@@ -685,12 +652,7 @@ export const INSTRUCTIONS_LOAD_REASONS = [
   'compact',
 ] as const
 
-export const INSTRUCTIONS_MEMORY_TYPES = [
-  'User',
-  'Project',
-  'Local',
-  'Managed',
-] as const
+export const INSTRUCTIONS_MEMORY_TYPES = ['User', 'Project', 'Local', 'Managed'] as const
 
 export const InstructionsLoadedHookInputSchema = lazySchema(() =>
   BaseHookInputSchema().and(
@@ -975,14 +937,9 @@ export const HookJSONOutputSchema = lazySchema(() =>
 
 export const PromptRequestOptionSchema = lazySchema(() =>
   z.object({
-    key: z
-      .string()
-      .describe('Unique key for this option, returned in the response'),
+    key: z.string().describe('Unique key for this option, returned in the response'),
     label: z.string().describe('Display text for this option'),
-    description: z
-      .string()
-      .optional()
-      .describe('Optional description shown below the label'),
+    description: z.string().optional().describe('Optional description shown below the label'),
   }),
 )
 
@@ -990,9 +947,7 @@ export const PromptRequestSchema = lazySchema(() =>
   z.object({
     prompt: z
       .string()
-      .describe(
-        'Request ID. Presence of this key marks the line as a prompt request.',
-      ),
+      .describe('Request ID. Presence of this key marks the line as a prompt request.'),
     message: z.string().describe('The prompt message to display to the user'),
     options: z
       .array(PromptRequestOptionSchema())
@@ -1002,9 +957,7 @@ export const PromptRequestSchema = lazySchema(() =>
 
 export const PromptResponseSchema = lazySchema(() =>
   z.object({
-    prompt_response: z
-      .string()
-      .describe('The request ID from the corresponding prompt request'),
+    prompt_response: z.string().describe('The request ID from the corresponding prompt request'),
     selected: z.string().describe('The key of the selected option'),
   }),
 )
@@ -1018,13 +971,9 @@ export const SlashCommandSchema = lazySchema(() =>
     .object({
       name: z.string().describe('Skill name (without the leading slash)'),
       description: z.string().describe('Description of what the skill does'),
-      argumentHint: z
-        .string()
-        .describe('Hint for skill arguments (e.g., "<file>")'),
+      argumentHint: z.string().describe('Hint for skill arguments (e.g., "<file>")'),
     })
-    .describe(
-      'Information about an available skill (invoked via /command syntax).',
-    ),
+    .describe('Information about an available skill (invoked via /command syntax).'),
 )
 
 export const AgentInfoSchema = lazySchema(() =>
@@ -1035,13 +984,9 @@ export const AgentInfoSchema = lazySchema(() =>
       model: z
         .string()
         .optional()
-        .describe(
-          "Model alias this agent uses. If omitted, inherits the parent's model",
-        ),
+        .describe("Model alias this agent uses. If omitted, inherits the parent's model"),
     })
-    .describe(
-      'Information about an available subagent that can be invoked via the Task tool.',
-    ),
+    .describe('Information about an available subagent that can be invoked via the Task tool.'),
 )
 
 export const ModelInfoSchema = lazySchema(() =>
@@ -1049,13 +994,8 @@ export const ModelInfoSchema = lazySchema(() =>
     .object({
       value: z.string().describe('Model identifier to use in API calls'),
       displayName: z.string().describe('Human-readable display name'),
-      description: z
-        .string()
-        .describe("Description of the model's capabilities"),
-      supportsEffort: z
-        .boolean()
-        .optional()
-        .describe('Whether this model supports effort levels'),
+      description: z.string().describe("Description of the model's capabilities"),
+      supportsEffort: z.boolean().optional().describe('Whether this model supports effort levels'),
       supportedEffortLevels: z
         .array(z.enum(['low', 'medium', 'high', 'max']))
         .optional()
@@ -1066,14 +1006,8 @@ export const ModelInfoSchema = lazySchema(() =>
         .describe(
           'Whether this model supports adaptive thinking (Claude decides when and how much to think)',
         ),
-      supportsFastMode: z
-        .boolean()
-        .optional()
-        .describe('Whether this model supports fast mode'),
-      supportsAutoMode: z
-        .boolean()
-        .optional()
-        .describe('Whether this model supports auto mode'),
+      supportsFastMode: z.boolean().optional().describe('Whether this model supports fast mode'),
+      supportsAutoMode: z.boolean().optional().describe('Whether this model supports auto mode'),
     })
     .describe('Information about an available model.'),
 )
@@ -1101,24 +1035,17 @@ export const AccountInfoSchema = lazySchema(() =>
 // ============================================================================
 
 export const AgentMcpServerSpecSchema = lazySchema(() =>
-  z.union([
-    z.string(),
-    z.record(z.string(), McpServerConfigForProcessTransportSchema()),
-  ]),
+  z.union([z.string(), z.record(z.string(), McpServerConfigForProcessTransportSchema())]),
 )
 
 export const AgentDefinitionSchema = lazySchema(() =>
   z
     .object({
-      description: z
-        .string()
-        .describe('Natural language description of when to use this agent'),
+      description: z.string().describe('Natural language description of when to use this agent'),
       tools: z
         .array(z.string())
         .optional()
-        .describe(
-          'Array of allowed tool names. If omitted, inherits all tools from parent',
-        ),
+        .describe('Array of allowed tool names. If omitted, inherits all tools from parent'),
       disallowedTools: z
         .array(z.string())
         .optional()
@@ -1150,9 +1077,7 @@ export const AgentDefinitionSchema = lazySchema(() =>
         .int()
         .positive()
         .optional()
-        .describe(
-          'Maximum number of agentic turns (API round-trips) before stopping',
-        ),
+        .describe('Maximum number of agentic turns (API round-trips) before stopping'),
       background: z
         .boolean()
         .optional()
@@ -1168,18 +1093,12 @@ export const AgentDefinitionSchema = lazySchema(() =>
       effort: z
         .union([z.enum(['low', 'medium', 'high', 'max']), z.number().int()])
         .optional()
-        .describe(
-          'Reasoning effort level for this agent. Either a named level or an integer',
-        ),
+        .describe('Reasoning effort level for this agent. Either a named level or an integer'),
       permissionMode: PermissionModeSchema()
         .optional()
-        .describe(
-          'Permission mode controlling how tool executions are handled',
-        ),
+        .describe('Permission mode controlling how tool executions are handled'),
     })
-    .describe(
-      'Definition for a custom subagent that can be invoked via the Agent tool.',
-    ),
+    .describe('Definition for a custom subagent that can be invoked via the Agent tool.'),
 )
 
 // ============================================================================
@@ -1200,12 +1119,8 @@ export const SettingSourceSchema = lazySchema(() =>
 export const SdkPluginConfigSchema = lazySchema(() =>
   z
     .object({
-      type: z
-        .literal('local')
-        .describe("Plugin type. Currently only 'local' is supported"),
-      path: z
-        .string()
-        .describe('Absolute or relative path to the plugin directory'),
+      type: z.literal('local').describe("Plugin type. Currently only 'local' is supported"),
+      path: z.string().describe('Absolute or relative path to the plugin directory'),
     })
     .describe('Configuration for loading a plugin.'),
 )
@@ -1265,9 +1180,7 @@ export const SDKAssistantMessageErrorSchema = lazySchema(() =>
   ]),
 )
 
-export const SDKStatusSchema = lazySchema(() =>
-  z.union([z.literal('compacting'), z.null()]),
-)
+export const SDKStatusSchema = lazySchema(() => z.union([z.literal('compacting'), z.null()]))
 
 // SDKUserMessage content without uuid/session_id
 const SDKUserMessageContentSchema = lazySchema(() =>
@@ -1308,18 +1221,10 @@ export const SDKRateLimitInfoSchema = lazySchema(() =>
       status: z.enum(['allowed', 'allowed_warning', 'rejected']),
       resetsAt: z.number().optional(),
       rateLimitType: z
-        .enum([
-          'five_hour',
-          'seven_day',
-          'seven_day_opus',
-          'seven_day_sonnet',
-          'overage',
-        ])
+        .enum(['five_hour', 'seven_day', 'seven_day_opus', 'seven_day_sonnet', 'overage'])
         .optional(),
       utilization: z.number().optional(),
-      overageStatus: z
-        .enum(['allowed', 'allowed_warning', 'rejected'])
-        .optional(),
+      overageStatus: z.enum(['allowed', 'allowed_warning', 'rejected']).optional(),
       overageResetsAt: z.number().optional(),
       overageDisabledReason: z
         .enum([
@@ -1370,9 +1275,7 @@ export const SDKStreamlinedTextMessageSchema = lazySchema(() =>
   z
     .object({
       type: z.literal('streamlined_text'),
-      text: z
-        .string()
-        .describe('Text content preserved from the assistant message'),
+      text: z.string().describe('Text content preserved from the assistant message'),
       session_id: z.string(),
       uuid: UUIDPlaceholder(),
     })
@@ -1547,13 +1450,7 @@ export const SDKPostTurnSummaryMessageSchema = lazySchema(() =>
       type: z.literal('system'),
       subtype: z.literal('post_turn_summary'),
       summarizes_uuid: z.string(),
-      status_category: z.enum([
-        'blocked',
-        'waiting',
-        'completed',
-        'review_ready',
-        'failed',
-      ]),
+      status_category: z.enum(['blocked', 'waiting', 'completed', 'review_ready', 'failed']),
       status_detail: z.string(),
       is_noteworthy: z.boolean(),
       title: z.string(),
@@ -1746,7 +1643,6 @@ export const SDKSessionStateChangedMessageSchema = lazySchema(() =>
     ),
 )
 
-
 export const SDKTaskProgressMessageSchema = lazySchema(() =>
   z.object({
     type: z.literal('system'),
@@ -1786,9 +1682,7 @@ export const SDKElicitationCompleteMessageSchema = lazySchema(() =>
       uuid: UUIDPlaceholder(),
       session_id: z.string(),
     })
-    .describe(
-      'Emitted when an MCP server confirms that a URL-mode elicitation is complete.',
-    ),
+    .describe('Emitted when an MCP server confirms that a URL-mode elicitation is complete.'),
 )
 
 /** @internal */
@@ -1818,27 +1712,14 @@ export const SDKSessionInfoSchema = lazySchema(() =>
         .describe(
           'Display title for the session: custom title, auto-generated summary, or first prompt.',
         ),
-      lastModified: z
-        .number()
-        .describe('Last modified time in milliseconds since epoch.'),
+      lastModified: z.number().describe('Last modified time in milliseconds since epoch.'),
       fileSize: z
         .number()
         .optional()
-        .describe(
-          'File size in bytes. Only populated for local JSONL storage.',
-        ),
-      customTitle: z
-        .string()
-        .optional()
-        .describe('User-set session title via /rename.'),
-      firstPrompt: z
-        .string()
-        .optional()
-        .describe('First meaningful user prompt in the session.'),
-      gitBranch: z
-        .string()
-        .optional()
-        .describe('Git branch at the end of the session.'),
+        .describe('File size in bytes. Only populated for local JSONL storage.'),
+      customTitle: z.string().optional().describe('User-set session title via /rename.'),
+      firstPrompt: z.string().optional().describe('First meaningful user prompt in the session.'),
+      gitBranch: z.string().optional().describe('Git branch at the end of the session.'),
       cwd: z.string().optional().describe('Working directory for the session.'),
       tag: z.string().optional().describe('User-set session tag.'),
       createdAt: z
@@ -1883,7 +1764,5 @@ export const SDKMessageSchema = lazySchema(() =>
 export const FastModeStateSchema = lazySchema(() =>
   z
     .enum(['off', 'cooldown', 'on'])
-    .describe(
-      'Fast mode state: off, in cooldown after rate limit, or actively enabled.',
-    ),
+    .describe('Fast mode state: off, in cooldown after rate limit, or actively enabled.'),
 )

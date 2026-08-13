@@ -46,13 +46,8 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
   constructor(options: { timeout?: number } = {}) {
     const defaultEndpoint = 'https://api.anthropic.com/api/claude_code/metrics'
 
-    if (
-      process.env.USER_TYPE === 'ant' &&
-      process.env.ANT_CLAUDE_CODE_METRICS_ENDPOINT
-    ) {
-      this.endpoint =
-        process.env.ANT_CLAUDE_CODE_METRICS_ENDPOINT +
-        '/api/claude_code/metrics'
+    if (process.env.USER_TYPE === 'ant' && process.env.ANT_CLAUDE_CODE_METRICS_ENDPOINT) {
+      this.endpoint = process.env.ANT_CLAUDE_CODE_METRICS_ENDPOINT + '/api/claude_code/metrics'
     } else {
       this.endpoint = defaultEndpoint
     }
@@ -91,12 +86,9 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
     try {
       // Skip if trust not established in interactive mode
       // This prevents triggering apiKeyHelper before trust dialog
-      const hasTrust =
-        checkHasTrustDialogAccepted() || getIsNonInteractiveSession()
+      const hasTrust = checkHasTrustDialogAccepted() || getIsNonInteractiveSession()
       if (!hasTrust) {
-        logForDebugging(
-          'BigQuery metrics export: trust not established, skipping',
-        )
+        logForDebugging('BigQuery metrics export: trust not established, skipping')
         resultCallback({ code: ExportResultCode.SUCCESS })
         return
       }
@@ -133,9 +125,7 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
       })
 
       logForDebugging('BigQuery metrics exported successfully')
-      logForDebugging(
-        `BigQuery API Response: ${jsonStringify(response.data, null, 2)}`,
-      )
+      logForDebugging(`BigQuery API Response: ${jsonStringify(response.data, null, 2)}`)
       resultCallback({ code: ExportResultCode.SUCCESS })
     } catch (error) {
       logForDebugging(`BigQuery metrics export failed: ${errorMessage(error)}`)
@@ -147,9 +137,7 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
     }
   }
 
-  private transformMetricsForInternal(
-    metrics: ResourceMetrics,
-  ): InternalMetricsPayload {
+  private transformMetricsForInternal(metrics: ResourceMetrics): InternalMetricsPayload {
     const attrs = metrics.resource.attributes
 
     const resourceAttributes: Record<string, string> = {
@@ -182,8 +170,8 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
 
     const transformed = {
       resource_attributes: resourceAttributes,
-      metrics: metrics.scopeMetrics.flatMap(scopeMetric =>
-        scopeMetric.metrics.map(metric => ({
+      metrics: metrics.scopeMetrics.flatMap((scopeMetric) =>
+        scopeMetric.metrics.map((metric) => ({
           name: metric.descriptor.name,
           description: metric.descriptor.description,
           unit: metric.descriptor.unit,
@@ -199,11 +187,8 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
     const dataPoints = metric.dataPoints || []
 
     return dataPoints
-      .filter(
-        (point): point is OTelDataPoint<number> =>
-          typeof point.value === 'number',
-      )
-      .map(point => ({
+      .filter((point): point is OTelDataPoint<number> => typeof point.value === 'number')
+      .map((point) => ({
         attributes: this.convertAttributes(point.attributes),
         value: point.value,
         timestamp: this.hrTimeToISOString(
@@ -223,9 +208,7 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
     logForDebugging('BigQuery metrics exporter flush complete')
   }
 
-  private convertAttributes(
-    attributes: Attributes | undefined,
-  ): Record<string, string> {
+  private convertAttributes(attributes: Attributes | undefined): Record<string, string> {
     const result: Record<string, string> = {}
     if (attributes) {
       for (const [key, value] of Object.entries(attributes)) {

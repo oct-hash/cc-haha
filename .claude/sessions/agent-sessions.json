@@ -1,0 +1,51 @@
+{
+  "activeKind": "claude-haha",
+  "config": {},
+  "sessions": [
+    {
+      "id": "session-1786465813748-2",
+      "agentKind": "codex",
+      "metadata": {
+        "agentKind": "codex",
+        "createdAt": "2026-08-11T16:30:13.748Z",
+        "messageCount": 0,
+        "lastActiveAt": "2026-08-11T16:30:13.748Z",
+        "totalTokens": 0,
+        "totalToolCalls": 0,
+        "errorsEncountered": 0,
+        "retryCount": 0
+      },
+      "config": {}
+    },
+    {
+      "id": "session-1786465813748-3",
+      "agentKind": "claude-code",
+      "metadata": {
+        "agentKind": "claude-code",
+        "createdAt": "2026-08-11T16:30:13.748Z",
+        "messageCount": 0,
+        "lastActiveAt": "2026-08-11T16:30:13.748Z",
+        "totalTokens": 0,
+        "totalToolCalls": 0,
+        "errorsEncountered": 0,
+        "retryCount": 0
+      },
+      "config": {}
+    },
+    {
+      "id": "session-1786465813748-4",
+      "agentKind": "claude-haha",
+      "metadata": {
+        "agentKind": "claude-haha",
+        "createdAt": "2026-08-11T16:30:13.748Z",
+        "messageCount": 0,
+        "lastActiveAt": "2026-08-11T16:30:13.748Z",
+        "totalTokens": 0,
+        "totalToolCalls": 0,
+        "errorsEncountered": 0,
+        "retryCount": 0
+      },
+      "config": {}
+    }
+  ]
+}

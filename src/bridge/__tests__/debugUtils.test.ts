@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import {
-  redactSecrets,
-  debugTruncate,
   debugBody,
+  debugTruncate,
   describeAxiosError,
-  extractHttpStatus,
   extractErrorDetail,
+  extractHttpStatus,
+  redactSecrets,
 } from '../debugUtils'
 
 describe('redactSecrets', () => {

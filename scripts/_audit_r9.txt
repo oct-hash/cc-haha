@@ -1,0 +1,28 @@
+==== CITATIONS ====
+refs=51 distinct_cited=51
+dups=[]
+gaps=[]
+orphan=[]
+cited_but_absent=[]
+
+==== KEY NUMBERS IN TEXT vs JSON ====
+[49] Ogt 0.25 to 0.38 : FOUND  | JSON pool Ogt 0.2506->0.3844 (+53.4%)
+[49] Gclc 0.47 to 0.68 : FOUND | JSON pool Gclc 0.4686->0.6783 (+44.8%)
+[24] Sham 10,371 : FOUND ; early IR 34,088 : FOUND  | JSON n_Sham=10371 n_earlyIR=34088 total=44459
+[45] Hmox1 0.28 to 0.45 +58% : FOUND/FOUND | JSON 12h Hmox1 0.2829->0.4457 (+57.6%)
+[49] bulk Hmox1 157/20/30 : FOUND/FOUND/FOUND | JSON Hmox1 SHAM_4h=156.7 SHAM_24h=19.7 NORM_3m=29.6
+[49] bulk Ogt 57 4.6-fold vs 12 : FOUND/FOUND/FOUND | JSON Ogt SHAM_4h=12.4 SHAM_24h=56.7 ratio=4.57
+[72] Moran 0.39 to 0.61 : FOUND/FOUND | squidpy Spp1 Sham=0.3905 IR=0.6136
+spatial spots 2855/3392 : **MISSING**/**MISSING** | JSON Sham=2855 IR=3392
+
+==== GSE98622 LABELS ====
+bulk JSON columns: ['SHAM_4h', 'SHAM_24h', 'NORM_3m', 'NORM_9m', 'SHAM_12m', 'NORM_15m']
+[19] GSE98622 desc has '2 h'=True '2 wk'=True '6 wk'=True '49 samples'=False
+[49] uses labels SHAM_4h=True SHAM_24h=True NORM_3m=True
+
+==== FIGURE FILES ====
+[交付最终版] 0 img: []
+[交付最终版/supplementary] 10 img: ['FigS1_SPP1_validation_v1.pdf', 'FigS1_SPP1_validation_v1.png', 'FigS2_bulk_Spp1_timecourse_v1.pdf', 'FigS2_bulk_Spp1_timecourse_v1.png', 'FigS3_scRNA_replication_v1.pdf', 'FigS3_scRNA_replication_v1.png', 'FigS4_spatial_coloc_v1.pdf', 'FigS4_spatial_coloc_v1.png', 'FigS4b_moran_spdep_crosscheck_v1.pdf', 'FigS4b_moran_spdep_crosscheck_v1.png']
+[results] 0 img: []
+
+figure mentions in body: ['Figure 1', 'Figure 2', 'Figure 3', 'Figure 4', 'Figure 5', 'Figure 6', 'Figure 7', 'Figure 8', 'Figure 8a', 'Figure 8d', 'Figure S2', 'Figure S3', 'Figure S4', 'Figure S4b']

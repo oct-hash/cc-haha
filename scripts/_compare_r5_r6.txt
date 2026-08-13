@@ -1,0 +1,72 @@
+======================================================================
+R6_Rpipeline (manuscript/)
+path exists: True
+total_paragraphs: 161
+embedded_images: 0
+-- matches Figure/Moran/spdep/legend --
+  [20] 2.2 Virtual Cell Atlas (Figure 1)
+  [22] 2.3 Cross-Dataset Temporal Coordination Analysis (Figure 2)
+  [25] 2.4 Co-expression Network Analysis (Figure 3)
+  [27] 2.5 Virtual Metabolic Flux Scoring (Figure 4)
+  [29] 2.6 Boolean Network Modeling (Figure 5)
+  [31] 2.7 Drug-Connectivity Analysis (Figure 6)
+  [33] 2.8 Cell-Cell Communication Inference (Figure 8) For spatial co-localization (Supplementary Figure S4), the 10
+  [36] Bootstrap 95% confidence intervals (1,000 resamples) and Mann-Whitney U tests were used for cell-type comparis
+  [39] 3.1 Virtual Cell Atlas: O-GlcNAc and Ferroptosis Pathways Are Broadly Distributed Across Renal Cell Types (Fig
+  [42] Figure 1. Virtual cell atlas of O-GlcNAc, Nrf2, and ferroptosis pathway genes across 26 renal cell types (GSE1
+  [43] 3.2 I/R Induces Coordinated Temporal Waves Across Cell Types (Figure 2)
+  [50] Figure 2. Temporal coordination of the renal stress program and cross-dataset validation. (Top) Three temporal
+  [51] 3.3 Co-expression Network Dynamics Reveal I/R-Induced Module Reorganization (Figure 3)
+  [53] Figure 3. Co-expression network dynamics during I/R progression. Gene-gene Spearman correlation networks at Co
+  [54] 3.4 Virtual Metabolic Flux Reveals Coordinated GSH-Iron-Lipid Metabolic Reprogramming (Figure 4)
+  [58] Figure 4. Virtual metabolic flux reprogramming. Pathway-level scores (77 metabolic genes, 9 pathways) across t
+  [59] 3.5 Boolean Network Identifies Nrf2 as the Master Regulator of Ferroptosis Defense (Figure 5)
+  [61] Figure 5. Boolean network model and in silico perturbation. A 15-node network of the IRI→O-GlcNAc→Nrf2→ferropt
+  [62] 3.6 Drug-Connectivity Analysis Ranks Signature Reversers (Figure 6)
+  [64] Figure 6. Data-driven drug connectivity on the genome-wide kidney I/R signature (CREEDS, 271 compounds). (A) T
+  [65] 3.7 Cross-Organ Comparison: Kidney vs. Heart I/R (Figure 7)
+  [67] Figure 7. Cross-organ comparison of kidney versus heart I/R. The O-GlcNAc-Nrf2-ferroptosis axis is conserved, 
+  [68] 3.8 Intercellular Communication Peaks Transiently at 12 h and Is Led by an SPP1 Repair-Initiation Pulse (Figur
+  [69] Aggregating communication across all six timepoints revealed that intercellular signaling is not gradually rem
+  [71] Resolving the SPP1 network at cell-type resolution clarified its directional architecture (Figure 8d). SPP1 wa
+  [72] To ensure these findings were not artifacts of a single inference method, we cross-validated the 12 h SPP1 sig
+  [74] Figure 8. Intercellular communication peaks transiently at 12 h post-IRI and is led by an SPP1 repair-initiati
+  [80] Two orthogonal computational analyses now provide initial in silico support for this hypothesis (Section 3.8).
+  [94] Building on the Visium spatial evidence presented here (Supplementary Figure S4), future studies at single-cel
+
+======================================================================
+R5 (交付最终版/)
+path exists: True
+total_paragraphs: 170
+embedded_images: 8
+-- matches Figure/Moran/spdep/legend --
+  [20] 2.2 Virtual Cell Atlas (Figure 1)
+  [22] 2.3 Cross-Dataset Temporal Coordination Analysis (Figure 2)
+  [25] 2.4 Co-expression Network Analysis (Figure 3)
+  [27] 2.5 Virtual Metabolic Flux Scoring (Figure 4)
+  [29] 2.6 Boolean Network Modeling (Figure 5)
+  [31] 2.7 Drug-Connectivity Analysis (Figure 6)
+  [33] 2.8 Cell-Cell Communication Inference (Figure 8) For spatial co-localization (Supplementary Figure S4), the 10
+  [36] Bootstrap 95% confidence intervals (1,000 resamples) and Mann-Whitney U tests were used for cell-type comparis
+  [39] 3.1 Virtual Cell Atlas: O-GlcNAc and Ferroptosis Pathways Are Broadly Distributed Across Renal Cell Types (Fig
+  [43] Figure 1. Virtual cell atlas of O-GlcNAc, Nrf2, and ferroptosis pathway genes across 26 renal cell types (GSE1
+  [44] 3.2 I/R Induces Coordinated Temporal Waves Across Cell Types (Figure 2)
+  [52] Figure 2. Temporal coordination of the renal stress program and cross-dataset validation. (Top) Three temporal
+  [53] 3.3 Co-expression Network Dynamics Reveal I/R-Induced Module Reorganization (Figure 3)
+  [56] Figure 3. Co-expression network dynamics during I/R progression. Gene-gene Spearman correlation networks at Co
+  [57] 3.4 Virtual Metabolic Flux Reveals Coordinated GSH-Iron-Lipid Metabolic Reprogramming (Figure 4)
+  [62] Figure 4. Virtual metabolic flux reprogramming. Pathway-level scores (77 metabolic genes, 9 pathways) across t
+  [63] 3.5 Boolean Network Identifies Nrf2 as the Master Regulator of Ferroptosis Defense (Figure 5)
+  [66] Figure 5. Boolean network model and in silico perturbation. A 15-node network of the IRI→O-GlcNAc→Nrf2→ferropt
+  [67] 3.6 Drug-Connectivity Analysis Ranks Signature Reversers (Figure 6)
+  [70] Figure 6. Data-driven drug connectivity on the genome-wide kidney I/R signature (CREEDS, 271 compounds). (A) T
+  [71] 3.7 Cross-Organ Comparison: Kidney vs. Heart I/R (Figure 7)
+  [74] Figure 7. Cross-organ comparison of kidney versus heart I/R. The O-GlcNAc-Nrf2-ferroptosis axis is conserved, 
+  [75] 3.8 Intercellular Communication Peaks Transiently at 12 h and Is Led by an SPP1 Repair-Initiation Pulse (Figur
+  [76] Aggregating communication across all six timepoints revealed that intercellular signaling is not gradually rem
+  [78] Resolving the SPP1 network at cell-type resolution clarified its directional architecture (Figure 8d). SPP1 wa
+  [79] To ensure these findings were not artifacts of a single inference method, we cross-validated the 12 h SPP1 sig
+  [80] As further external validation beyond the discovery dataset, we examined an independent wild-type mouse kidney
+  [81] Figure 8. Intercellular communication peaks transiently at 12 h post-IRI and is led by an SPP1 repair-initiati
+  [88] Two orthogonal computational analyses now provide initial in silico support for this hypothesis (Section 3.8).
+  [102] Building on the Visium spatial evidence presented here (Supplementary Figure S4), future studies at single-cel

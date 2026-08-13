@@ -35,11 +35,25 @@ export function createClaudeCodeAdapter(config?: AgentConfig): AgentAdapter {
       'acceptEdits',
     ]
 
+    if (config?.model) {
+      args.push('--model', config.model)
+    }
+
     if (config?.systemPromptPath) {
       args.push('--append-system-prompt', config.systemPromptPath)
     }
 
     if (config?.extraArgs) {
+      const dangerous = config.extraArgs.filter((a) =>
+        /^--(permission-mode|dangerously-skip-permissions|dangerously-disable-sandbox)(?:[=\s]|$)/.test(
+          a,
+        ),
+      )
+      if (dangerous.length > 0) {
+        throw new Error(
+          `AgentConfig.extraArgs contains dangerous flags that would override security defaults: ${dangerous.join(', ')}`,
+        )
+      }
       args.push(...config.extraArgs)
     }
 

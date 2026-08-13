@@ -1,11 +1,5 @@
-import type {
-  ToolResultBlockParam,
-  ToolUseBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs'
-import type {
-  ElicitRequestURLParams,
-  ElicitResult,
-} from '@modelcontextprotocol/sdk/types.js'
+import type { ToolResultBlockParam, ToolUseBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { ElicitRequestURLParams, ElicitResult } from '@modelcontextprotocol/sdk/types.js'
 import type { UUID } from 'crypto'
 import type { z } from 'zod/v4'
 import type { Command } from './commands.js'
@@ -21,14 +15,8 @@ export type ToolInputJSONSchema = {
 }
 
 import type { Notification } from './context/notifications.js'
-import type {
-  MCPServerConnection,
-  ServerResource,
-} from './services/mcp/types.js'
-import type {
-  AgentDefinition,
-  AgentDefinitionsResult,
-} from './tools/AgentTool/loadAgentsDir.js'
+import type { MCPServerConnection, ServerResource } from './services/mcp/types.js'
+import type { AgentDefinition, AgentDefinitionsResult } from './tools/AgentTool/loadAgentsDir.js'
 import type {
   AssistantMessage,
   AttachmentMessage,
@@ -76,11 +64,7 @@ import type { SpinnerMode } from './components/Spinner.js'
 import type { QuerySource } from './constants/querySource.js'
 import type { SDKStatus } from './entrypoints/agentSdkTypes.js'
 import type { AppState } from './state/AppState.js'
-import type {
-  HookProgress,
-  PromptRequest,
-  PromptResponse,
-} from './types/hooks.js'
+import type { HookProgress, PromptRequest, PromptResponse } from './types/hooks.js'
 import type { AgentId } from './types/ids.js'
 import type { DeepImmutable } from './types/utils.js'
 import type { AttributionState } from './utils/commitAttribution.js'
@@ -137,15 +121,14 @@ export type ToolPermissionContext = DeepImmutable<{
   prePlanMode?: PermissionMode
 }>
 
-export const getEmptyToolPermissionContext: () => ToolPermissionContext =
-  () => ({
-    mode: 'default',
-    additionalWorkingDirectories: new Map(),
-    alwaysAllowRules: {},
-    alwaysDenyRules: {},
-    alwaysAskRules: {},
-    isBypassPermissionsModeAvailable: false,
-  })
+export const getEmptyToolPermissionContext: () => ToolPermissionContext = () => ({
+  mode: 'default',
+  additionalWorkingDirectories: new Map(),
+  alwaysAllowRules: {},
+  alwaysDenyRules: {},
+  alwaysAskRules: {},
+  isBypassPermissionsModeAvailable: false,
+})
 
 export type CompactProgressEvent =
   | {
@@ -204,14 +187,9 @@ export type ToolUseContext = {
   addNotification?: (notif: Notification) => void
   /** Append a UI-only system message to the REPL message list. Stripped at the
    *  normalizeMessagesForAPI boundary — the Exclude<> makes that type-enforced. */
-  appendSystemMessage?: (
-    msg: Exclude<SystemMessage, SystemLocalCommandMessage>,
-  ) => void
+  appendSystemMessage?: (msg: Exclude<SystemMessage, SystemLocalCommandMessage>) => void
   /** Send an OS-level notification (iTerm2, Kitty, Ghostty, bell, etc.) */
-  sendOSNotification?: (opts: {
-    message: string
-    notificationType: string
-  }) => void
+  sendOSNotification?: (opts: { message: string; notificationType: string }) => void
   nestedMemoryAttachmentTriggers?: Set<string>
   /**
    * CLAUDE.md paths already injected as nested_memory attachments this
@@ -235,12 +213,8 @@ export type ToolUseContext = {
   onCompactProgress?: (event: CompactProgressEvent) => void
   setSDKStatus?: (status: SDKStatus) => void
   openMessageSelector?: () => void
-  updateFileHistoryState: (
-    updater: (prev: FileHistoryState) => FileHistoryState,
-  ) => void
-  updateAttributionState: (
-    updater: (prev: AttributionState) => AttributionState,
-  ) => void
+  updateFileHistoryState: (updater: (prev: FileHistoryState) => FileHistoryState) => void
+  updateAttributionState: (updater: (prev: AttributionState) => AttributionState) => void
   setConversationId?: (id: UUID) => void
   agentId?: AgentId // Only set for subagents; use getSessionId() for session ID. Hooks use this to distinguish subagent calls.
   agentType?: string // Subagent type name. For the main thread's --agent type, hooks fall back to getMainThreadAgentType().
@@ -313,19 +287,13 @@ export function filterToolProgressMessages(
   progressMessagesForMessage: ProgressMessage[],
 ): ProgressMessage<ToolProgressData>[] {
   return progressMessagesForMessage.filter(
-    (msg): msg is ProgressMessage<ToolProgressData> =>
-      msg.data?.type !== 'hook_progress',
+    (msg): msg is ProgressMessage<ToolProgressData> => msg.data?.type !== 'hook_progress',
   )
 }
 
 export type ToolResult<T> = {
   data: T
-  newMessages?: (
-    | UserMessage
-    | AssistantMessage
-    | AttachmentMessage
-    | SystemMessage
-  )[]
+  newMessages?: (UserMessage | AssistantMessage | AttachmentMessage | SystemMessage)[]
   // contextModifier is only honored for tools that aren't concurrency safe.
   contextModifier?: (context: ToolUseContext) => ToolUseContext
   /** MCP protocol metadata (structuredContent, _meta) to pass through to SDK consumers */
@@ -345,10 +313,7 @@ export type AnyObject = z.ZodType<{ [key: string]: unknown }>
 /**
  * Checks if a tool matches the given name (primary name or alias).
  */
-export function toolMatchesName(
-  tool: { name: string; aliases?: string[] },
-  name: string,
-): boolean {
+export function toolMatchesName(tool: { name: string; aliases?: string[] }, name: string): boolean {
   return tool.name === name || (tool.aliases?.includes(name) ?? false)
 }
 
@@ -356,7 +321,7 @@ export function toolMatchesName(
  * Finds a tool by name or alias from a list of tools.
  */
 export function findToolByName(tools: Tools, name: string): Tool | undefined {
-  return tools.find(t => toolMatchesName(t, name))
+  return tools.find((t) => toolMatchesName(t, name))
 }
 
 export type Tool<
@@ -486,10 +451,7 @@ export type Tool<
    * @param input
    * @param context
    */
-  validateInput?(
-    input: z.infer<Input>,
-    context: ToolUseContext,
-  ): Promise<ValidationResult>
+  validateInput?(input: z.infer<Input>, context: ToolUseContext): Promise<ValidationResult>
 
   /**
    * Determines if the user is asked for permission. Only called after validateInput() passes.
@@ -497,10 +459,7 @@ export type Tool<
    * @param input
    * @param context
    */
-  checkPermissions(
-    input: z.infer<Input>,
-    context: ToolUseContext,
-  ): Promise<PermissionResult>
+  checkPermissions(input: z.infer<Input>, context: ToolUseContext): Promise<PermissionResult>
 
   // Optional method for tools that operate on a file path
   getPath?(input: z.infer<Input>): string
@@ -511,9 +470,7 @@ export type Tool<
    * expensive parsing happens here. Returns a closure that is called per
    * hook pattern. If not implemented, only tool-name-level matching works.
    */
-  preparePermissionMatcher?(
-    input: z.infer<Input>,
-  ): Promise<(pattern: string) => boolean>
+  preparePermissionMatcher?(input: z.infer<Input>): Promise<(pattern: string) => boolean>
 
   prompt(options: {
     getToolPermissionContext: () => Promise<ToolPermissionContext>
@@ -543,9 +500,7 @@ export type Tool<
    * @param input The tool input
    * @returns Activity description string, or null to fall back to tool name
    */
-  getActivityDescription?(
-    input: Partial<z.infer<Input>> | undefined,
-  ): string | null
+  getActivityDescription?(input: Partial<z.infer<Input>> | undefined): string | null
   /**
    * Returns a compact representation of this tool use for the auto-mode
    * security classifier. Examples: `ls -la` for Bash, `/tmp/x: new content`
@@ -554,10 +509,7 @@ export type Tool<
    * double-encoding when the caller JSON-wraps the value.
    */
   toAutoClassifierInput(input: z.infer<Input>): unknown
-  mapToolResultToToolResultBlockParam(
-    content: Output,
-    toolUseID: string,
-  ): ToolResultBlockParam
+  mapToolResultToToolResultBlockParam(content: Output, toolUseID: string): ToolResultBlockParam
   /**
    * Optional. When omitted, the tool result renders nothing (same as returning
    * null). Omit for tools whose results are surfaced elsewhere (e.g., TodoWrite
@@ -762,8 +714,7 @@ const TOOL_DEFAULTS = {
   checkPermissions: (
     input: { [key: string]: unknown },
     _ctx?: ToolUseContext,
-  ): Promise<PermissionResult> =>
-    Promise.resolve({ behavior: 'allow', updatedInput: input }),
+  ): Promise<PermissionResult> => Promise.resolve({ behavior: 'allow', updatedInput: input }),
   toAutoClassifierInput: (_input?: unknown) => '',
   userFacingName: (_input?: unknown) => '',
 }

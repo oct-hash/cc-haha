@@ -20,12 +20,7 @@ import {
   truncatePrompt,
   wrapWithOsc8Link,
 } from './bridgeStatusUtil.js'
-import type {
-  BridgeConfig,
-  BridgeLogger,
-  SessionActivity,
-  SpawnMode,
-} from './types.js'
+import type { BridgeConfig, BridgeLogger, SessionActivity, SpawnMode } from './types.js'
 
 const QR_OPTIONS = {
   type: 'utf8' as const,
@@ -139,11 +134,11 @@ export function createBridgeLogger(options: {
   /** Regenerate the QR code with the given URL. */
   function regenerateQr(url: string): void {
     generateQr(url)
-      .then(lines => {
+      .then((lines) => {
         qrLines = lines
         renderStatusLine()
       })
-      .catch(e => {
+      .catch((e) => {
         logForDebugging(`QR code generation failed: ${e}`, { level: 'error' })
       })
   }
@@ -152,8 +147,7 @@ export function createBridgeLogger(options: {
   function renderConnectingLine(): void {
     clearStatusLines()
 
-    const frame =
-      BRIDGE_SPINNER_FRAMES[connectingTick % BRIDGE_SPINNER_FRAMES.length]!
+    const frame = BRIDGE_SPINNER_FRAMES[connectingTick % BRIDGE_SPINNER_FRAMES.length]!
     let suffix = ''
     if (repoName) {
       suffix += chalk.dim(' \u00b7 ') + chalk.dim(repoName)
@@ -161,9 +155,7 @@ export function createBridgeLogger(options: {
     if (branch) {
       suffix += chalk.dim(' \u00b7 ') + chalk.dim(branch)
     }
-    writeStatus(
-      `${chalk.yellow(frame)} ${chalk.yellow('Connecting')}${suffix}\n`,
-    )
+    writeStatus(`${chalk.yellow(frame)} ${chalk.yellow('Connecting')}${suffix}\n`)
   }
 
   /** Start the connecting spinner. Stopped by first updateIdleStatus(). */
@@ -222,9 +214,7 @@ export function createBridgeLogger(options: {
     }
 
     if (process.env.USER_TYPE === 'ant' && debugLogPath) {
-      writeStatus(
-        `${chalk.yellow('[ANT-ONLY] Logs:')} ${chalk.dim(debugLogPath)}\n`,
-      )
+      writeStatus(`${chalk.yellow('[ANT-ONLY] Logs:')} ${chalk.dim(debugLogPath)}\n`)
     }
     writeStatus(`${indicatorColor(indicator)} ${stateText}${suffix}\n`)
 
@@ -238,15 +228,11 @@ export function createBridgeLogger(options: {
         `    ${chalk.dim(`Capacity: ${sessionActive}/${sessionMax} \u00b7 ${modeHint}`)}\n`,
       )
       for (const [, info] of sessionDisplayInfo) {
-        const titleText = info.title
-          ? truncatePrompt(info.title, 35)
-          : chalk.dim('Attached')
+        const titleText = info.title ? truncatePrompt(info.title, 35) : chalk.dim('Attached')
         const titleLinked = wrapWithOsc8Link(titleText, info.url)
         const act = info.activity
         const showAct = act && act.type !== 'result' && act.type !== 'error'
-        const actText = showAct
-          ? chalk.dim(` ${truncatePrompt(act.summary, 40)}`)
-          : ''
+        const actText = showAct ? chalk.dim(` ${truncatePrompt(act.summary, 40)}`) : ''
         writeStatus(`    ${titleLinked}${actText}
 `)
       }
@@ -277,15 +263,11 @@ export function createBridgeLogger(options: {
     const url = activeSessionUrl ?? connectUrl
     if (url) {
       writeStatus('\n')
-      const footerText = isIdle
-        ? buildIdleFooterText(url)
-        : buildActiveFooterText(url)
+      const footerText = isIdle ? buildIdleFooterText(url) : buildActiveFooterText(url)
       const qrHint = qrVisible
         ? chalk.dim.italic('space to hide QR code')
         : chalk.dim.italic('space to show QR code')
-      const toggleHint = spawnModeDisplay
-        ? chalk.dim.italic(' \u00b7 w to toggle spawn mode')
-        : ''
+      const toggleHint = spawnModeDisplay ? chalk.dim.italic(' \u00b7 w to toggle spawn mode') : ''
       writeStatus(`${chalk.dim(footerText)}\n`)
       writeStatus(`${qrHint}${toggleHint}\n`)
     }
@@ -304,9 +286,7 @@ export function createBridgeLogger(options: {
       if (verbose) {
         if (config.spawnMode !== 'single-session') {
           write(chalk.dim(`Spawn mode: `) + `${config.spawnMode}\n`)
-          write(
-            chalk.dim(`Max concurrent sessions: `) + `${config.maxSessions}\n`,
-          )
+          write(chalk.dim(`Max concurrent sessions: `) + `${config.maxSessions}\n`)
         }
         write(chalk.dim(`Environment ID: `) + `${environmentId}\n`)
       }
@@ -394,11 +374,7 @@ export function createBridgeLogger(options: {
       // Multi-session: keep footer/QR on the environment connect URL so users
       // can spawn more sessions. Per-session links are in the bullet list.
       if (sessionMax <= 1) {
-        activeSessionUrl = buildBridgeSessionUrl(
-          sessionId,
-          cachedEnvironmentId,
-          cachedIngressUrl,
-        )
+        activeSessionUrl = buildBridgeSessionUrl(sessionId, cachedEnvironmentId, cachedIngressUrl)
         regenerateQr(activeSessionUrl)
       }
       renderStatusLine()
@@ -416,8 +392,7 @@ export function createBridgeLogger(options: {
         }
       }
 
-      const frame =
-        BRIDGE_SPINNER_FRAMES[connectingTick % BRIDGE_SPINNER_FRAMES.length]!
+      const frame = BRIDGE_SPINNER_FRAMES[connectingTick % BRIDGE_SPINNER_FRAMES.length]!
       connectingTick++
       writeStatus(
         `${chalk.yellow(frame)} ${chalk.yellow('Reconnecting')} ${chalk.dim('\u00b7')} ${chalk.dim(`retrying in ${delayStr}`)} ${chalk.dim('\u00b7')} ${chalk.dim(`disconnected ${elapsedStr}`)}\n`,
@@ -472,8 +447,7 @@ export function createBridgeLogger(options: {
     },
 
     updateSessionCount(active: number, max: number, mode: SpawnMode): void {
-      if (sessionActive === active && sessionMax === max && spawnMode === mode)
-        return
+      if (sessionActive === active && sessionMax === max && spawnMode === mode) return
       sessionActive = active
       sessionMax = max
       spawnMode = mode

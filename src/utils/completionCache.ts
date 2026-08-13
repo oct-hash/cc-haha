@@ -104,10 +104,7 @@ export async function setupShellCompletion(theme: ThemeName): Promise<string> {
   let existing = ''
   try {
     existing = await readFile(shell.rcFile, { encoding: 'utf-8' })
-    if (
-      existing.includes('claude completion') ||
-      existing.includes(shell.cacheFile)
-    ) {
+    if (existing.includes('claude completion') || existing.includes(shell.cacheFile)) {
       return `${EOL}${color('success', theme)(`Shell completions updated for ${shell.name}`)}${EOL}${chalk.dim(`See ${formatPathLink(shell.rcFile)}`)}${EOL}`
     }
   } catch (e: unknown) {
@@ -154,13 +151,9 @@ export async function regenerateCompletionCache(): Promise<void> {
   ])
 
   if (result.code !== 0) {
-    logForDebugging(
-      `update: Failed to regenerate ${shell.name} completion cache`,
-    )
+    logForDebugging(`update: Failed to regenerate ${shell.name} completion cache`)
     return
   }
 
-  logForDebugging(
-    `update: Regenerated ${shell.name} completion cache at ${shell.cacheFile}`,
-  )
+  logForDebugging(`update: Regenerated ${shell.name} completion cache at ${shell.cacheFile}`)
 }

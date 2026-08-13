@@ -20,10 +20,7 @@ import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod/v4'
 import { type ChannelEntry, getAllowedChannels } from '../../bootstrap/state.js'
 import { CHANNEL_TAG } from '../../constants/xml.js'
-import {
-  getClaudeAIOAuthTokens,
-  getSubscriptionType,
-} from '../../utils/auth.js'
+import { getClaudeAIOAuthTokens, getSubscriptionType } from '../../utils/auth.js'
 import { lazySchema } from '../../utils/lazySchema.js'
 import { parsePluginIdentifier } from '../../utils/plugins/pluginIdentifier.js'
 import { getSettingsForSource } from '../../utils/settings/settings.js'
@@ -59,8 +56,7 @@ export const ChannelMessageNotificationSchema = lazySchema(() =>
  * channel can never accidentally match — approval requires the server
  * to deliberately emit this specific event.
  */
-export const CHANNEL_PERMISSION_METHOD =
-  'notifications/claude/channel/permission'
+export const CHANNEL_PERMISSION_METHOD = 'notifications/claude/channel/permission'
 export const ChannelPermissionNotificationSchema = lazySchema(() =>
   z.object({
     method: z.literal(CHANNEL_PERMISSION_METHOD),
@@ -82,8 +78,7 @@ export const ChannelPermissionNotificationSchema = lazySchema(() =>
  * Not a zod schema — CC SENDS this, doesn't validate it. A type here
  * keeps both halves of the protocol documented side by side.
  */
-export const CHANNEL_PERMISSION_REQUEST_METHOD =
-  'notifications/claude/channel/permission_request'
+export const CHANNEL_PERMISSION_REQUEST_METHOD = 'notifications/claude/channel/permission_request'
 export type ChannelPermissionRequestParams = {
   request_id: string
   tool_name: string
@@ -141,14 +136,7 @@ export type ChannelGateResult =
   | { action: 'register' }
   | {
       action: 'skip'
-      kind:
-        | 'capability'
-        | 'disabled'
-        | 'auth'
-        | 'policy'
-        | 'session'
-        | 'marketplace'
-        | 'allowlist'
+      kind: 'capability' | 'disabled' | 'auth' | 'policy' | 'session' | 'marketplace' | 'allowlist'
       reason: string
     }
 
@@ -165,10 +153,8 @@ export function findChannelEntry(
   // split unconditionally — for a bare name like 'slack', parts is ['slack']
   // and the plugin-kind branch correctly never matches (parts[0] !== 'plugin').
   const parts = serverName.split(':')
-  return channels.find(c =>
-    c.kind === 'server'
-      ? serverName === c.name
-      : parts[0] === 'plugin' && parts[1] === c.name,
+  return channels.find((c) =>
+    c.kind === 'server' ? serverName === c.name : parts[0] === 'plugin' && parts[1] === c.name,
   )
 }
 
@@ -239,8 +225,7 @@ export function gateChannelServer(
     return {
       action: 'skip',
       kind: 'policy',
-      reason:
-        'channels not enabled by org policy (set channelsEnabled: true in managed settings)',
+      reason: 'channels not enabled by org policy (set channelsEnabled: true in managed settings)',
     }
   }
 
@@ -264,9 +249,7 @@ export function gateChannelServer(
     // the config at addPluginScopeToServers — undefined (non-plugin server,
     // shouldn't happen for plugin-kind entry) or @-less (builtin/inline)
     // both fail the comparison.
-    const actual = pluginSource
-      ? parsePluginIdentifier(pluginSource).marketplace
-      : undefined
+    const actual = pluginSource ? parsePluginIdentifier(pluginSource).marketplace : undefined
     if (actual !== entry.marketplace) {
       return {
         action: 'skip',
@@ -280,15 +263,8 @@ export function gateChannelServer(
     // not the session-wide bit) bypasses — so accepting the dev dialog for
     // one entry doesn't leak allowlist-bypass to --channels entries.
     if (!entry.dev) {
-      const { entries, source } = getEffectiveChannelAllowlist(
-        sub,
-        policy?.allowedChannelPlugins,
-      )
-      if (
-        !entries.some(
-          e => e.plugin === entry.name && e.marketplace === entry.marketplace,
-        )
-      ) {
+      const { entries, source } = getEffectiveChannelAllowlist(sub, policy?.allowedChannelPlugins)
+      if (!entries.some((e) => e.plugin === entry.name && e.marketplace === entry.marketplace)) {
         return {
           action: 'skip',
           kind: 'allowlist',

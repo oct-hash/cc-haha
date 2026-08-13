@@ -65,8 +65,7 @@ export const goalCommand: Command = {
   type: 'prompt',
   name: 'goal',
   description: 'Closed-loop goal execution with verifier-gated completion',
-  whenToUse:
-    'Use when you need to set and track specific goals with verification gates.',
+  whenToUse: 'Use when you need to set and track specific goals with verification gates.',
   contentLength: 0,
   progressMessage: 'processing goal',
   source: 'builtin',
@@ -80,7 +79,7 @@ export const goalCommand: Command = {
     switch (subcommand) {
       case 'list': {
         const activeGoals = Array.from(goals.values()).filter(
-          g => g.state !== 'DONE' && g.state !== 'FAILED',
+          (g) => g.state !== 'DONE' && g.state !== 'FAILED',
         )
         if (activeGoals.length === 0) {
           return [
@@ -90,9 +89,7 @@ export const goalCommand: Command = {
             },
           ]
         }
-        const output = ['📋 **Active Goals:**\n', ...activeGoals.map(formatGoal)].join(
-          '\n',
-        )
+        const output = ['📋 **Active Goals:**\n', ...activeGoals.map(formatGoal)].join('\n')
         return [{ type: 'text', text: output }]
       }
 
@@ -330,9 +327,7 @@ When implementation is complete (3+ file edits), run: \`/goal verify ${newGoal.i
 }
 
 // Helper function to integrate with VERIFICATION_AGENT
-export function spawnVerificationAgent(
-  goal: Goal,
-): { subagent_type: string; task: object } {
+export function spawnVerificationAgent(goal: Goal): { subagent_type: string; task: object } {
   return {
     subagent_type: VERIFICATION_AGENT_TYPE,
     task: {

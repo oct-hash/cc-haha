@@ -3,20 +3,15 @@
  * Manages message polling, sending, and contact resolution
  */
 
-import type {
-  WechatAccount,
-  WechatMessage,
-  WechatContact,
-  WechatUpdate,
-} from './types.js'
 import {
-  getUpdates,
   getContacts,
-  sendTextMessage,
-  sendImageMessage,
+  getUpdates,
   sendFileMessage,
+  sendImageMessage,
+  sendTextMessage,
   sendVideoMessage,
 } from './api.js'
+import type { WechatAccount, WechatContact, WechatMessage, WechatUpdate } from './types.js'
 
 export interface MessageHandlerCallbacks {
   onMessage: (message: WechatMessage, sender: WechatContact | null) => void
@@ -161,11 +156,7 @@ export class WechatMessageHandler {
   /**
    * Send file message
    */
-  async sendFile(
-    to: string,
-    mediaId: string,
-    fileName: string,
-  ): Promise<{ message_id: string }> {
+  async sendFile(to: string, mediaId: string, fileName: string): Promise<{ message_id: string }> {
     const userId = this.resolveUserId(to) || to
     return sendFileMessage(userId, mediaId, fileName, this.account)
   }
@@ -196,14 +187,9 @@ export class WechatMessageHandler {
 /**
  * Format WeChat message for display
  */
-export function formatWechatMessage(
-  msg: WechatMessage,
-  sender: WechatContact | null,
-): string {
+export function formatWechatMessage(msg: WechatMessage, sender: WechatContact | null): string {
   const senderName = sender?.nickname || msg.from_nickname || 'Unknown'
-  const time = msg.create_time
-    ? new Date(msg.create_time * 1000).toLocaleString()
-    : ''
+  const time = msg.create_time ? new Date(msg.create_time * 1000).toLocaleString() : ''
 
   const items: string[] = []
   for (const item of msg.item_list || []) {

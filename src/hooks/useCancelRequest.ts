@@ -7,11 +7,7 @@
 import { useCallback, useRef } from 'react'
 import { logEvent } from 'src/services/analytics/index.js'
 import type { AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS } from 'src/services/analytics/metadata.js'
-import {
-  useAppState,
-  useAppStateStore,
-  useSetAppState,
-} from 'src/state/AppState.js'
+import { useAppState, useAppStateStore, useSetAppState } from 'src/state/AppState.js'
 import { isVimModeEnabled } from '../components/PromptInput/utils.js'
 import type { ToolUseConfirm } from '../components/permissions/PermissionRequest.js'
 import type { SpinnerMode } from '../components/Spinner/types.js'
@@ -38,9 +34,7 @@ import { emitTaskTerminatedSdk } from '../utils/sdkEventQueue.js'
 const KILL_AGENTS_CONFIRM_WINDOW_MS = 3000
 
 type CancelRequestHandlerProps = {
-  setToolUseConfirmQueue: (
-    f: (toolUseConfirmQueue: ToolUseConfirm[]) => ToolUseConfirm[],
-  ) => void
+  setToolUseConfirmQueue: (f: (toolUseConfirmQueue: ToolUseConfirm[]) => ToolUseConfirm[]) => void
   onCancel: () => void
   onAgentsKilled: () => void
   isMessageSelectorVisible: boolean
@@ -82,14 +76,12 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
   const queuedCommandsLength = useCommandQueue().length
   const { addNotification, removeNotification } = useNotifications()
   const lastKillAgentsPressRef = useRef<number>(0)
-  const viewSelectionMode = useAppState(s => s.viewSelectionMode)
+  const viewSelectionMode = useAppState((s) => s.viewSelectionMode)
 
   const handleCancel = useCallback(() => {
     const cancelProps = {
-      source:
-        'escape' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      streamMode:
-        streamMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      source: 'escape' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      streamMode: streamMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     }
 
     // Priority 1: If there's an active task running, cancel it first
@@ -113,13 +105,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
     logEvent('tengu_cancel', cancelProps)
     setToolUseConfirmQueue(() => [])
     onCancel()
-  }, [
-    abortSignal,
-    popCommandFromQueue,
-    setToolUseConfirmQueue,
-    onCancel,
-    streamMode,
-  ])
+  }, [abortSignal, popCommandFromQueue, setToolUseConfirmQueue, onCancel, streamMode])
 
   // Determine if this handler should be active
   // Other contexts (Transcript, HistorySearch, Help) have their own escape handlers
@@ -158,8 +144,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
   // ctrl+c when main is idle at the prompt — that blocks the copy-selection
   // handler and double-press-to-exit from ever seeing the keypress.
   const isCtrlCActive =
-    isContextActive &&
-    (canCancelRunningTask || hasQueuedCommands || isViewingTeammate)
+    isContextActive && (canCancelRunningTask || hasQueuedCommands || isViewingTeammate)
 
   useKeybinding('chat:cancel', handleCancel, {
     context: 'Chat',
@@ -188,7 +173,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
     const summary =
       descriptions.length === 1
         ? `Background agent "${descriptions[0]}" was stopped by the user.`
-        : `${descriptions.length} background agents were stopped by the user: ${descriptions.map(d => `"${d}"`).join(', ')}.`
+        : `${descriptions.length} background agents were stopped by the user: ${descriptions.map((d) => `"${d}"`).join(', ')}.`
     enqueuePendingNotification({ value: summary, mode: 'task-notification' })
     onAgentsKilled()
     return true
@@ -225,7 +210,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
   const handleKillAgents = useCallback(() => {
     const tasks = store.getState().tasks
     const hasRunningAgents = Object.values(tasks).some(
-      t => t.type === 'local_agent' && t.status === 'running',
+      (t) => t.type === 'local_agent' && t.status === 'running',
     )
     if (!hasRunningAgents) {
       addNotification({
@@ -243,8 +228,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
       lastKillAgentsPressRef.current = 0
       removeNotification('kill-agents-confirm')
       logEvent('tengu_cancel', {
-        source:
-          'kill_agents' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+        source: 'kill_agents' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       })
       clearCommandQueue()
       killAllAgentsAndNotify()
@@ -252,11 +236,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
     }
     // First press -- show confirmation hint in status bar
     lastKillAgentsPressRef.current = now
-    const shortcut = getShortcutDisplay(
-      'chat:killAgents',
-      'Chat',
-      'ctrl+x ctrl+k',
-    )
+    const shortcut = getShortcutDisplay('chat:killAgents', 'Chat', 'ctrl+x ctrl+k')
     addNotification({
       key: 'kill-agents-confirm',
       text: `Press ${shortcut} again to stop background agents`,

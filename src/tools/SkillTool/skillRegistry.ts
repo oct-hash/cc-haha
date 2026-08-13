@@ -1,7 +1,7 @@
+import type { Command } from 'src/types/command.js'
+import { logForDebugging } from 'src/utils/debug.js'
 import { getClaudeConfigHomeDir } from 'src/utils/envUtils.js'
 import { getFsImplementation } from 'src/utils/fsOperations.js'
-import { logForDebugging } from 'src/utils/debug.js'
-import type { Command } from 'src/types/command.js'
 
 /**
  * Skill metadata for registry management.
@@ -100,7 +100,7 @@ export class SkillRegistry {
    * Get all registered skills.
    */
   getAll(): SkillMetadata[] {
-    return Array.from(this.skills.values()).map(v => v.metadata)
+    return Array.from(this.skills.values()).map((v) => v.metadata)
   }
 
   /**
@@ -109,7 +109,7 @@ export class SkillRegistry {
   findByTag(tag: string): SkillMetadata[] {
     const names = this.tagsIndex.get(tag)
     if (!names) return []
-    return [...names].map(n => this.skills.get(n)!.metadata).filter(Boolean)
+    return [...names].map((n) => this.skills.get(n)!.metadata).filter(Boolean)
   }
 
   /**
@@ -118,7 +118,7 @@ export class SkillRegistry {
   findByAuthor(author: string): SkillMetadata[] {
     const names = this.authorsIndex.get(author)
     if (!names) return []
-    return [...names].map(n => this.skills.get(n)!.metadata).filter(Boolean)
+    return [...names].map((n) => this.skills.get(n)!.metadata).filter(Boolean)
   }
 
   /**
@@ -127,10 +127,10 @@ export class SkillRegistry {
   search(query: string): SkillMetadata[] {
     const lower = query.toLowerCase()
     return this.getAll().filter(
-      s =>
+      (s) =>
         s.name.toLowerCase().includes(lower) ||
         s.description.toLowerCase().includes(lower) ||
-        s.tags?.some(t => t.toLowerCase().includes(lower)),
+        s.tags?.some((t) => t.toLowerCase().includes(lower)),
     )
   }
 
@@ -164,8 +164,7 @@ export class SkillRegistry {
    * Returns: -1 if a < b, 0 if a === b, 1 if a > b
    */
   compareVersions(a: string, b: string): number {
-    const parse = (v: string) =>
-      v.split('.').map(n => parseInt(n, 10) || 0)
+    const parse = (v: string) => v.split('.').map((n) => parseInt(n, 10) || 0)
     const [aMaj, aMin, aPat] = parse(a)
     const [bMaj, bMin, bPat] = parse(b)
 

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { EMPTY_USAGE } from '../emptyUsage'
 
 describe('EMPTY_USAGE', () => {

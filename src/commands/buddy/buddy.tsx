@@ -1,18 +1,9 @@
 import * as React from 'react'
+import { companionUserId, getCompanion, roll } from '../../buddy/companion.js'
+import { renderSprite } from '../../buddy/sprites.js'
+import { RARITY_COLORS, RARITY_STARS, STAT_NAMES, type StoredCompanion } from '../../buddy/types.js'
 import { Box, Text } from '../../ink.js'
 import type { LocalJSXCommandCall } from '../../types/command.js'
-import {
-  getCompanion,
-  roll,
-  companionUserId,
-} from '../../buddy/companion.js'
-import { renderSprite } from '../../buddy/sprites.js'
-import {
-  RARITY_COLORS,
-  RARITY_STARS,
-  STAT_NAMES,
-  type StoredCompanion,
-} from '../../buddy/types.js'
 import { saveGlobalConfig } from '../../utils/config.js'
 
 function CompanionCard({
@@ -38,7 +29,7 @@ function CompanionCard({
   // Handle subcommands
   React.useEffect(() => {
     if (trimmed === 'mute') {
-      saveGlobalConfig(c => ({ ...c, companionMuted: true }))
+      saveGlobalConfig((c) => ({ ...c, companionMuted: true }))
       onDone(`${companion?.name ?? 'Companion'} is now muted.`, {
         display: 'system',
       })
@@ -46,7 +37,7 @@ function CompanionCard({
     }
 
     if (trimmed === 'unmute') {
-      saveGlobalConfig(c => ({ ...c, companionMuted: false }))
+      saveGlobalConfig((c) => ({ ...c, companionMuted: false }))
       onDone(`${companion?.name ?? 'Companion'} says hello!`, {
         display: 'system',
       })
@@ -67,21 +58,36 @@ function CompanionCard({
 
     if (trimmed === 'hatch') {
       if (companion) {
-        onDone(
-          `You already have ${companion.name}! Use /buddy info to see them.`,
-          { display: 'system' },
-        )
+        onDone(`You already have ${companion.name}! Use /buddy info to see them.`, {
+          display: 'system',
+        })
         return
       }
       // Hatch a new companion with a generated name
       const { bones } = roll(companionUserId())
       const adjectives = [
-        'Bright', 'Cozy', 'Swift', 'Calm', 'Wise', 'Bold',
-        'Fuzzy', 'Lucky', 'Snappy', 'Quirky',
+        'Bright',
+        'Cozy',
+        'Swift',
+        'Calm',
+        'Wise',
+        'Bold',
+        'Fuzzy',
+        'Lucky',
+        'Snappy',
+        'Quirky',
       ]
       const nouns = [
-        'Spark', 'Pixel', 'Ember', 'Glitch', 'Byte',
-        'Flux', 'Drift', 'Blip', 'Quip', 'Zap',
+        'Spark',
+        'Pixel',
+        'Ember',
+        'Glitch',
+        'Byte',
+        'Flux',
+        'Drift',
+        'Blip',
+        'Quip',
+        'Zap',
       ]
       const adj = adjectives[Math.floor(Math.random() * adjectives.length)]!
       const noun = nouns[Math.floor(Math.random() * nouns.length)]!
@@ -91,11 +97,10 @@ function CompanionCard({
         personality: `A ${bones.rarity} ${bones.species} who loves debugging and hanging out.`,
         hatchedAt: Date.now(),
       }
-      saveGlobalConfig(c => ({ ...c, companion: soul }))
-      onDone(
-        `✨ You hatched ${name} the ${bones.rarity} ${bones.species}! Say hello!`,
-        { display: 'system' },
-      )
+      saveGlobalConfig((c) => ({ ...c, companion: soul }))
+      onDone(`✨ You hatched ${name} the ${bones.rarity} ${bones.species}! Say hello!`, {
+        display: 'system',
+      })
       return
     }
 
@@ -105,7 +110,7 @@ function CompanionCard({
         return
       }
       const name = companion.name
-      saveGlobalConfig(c => {
+      saveGlobalConfig((c) => {
         const next = { ...c }
         delete next.companion
         return next
@@ -121,7 +126,14 @@ function CompanionCard({
     const preview = renderSprite(bones, 0)
     const color = RARITY_COLORS[bones.rarity]
     return (
-      <Box flexDirection="column" paddingX={1} paddingY={1} autoFocus={true} onKeyDown={handleKeyDown} tabIndex={0}>
+      <Box
+        flexDirection="column"
+        paddingX={1}
+        paddingY={1}
+        autoFocus={true}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+      >
         <Text bold>You haven't hatched a companion yet!</Text>
         <Text dimColor>Here's a preview of yours:</Text>
         <Box flexDirection="column" marginY={1}>
@@ -134,8 +146,12 @@ function CompanionCard({
             A {bones.rarity} {bones.species} {RARITY_STARS[bones.rarity]}
           </Text>
         </Box>
-        <Text>Run <Text bold>/buddy hatch</Text> to bring them to life!</Text>
-        <Text dimColor>Or type <Text bold>q</Text> to dismiss.</Text>
+        <Text>
+          Run <Text bold>/buddy hatch</Text> to bring them to life!
+        </Text>
+        <Text dimColor>
+          Or type <Text bold>q</Text> to dismiss.
+        </Text>
       </Box>
     )
   }
@@ -144,7 +160,14 @@ function CompanionCard({
   const color = RARITY_COLORS[companion.rarity]
 
   return (
-    <Box flexDirection="column" paddingX={1} paddingY={1} autoFocus={true} onKeyDown={handleKeyDown} tabIndex={0}>
+    <Box
+      flexDirection="column"
+      paddingX={1}
+      paddingY={1}
+      autoFocus={true}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+    >
       <Box flexDirection="row" gap={2}>
         <Box flexDirection="column">
           {sprite.map((line, i) => (
@@ -158,8 +181,7 @@ function CompanionCard({
         </Box>
         <Box flexDirection="column" justifyContent="center">
           <Text>
-            <Text bold>Species:</Text>{' '}
-            <Text color={color}>{companion.species}</Text>
+            <Text bold>Species:</Text> <Text color={color}>{companion.species}</Text>
           </Text>
           <Text>
             <Text bold>Rarity:</Text>{' '}
@@ -170,29 +192,20 @@ function CompanionCard({
           {companion.shiny && <Text color="warning">✦ Shiny!</Text>}
           <Text dimColor>{'─'.repeat(20)}</Text>
           <Text bold>Stats:</Text>
-          {STAT_NAMES.map(stat => (
+          {STAT_NAMES.map((stat) => (
             <Text key={stat}>
-              <Text dimColor>{stat}:</Text>{' '}
-              <Text color={color}>{companion.stats[stat]}</Text>
+              <Text dimColor>{stat}:</Text> <Text color={color}>{companion.stats[stat]}</Text>
             </Text>
           ))}
         </Box>
       </Box>
       <Text dimColor>{'─'.repeat(40)}</Text>
-      <Text dimColor>
-        /buddy pet · /buddy mute · /buddy unmute · /buddy release
-      </Text>
+      <Text dimColor>/buddy pet · /buddy mute · /buddy unmute · /buddy release</Text>
       <Text dimColor>Press q or Enter to dismiss</Text>
     </Box>
   )
 }
 
 export const call: LocalJSXCommandCall = async (onDone, context, args = '') => {
-  return (
-    <CompanionCard
-      onDone={onDone}
-      args={args}
-      setAppState={context.setAppState}
-    />
-  )
+  return <CompanionCard onDone={onDone} args={args} setAppState={context.setAppState} />
 }

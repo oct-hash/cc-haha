@@ -1,6 +1,6 @@
 import type { Message } from '../types/message.js'
-import { getCompanion } from './companion.js'
 import { getGlobalConfig } from '../utils/config.js'
+import { getCompanion } from './companion.js'
 
 // Simple companion observer: picks a reaction based on the last assistant message.
 // This is a lightweight placeholder that generates fun reactions without an LLM call.
@@ -21,19 +21,16 @@ const GENERAL_QUIPS = [
   'You got this!',
 ]
 
-const CODE_QUIPS = [
-  'Fancy!',
-  'Clean code!',
-  'Elegant solution!',
-  'Ship it!',
-]
+const CODE_QUIPS = ['Fancy!', 'Clean code!', 'Elegant solution!', 'Ship it!']
 
 function pickQuip(messages: Message[]): string | undefined {
-  const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant')
+  const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant')
   if (!lastAssistant) return undefined
 
   const content = Array.isArray(lastAssistant.content)
-    ? lastAssistant.content.map(c => (typeof c === 'string' ? c : c.type === 'text' ? c.text : '')).join('')
+    ? lastAssistant.content
+        .map((c) => (typeof c === 'string' ? c : c.type === 'text' ? c.text : ''))
+        .join('')
     : typeof lastAssistant.content === 'string'
       ? lastAssistant.content
       : ''
@@ -44,10 +41,20 @@ function pickQuip(messages: Message[]): string | undefined {
   if (Math.random() > 0.2) return undefined
 
   const lower = content.toLowerCase()
-  if (lower.includes('error') || lower.includes('bug') || lower.includes('fix') || lower.includes('debug')) {
+  if (
+    lower.includes('error') ||
+    lower.includes('bug') ||
+    lower.includes('fix') ||
+    lower.includes('debug')
+  ) {
     return DEBUGGING_QUIPS[Math.floor(Math.random() * DEBUGGING_QUIPS.length)]
   }
-  if (lower.includes('function') || lower.includes('class') || lower.includes('const') || lower.includes('```')) {
+  if (
+    lower.includes('function') ||
+    lower.includes('class') ||
+    lower.includes('const') ||
+    lower.includes('```')
+  ) {
     return CODE_QUIPS[Math.floor(Math.random() * CODE_QUIPS.length)]
   }
   return GENERAL_QUIPS[Math.floor(Math.random() * GENERAL_QUIPS.length)]

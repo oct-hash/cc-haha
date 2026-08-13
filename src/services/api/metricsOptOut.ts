@@ -63,28 +63,21 @@ async function _checkMetricsEnabledAPI(): Promise<MetricsStatus> {
       also403Revoked: true,
     })
 
-    logForDebugging(
-      `Metrics opt-out API response: enabled=${data.metrics_logging_enabled}`,
-    )
+    logForDebugging(`Metrics opt-out API response: enabled=${data.metrics_logging_enabled}`)
 
     return {
       enabled: data.metrics_logging_enabled,
       hasError: false,
     }
   } catch (error) {
-    logForDebugging(
-      `Failed to check metrics opt-out status: ${errorMessage(error)}`,
-    )
+    logForDebugging(`Failed to check metrics opt-out status: ${errorMessage(error)}`)
     logError(error)
     return { enabled: false, hasError: true }
   }
 }
 
 // Create memoized version with custom error handling
-const memoizedCheckMetrics = memoizeWithTTLAsync(
-  _checkMetricsEnabledAPI,
-  CACHE_TTL_MS,
-)
+const memoizedCheckMetrics = memoizeWithTTLAsync(_checkMetricsEnabledAPI, CACHE_TTL_MS)
 
 /**
  * Fetch (in-memory memoized) and persist to disk on change.
@@ -105,7 +98,7 @@ async function refreshMetricsStatus(): Promise<MetricsStatus> {
     return result
   }
 
-  saveGlobalConfig(current => ({
+  saveGlobalConfig((current) => ({
     ...current,
     metricsStatusCache: {
       enabled: result.enabled,

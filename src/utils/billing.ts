@@ -71,8 +71,5 @@ export function hasClaudeAiBillingAccess(): boolean {
   const config = getGlobalConfig()
   const orgRole = config.oauthAccount?.organizationRole
 
-  return (
-    !!orgRole &&
-    ['admin', 'billing', 'owner', 'primary_owner'].includes(orgRole)
-  )
+  return !!orgRole && ['admin', 'billing', 'owner', 'primary_owner'].includes(orgRole)
 }

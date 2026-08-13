@@ -10,48 +10,50 @@
 // only module-scope handler/component imports are resolved here directly.
 
 import { feature } from 'bun:bundle'
-import * as React from 'react'
+import type * as React from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { getSessionId } from '../bootstrap/state.js'
-import { buildPermissionUpdates } from '../components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.js'
+import { AUTO_MODE_DESCRIPTION } from 'src/components/AutoModeOptInDialog.js'
 import { useFeedbackSurvey } from 'src/components/FeedbackSurvey/useFeedbackSurvey.js'
 import { useMemorySurvey } from 'src/components/FeedbackSurvey/useMemorySurvey.js'
 import { usePostCompactSurvey } from 'src/components/FeedbackSurvey/usePostCompactSurvey.js'
-import { useIssueFlagBanner } from '../hooks/useIssueFlagBanner.js'
-import { useSkillImprovementSurvey } from '../hooks/useSkillImprovementSurvey.js'
+import { useFileHistorySnapshotInit } from 'src/hooks/useFileHistorySnapshotInit.js'
+import { getSessionId } from '../bootstrap/state.js'
+import { buildPermissionUpdates } from '../components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.js'
 // SpinnerMode is a type-display anchor: tsc renders the feedbackSurvey wrapper's
 // lastResponse as `SpinnerMode | null` (matching the baseline) only when an
 // unresolved type alias is in scope in this module. Never emitted at runtime.
 import type { SpinnerMode } from '../components/Spinner.js'
+import { useIDEIntegration } from '../hooks/useIDEIntegration.js'
+import { useIssueFlagBanner } from '../hooks/useIssueFlagBanner.js'
+import { useSkillImprovementSurvey } from '../hooks/useSkillImprovementSurvey.js'
+import type { ScopedMcpServerConfig } from '../services/mcp/types.js'
 import type { AppStateStore } from '../state/AppState.js'
+import type { Tool, ToolPermissionContext } from '../Tool.js'
 import { getAllInProcessTeammateTasks } from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
 import type { TaskState } from '../tasks/types.js'
-import type { Tool, ToolPermissionContext } from '../Tool.js'
 import { SLEEP_TOOL_NAME } from '../tools/SleepTool/prompt.js'
 import type { Message as MessageType } from '../types/message.js'
 import { createAbortController } from '../utils/abortController.js'
 import { count } from '../utils/array.js'
+import { type AutoRunIssueReason, shouldAutoRunIssue } from '../utils/autoRunIssue.js'
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js'
 import { isEnvTruthy } from '../utils/envUtils.js'
-import { type FileHistorySnapshot, type FileHistoryState, fileHistoryEnabled, fileHistoryMakeSnapshot } from '../utils/fileHistory.js'
+import {
+  type FileHistorySnapshot,
+  type FileHistoryState,
+  fileHistoryEnabled,
+  fileHistoryMakeSnapshot,
+} from '../utils/fileHistory.js'
 import type { FileStateCache } from '../utils/fileStateCache.js'
-import { type PromptInputHelpers } from '../utils/handlePromptSubmit.js'
+import type { PromptInputHelpers } from '../utils/handlePromptSubmit.js'
 import type { IDEExtensionInstallationStatus, IdeType } from '../utils/ide.js'
 import type { SetAppState } from '../utils/messageQueueManager.js'
 import { createSystemMessage, createTurnDurationMessage } from '../utils/messages.js'
 import { applyPermissionUpdates } from '../utils/permissions/PermissionUpdate.js'
 import { stripDangerousPermissionsForAutoMode } from '../utils/permissions/permissionSetup.js'
 import { getPlanSlug, setPlanSlug } from '../utils/plans.js'
-import type { ScopedMcpServerConfig } from '../services/mcp/types.js'
 import { isLoggableMessage } from '../utils/sessionStorage.js'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
-import { useIDEIntegration } from '../hooks/useIDEIntegration.js'
-import { useFileHistorySnapshotInit } from 'src/hooks/useFileHistorySnapshotInit.js'
-import {
-  type AutoRunIssueReason,
-  shouldAutoRunIssue,
-} from '../utils/autoRunIssue.js'
-import { AUTO_MODE_DESCRIPTION } from 'src/components/AutoModeOptInDialog.js'
 
 // Keep the SpinnerMode anchor referenced so it survives lint's noUnusedImports.
 // Type-only; erased at compile time.
@@ -63,7 +65,7 @@ type _SpinnerModeAnchor = SpinnerMode
 // builds eliminate the module entirely (including its two O(n) useMemos that run
 // on every messages change, plus the GrowthBook fetch).
 const useFrustrationDetection: typeof import('../components/FeedbackSurvey/useFrustrationDetection.js').useFrustrationDetection =
-  'external' === 'ant'
+  process.env.USER_TYPE === 'ant'
     ? require('../components/FeedbackSurvey/useFrustrationDetection.js').useFrustrationDetection
     : () => ({
         state: 'closed',
@@ -442,7 +444,7 @@ export function useREPLInitialMessage(params: UseREPLInitialMessageParams) {
 
       // Atomically: clear initial message, set permission mode and rules, and store plan for verification
       const shouldStorePlanForVerification =
-        initialMsg.message.planContent && 'external' === 'ant' && isEnvTruthy(undefined)
+        initialMsg.message.planContent && process.env.USER_TYPE === 'ant' && isEnvTruthy(undefined)
       setAppState((prev) => {
         // Build and apply permission updates (mode + allowedPrompts rules)
         let updatedToolPermissionContext = initialMsg.mode

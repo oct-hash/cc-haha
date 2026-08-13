@@ -1,0 +1,17 @@
+SRC_DIR exists: True
+DST_DIR exists: True
+
+[COPIED] FigS4b_moran_spdep_crosscheck_v1.png  215196 bytes -> D:\肾脏虚拟细胞文章设计\交付最终版\supplementary\FigS4b_moran_spdep_crosscheck_v1.png
+[COPIED] FigS4b_moran_spdep_crosscheck_v1.pdf  34014 bytes -> D:\肾脏虚拟细胞文章设计\交付最终版\supplementary\FigS4b_moran_spdep_crosscheck_v1.pdf
+
+==== 交付最终版/supplementary/ AFTER ====
+   FigS1_SPP1_validation_v1.pdf   size=52785
+   FigS1_SPP1_validation_v1.png   size=270608
+   FigS2_bulk_Spp1_timecourse_v1.pdf   size=51736
+   FigS2_bulk_Spp1_timecourse_v1.png   size=196048
+   FigS3_scRNA_replication_v1.pdf   size=196456
+   FigS3_scRNA_replication_v1.png   size=575184
+   FigS4_spatial_coloc_v1.pdf   size=1559476
+   FigS4_spatial_coloc_v1.png   size=1150057
+   FigS4b_moran_spdep_crosscheck_v1.pdf   size=34014
+   FigS4b_moran_spdep_crosscheck_v1.png   size=215196

@@ -7,15 +7,15 @@ import { feature } from 'bun:bundle'
 import * as React from 'react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { snapshotOutputTokensForTurn } from '../bootstrap/state.js'
-import type { SpinnerMode } from '../components/Spinner.js'
 import type { ToolUseConfirm } from '../components/permissions/PermissionRequest.js'
+import type { SpinnerMode } from '../components/Spinner.js'
 import type { PromptRequest, PromptResponse } from '../types/hooks.js'
 import type { Message as MessageType } from '../types/message.js'
 import type { PromptInputMode, VimMode } from '../types/textInputTypes.js'
 import type { PastedContent } from '../utils/config.js'
 import { logForDebugging } from '../utils/debug.js'
-import { createAgentsKilledMessage, createAssistantMessage } from '../utils/messages.js'
 import { popAllEditable } from '../utils/messageQueueManager.js'
+import { createAgentsKilledMessage, createAssistantMessage } from '../utils/messages.js'
 import type { QueryGuard } from '../utils/QueryGuard.js'
 import type { ToolJSXValue } from './REPL.render.js'
 import type { Screen } from './REPL.types.js'
@@ -212,11 +212,11 @@ export function useREPLDialogs(params: UseREPLDialogsParams) {
     if (allowDialogsWithAnimation && showIdeOnboarding) return 'ide-onboarding'
 
     // Model switch callout (ant-only, eliminated from external builds)
-    if ('external' === 'ant' && allowDialogsWithAnimation && showModelSwitchCallout)
+    if (process.env.USER_TYPE === 'ant' && allowDialogsWithAnimation && showModelSwitchCallout)
       return 'model-switch'
 
     // Undercover auto-enable explainer (ant-only, eliminated from external builds)
-    if ('external' === 'ant' && allowDialogsWithAnimation && showUndercoverCallout)
+    if (process.env.USER_TYPE === 'ant' && allowDialogsWithAnimation && showUndercoverCallout)
       return 'undercover-callout'
 
     // Effort callout (shown once for Opus 4.6 users when effort is enabled)
@@ -397,4 +397,4 @@ export function useREPLDialogs(params: UseREPLDialogsParams) {
     onCancel,
     cancelRequestProps,
   }
-} 
+}

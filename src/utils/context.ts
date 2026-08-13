@@ -3,6 +3,7 @@ import { CONTEXT_1M_BETA_HEADER } from '../constants/betas.js'
 import { getGlobalConfig } from './config.js'
 import { isEnvTruthy } from './envUtils.js'
 import { getCanonicalName } from './model/model.js'
+import { resolveAntModel } from './model/antModels.js'
 import { getModelCapability } from './model/modelCapabilities.js'
 
 // Model context window size (200k tokens for all models right now)
@@ -48,18 +49,12 @@ export function modelSupports1M(model: string): boolean {
   return canonical.includes('claude-sonnet-4') || canonical.includes('opus-4-6')
 }
 
-export function getContextWindowForModel(
-  model: string,
-  betas?: string[],
-): number {
+export function getContextWindowForModel(model: string, betas?: string[]): number {
   // Allow override via environment variable (ant-only)
   // This takes precedence over all other context window resolution, including 1M detection,
   // so users can cap the effective context window for local decisions (auto-compact, etc.)
   // while still using a 1M-capable endpoint.
-  if (
-    process.env.USER_TYPE === 'ant' &&
-    process.env.CLAUDE_CODE_MAX_CONTEXT_TOKENS
-  ) {
+  if (process.env.USER_TYPE === 'ant' && process.env.CLAUDE_CODE_MAX_CONTEXT_TOKENS) {
     const override = parseInt(process.env.CLAUDE_CODE_MAX_CONTEXT_TOKENS, 10)
     if (!isNaN(override) && override > 0) {
       return override
@@ -73,10 +68,7 @@ export function getContextWindowForModel(
 
   const cap = getModelCapability(model)
   if (cap?.max_input_tokens && cap.max_input_tokens >= 100_000) {
-    if (
-      cap.max_input_tokens > MODEL_CONTEXT_WINDOW_DEFAULT &&
-      is1mContextDisabled()
-    ) {
+    if (cap.max_input_tokens > MODEL_CONTEXT_WINDOW_DEFAULT && is1mContextDisabled()) {
       return MODEL_CONTEXT_WINDOW_DEFAULT
     }
     return cap.max_input_tokens
@@ -132,9 +124,7 @@ export function calculateContextPercentages(
     currentUsage.cache_creation_input_tokens +
     currentUsage.cache_read_input_tokens
 
-  const usedPercentage = Math.round(
-    (totalInputTokens / contextWindowSize) * 100,
-  )
+  const usedPercentage = Math.round((totalInputTokens / contextWindowSize) * 100)
   const clampedUsed = Math.min(100, Math.max(0, usedPercentage))
 
   return {
@@ -170,11 +160,7 @@ export function getModelMaxOutputTokens(model: string): {
   } else if (m.includes('sonnet-4-6')) {
     defaultTokens = 32_000
     upperLimit = 128_000
-  } else if (
-    m.includes('opus-4-5') ||
-    m.includes('sonnet-4') ||
-    m.includes('haiku-4')
-  ) {
+  } else if (m.includes('opus-4-5') || m.includes('sonnet-4') || m.includes('haiku-4')) {
     defaultTokens = 32_000
     upperLimit = 64_000
   } else if (m.includes('opus-4-1') || m.includes('opus-4')) {

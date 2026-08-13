@@ -189,10 +189,7 @@ class WechatBridge {
       console.error(`[Bridge] Response sent to ${msg.from_user_id}`)
     } catch (err) {
       console.error('[Bridge] Error handling message:', err)
-      await this.sendWechatMessage(
-        msg.from_user_id,
-        '抱歉，处理消息时遇到错误。请稍后再试。',
-      )
+      await this.sendWechatMessage(msg.from_user_id, '抱歉，处理消息时遇到错误。请稍后再试。')
     }
   }
 
@@ -213,7 +210,7 @@ class WechatBridge {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${CONFIG.claudeApiKey}`,
+            Authorization: `Bearer ${CONFIG.claudeApiKey}`,
             'anthropic-version': '2023-06-01',
           },
           timeout: CONFIG.maxResponseTimeMs,

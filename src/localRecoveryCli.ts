@@ -151,17 +151,13 @@ async function run(): Promise<void> {
   const apiKey = process.env.ANTHROPIC_API_KEY
   const authToken = process.env.ANTHROPIC_AUTH_TOKEN
   if (!apiKey && !authToken) {
-    process.stderr.write(
-      'Error: set ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN\n',
-    )
+    process.stderr.write('Error: set ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN\n')
     process.exitCode = 1
     return
   }
 
   const model =
-    parsed.model ||
-    process.env.ANTHROPIC_DEFAULT_SONNET_MODEL ||
-    process.env.ANTHROPIC_MODEL
+    parsed.model || process.env.ANTHROPIC_DEFAULT_SONNET_MODEL || process.env.ANTHROPIC_MODEL
 
   if (!model) {
     process.stderr.write('Error: model is required\n')
@@ -190,8 +186,8 @@ async function run(): Promise<void> {
   }
 
   const text = response.content
-    .filter(block => block.type === 'text')
-    .map(block => block.text)
+    .filter((block) => block.type === 'text')
+    .map((block) => block.text)
     .join('\n')
 
   process.stdout.write(`${text}\n`)
@@ -205,17 +201,13 @@ async function runInteractive(parsed: {
   const apiKey = process.env.ANTHROPIC_API_KEY
   const authToken = process.env.ANTHROPIC_AUTH_TOKEN
   if (!apiKey && !authToken) {
-    process.stderr.write(
-      'Error: set ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN\n',
-    )
+    process.stderr.write('Error: set ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN\n')
     process.exitCode = 1
     return
   }
 
   const model =
-    parsed.model ||
-    process.env.ANTHROPIC_DEFAULT_SONNET_MODEL ||
-    process.env.ANTHROPIC_MODEL
+    parsed.model || process.env.ANTHROPIC_DEFAULT_SONNET_MODEL || process.env.ANTHROPIC_MODEL
 
   if (!model) {
     process.stderr.write('Error: model is required\n')
@@ -270,21 +262,20 @@ async function runInteractive(parsed: {
         messages,
       })
       const text = response.content
-        .filter(block => block.type === 'text')
-        .map(block => block.text)
+        .filter((block) => block.type === 'text')
+        .map((block) => block.text)
         .join('\n')
       process.stdout.write(`claude> ${text}\n\n`)
       messages.push({ role: 'assistant', content: text })
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : String(error)
+      const message = error instanceof Error ? error.message : String(error)
       process.stderr.write(`error: ${message}\n`)
     }
     rl.prompt()
   }
 }
 
-void run().catch(error => {
+void run().catch((error) => {
   const message = error instanceof Error ? error.stack || error.message : String(error)
   process.stderr.write(`${message}\n`)
   process.exitCode = 1

@@ -1,9 +1,6 @@
 import { feature } from 'bun:bundle'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
-import {
-  getClaudeAIOAuthTokens,
-  isAnthropicAuthEnabled,
-} from '../utils/auth.js'
+import { getClaudeAIOAuthTokens, isAnthropicAuthEnabled } from '../utils/auth.js'
 
 /**
  * Kill-switch check for voice mode. Returns true unless the

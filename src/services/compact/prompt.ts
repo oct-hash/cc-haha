@@ -275,10 +275,7 @@ export function getPartialCompactPrompt(
   customInstructions?: string,
   direction: PartialCompactDirection = 'from',
 ): string {
-  const template =
-    direction === 'up_to'
-      ? PARTIAL_COMPACT_UP_TO_PROMPT
-      : PARTIAL_COMPACT_PROMPT
+  const template = direction === 'up_to' ? PARTIAL_COMPACT_UP_TO_PROMPT : PARTIAL_COMPACT_PROMPT
   let prompt = NO_TOOLS_PREAMBLE + template
 
   if (customInstructions && customInstructions.trim() !== '') {
@@ -313,10 +310,7 @@ export function formatCompactSummary(summary: string): string {
 
   // Strip analysis section — it's a drafting scratchpad that improves summary
   // quality but has no informational value once the summary is written.
-  formattedSummary = formattedSummary.replace(
-    /<analysis>[\s\S]*?<\/analysis>/,
-    '',
-  )
+  formattedSummary = formattedSummary.replace(/<analysis>[\s\S]*?<\/analysis>/, '')
 
   // Extract and format summary section
   const summaryMatch = formattedSummary.match(/<summary>([\s\S]*?)<\/summary>/)
@@ -358,10 +352,7 @@ ${formattedSummary}`
     let continuation = `${baseSummary}
 Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.`
 
-    if (
-      (feature('PROACTIVE') || feature('KAIROS')) &&
-      proactiveModule?.isProactiveActive()
-    ) {
+    if ((feature('PROACTIVE') || feature('KAIROS')) && proactiveModule?.isProactiveActive()) {
       continuation += `
 
 You are running in autonomous/proactive mode. This is NOT a first wake-up — you were already working autonomously before compaction. Continue your work loop: pick up where you left off based on the summary above. Do not greet the user or ask what to work on.`

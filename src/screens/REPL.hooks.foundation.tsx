@@ -3,9 +3,19 @@
 import { feature } from 'bun:bundle'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { Command } from '../commands.js'
-import { useNotifications } from '../context/notifications.js'
+import { shouldShowDesktopUpsellStartup } from 'src/components/DesktopUpsell/DesktopUpsellStartup.js'
+import { useNotificationLayer } from 'src/hooks/useNotificationLayer.js'
+import { usePromptsFromClaudeInChrome } from 'src/hooks/usePromptsFromClaudeInChrome.js'
+import {
+  useKickOffCheckAndDisableAutoModeIfNeeded,
+  useKickOffCheckAndDisableBypassPermissionsIfNeeded,
+} from 'src/utils/permissions/bypassPermissionsKillswitch.js'
+import { performStartupChecks } from 'src/utils/plugins/performStartupChecks.js'
 import { getProjectRoot } from '../bootstrap/state.js'
+import type { Command } from '../commands.js'
+import { shouldShowEffortCallout } from '../components/EffortCallout.js'
+import { useNotifications } from '../context/notifications.js'
+import { useCommandQueue } from '../hooks/useCommandQueue.js'
 import { useIdeLogging } from '../hooks/useIdeLogging.js'
 import { type IDESelection, useIdeSelection } from '../hooks/useIdeSelection.js'
 import { useMainLoopModel } from '../hooks/useMainLoopModel.js'
@@ -14,33 +24,23 @@ import { useMergedClients } from '../hooks/useMergedClients.js'
 import { useMergedCommands } from '../hooks/useMergedCommands.js'
 import { useMergedTools } from '../hooks/useMergedTools.js'
 import { useSkillsChange } from '../hooks/useSkillsChange.js'
-import { useTasksV2WithCollapseEffect } from '../hooks/useTasksV2.js'
 import { useSwarmInitialization } from '../hooks/useSwarmInitialization.js'
-import { useCommandQueue } from '../hooks/useCommandQueue.js'
-import { useNotificationLayer } from 'src/hooks/useNotificationLayer.js'
-import { usePromptsFromClaudeInChrome } from 'src/hooks/usePromptsFromClaudeInChrome.js'
+import { useTasksV2WithCollapseEffect } from '../hooks/useTasksV2.js'
 import { useTerminalNotification } from '../ink/useTerminalNotification.js'
+import type { RemoteSessionConfig } from '../remote/RemoteSessionManager.js'
+import type { MCPServerConnection, ScopedMcpServerConfig } from '../services/mcp/types.js'
 import { useAppState, useAppStateStore, useSetAppState } from '../state/AppState.js'
 import type { Tool } from '../Tool.js'
 import { isLocalAgentTask } from '../tasks/LocalAgentTask/LocalAgentTask.js'
-import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
 import { resolveAgentTools } from '../tools/AgentTool/agentToolUtils.js'
+import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
 import { getTools } from '../tools.js'
-import type { RemoteSessionConfig } from '../remote/RemoteSessionManager.js'
-import type { MCPServerConnection, ScopedMcpServerConfig } from '../services/mcp/types.js'
-import type { IDEExtensionInstallationStatus, IdeType } from '../utils/ide.js'
-import { getAgentTranscript } from '../utils/sessionStorage.js'
 import { asAgentId } from '../types/ids.js'
 import type { Message as MessageType } from '../types/message.js'
-import { isEnvTruthy } from '../utils/envUtils.js'
 import { logForDebugging } from '../utils/debug.js'
-import { performStartupChecks } from 'src/utils/plugins/performStartupChecks.js'
-import { shouldShowDesktopUpsellStartup } from 'src/components/DesktopUpsell/DesktopUpsellStartup.js'
-import { shouldShowEffortCallout } from '../components/EffortCallout.js'
-import {
-  useKickOffCheckAndDisableAutoModeIfNeeded,
-  useKickOffCheckAndDisableBypassPermissionsIfNeeded,
-} from 'src/utils/permissions/bypassPermissionsKillswitch.js'
+import { isEnvTruthy } from '../utils/envUtils.js'
+import type { IDEExtensionInstallationStatus, IdeType } from '../utils/ide.js'
+import { getAgentTranscript } from '../utils/sessionStorage.js'
 import type { Screen } from './REPL.types.js'
 import { EMPTY_MCP_CLIENTS } from './REPL.utils.js'
 
@@ -54,7 +54,7 @@ const PROACTIVE_NO_OP_SUBSCRIBE = (_cb: () => void) => () => {}
 const PROACTIVE_FALSE = () => false
 const SUGGEST_BG_PR_NOOP = (_p: string, _n: string): boolean => false
 const shouldShowAntModelSwitch =
-  'external' === 'ant'
+  process.env.USER_TYPE === 'ant'
     ? require('../components/AntModelSwitchCallout.js').shouldShowModelSwitchCallout
     : (): boolean => false
 /* eslint-enable @typescript-eslint/no-require-imports */
@@ -93,7 +93,7 @@ export function useREPLFoundation(params: UseREPLFoundationParams) {
     [],
   )
   const moreRightEnabled = useMemo(
-    () => 'external' === 'ant' && isEnvTruthy(process.env.CLAUDE_MORERIGHT),
+    () => process.env.USER_TYPE === 'ant' && isEnvTruthy(process.env.CLAUDE_MORERIGHT),
     [],
   )
   const disableVirtualScroll = useMemo(
@@ -243,7 +243,7 @@ export function useREPLFoundation(params: UseREPLFoundationParams) {
   const [showIdeOnboarding, setShowIdeOnboarding] = useState(false)
   // Dead code elimination: model switch callout state (ant-only)
   const [showModelSwitchCallout, setShowModelSwitchCallout] = useState(() => {
-    if ('external' === 'ant') {
+    if (process.env.USER_TYPE === 'ant') {
       return shouldShowAntModelSwitch()
     }
     return false

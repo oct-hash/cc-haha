@@ -48,9 +48,7 @@ export function getAntModels(): AntModel[] {
   return getAntModelOverrideConfig()?.antModels ?? []
 }
 
-export function resolveAntModel(
-  model: string | undefined,
-): AntModel | undefined {
+export function resolveAntModel(model: string | undefined): AntModel | undefined {
   if (process.env.USER_TYPE !== 'ant') {
     return undefined
   }
@@ -58,7 +56,5 @@ export function resolveAntModel(
     return undefined
   }
   const lower = model.toLowerCase()
-  return getAntModels().find(
-    m => m.alias === model || lower.includes(m.model.toLowerCase()),
-  )
+  return getAntModels().find((m) => m.alias === model || lower.includes(m.model.toLowerCase()))
 }

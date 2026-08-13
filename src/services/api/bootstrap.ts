@@ -1,10 +1,6 @@
 import axios from 'axios'
 import isEqual from 'lodash-es/isEqual.js'
-import {
-  getAnthropicApiKey,
-  getClaudeAIOAuthTokens,
-  hasProfileScope,
-} from 'src/utils/auth.js'
+import { getAnthropicApiKey, getClaudeAIOAuthTokens, hasProfileScope } from 'src/utils/auth.js'
 import { z } from 'zod'
 import { getOauthConfig, OAUTH_BETA_HEADER } from '../../constants/oauth.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
@@ -53,8 +49,7 @@ async function fetchBootstrapAPI(): Promise<BootstrapResponse | null> {
   // OAuth preferred (requires user:profile scope — service-key OAuth tokens
   // lack it and would 403). Fall back to API key auth for console users.
   const apiKey = getAnthropicApiKey()
-  const hasUsableOAuth =
-    getClaudeAIOAuthTokens()?.accessToken && hasProfileScope()
+  const hasUsableOAuth = getClaudeAIOAuthTokens()?.accessToken && hasProfileScope()
   if (!hasUsableOAuth && !apiKey) {
     logForDebugging('[Bootstrap] Skipped: no usable OAuth or API key')
     return null
@@ -92,9 +87,7 @@ async function fetchBootstrapAPI(): Promise<BootstrapResponse | null> {
       })
       const parsed = bootstrapResponseSchema().safeParse(response.data)
       if (!parsed.success) {
-        logForDebugging(
-          `[Bootstrap] Response failed validation: ${parsed.error.message}`,
-        )
+        logForDebugging(`[Bootstrap] Response failed validation: ${parsed.error.message}`)
         return null
       }
       logForDebugging('[Bootstrap] Fetch ok')
@@ -130,7 +123,7 @@ export async function fetchBootstrapData(): Promise<void> {
     }
 
     logForDebugging('[Bootstrap] Cache updated, persisting to disk')
-    saveGlobalConfig(current => ({
+    saveGlobalConfig((current) => ({
       ...current,
       clientDataCache: clientData,
       additionalModelOptionsCache: additionalModelOptions,

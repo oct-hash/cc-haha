@@ -9,11 +9,7 @@ export type SharpInstance = {
     options?: { fit?: string; withoutEnlargement?: boolean },
   ): SharpInstance
   jpeg(options?: { quality?: number }): SharpInstance
-  png(options?: {
-    compressionLevel?: number
-    palette?: boolean
-    colors?: number
-  }): SharpInstance
+  png(options?: { compressionLevel?: number; palette?: boolean; colors?: number }): SharpInstance
   webp(options?: { quality?: number }): SharpInstance
   toBuffer(): Promise<Buffer>
 }
@@ -50,17 +46,13 @@ export async function getImageProcessor(): Promise<SharpFunction> {
     } catch {
       // Fall back to sharp if native module is not available
       // biome-ignore lint/suspicious/noConsole: intentional warning
-      console.warn(
-        'Native image processor not available, falling back to sharp',
-      )
+      console.warn('Native image processor not available, falling back to sharp')
     }
   }
 
   // Use sharp for non-bundled builds or as fallback.
   // Single structural cast: our SharpFunction is a subset of sharp's actual type surface.
-  const imported = (await import(
-    'sharp'
-  )) as unknown as MaybeDefault<SharpFunction>
+  const imported = (await import('sharp')) as unknown as MaybeDefault<SharpFunction>
   const sharp = unwrapDefault(imported)
   imageProcessorModule = { default: sharp }
   return sharp
@@ -76,9 +68,7 @@ export async function getImageCreator(): Promise<SharpCreator> {
     return imageCreatorModule.default
   }
 
-  const imported = (await import(
-    'sharp'
-  )) as unknown as MaybeDefault<SharpCreator>
+  const imported = (await import('sharp')) as unknown as MaybeDefault<SharpCreator>
   const sharp = unwrapDefault(imported)
   imageCreatorModule = { default: sharp }
   return sharp
@@ -87,8 +77,6 @@ export async function getImageCreator(): Promise<SharpCreator> {
 // Dynamic import shape varies by module interop mode — ESM yields { default: fn }, CJS yields fn directly.
 type MaybeDefault<T> = T | { default: T }
 
-function unwrapDefault<T extends (...args: never[]) => unknown>(
-  mod: MaybeDefault<T>,
-): T {
+function unwrapDefault<T extends (...args: never[]) => unknown>(mod: MaybeDefault<T>): T {
   return typeof mod === 'function' ? mod : mod.default
 }

@@ -13,10 +13,8 @@ export const FINGERPRINT_SALT = '59cf53e54c78'
  * @param messages - Array of internal message types
  * @returns First text content, or empty string if not found
  */
-export function extractFirstMessageText(
-  messages: (UserMessage | AssistantMessage)[],
-): string {
-  const firstUserMessage = messages.find(msg => msg.type === 'user')
+export function extractFirstMessageText(messages: (UserMessage | AssistantMessage)[]): string {
+  const firstUserMessage = messages.find((msg) => msg.type === 'user')
   if (!firstUserMessage) {
     return ''
   }
@@ -28,7 +26,7 @@ export function extractFirstMessageText(
   }
 
   if (Array.isArray(content)) {
-    const textBlock = content.find(block => block.type === 'text')
+    const textBlock = content.find((block) => block.type === 'text')
     if (textBlock && textBlock.type === 'text') {
       return textBlock.text
     }
@@ -47,13 +45,10 @@ export function extractFirstMessageText(
  * @param version - Version string (from MACRO.VERSION)
  * @returns 3-character hex fingerprint
  */
-export function computeFingerprint(
-  messageText: string,
-  version: string,
-): string {
+export function computeFingerprint(messageText: string, version: string): string {
   // Extract chars at indices [4, 7, 20], use "0" if index not found
   const indices = [4, 7, 20]
-  const chars = indices.map(i => messageText[i] || '0').join('')
+  const chars = indices.map((i) => messageText[i] || '0').join('')
 
   const fingerprintInput = `${FINGERPRINT_SALT}${chars}${version}`
 

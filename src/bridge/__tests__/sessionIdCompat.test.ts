@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'bun:test'
-import { toCompatSessionId, toInfraSessionId, setCseShimGate } from '../sessionIdCompat'
+import { describe, expect, it } from 'bun:test'
+import { setCseShimGate, toCompatSessionId, toInfraSessionId } from '../sessionIdCompat'
 
 describe('toCompatSessionId', () => {
   it('re-tags cse_ to session_', () => {

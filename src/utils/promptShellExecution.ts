@@ -18,10 +18,7 @@ import { processToolResultBlock } from './toolResultStorage.js'
 // load-bearing check must live in call() itself (see PR #23311).
 type ShellOut = { stdout: string; stderr: string; interrupted: boolean }
 type PromptShellTool = Tool & {
-  call(
-    input: { command: string },
-    context: ToolUseContext,
-  ): Promise<{ data: ShellOut }>
+  call(input: { command: string }, context: ToolUseContext): Promise<{ data: ShellOut }>
 }
 
 import { isPowerShellToolEnabled } from './shell/shellToolUtils.js'
@@ -78,9 +75,7 @@ export async function executeShellCommandsInPrompt(
   // hit BashTool. PowerShell only when the runtime gate allows — a skill
   // author's frontmatter choice doesn't override the user's opt-in/out.
   const shellTool: PromptShellTool =
-    shell === 'powershell' && isPowerShellToolEnabled()
-      ? getPowerShellTool()
-      : BashTool
+    shell === 'powershell' && isPowerShellToolEnabled() ? getPowerShellTool() : BashTool
 
   // INLINE_PATTERN's lookbehind is ~100x slower than BLOCK_PATTERN on large
   // skill content (265µs vs 2µs @ 17KB). 93% of skills have no !` at all,
@@ -90,7 +85,7 @@ export async function executeShellCommandsInPrompt(
   const inlineMatches = text.includes('!`') ? text.matchAll(INLINE_PATTERN) : []
 
   await Promise.all(
-    [...blockMatches, ...inlineMatches].map(async match => {
+    [...blockMatches, ...inlineMatches].map(async (match) => {
       const command = match[1]?.trim()
       if (command) {
         try {
@@ -114,11 +109,7 @@ export async function executeShellCommandsInPrompt(
 
           const { data } = await shellTool.call({ command }, context)
           // Reuse the same persistence flow as regular Bash tool calls
-          const toolResultBlock = await processToolResultBlock(
-            shellTool,
-            data,
-            randomUUID(),
-          )
+          const toolResultBlock = await processToolResultBlock(shellTool, data, randomUUID())
           // Extract the string content from the block
           const output =
             typeof toolResultBlock.content === 'string'
@@ -142,11 +133,7 @@ export async function executeShellCommandsInPrompt(
   return result
 }
 
-function formatBashOutput(
-  stdout: string,
-  stderr: string,
-  inline = false,
-): string {
+function formatBashOutput(stdout: string, stderr: string, inline = false): string {
   const parts: string[] = []
 
   if (stdout.trim()) {
@@ -172,9 +159,7 @@ function formatBashError(e: unknown, pattern: string, inline = false): never {
       )
     }
     const output = formatBashOutput(e.stdout, e.stderr, inline)
-    throw new MalformedCommandError(
-      `Shell command failed for pattern "${pattern}": ${output}`,
-    )
+    throw new MalformedCommandError(`Shell command failed for pattern "${pattern}": ${output}`)
   }
 
   const message = errorMessage(e)

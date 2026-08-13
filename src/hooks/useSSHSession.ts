@@ -12,14 +12,12 @@
 import { randomUUID } from 'crypto'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { ToolUseConfirm } from '../components/permissions/PermissionRequest.js'
+import type { SDKMessage } from '../entrypoints/agentSdkTypes.js'
 import {
   createSyntheticAssistantMessage,
   createToolStub,
 } from '../remote/remotePermissionBridge.js'
-import {
-  convertSDKMessage,
-  isSessionEndMessage,
-} from '../remote/sdkMessageAdapter.js'
+import { convertSDKMessage, isSessionEndMessage } from '../remote/sdkMessageAdapter.js'
 import type { SSHSession } from '../ssh/createSSHSession.js'
 import type { SSHSessionManager } from '../ssh/SSHSessionManager.js'
 import type { Tool } from '../Tool.js'
@@ -70,7 +68,7 @@ export function useSSHSession({
     logForDebugging('[useSSHSession] wiring SSH session manager')
 
     const manager = session.createManager({
-      onMessage: sdkMessage => {
+      onMessage: (sdkMessage: SDKMessage) => {
         if (isSessionEndMessage(sdkMessage)) {
           setIsLoading(false)
         }
@@ -85,27 +83,30 @@ export function useSSHSession({
           convertToolResults: true,
         })
         if (converted.type === 'message') {
-          setMessages(prev => [...prev, converted.message])
+          setMessages((prev) => [...prev, converted.message])
         }
       },
-      onPermissionRequest: (request, requestId) => {
-        logForDebugging(
-          `[useSSHSession] permission request: ${request.tool_name}`,
-        )
+      onPermissionRequest: (
+        request: {
+          tool_name: string
+          description?: string
+          permission_suggestions?: string[]
+          blocked_path?: string
+          input: Record<string, unknown>
+          tool_use_id: string
+        },
+        requestId: string,
+      ) => {
+        logForDebugging(`[useSSHSession] permission request: ${request.tool_name}`)
 
         const tool =
-          findToolByName(toolsRef.current, request.tool_name) ??
-          createToolStub(request.tool_name)
+          findToolByName(toolsRef.current, request.tool_name) ?? createToolStub(request.tool_name)
 
-        const syntheticMessage = createSyntheticAssistantMessage(
-          request,
-          requestId,
-        )
+        const syntheticMessage = createSyntheticAssistantMessage(request, requestId)
 
         const permissionResult: PermissionAskDecision = {
           behavior: 'ask',
-          message:
-            request.description ?? `${request.tool_name} requires permission`,
+          message: request.description ?? `${request.tool_name} requires permission`,
           suggestions: request.permission_suggestions,
           blockedPath: request.blocked_path,
         }
@@ -113,8 +114,7 @@ export function useSSHSession({
         const toolUseConfirm: ToolUseConfirm = {
           assistantMessage: syntheticMessage,
           tool,
-          description:
-            request.description ?? `${request.tool_name} requires permission`,
+          description: request.description ?? `${request.tool_name} requires permission`,
           input: request.input,
           toolUseContext: {} as ToolUseConfirm['toolUseContext'],
           toolUseID: request.tool_use_id,
@@ -126,18 +126,14 @@ export function useSSHSession({
               behavior: 'deny',
               message: 'User aborted',
             })
-            setToolUseConfirmQueue(q =>
-              q.filter(i => i.toolUseID !== request.tool_use_id),
-            )
+            setToolUseConfirmQueue((q) => q.filter((i) => i.toolUseID !== request.tool_use_id))
           },
           onAllow(updatedInput) {
             manager.respondToPermissionRequest(requestId, {
               behavior: 'allow',
               updatedInput,
             })
-            setToolUseConfirmQueue(q =>
-              q.filter(i => i.toolUseID !== request.tool_use_id),
-            )
+            setToolUseConfirmQueue((q) => q.filter((i) => i.toolUseID !== request.tool_use_id))
             setIsLoading(true)
           },
           onReject(feedback) {
@@ -145,24 +141,20 @@ export function useSSHSession({
               behavior: 'deny',
               message: feedback ?? 'User denied permission',
             })
-            setToolUseConfirmQueue(q =>
-              q.filter(i => i.toolUseID !== request.tool_use_id),
-            )
+            setToolUseConfirmQueue((q) => q.filter((i) => i.toolUseID !== request.tool_use_id))
           },
           async recheckPermission() {},
         }
 
-        setToolUseConfirmQueue(q => [...q, toolUseConfirm])
+        setToolUseConfirmQueue((q) => [...q, toolUseConfirm])
         setIsLoading(false)
       },
       onConnected: () => {
         logForDebugging('[useSSHSession] connected')
         isConnectedRef.current = true
       },
-      onReconnecting: (attempt, max) => {
-        logForDebugging(
-          `[useSSHSession] ssh dropped, reconnecting (${attempt}/${max})`,
-        )
+      onReconnecting: (attempt: number, max: number) => {
+        logForDebugging(`[useSSHSession] ssh dropped, reconnecting (${attempt}/${max})`)
         isConnectedRef.current = false
         // Surface a transient system message in the transcript so the user
         // knows what's happening — the next onConnected clears the state.
@@ -177,7 +169,7 @@ export function useSSHSession({
           uuid: randomUUID(),
           level: 'warning',
         }
-        setMessages(prev => [...prev, msg])
+        setMessages((prev) => [...prev, msg])
       },
       onDisconnected: () => {
         logForDebugging('[useSSHSession] ssh process exited (giving up)')
@@ -187,9 +179,7 @@ export function useSSHSession({
         isConnectedRef.current = false
         setIsLoading(false)
 
-        let msg = connected
-          ? 'Remote session ended.'
-          : 'SSH session failed before connecting.'
+        let msg = connected ? 'Remote session ended.' : 'SSH session failed before connecting.'
         // Surface remote stderr if it looks like an error (pre-connect always,
         // post-connect only on nonzero exit — normal --verbose noise otherwise).
         if (stderr && (!connected || exitCode !== 0)) {
@@ -197,7 +187,7 @@ export function useSSHSession({
         }
         void gracefulShutdown(1, 'other', { finalMessage: msg })
       },
-      onError: error => {
+      onError: (error: Error) => {
         logForDebugging(`[useSSHSession] error: ${error.message}`)
       },
     })

@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import {
   extractConnectionErrorDetails,
+  formatAPIError,
   getSSLErrorHint,
   sanitizeAPIError,
-  formatAPIError,
 } from '../errorUtils'
 
 describe('extractConnectionErrorDetails', () => {
@@ -74,7 +74,8 @@ describe('sanitizeAPIError', () => {
 
   it('extracts title from HTML response', () => {
     const err = {
-      message: '<!DOCTYPE html><html><head><title>Cloudflare Error</title></head><body></body></html>',
+      message:
+        '<!DOCTYPE html><html><head><title>Cloudflare Error</title></head><body></body></html>',
       status: 502,
     } as any
     expect(sanitizeAPIError(err)).toBe('Cloudflare Error')

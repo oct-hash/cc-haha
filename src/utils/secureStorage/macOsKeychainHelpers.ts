@@ -26,9 +26,7 @@ import type { SecureStorageData } from './types.js'
 // orphan existing stored credentials.
 export const CREDENTIALS_SERVICE_SUFFIX = '-credentials'
 
-export function getMacOsKeychainStorageServiceName(
-  serviceSuffix: string = '',
-): string {
+export function getMacOsKeychainStorageServiceName(serviceSuffix: string = ''): string {
   const configDir = getClaudeConfigHomeDir()
   const isDefaultDir = !process.env.CLAUDE_CONFIG_DIR
 

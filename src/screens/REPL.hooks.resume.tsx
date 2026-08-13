@@ -3,13 +3,17 @@
 // across turns and resume flows.
 
 import { feature } from 'bun:bundle'
-import * as React from 'react'
+import type { UUID } from 'crypto'
+import { dirname } from 'path'
+import type * as React from 'react'
 import { useCallback, useEffect } from 'react'
+import {
+  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+  logEvent,
+} from 'src/services/analytics/index.js'
 import { getOriginalCwd, setCostStateForRestore, switchSession } from '../bootstrap/state.js'
 import type { ResumeEntrypoint } from '../commands.js'
 import { getStoredSessionCosts, resetCostState, saveCurrentSessionCosts } from '../cost-tracker.js'
-import { type UUID } from 'crypto'
-import { dirname } from 'path'
 import type { AppStateStore } from '../state/AppState.js'
 import { restoreRemoteAgentTasks } from '../tasks/RemoteAgentTask/RemoteAgentTask.js'
 import type { AgentDefinition, AgentDefinitionsResult } from '../tools/AgentTool/loadAgentsDir.js'
@@ -19,16 +23,16 @@ import type { Message as MessageType } from '../types/message.js'
 import { updateSessionName } from '../utils/concurrentSessions.js'
 import { deserializeMessages } from '../utils/conversationRecovery.js'
 import { copyFileHistoryForResume } from '../utils/fileHistory.js'
-import {
-  mergeFileStateCaches,
-  READ_FILE_STATE_CACHE_SIZE,
-} from '../utils/fileStateCache.js'
 import type { FileStateCache } from '../utils/fileStateCache.js'
+import { mergeFileStateCaches, READ_FILE_STATE_CACHE_SIZE } from '../utils/fileStateCache.js'
 import { executeSessionEndHooks, getSessionEndHookTimeoutMs } from '../utils/hooks.js'
 import type { SetAppState } from '../utils/messageQueueManager.js'
 import { createSystemMessage } from '../utils/messages.js'
 import { copyPlanForFork, copyPlanForResume } from '../utils/plans.js'
-import { extractBashToolsFromMessages, extractReadFilesFromMessages } from '../utils/queryHelpers.js'
+import {
+  extractBashToolsFromMessages,
+  extractReadFilesFromMessages,
+} from '../utils/queryHelpers.js'
 import {
   computeStandaloneAgentContext,
   exitRestoredWorktree,
@@ -47,10 +51,6 @@ import {
 import type { ContentReplacementState } from '../utils/toolResultStorage.js'
 import { reconstructContentReplacementState } from '../utils/toolResultStorage.js'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
-import {
-  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
 
 export interface UseREPLResumeParams {
   initialMessages?: MessageType[]

@@ -4,9 +4,14 @@
  * and triggers the review analysis.
  */
 
-import { getSessionManager } from '../utils/sessionContext.js'
+import {
+  formatReviewForDisplay,
+  generateTaskReview,
+  isTaskDoneTrigger,
+  saveReviewToSession,
+} from '../commands/task-done/taskDone.js'
 import type { Message } from '../types/message.js'
-import { isTaskDoneTrigger, generateTaskReview, saveReviewToSession, formatReviewForDisplay } from '../commands/task-done/taskDone.js'
+import { getSessionManager } from '../utils/sessionContext.js'
 
 interface TaskDoneTriggerOptions {
   messages: Message[]
@@ -25,7 +30,7 @@ export function checkTaskDoneTrigger(input: string): boolean {
  * Process task done trigger - generates and saves review
  */
 export async function processTaskDoneTrigger(
-  options: TaskDoneTriggerOptions
+  options: TaskDoneTriggerOptions,
 ): Promise<string | null> {
   const { messages, input, onReviewReady } = options
 
@@ -58,7 +63,9 @@ export async function processTaskDoneTrigger(
  */
 export function getSessionReviews(): ReturnType<typeof getSessionManager> extends {
   getSession(): { context: { reviews: infer R } } | null
-} ? R : never {
+}
+  ? R
+  : never {
   const sessionManager = getSessionManager()
   const session = sessionManager.getSession()
   return session?.context.reviews ?? []

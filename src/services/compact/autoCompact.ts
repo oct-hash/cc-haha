@@ -72,17 +72,14 @@ const MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3
 export function getAutoCompactThreshold(model: string): number {
   const effectiveContextWindow = getEffectiveContextWindowSize(model)
 
-  const autocompactThreshold =
-    effectiveContextWindow - AUTOCOMPACT_BUFFER_TOKENS
+  const autocompactThreshold = effectiveContextWindow - AUTOCOMPACT_BUFFER_TOKENS
 
   // Override for easier testing of autocompact
   const envPercent = process.env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE
   if (envPercent) {
     const parsed = parseFloat(envPercent)
     if (!isNaN(parsed) && parsed > 0 && parsed <= 100) {
-      const percentageThreshold = Math.floor(
-        effectiveContextWindow * (parsed / 100),
-      )
+      const percentageThreshold = Math.floor(effectiveContextWindow * (parsed / 100))
       return Math.min(percentageThreshold, autocompactThreshold)
     }
   }
@@ -105,10 +102,7 @@ export function calculateTokenWarningState(
     ? autoCompactThreshold
     : getEffectiveContextWindowSize(model)
 
-  const percentLeft = Math.max(
-    0,
-    Math.round(((threshold - tokenUsage) / threshold) * 100),
-  )
+  const percentLeft = Math.max(0, Math.round(((threshold - tokenUsage) / threshold) * 100))
 
   const warningThreshold = threshold - WARNING_THRESHOLD_BUFFER_TOKENS
   const errorThreshold = threshold - ERROR_THRESHOLD_BUFFER_TOKENS
@@ -116,22 +110,16 @@ export function calculateTokenWarningState(
   const isAboveWarningThreshold = tokenUsage >= warningThreshold
   const isAboveErrorThreshold = tokenUsage >= errorThreshold
 
-  const isAboveAutoCompactThreshold =
-    isAutoCompactEnabled() && tokenUsage >= autoCompactThreshold
+  const isAboveAutoCompactThreshold = isAutoCompactEnabled() && tokenUsage >= autoCompactThreshold
 
   const actualContextWindow = getEffectiveContextWindowSize(model)
-  const defaultBlockingLimit =
-    actualContextWindow - MANUAL_COMPACT_BUFFER_TOKENS
+  const defaultBlockingLimit = actualContextWindow - MANUAL_COMPACT_BUFFER_TOKENS
 
   // Allow override for testing
   const blockingLimitOverride = process.env.CLAUDE_CODE_BLOCKING_LIMIT_OVERRIDE
-  const parsedOverride = blockingLimitOverride
-    ? parseInt(blockingLimitOverride, 10)
-    : NaN
+  const parsedOverride = blockingLimitOverride ? parseInt(blockingLimitOverride, 10) : NaN
   const blockingLimit =
-    !isNaN(parsedOverride) && parsedOverride > 0
-      ? parsedOverride
-      : defaultBlockingLimit
+    !isNaN(parsedOverride) && parsedOverride > 0 ? parsedOverride : defaultBlockingLimit
 
   const isAtBlockingLimit = tokenUsage >= blockingLimit
 
@@ -230,10 +218,7 @@ export async function shouldAutoCompact(
     `autocompact: tokens=${tokenCount} threshold=${threshold} effectiveWindow=${effectiveWindow}${snipTokensFreed > 0 ? ` snipFreed=${snipTokensFreed}` : ''}`,
   )
 
-  const { isAboveAutoCompactThreshold } = calculateTokenWarningState(
-    tokenCount,
-    model,
-  )
+  const { isAboveAutoCompactThreshold } = calculateTokenWarningState(tokenCount, model)
 
   return isAboveAutoCompactThreshold
 }
@@ -265,12 +250,7 @@ export async function autoCompactIfNeeded(
   }
 
   const model = toolUseContext.options.mainLoopModel
-  const shouldCompact = await shouldAutoCompact(
-    messages,
-    model,
-    querySource,
-    snipTokensFreed,
-  )
+  const shouldCompact = await shouldAutoCompact(messages, model, querySource, snipTokensFreed)
 
   if (!shouldCompact) {
     return { wasCompacted: false }

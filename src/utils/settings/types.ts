@@ -3,10 +3,7 @@ import { z } from 'zod/v4'
 import { SandboxSettingsSchema } from '../../entrypoints/sandboxTypes.js'
 import { isEnvTruthy } from '../envUtils.js'
 import { lazySchema } from '../lazySchema.js'
-import {
-  EXTERNAL_PERMISSION_MODES,
-  PERMISSION_MODES,
-} from '../permissions/PermissionMode.js'
+import { EXTERNAL_PERMISSION_MODES, PERMISSION_MODES } from '../permissions/PermissionMode.js'
 import { MarketplaceSourceSchema } from '../plugins/schemas.js'
 import { CLAUDE_CODE_SETTINGS_SCHEMA_URL } from './constants.js'
 import { PermissionRuleSchema } from './permissionValidation.js'
@@ -32,9 +29,7 @@ import { count } from '../array.js'
 /**
  * Schema for environment variables
  */
-export const EnvironmentVariablesSchema = lazySchema(() =>
-  z.record(z.string(), z.coerce.string()),
-)
+export const EnvironmentVariablesSchema = lazySchema(() => z.record(z.string(), z.coerce.string()))
 
 /**
  * Schema for permissions section
@@ -53,15 +48,9 @@ export const PermissionsSchema = lazySchema(() =>
       ask: z
         .array(PermissionRuleSchema())
         .optional()
-        .describe(
-          'List of permission rules that should always prompt for confirmation',
-        ),
+        .describe('List of permission rules that should always prompt for confirmation'),
       defaultMode: z
-        .enum(
-          feature('TRANSCRIPT_CLASSIFIER')
-            ? PERMISSION_MODES
-            : EXTERNAL_PERMISSION_MODES,
-        )
+        .enum(feature('TRANSCRIPT_CLASSIFIER') ? PERMISSION_MODES : EXTERNAL_PERMISSION_MODES)
         .optional()
         .describe('Default permission mode when Claude Code needs access'),
       disableBypassPermissionsMode: z
@@ -70,10 +59,7 @@ export const PermissionsSchema = lazySchema(() =>
         .describe('Disable the ability to bypass permission prompts'),
       ...(feature('TRANSCRIPT_CLASSIFIER')
         ? {
-            disableAutoMode: z
-              .enum(['disable'])
-              .optional()
-              .describe('Disable auto mode'),
+            disableAutoMode: z.enum(['disable']).optional().describe('Disable auto mode'),
           }
         : {}),
       additionalDirectories: z
@@ -90,9 +76,7 @@ export const PermissionsSchema = lazySchema(() =>
  */
 export const ExtraKnownMarketplaceSchema = lazySchema(() =>
   z.object({
-    source: MarketplaceSourceSchema().describe(
-      'Where to fetch the marketplace from',
-    ),
+    source: MarketplaceSourceSchema().describe('Where to fetch the marketplace from'),
     installLocation: z
       .string()
       .optional()
@@ -127,9 +111,7 @@ export const AllowedMcpServerEntrySchema = lazySchema(() =>
         .array(z.string())
         .min(1, 'Server command must have at least one element (the command)')
         .optional()
-        .describe(
-          'Command array [command, ...args] to match exactly for allowed stdio servers',
-        ),
+        .describe('Command array [command, ...args] to match exactly for allowed stdio servers'),
       serverUrl: z
         .string()
         .optional()
@@ -139,7 +121,7 @@ export const AllowedMcpServerEntrySchema = lazySchema(() =>
       // Future extensibility: allowedTransports, requiredArgs, maxInstances, etc.
     })
     .refine(
-      data => {
+      (data) => {
         const defined = count(
           [
             data.serverName !== undefined,
@@ -151,8 +133,7 @@ export const AllowedMcpServerEntrySchema = lazySchema(() =>
         return defined === 1
       },
       {
-        message:
-          'Entry must have exactly one of "serverName", "serverCommand", or "serverUrl"',
+        message: 'Entry must have exactly one of "serverName", "serverCommand", or "serverUrl"',
       },
     ),
 )
@@ -176,9 +157,7 @@ export const DeniedMcpServerEntrySchema = lazySchema(() =>
         .array(z.string())
         .min(1, 'Server command must have at least one element (the command)')
         .optional()
-        .describe(
-          'Command array [command, ...args] to match exactly for blocked stdio servers',
-        ),
+        .describe('Command array [command, ...args] to match exactly for blocked stdio servers'),
       serverUrl: z
         .string()
         .optional()
@@ -188,7 +167,7 @@ export const DeniedMcpServerEntrySchema = lazySchema(() =>
       // Future extensibility: reason, blockedSince, etc.
     })
     .refine(
-      data => {
+      (data) => {
         const defined = count(
           [
             data.serverName !== undefined,
@@ -200,8 +179,7 @@ export const DeniedMcpServerEntrySchema = lazySchema(() =>
         return defined === 1
       },
       {
-        message:
-          'Entry must have exactly one of "serverName", "serverCommand", or "serverUrl"',
+        message: 'Entry must have exactly one of "serverName", "serverCommand", or "serverUrl"',
       },
     ),
 )
@@ -245,12 +223,7 @@ export const DeniedMcpServerEntrySchema = lazySchema(() =>
  * schema preprocess (below) and the runtime helper (pluginOnlyPolicy.ts)
  * share one source of truth.
  */
-export const CUSTOMIZATION_SURFACES = [
-  'skills',
-  'agents',
-  'hooks',
-  'mcp',
-] as const
+export const CUSTOMIZATION_SURFACES = ['skills', 'agents', 'hooks', 'mcp'] as const
 
 export const SettingsSchema = lazySchema(() =>
   z
@@ -285,13 +258,8 @@ export const SettingsSchema = lazySchema(() =>
         ? {
             xaaIdp: z
               .object({
-                issuer: z
-                  .string()
-                  .url()
-                  .describe('IdP issuer URL for OIDC discovery'),
-                clientId: z
-                  .string()
-                  .describe("Claude Code's client_id registered at the IdP"),
+                issuer: z.string().url().describe('IdP issuer URL for OIDC discovery'),
+                clientId: z.string().describe("Claude Code's client_id registered at the IdP"),
                 callbackPort: z
                   .number()
                   .int()
@@ -369,13 +337,8 @@ export const SettingsSchema = lazySchema(() =>
         .describe(
           "Include built-in commit and PR workflow instructions in Claude's system prompt (default: true)",
         ),
-      permissions: PermissionsSchema()
-        .optional()
-        .describe('Tool usage permissions configuration'),
-      model: z
-        .string()
-        .optional()
-        .describe('Override the default model used by Claude Code'),
+      permissions: PermissionsSchema().optional().describe('Tool usage permissions configuration'),
+      model: z.string().optional().describe('Override the default model used by Claude Code'),
       // Enterprise allowlist of models
       availableModels: z
         .array(z.string())
@@ -400,9 +363,7 @@ export const SettingsSchema = lazySchema(() =>
       enableAllProjectMcpServers: z
         .boolean()
         .optional()
-        .describe(
-          'Whether to automatically approve all MCP servers in the project',
-        ),
+        .describe('Whether to automatically approve all MCP servers in the project'),
       // List of approved MCP servers from .mcp.json
       enabledMcpjsonServers: z
         .array(z.string())
@@ -523,11 +484,9 @@ export const SettingsSchema = lazySchema(() =>
           // "commands"] on an old client → ["skills"] → locks what it knows,
           // ignores what it doesn't. Degrades to less-locked, never to
           // everything-unlocked.
-          v =>
+          (v) =>
             Array.isArray(v)
-              ? v.filter(x =>
-                  (CUSTOMIZATION_SURFACES as readonly string[]).includes(x),
-                )
+              ? v.filter((x) => (CUSTOMIZATION_SURFACES as readonly string[]).includes(x))
               : v,
           z.union([z.boolean(), z.array(z.enum(CUSTOMIZATION_SURFACES))]),
         )
@@ -557,10 +516,7 @@ export const SettingsSchema = lazySchema(() =>
         .describe('Custom status line display configuration'),
       // Enabled plugins using marketplace-first format
       enabledPlugins: z
-        .record(
-          z.string(),
-          z.union([z.array(z.string()), z.boolean(), z.undefined()]),
-        )
+        .record(z.string(), z.union([z.array(z.string()), z.boolean(), z.undefined()]))
         .optional()
         .describe(
           'Enabled plugins using plugin-id@marketplace-id format. Example: { "formatter@anthropic-tools": true }. Also supports extended format with version constraints.',
@@ -568,7 +524,7 @@ export const SettingsSchema = lazySchema(() =>
       // Extra marketplaces for this repository (usually for project settings)
       extraKnownMarketplaces: z
         .record(z.string(), ExtraKnownMarketplaceSchema())
-        .check(ctx => {
+        .check((ctx) => {
           // For settings sources, key must equal source.name. diffMarketplaces
           // looks up materialized state by dict key; addMarketplaceSource stores
           // under marketplace.name (= source.name for settings). A mismatch means
@@ -579,10 +535,7 @@ export const SettingsSchema = lazySchema(() =>
           // benign); for settings, both key and name are user-authored in the
           // same JSON object.
           for (const [key, entry] of Object.entries(ctx.value)) {
-            if (
-              entry.source.source === 'settings' &&
-              entry.source.name !== key
-            ) {
+            if (entry.source.source === 'settings' && entry.source.name !== key) {
               ctx.issues.push({
                 code: 'custom',
                 input: entry.source.name,
@@ -628,10 +581,7 @@ export const SettingsSchema = lazySchema(() =>
           'Force a specific login method: "claudeai" for Claude Pro/Max, "console" for Console billing',
         ),
       // Organization UUID to use for OAuth login (will be added as URL param to authorization URL)
-      forceLoginOrgUUID: z
-        .string()
-        .optional()
-        .describe('Organization UUID to use for OAuth login'),
+      forceLoginOrgUUID: z.string().optional().describe('Organization UUID to use for OAuth login'),
       otelHeadersHelper: z
         .string()
         .optional()
@@ -661,10 +611,7 @@ export const SettingsSchema = lazySchema(() =>
         .describe(
           'Probability (0–1) that the session quality survey appears when eligible. 0.05 is a reasonable starting point.',
         ),
-      spinnerTipsEnabled: z
-        .boolean()
-        .optional()
-        .describe('Whether to show tips in the spinner'),
+      spinnerTipsEnabled: z.boolean().optional().describe('Whether to show tips in the spinner'),
       spinnerVerbs: z
         .object({
           mode: z.enum(['append', 'replace']),
@@ -716,9 +663,7 @@ export const SettingsSchema = lazySchema(() =>
       fastMode: z
         .boolean()
         .optional()
-        .describe(
-          'When true, fast mode is enabled. When absent or false, fast mode is off.',
-        ),
+        .describe('When true, fast mode is enabled. When absent or false, fast mode is off.'),
       fastModePerSessionOptIn: z
         .boolean()
         .optional()
@@ -760,27 +705,15 @@ export const SettingsSchema = lazySchema(() =>
                 z.string(),
                 z.record(
                   z.string(),
-                  z.union([
-                    z.string(),
-                    z.number(),
-                    z.boolean(),
-                    z.array(z.string()),
-                  ]),
+                  z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
                 ),
               )
               .optional()
-              .describe(
-                'User configuration values for MCP servers keyed by server name',
-              ),
+              .describe('User configuration values for MCP servers keyed by server name'),
             options: z
               .record(
                 z.string(),
-                z.union([
-                  z.string(),
-                  z.number(),
-                  z.boolean(),
-                  z.array(z.string()),
-                ]),
+                z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
               )
               .optional()
               .describe(
@@ -810,9 +743,7 @@ export const SettingsSchema = lazySchema(() =>
             disableDeepLinkRegistration: z
               .enum(['disable'])
               .optional()
-              .describe(
-                'Prevent claude-cli:// protocol handler registration with the OS',
-              ),
+              .describe('Prevent claude-cli:// protocol handler registration with the OS'),
           }
         : {}),
       minimumVersion: z
@@ -833,9 +764,7 @@ export const SettingsSchema = lazySchema(() =>
             classifierPermissionsEnabled: z
               .boolean()
               .optional()
-              .describe(
-                'Enable AI-based classification for Bash(prompt:...) permission rules',
-              ),
+              .describe('Enable AI-based classification for Bash(prompt:...) permission rules'),
           }
         : {}),
       ...(feature('PROACTIVE') || feature('KAIROS')
@@ -880,9 +809,7 @@ export const SettingsSchema = lazySchema(() =>
             assistantName: z
               .string()
               .optional()
-              .describe(
-                'Display name for the assistant, shown in the claude.ai session list',
-              ),
+              .describe('Display name for the assistant, shown in the claude.ai session list'),
           }
         : {}),
       // Teams/Enterprise opt-IN for channel notifications. Default OFF.
@@ -956,23 +883,17 @@ export const SettingsSchema = lazySchema(() =>
       showThinkingSummaries: z
         .boolean()
         .optional()
-        .describe(
-          'Show thinking summaries in the transcript view (ctrl+o). Default: false.',
-        ),
+        .describe('Show thinking summaries in the transcript view (ctrl+o). Default: false.'),
       skipDangerousModePermissionPrompt: z
         .boolean()
         .optional()
-        .describe(
-          'Whether the user has accepted the bypass permissions mode dialog',
-        ),
+        .describe('Whether the user has accepted the bypass permissions mode dialog'),
       ...(feature('TRANSCRIPT_CLASSIFIER')
         ? {
             skipAutoPermissionPrompt: z
               .boolean()
               .optional()
-              .describe(
-                'Whether the user has accepted the auto mode opt-in dialog',
-              ),
+              .describe('Whether the user has accepted the auto mode opt-in dialog'),
             useAutoModeDuringPlan: z
               .boolean()
               .optional()
@@ -998,18 +919,13 @@ export const SettingsSchema = lazySchema(() =>
                 environment: z
                   .array(z.string())
                   .optional()
-                  .describe(
-                    'Entries for the auto mode classifier environment section',
-                  ),
+                  .describe('Entries for the auto mode classifier environment section'),
               })
               .optional()
               .describe('Auto mode classifier prompt customization'),
           }
         : {}),
-      disableAutoMode: z
-        .enum(['disable'])
-        .optional()
-        .describe('Disable auto mode'),
+      disableAutoMode: z.enum(['disable']).optional().describe('Disable auto mode'),
       sshConfigs: z
         .array(
           z.object({
@@ -1024,11 +940,7 @@ export const SettingsSchema = lazySchema(() =>
               .describe(
                 'SSH host in format "user@hostname" or "hostname", or a host alias from ~/.ssh/config',
               ),
-            sshPort: z
-              .number()
-              .int()
-              .optional()
-              .describe('SSH port (default: 22)'),
+            sshPort: z.number().int().optional().describe('SSH port (default: 22)'),
             sshIdentityFile: z
               .string()
               .optional()
@@ -1095,12 +1007,8 @@ export type SkillHookMatcher = {
   skillName: string
 }
 
-export type AllowedMcpServerEntry = z.infer<
-  ReturnType<typeof AllowedMcpServerEntrySchema>
->
-export type DeniedMcpServerEntry = z.infer<
-  ReturnType<typeof DeniedMcpServerEntrySchema>
->
+export type AllowedMcpServerEntry = z.infer<ReturnType<typeof AllowedMcpServerEntrySchema>>
+export type DeniedMcpServerEntry = z.infer<ReturnType<typeof DeniedMcpServerEntrySchema>>
 export type SettingsJson = z.infer<ReturnType<typeof SettingsSchema>>
 
 /**
@@ -1133,10 +1041,7 @@ export function isMcpServerUrlEntry(
 /**
  * User configuration values for MCPB MCP servers
  */
-export type UserConfigValues = Record<
-  string,
-  string | number | boolean | string[]
->
+export type UserConfigValues = Record<string, string | number | boolean | string[]>
 
 /**
  * Plugin configuration stored in settings.json

@@ -1,0 +1,80 @@
+==== BODY citation markers (paragraph: raw) ====
+[10] ['1-4', '5', '6-8']
+[12] ['9-11', '12-14', '15-21', '22']
+[13] ['21,22']
+[19] ['26']
+[21] ['25', '26']
+[23] ['16,23']
+[30] ['30']
+[32] ['43', '31', '22']
+[34] ['49', '50']
+[36] ['32', '30', '43']
+[72] ['49', '50']
+[73] ['51']
+[79] ['44,45', '46', '47', '48', '47']
+[82] ['21,35-39']
+[84] ['9']
+[88] ['22', '41', '19,42']
+
+distinct cited ref numbers in body: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 26, 30, 31, 32, 35, 36, 37, 38, 39, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
+count: 44  min=1 max=51
+
+==== REFERENCES entries (leading number) ====
+1: 1. Ronco C, Bellomo R, Kellum JA. Acute kidney injury. Lancet. 2019;394(10212):1949-1964.
+2: 2. Basile DP, Anderson MD, Sutton TA. Pathophysiology of acute kidney injury. Compr Physio
+3: 3. Zuk A, Bonventre JV. Acute kidney injury. Annu Rev Med. 2016;67:293-307.
+4: 4. Hoste EAJ, Kellum JA, Selby NM, et al. Global epidemiology and outcomes of acute kidney
+5: 5. Pickkers P, Darmon M, Hoste E, et al. Acute kidney injury in the critically ill: an upd
+6: 6. Park J, Shrestha R, Qiu C, et al. Single-cell transcriptomics of the mouse kidney revea
+7: 7. Liu J, Krautzberger AM, Sui SH, et al. Cell-specific translational profiling in acute k
+8: 8. Balzer MS, Rohacs T, Susztak K. How many cell types are in the kidney and what do they 
+9: 9. Yang X, Qian K. Protein O-GlcNAcylation: emerging mechanisms and functions. Nat Rev Mol
+10: 10. Seo K, Lee J, Park J, et al. O-GlcNAcylation regulates ischemia-reperfusion injury in 
+11: 11. Hart GW, Housley MP, Slawson C. Cycling of O-linked beta-N-acetylglucosamine on nucleo
+12: 12. Dodson M, Castro-Portuguez R, Zhang DD. NRF2 plays a critical role in mitigating lipid
+13: 13. Silva-Palacios A, Ostolga-Chavarria M, Zazueta C, Konigsberg M. Nrf2: molecular and ep
+14: 14. Tonelli C, Chio IIC, Tuveson DA. Transcriptional regulation by Nrf2. Antioxid Redox Si
+15: 15. Stockwell BR. Ferroptosis turns 10: Emerging mechanisms, physiological functions, and 
+16: 16. Linkermann A, Skouta R, Himmerkus N, et al. Synchronized renal tubular cell death invo
+17: 17. Tonnus W, Meyer C, Paliege A, et al. The pathological features of regulated necrosis. 
+18: 18. Tang D, Chen X, Kang R, Kroemer G. Ferroptosis: molecular mechanisms and health implic
+19: 19. Deng F, Sharma I, Dai Y, et al. Ferroptosis in acute kidney injury. Cell Death Dis. 20
+20: 20. Dixon SJ, Lemberg KM, Lamprecht MR, et al. Ferroptosis: an iron-dependent form of nona
+21: 21. Jiang X, Stockwell BR, Conrad M. Ferroptosis: mechanisms, biology and role in disease.
+22: 22. Ng YH, Okolo CA, Erickson JR, Baldi JC, Jones PP. Protein O-GlcNAcylation in the heart
+23: 23. Muller T, Dewitz C, Schmitz J, et al. Necroptosis and ferroptosis are alternative cell
+24: 24. Belavgeni A, Meyer C, Stumpf J, et al. Ferroptosis and necroptosis in the kidney. Cell
+25: 25. Wolf FA, Angerer P, Theis FJ. SCANPY: large-scale single-cell gene expression data ana
+26: 26. Kirita Y, Wu H, Uchimura K, et al. Cell profiling of mouse acute kidney injury reveals
+27: 27. Gerhardt LMS, Liu J, Koppitch K, Cippa PE, McMahon AP. Single-nuclear transcriptomics 
+28: 28. Wu H, Kirita Y, Donnelly EL, Humphreys BD. Advantages of single-nucleus over single-ce
+29: 29. Kfoury J, Guo M, Bhatt K, et al. Single-cell and spatial transcriptomics of kidney isc
+30: 30. Mussel C, Hopfensitz M, Kestler HA. BoolNet--an R package for generation, reconstructi
+31: 31. Subramanian A, Narayan R, Corsello SM, et al. A Next Generation Connectivity Map: L100
+32: 32. Benjamini Y, Hochberg Y. Controlling the false discovery rate: a practical and powerfu
+33: 33. Riegman M, Sagie L, Galed C, et al. Ferroptosis occurs through an osmotic mechanism an
+34: 34. Jang HR, Rabb H. Immune cells in experimental acute kidney injury. Nat Rev Nephrol. 20
+35: 35. Doll S, Freitas FP, Shah R, et al. FSP1 is a glutathione-independent ferroptosis suppr
+36: 36. Bersuker K, Hendricks JM, Li Z, et al. The CoQ oxidoreductase FSP1 acts parallel to GP
+37: 37. Yang WS, Sriramaratnam R, Welsch M, et al. Regulation of ferroptotic cancer cell death
+38: 38. Wenzel SE, Tyurina YY, Zhao J, et al. PEBP1 wardens ferroptosis by enabling lipoxygena
+39: 39. Ide S, Kobayashi Y, Ide K, et al. Ferroptotic cell death triggered by conjugated linol
+40: 40. Paller MS, Hedlund BE, Sikora JJ, et al. Role of iron in postischemic renal injury in 
+41: 41. Fang X, Wang H, Han D, et al. Ferroptosis as a target for protection against cardiomyo
+42: 42. Linkermann A, Chen G, Dong G, et al. Regulated cell death in AKI. J Am Soc Nephrol. 20
+43: 43. Wang Z, Monteiro CD, Jagodnik KM, et al. Extraction and analysis of signatures from th
+44: 44. Gong N, Wang WJ, Fu YF, et al. The SPP1-CD44 Signaling Axis Orchestrates Macrophage Me
+45: 45. Li PP, Tao ZX, Gao YY, et al. Ability of SPP1 to Alleviate Post-Intracerebral Hemorrha
+46: 46. Pietsch EC, Chan JY, Torti FM, et al. Nrf2 mediates the induction of ferritin H in res
+47: 47. Hong Y, An Q, Wang Z, et al. Multi-omics Analysis Reveals the Propagation Mechanism of
+48: 48. Rudman-Melnick V, Adam M, Potter A, et al. Single-Cell Profiling of AKI in a Murine Mo
+49: 49. Dimitrov D, Turei D, Garrido-Rodriguez M, et al. Comparison of methods and resources f
+50: 50. Browaeys R, Saelens W, Saeys Y. NicheNet: modeling intercellular communication by link
+51: 51. Heruye SH, Myslinski J, Zeng C, et al. Inflammation primes the murine kidney for recov
+
+reference numbers present: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
+count: 51
+duplicates: []
+gaps (missing numbers): []
+cited-but-absent-in-References: []
+in-References-but-never-cited: [24, 27, 28, 29, 33, 34, 40]

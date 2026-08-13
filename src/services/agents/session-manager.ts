@@ -233,15 +233,21 @@ export class SessionManager {
         await fs.promises.mkdir(path.dirname(filePath), { recursive: true })
         await fs.promises.writeFile(filePath, JSON.stringify(state, null, 2))
       })
-      .catch(() => {
-        // Swallow to keep the chain alive for subsequent saves
+      .catch((err) => {
+        try {
+          process.stderr.write(
+            `[SessionManager] save() failed: ${err instanceof Error ? err.message : String(err)}\n`,
+          )
+        } catch {
+          // stderr fd may be closed (pipe broken, EBADF) — nothing else we can do
+        }
       })
     return this._saveChain
   }
 
   static async load(config?: SessionManagerConfig): Promise<SessionManager> {
+    const filePath = getSessionsPath()
     try {
-      const filePath = getSessionsPath()
       const raw = await fs.promises.readFile(filePath, 'utf-8')
       const data = JSON.parse(raw)
       const sm = new SessionManager({ ...data.config, ...config })
@@ -259,7 +265,26 @@ export class SessionManager {
         })
       }
       return sm
-    } catch {
+    } catch (err) {
+      // ENOENT = first run (no persisted state yet) — normal, not an error.
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+        return new SessionManager(config)
+      }
+      // Corrupt or unreadable state file: log it and back it up so the next
+      // save() does not silently overwrite the only copy of the user's data.
+      const msg = err instanceof Error ? err.message : String(err)
+      try {
+        process.stderr.write(
+          `[SessionManager] load() failed for ${filePath}: ${msg} — backing up corrupt file\n`,
+        )
+      } catch {
+        // stderr fd may be closed — nothing else we can do
+      }
+      try {
+        await fs.promises.rename(filePath, `${filePath}.corrupt-${Date.now()}`)
+      } catch {
+        // rename may fail (e.g. file already gone) — non-critical
+      }
       return new SessionManager(config)
     }
   }

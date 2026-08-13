@@ -5,11 +5,11 @@
  * This is a thin bridging layer - actual persistence flows through existing mechanisms.
  */
 
-import type { SessionState, SessionContext, SessionMetadata } from './sessionContext.js'
+import type { SessionContext, SessionMetadata, SessionState } from './sessionContext.js'
 import { createSessionManager, getSessionManager } from './sessionContext.js'
 
 // Re-export types for convenience
-export type { SessionState, SessionContext, SessionMetadata } from './sessionContext.js'
+export type { SessionContext, SessionMetadata, SessionState } from './sessionContext.js'
 
 /**
  * Lightweight context carrier for cross-session handoff.
@@ -97,7 +97,12 @@ export class SessionContextBridge {
   /**
    * Save current artifact
    */
-  saveArtifact(type: 'code' | 'config' | 'doc' | 'output', content: string, description: string, path?: string): void {
+  saveArtifact(
+    type: 'code' | 'config' | 'doc' | 'output',
+    content: string,
+    description: string,
+    path?: string,
+  ): void {
     if (!this.manager) return
     this.manager.addArtifact(type, content, description, path)
   }
@@ -110,17 +115,18 @@ export class SessionContextBridge {
     if (!session) return null
 
     const lastTool = session.context.recentTools[0]
-    const pendingTasks = session.context.pendingTasks.filter(t => t.status !== 'pending')
+    const pendingTasks = session.context.pendingTasks.filter((t) => t.status !== 'pending')
 
     return {
       task: session.metadata.taskDescription || session.context.currentTask || 'Unknown task',
       branch: session.metadata.branch,
       lastStep: lastTool?.name || 'None',
-      pendingDecisions: pendingTasks.map(t => t.description),
+      pendingDecisions: pendingTasks.map((t) => t.description),
       keyFiles: session.context.recentFiles.slice(0, 5),
-      artifactSummary: session.context.artifacts.length > 0
-        ? `${session.context.artifacts.length} artifacts saved`
-        : 'No artifacts yet',
+      artifactSummary:
+        session.context.artifacts.length > 0
+          ? `${session.context.artifacts.length} artifacts saved`
+          : 'No artifacts yet',
     }
   }
 

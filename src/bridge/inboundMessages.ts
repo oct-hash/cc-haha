@@ -20,18 +20,13 @@ import { detectImageFormatFromBase64 } from '../utils/imageResizer.js'
  */
 export function extractInboundMessageFields(
   msg: SDKMessage,
-):
-  | { content: string | Array<ContentBlockParam>; uuid: UUID | undefined }
-  | undefined {
+): { content: string | Array<ContentBlockParam>; uuid: UUID | undefined } | undefined {
   if (msg.type !== 'user') return undefined
   const content = msg.message?.content
   if (!content) return undefined
   if (Array.isArray(content) && content.length === 0) return undefined
 
-  const uuid =
-    'uuid' in msg && typeof msg.uuid === 'string'
-      ? (msg.uuid as UUID)
-      : undefined
+  const uuid = 'uuid' in msg && typeof msg.uuid === 'string' ? (msg.uuid as UUID) : undefined
 
   return {
     content: Array.isArray(content) ? normalizeImageBlocks(content) : content,
@@ -49,12 +44,10 @@ export function extractInboundMessageFields(
  * Fast-path scan returns the original array reference when no
  * normalization is needed (zero allocation on the happy path).
  */
-export function normalizeImageBlocks(
-  blocks: Array<ContentBlockParam>,
-): Array<ContentBlockParam> {
+export function normalizeImageBlocks(blocks: Array<ContentBlockParam>): Array<ContentBlockParam> {
   if (!blocks.some(isMalformedBase64Image)) return blocks
 
-  return blocks.map(block => {
+  return blocks.map((block) => {
     if (!isMalformedBase64Image(block)) return block
     const src = block.source as unknown as Record<string, unknown>
     const mediaType =

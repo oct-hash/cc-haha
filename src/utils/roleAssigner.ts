@@ -42,27 +42,9 @@ const TASK_TYPE_TO_AGENT_TYPE: Record<string, string> = {
  * Role scope definitions (shared with swarm teammate prompts)
  */
 const ROLE_SCOPES = {
-  planner: [
-    '分析任务需求',
-    '制定执行计划',
-    '分解任务步骤',
-    '识别依赖和风险',
-    '协调团队协作',
-  ],
-  executor: [
-    '执行代码实现',
-    '运行测试验证',
-    '处理技术细节',
-    '修复遇到的问题',
-    '报告进度状态',
-  ],
-  reviewer: [
-    '检查代码质量',
-    '验证测试覆盖',
-    '确认需求满足',
-    '提供改进建议',
-    '最终验收签字',
-  ],
+  planner: ['分析任务需求', '制定执行计划', '分解任务步骤', '识别依赖和风险', '协调团队协作'],
+  executor: ['执行代码实现', '运行测试验证', '处理技术细节', '修复遇到的问题', '报告进度状态'],
+  reviewer: ['检查代码质量', '验证测试覆盖', '确认需求满足', '提供改进建议', '最终验收签字'],
 }
 
 /**
@@ -90,12 +72,12 @@ export function analyzeTask(task: string): TaskAnalysis {
   const complexity = complexitySignal
 
   // Determine role requirements based on task characteristics
-  const requiresPlanning = ['design', 'refactor', 'implement'].includes(taskType) ||
-    complexity === 'high'
-  const requiresReview = ['fix', 'refactor', 'implement', 'design'].includes(taskType) ||
-    complexity !== 'low'
-  const requiresExecution = ['implement', 'fix', 'refactor'].includes(taskType) ||
-    taskType === 'unknown'
+  const requiresPlanning =
+    ['design', 'refactor', 'implement'].includes(taskType) || complexity === 'high'
+  const requiresReview =
+    ['fix', 'refactor', 'implement', 'design'].includes(taskType) || complexity !== 'low'
+  const requiresExecution =
+    ['implement', 'fix', 'refactor'].includes(taskType) || taskType === 'unknown'
 
   return {
     taskType,
@@ -119,7 +101,7 @@ function detectComplexityFromTask(task: string): ComplexityLevel {
     /migrate|迁移/i,
     /architecture|架构/i,
     /design.*pattern|设计模式/i,
-    /(\d+)\s*(?:个|files?|files)/i,  // mentions multiple files
+    /(\d+)\s*(?:个|files?|files)/i, // mentions multiple files
   ]
 
   // Medium complexity indicators
@@ -222,7 +204,7 @@ export function getRolePrompt(role: 'planner' | 'executor' | 'reviewer', task: s
 Task: ${task}
 
 Your responsibilities:
-${ROLE_SCOPES.planner.map(s => `- ${s}`).join('\n')}
+${ROLE_SCOPES.planner.map((s) => `- ${s}`).join('\n')}
 
 Analyze the task, create a detailed plan, and be ready to hand off to the Executor.`,
 
@@ -231,7 +213,7 @@ Analyze the task, create a detailed plan, and be ready to hand off to the Execut
 Task: ${task}
 
 Your responsibilities:
-${ROLE_SCOPES.executor.map(s => `- ${s}`).join('\n')}
+${ROLE_SCOPES.executor.map((s) => `- ${s}`).join('\n')}
 
 Follow the plan (if provided by Planner), implement the solution, and verify your work.`,
 
@@ -240,7 +222,7 @@ Follow the plan (if provided by Planner), implement the solution, and verify you
 Task: ${task}
 
 Your responsibilities:
-${ROLE_SCOPES.reviewer.map(s => `- ${s}`).join('\n')}
+${ROLE_SCOPES.reviewer.map((s) => `- ${s}`).join('\n')}
 
 Review the implementation thoroughly, check quality and coverage, and provide feedback.`,
   }
@@ -260,7 +242,7 @@ export function formatRoleAssignment(assignment: RoleAssignment): string {
  * Format workflow sequence as string
  */
 export function formatWorkflow(sequence: string[]): string {
-  return sequence.map(role => `[${role}]`).join(' → ')
+  return sequence.map((role) => `[${role}]`).join(' → ')
 }
 
 /**
@@ -268,10 +250,14 @@ export function formatWorkflow(sequence: string[]): string {
  */
 export function getAgentTypeForRole(role: string): string {
   switch (role) {
-    case 'planner': return 'PLAN'
-    case 'executor': return 'GENERAL_PURPOSE'
-    case 'reviewer': return 'VERIFICATION'
-    default: return 'GENERAL_PURPOSE'
+    case 'planner':
+      return 'PLAN'
+    case 'executor':
+      return 'GENERAL_PURPOSE'
+    case 'reviewer':
+      return 'VERIFICATION'
+    default:
+      return 'GENERAL_PURPOSE'
   }
 }
 

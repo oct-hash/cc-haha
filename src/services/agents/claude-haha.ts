@@ -31,6 +31,7 @@ type RawEvent = StreamEventShape | ContentMessage | { type: string; [k: string]:
 export type QueryExecutor = (
   userMessage: string,
   abortController: AbortController,
+  modelOverride?: string,
 ) => AsyncGenerator<RawEvent, void, unknown>
 
 // -- factory -----------------------------------------------------------------
@@ -51,6 +52,7 @@ export const createClaudeHahaAdapter: AgentAdapterFactory = (
   }
 
   const queryExecutor = hahaConfig.queryExecutor
+  const model = hahaConfig.model
   let status: AgentStatus = 'idle'
   let activeAbortController: AbortController | null = null
 
@@ -74,7 +76,7 @@ export const createClaudeHahaAdapter: AgentAdapterFactory = (
       activeAbortController = abortController
 
       try {
-        for await (const event of queryExecutor(userMessage, abortController)) {
+        for await (const event of queryExecutor(userMessage, abortController, model)) {
           yield* translateEvent(event)
         }
       } catch (err: unknown) {

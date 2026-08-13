@@ -29,13 +29,11 @@ export function parseFilename(filename: string): ParsedPaperInfo {
   const parts = name.split(/[_\-\s]+/)
 
   // Common cleanup: remove file sizes, version numbers
-  const cleanedParts = parts.filter(
-    (p) => !/^\d+(\.\d+)?(MB|KB)?$/i.test(p) && !/^v\d+$/i.test(p)
-  )
+  const cleanedParts = parts.filter((p) => !/^\d+(\.\d+)?(MB|KB)?$/i.test(p) && !/^v\d+$/i.test(p))
 
   // Title is typically the longest part or the part without common author surname patterns
   // This is heuristic - we keep it simple and just use the cleaned filename as title
-  const title = cleanedParts.join(' ').replace(/[_\-]/g, ' ').trim()
+  const title = cleanedParts.join(' ').replace(/[_-]/g, ' ').trim()
 
   return {
     title,
@@ -49,7 +47,7 @@ export function parseEmailSubject(subject: string): ParsedPaperInfo {
   // Remove common prefixes like "Fwd:", "Re:", etc.
   const cleanSubject = subject
     .replace(/^(Fwd|Re):\s*/gi, '')
-    .replace(/[\[\(].*?[\]\)]/g, '') // Remove bracketed content
+    .replace(/[[(].*?[\])]/g, '') // Remove bracketed content
     .trim()
 
   return {
@@ -58,10 +56,7 @@ export function parseEmailSubject(subject: string): ParsedPaperInfo {
   }
 }
 
-export function extractPaperInfo(
-  attachment: MailAttachment,
-  subject?: string
-): ParsedPaperInfo {
+export function extractPaperInfo(attachment: MailAttachment, subject?: string): ParsedPaperInfo {
   // First try filename
   const fromFilename = parseFilename(attachment.filename)
 

@@ -34,9 +34,7 @@ export function runPostCompactCleanup(querySource?: QuerySource): void {
   // (context-collapse, memory file cache) for main-thread compacts.
   // Same startsWith pattern as isMainThread (index.ts:188).
   const isMainThreadCompact =
-    querySource === undefined ||
-    querySource.startsWith('repl_main_thread') ||
-    querySource === 'sdk'
+    querySource === undefined || querySource.startsWith('repl_main_thread') || querySource === 'sdk'
 
   resetMicrocompactState()
   if (feature('CONTEXT_COLLAPSE')) {
@@ -69,9 +67,7 @@ export function runPostCompactCleanup(querySource?: QuerySource): void {
   // cacheUtils resets. See compactConversation() for full rationale.
   clearBetaTracingState()
   if (feature('COMMIT_ATTRIBUTION')) {
-    void import('../../utils/attributionHooks.js').then(m =>
-      m.sweepFileContentCache(),
-    )
+    void import('../../utils/attributionHooks.js').then((m) => m.sweepFileContentCache())
   }
   clearSessionMessagesCache()
 }

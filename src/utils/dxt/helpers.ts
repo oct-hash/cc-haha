@@ -10,18 +10,14 @@ import { jsonParse } from '../slowOperations.js'
  * schemas.js and schemas-loose.js). Deferring the import keeps ~700KB of bound
  * closures out of the startup heap for sessions that never touch .dxt/.mcpb.
  */
-export async function validateManifest(
-  manifestJson: unknown,
-): Promise<McpbManifest> {
+export async function validateManifest(manifestJson: unknown): Promise<McpbManifest> {
   const { McpbManifestSchema } = await import('@anthropic-ai/mcpb')
   const parseResult = McpbManifestSchema.safeParse(manifestJson)
 
   if (!parseResult.success) {
     const errors = parseResult.error.flatten()
     const errorMessages = [
-      ...Object.entries(errors.fieldErrors).map(
-        ([field, errs]) => `${field}: ${errs?.join(', ')}`,
-      ),
+      ...Object.entries(errors.fieldErrors).map(([field, errs]) => `${field}: ${errs?.join(', ')}`),
       ...(errors.formErrors || []),
     ]
       .filter(Boolean)

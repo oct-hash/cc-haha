@@ -2,16 +2,16 @@
 // focus, and theme. useREPLUiState is the fourth state block of the REPL
 // component body.
 
+import { randomUUID } from 'crypto'
 import * as React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { randomUUID } from 'crypto'
-import { useTerminalFocus, useTheme } from '../ink.js'
+import type { Theme } from 'src/utils/theme.js'
 import { hasCursorUpViewportYankBug } from '../ink/terminal.js'
+import { useTerminalFocus, useTheme } from '../ink.js'
 import { useAppState } from '../state/AppState.js'
 import type { Message as MessageType, UserMessage } from '../types/message.js'
 import type { VimMode } from '../types/textInputTypes.js'
 import { getGlobalConfig } from '../utils/config.js'
-import type { Theme } from 'src/utils/theme.js'
 import {
   type ContentReplacementRecord,
   provisionContentReplacementState,

@@ -1,0 +1,23 @@
+[copied] R9 -> manuscript_R10_bulkIRI_v1.docx
+[edit] para 19 done
+[edit] para 24 done
+[edit] para 49 done
+[saved]
+
+==== AUDIT ====
+R9 paras 161  R10 paras 161  equal=True
+changed paras: [19, 24, 49]  (expected [19,24,49])
+  OK  present=False want=False  'SHAM_4h (mean=157)'
+  OK  present=False want=False  'peak expression at SHAM_24h'
+  OK  present=False want=False  'SHAM_24h=20'
+  OK  present=False want=False  '4.6-fold vs SHAM_4h=12'
+  OK  present=False want=False  '49 samples across six reperfusion durations'
+  OK  present=False want=False  'Sham (n=12), 2 h (n=5)'
+  OK  present=True want=True  'peaking at 24 h (42'
+  OK  present=True want=True  'to 198 at 24 h'
+  OK  present=True want=True  '14,048 versus a baseline of 6,688'
+  OK  present=True want=True  'injury time course (IRI at 2 h, 4 h, 24 h'
+citations: refs=51 cited=51 orphan=[] missing=[]
+  [19] Three publicly available mouse kidney ischemia-reperfusion transcriptomic datasets were obtained from the NCBI Gene Expression Omnibus (GEO). GSE139107 provides droplet-based single-nucleus RNA-seq of 126,578 nuclei from 26 renal cell types across six I/R time
+  [24] Independent validation used GSE274819 scRNA-seq (Sham: 10,371 cells; early I/R: 34,088 cells pooled from three reperfusion timepoints — 4 h, 12 h, and 1 day) and GSE98622 bulk RNA-seq (49 samples spanning an ischemia-reperfusion injury time course from 2 h to 
+  [49] Independent validation in GSE274819 scRNA-seq confirmed the key findings: Ogt increased 53% from Sham to early I/R (4 h–1 day; 0.25 to 0.38), Gclc increased 45% (from 0.47 to 0.68), and Fth1 maintained extremely high baseline expression (99.9% detection, mean 

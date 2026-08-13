@@ -8,14 +8,11 @@ import { AGENT_TOOL_NAME } from '../AgentTool/constants.js'
 /* eslint-disable @typescript-eslint/no-require-imports */
 const BRIEF_TOOL_NAME: string | null =
   feature('KAIROS') || feature('KAIROS_BRIEF')
-    ? (
-        require('../BriefTool/prompt.js') as typeof import('../BriefTool/prompt.js')
-      ).BRIEF_TOOL_NAME
+    ? (require('../BriefTool/prompt.js') as typeof import('../BriefTool/prompt.js')).BRIEF_TOOL_NAME
     : null
 const SEND_USER_FILE_TOOL_NAME: string | null = feature('KAIROS')
-  ? (
-      require('../SendUserFileTool/prompt.js') as typeof import('../SendUserFileTool/prompt.js')
-    ).SEND_USER_FILE_TOOL_NAME
+  ? (require('../SendUserFileTool/prompt.js') as typeof import('../SendUserFileTool/prompt.js'))
+      .SEND_USER_FILE_TOOL_NAME
   : null
 
 /* eslint-enable @typescript-eslint/no-require-imports */

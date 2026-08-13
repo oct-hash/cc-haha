@@ -4,11 +4,33 @@ import { feature } from 'bun:bundle'
 import { randomUUID } from 'crypto'
 import type { RefObject } from 'react'
 import { logEvent } from 'src/services/analytics/index.js'
-import { getBudgetContinuationCount, getCurrentTurnTokenBudget, getTurnClassifierCount, getTurnClassifierDurationMs, getTurnHookCount, getTurnHookDurationMs, getTurnOutputTokens, getTurnToolCount, getTurnToolDurationMs, resetTurnClassifierDuration, resetTurnHookDuration, resetTurnToolDuration, snapshotOutputTokensForTurn } from '../bootstrap/state.js'
+import {
+  getBudgetContinuationCount,
+  getCurrentTurnTokenBudget,
+  getTurnClassifierCount,
+  getTurnClassifierDurationMs,
+  getTurnHookCount,
+  getTurnHookDurationMs,
+  getTurnOutputTokens,
+  getTurnToolCount,
+  getTurnToolDurationMs,
+  resetTurnClassifierDuration,
+  resetTurnHookDuration,
+  resetTurnToolDuration,
+  snapshotOutputTokensForTurn,
+} from '../bootstrap/state.js'
 import { fireCompanionObserver } from '../buddy/observer.js'
-import { messagesAfterAreOnlySynthetic, selectableUserMessagesFilter } from '../components/MessageSelector.js'
+import {
+  messagesAfterAreOnlySynthetic,
+  selectableUserMessagesFilter,
+} from '../components/MessageSelector.js'
 import { getSystemPrompt } from '../constants/prompts.js'
-import { BASH_INPUT_TAG, COMMAND_MESSAGE_TAG, COMMAND_NAME_TAG, LOCAL_COMMAND_STDOUT_TAG } from '../constants/xml.js'
+import {
+  BASH_INPUT_TAG,
+  COMMAND_MESSAGE_TAG,
+  COMMAND_NAME_TAG,
+  LOCAL_COMMAND_STDOUT_TAG,
+} from '../constants/xml.js'
 import { getSystemContext, getUserContext } from '../context.js'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import { mergeClients } from '../hooks/useMergedClients.js'
@@ -26,8 +48,17 @@ import { getGlobalConfigWriteCount } from '../utils/config.js'
 import type { EffortValue } from '../utils/effort.js'
 import { closeOpenDiffs, getConnectedIdeClient } from '../utils/ide.js'
 import { enqueue, getCommandQueueLength, type SetAppState } from '../utils/messageQueueManager.js'
-import { createApiMetricsMessage, createTurnDurationMessage, getContentText, isCompactBoundaryMessage, type StreamingToolUse } from '../utils/messages.js'
-import { checkAndDisableAutoModeIfNeeded, checkAndDisableBypassPermissionsIfNeeded } from '../utils/permissions/bypassPermissionsKillswitch.js'
+import {
+  createApiMetricsMessage,
+  createTurnDurationMessage,
+  getContentText,
+  isCompactBoundaryMessage,
+  type StreamingToolUse,
+} from '../utils/messages.js'
+import {
+  checkAndDisableAutoModeIfNeeded,
+  checkAndDisableBypassPermissionsIfNeeded,
+} from '../utils/permissions/bypassPermissionsKillswitch.js'
 import { getScratchpadDir, isScratchpadEnabled } from '../utils/permissions/filesystem.js'
 import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js'
 import { getQuerySourceForREPL } from '../utils/promptCategory.js'
@@ -39,8 +70,8 @@ import { setMemberActive } from '../utils/swarm/teamHelpers.js'
 import { buildEffectiveSystemPrompt } from '../utils/systemPrompt.js'
 import { getAgentName, getTeamName } from '../utils/teammate.js'
 import { parseTokenBudget } from '../utils/tokenBudget.js'
-import { median } from './REPL.utils.js'
 import { bridgeAdapterStream, type QueryEvent } from './REPL.handlers.stream.js'
+import { median } from './REPL.utils.js'
 
 export interface HandleQueryImplParams {
   messagesIncludingNewMessages: MessageType[]
@@ -303,7 +334,7 @@ export async function handleQueryImpl(params: HandleQueryImplParams): Promise<vo
   )
   queryCheckpoint('query_end')
 
-  if ('external' === 'ant' && apiMetricsRef.current.length > 0) {
+  if (process.env.USER_TYPE === 'ant' && apiMetricsRef.current.length > 0) {
     const entries = apiMetricsRef.current
     const ttfts = entries.map((e) => e.ttftMs)
     const otpsValues = entries.map((e) => {
@@ -512,7 +543,7 @@ export async function handleQuery(params: HandleQueryParams): Promise<void> {
 
       sendBridgeResultRef.current()
 
-      if ('external' === 'ant' && !abortController.signal.aborted) {
+      if (process.env.USER_TYPE === 'ant' && !abortController.signal.aborted) {
         setAppState((prev: any) => {
           if (prev.tungstenActiveSession === undefined) return prev
           if (prev.tungstenPanelAutoHidden === true) return prev

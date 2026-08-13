@@ -26,9 +26,7 @@ export function getNewlineInstructions(): string {
   }
 
   // Otherwise show backslash+return instructions
-  return hasUsedBackslashReturn()
-    ? '\\⏎ for newline'
-    : 'backslash (\\) + return (⏎) for newline'
+  return hasUsedBackslashReturn() ? '\\⏎ for newline' : 'backslash (\\) + return (⏎) for newline'
 }
 
 /**

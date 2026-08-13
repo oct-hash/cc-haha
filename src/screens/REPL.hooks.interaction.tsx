@@ -22,13 +22,10 @@ import { useInput, useStdin } from '../ink.js'
 import { diagnosticTracker } from '../services/diagnosticTracking.js'
 import type { Tool } from '../Tool.js'
 import type { HookProgress } from '../types/hooks.js'
-import type {
-  Message as MessageType,
-  ProgressMessage,
-} from '../types/message.js'
+import type { Message as MessageType, ProgressMessage } from '../types/message.js'
 import type { QueuedCommand } from '../types/textInputTypes.js'
-import { count } from '../utils/array.js'
 import { isAgentSwarmsEnabled } from '../utils/agentSwarmsEnabled.js'
+import { count } from '../utils/array.js'
 import { openFileInExternalEditor } from '../utils/editor.js'
 import { renderMessagesToPlainText } from '../utils/exportRenderer.js'
 import { truncateToWidth } from '../utils/format.js'
@@ -83,10 +80,7 @@ export interface UseREPLInteractionParams {
   // from useREPLDialogs
   focusedInputDialog: string | undefined
   // from useREPLInputQueue
-  handleIncomingPrompt: (
-    content: string,
-    options?: { isMeta?: boolean },
-  ) => boolean
+  handleIncomingPrompt: (content: string, options?: { isMeta?: boolean }) => boolean
   // from useREPLFoundation / props
   store: { getState: () => { kairosEnabled: boolean } }
   queuedCommands: readonly QueuedCommand[]
@@ -186,7 +180,7 @@ export function useREPLInteraction(params: UseREPLInteractionParams) {
   // - Workers receive permission responses via mailbox messages
   // - Leaders receive permission requests via mailbox messages
 
-  if ('external' === 'ant') {
+  if (process.env.USER_TYPE === 'ant') {
     // Tasks mode: watch for tasks and auto-process them
     // eslint-disable-next-line react-hooks/rules-of-hooks
     // biome-ignore lint/correctness/useHookAtTopLevel: conditional for dead code elimination in external builds
@@ -313,7 +307,7 @@ export function useREPLInteraction(params: UseREPLInteractionParams) {
 
     // Fall back to default behavior
     const hookType = currentHooks[0]?.data.hookEvent === 'SubagentStop' ? 'subagent stop' : 'stop'
-    if ('external' === 'ant') {
+    if (process.env.USER_TYPE === 'ant') {
       const cmd = currentHooks[completedCount]?.data.command
       const label = cmd ? ` '${truncateToWidth(cmd, 40)}'` : ''
       return total === 1

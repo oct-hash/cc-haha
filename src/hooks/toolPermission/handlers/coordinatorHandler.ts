@@ -30,11 +30,7 @@ async function handleCoordinatorPermission(
 
   try {
     // 1. Try permission hooks first (fast, local)
-    const hookResult = await ctx.runHooks(
-      permissionMode,
-      suggestions,
-      updatedInput,
-    )
+    const hookResult = await ctx.runHooks(permissionMode, suggestions, updatedInput)
     if (hookResult) return hookResult
 
     // 2. Try classifier (slow, inference -- bash only)
@@ -61,5 +57,5 @@ async function handleCoordinatorPermission(
   return null
 }
 
-export { handleCoordinatorPermission }
 export type { CoordinatorPermissionParams }
+export { handleCoordinatorPermission }

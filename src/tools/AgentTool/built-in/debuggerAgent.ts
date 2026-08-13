@@ -113,7 +113,6 @@ Always provide:
 - Use ${FILE_READ_TOOL_NAME} to inspect files
 - Use ${FILE_EDIT_TOOL_NAME}, ${FILE_WRITE_TOOL_NAME} only for actual fixes
 - Do NOT claim unsupported auto-healing like "reset agent state"`
-
 }
 
 export const DEBUGGER_AGENT: BuiltInAgentDefinition = {

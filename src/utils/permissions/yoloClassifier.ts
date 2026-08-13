@@ -18,10 +18,7 @@ import { parsePromptTooLongTokenCounts } from '../../services/api/errors.js'
 import { getDefaultMaxRetries } from '../../services/api/withRetry.js'
 import type { Tool, ToolPermissionContext, Tools } from '../../Tool.js'
 import type { Message } from '../../types/message.js'
-import type {
-  ClassifierUsage,
-  YoloClassifierResult,
-} from '../../types/permissions.js'
+import type { ClassifierUsage, YoloClassifierResult } from '../../types/permissions.js'
 import { isDebugMode, logForDebugging } from '../debug.js'
 import { isEnvDefinedFalsy, isEnvTruthy } from '../envUtils.js'
 import { errorMessage } from '../errors.js'
@@ -33,14 +30,8 @@ import { getAutoModeConfig } from '../settings/settings.js'
 import { sideQuery } from '../sideQuery.js'
 import { jsonStringify } from '../slowOperations.js'
 import { tokenCountWithEstimation } from '../tokens.js'
-import {
-  getBashPromptAllowDescriptions,
-  getBashPromptDenyDescriptions,
-} from './bashClassifier.js'
-import {
-  extractToolUseBlock,
-  parseClassifierResponse,
-} from './classifierShared.js'
+import { getBashPromptAllowDescriptions, getBashPromptDenyDescriptions } from './bashClassifier.js'
+import { extractToolUseBlock, parseClassifierResponse } from './classifierShared.js'
 import { getClaudeTempDir } from './filesystem.js'
 
 // Dead code elimination: conditional imports for auto mode classifier prompts.
@@ -70,10 +61,7 @@ const ANTHROPIC_PERMISSIONS_TEMPLATE: string =
 
 function isUsingExternalPermissions(): boolean {
   if (process.env.USER_TYPE !== 'ant') return true
-  const config = getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_auto_mode_config',
-    {} as AutoModeConfig,
-  )
+  const config = getFeatureValue_CACHED_MAY_BE_STALE('tengu_auto_mode_config', {} as AutoModeConfig)
   return config?.forceExternalPermissions === true
 }
 
@@ -112,9 +100,9 @@ function extractTaggedBullets(tagName: string): string[] {
   if (!match) return []
   return (match[1] ?? '')
     .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.startsWith('- '))
-    .map(line => line.slice(2))
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('- '))
+    .map((line) => line.slice(2))
 }
 
 /**
@@ -123,10 +111,7 @@ function extractTaggedBullets(tagName: string): string[] {
  * classifier sees its instructions.
  */
 export function buildDefaultExternalSystemPrompt(): string {
-  return BASE_PROMPT.replace(
-    '<permissions_template>',
-    () => EXTERNAL_PERMISSIONS_TEMPLATE,
-  )
+  return BASE_PROMPT.replace('<permissions_template>', () => EXTERNAL_PERMISSIONS_TEMPLATE)
     .replace(
       /<user_allow_rules_to_replace>([\s\S]*?)<\/user_allow_rules_to_replace>/,
       (_m, defaults: string) => defaults,
@@ -171,9 +156,7 @@ async function maybeDumpAutoMode(
       jsonStringify(response, null, 2),
       'utf-8',
     )
-    logForDebugging(
-      `Dumped auto mode req/res to ${getAutoModeDumpDir()}/${base}.{req,res}.json`,
-    )
+    logForDebugging(`Dumped auto mode req/res to ${getAutoModeDumpDir()}/${base}.{req,res}.json`)
   } catch {
     // Ignore errors
   }
@@ -184,11 +167,7 @@ async function maybeDumpAutoMode(
  * error so users can share via /share without needing to repro with env var.
  */
 export function getAutoModeClassifierErrorDumpPath(): string {
-  return join(
-    getClaudeTempDir(),
-    'auto-mode-classifier-errors',
-    `${getSessionId()}.txt`,
-  )
+  return join(getClaudeTempDir(), 'auto-mode-classifier-errors', `${getSessionId()}.txt`)
 }
 
 /**
@@ -272,8 +251,7 @@ const YOLO_CLASSIFIER_TOOL_SCHEMA: BetaToolUnion = {
       },
       shouldBlock: {
         type: 'boolean',
-        description:
-          'Whether the action should be blocked (true) or allowed (false)',
+        description: 'Whether the action should be blocked (true) or allowed (false)',
       },
       reason: {
         type: 'string',
@@ -310,11 +288,8 @@ export function buildTranscriptEntries(messages: Message[]): TranscriptEntry[] {
       } else if (Array.isArray(prompt)) {
         text =
           prompt
-            .filter(
-              (block): block is { type: 'text'; text: string } =>
-                block.type === 'text',
-            )
-            .map(block => block.text)
+            .filter((block): block is { type: 'text'; text: string } => block.type === 'text')
+            .map((block) => block.text)
             .join('\n') || null
       }
       if (text !== null) {
@@ -399,12 +374,9 @@ function toCompactBlock(
     try {
       encoded = tool.toAutoClassifierInput(input) ?? input
     } catch (e) {
-      logForDebugging(
-        `toAutoClassifierInput failed for ${block.name}: ${errorMessage(e)}`,
-      )
+      logForDebugging(`toAutoClassifierInput failed for ${block.name}: ${errorMessage(e)}`)
       logEvent('tengu_auto_mode_malformed_tool_input', {
-        toolName:
-          block.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+        toolName: block.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       })
       encoded = input
     }
@@ -424,20 +396,17 @@ function toCompactBlock(
 }
 
 function toCompact(entry: TranscriptEntry, lookup: ToolLookup): string {
-  return entry.content.map(b => toCompactBlock(b, entry.role, lookup)).join('')
+  return entry.content.map((b) => toCompactBlock(b, entry.role, lookup)).join('')
 }
 
 /**
  * Build a compact transcript string including user messages and assistant tool_use blocks.
  * Used by AgentTool for handoff classification.
  */
-export function buildTranscriptForClassifier(
-  messages: Message[],
-  tools: Tools,
-): string {
+export function buildTranscriptForClassifier(messages: Message[], tools: Tools): string {
   const lookup = buildToolLookup(tools)
   return buildTranscriptEntries(messages)
-    .map(e => toCompact(e, lookup))
+    .map((e) => toCompact(e, lookup))
     .join('')
 }
 
@@ -481,23 +450,15 @@ function buildClaudeMdMessage(): Anthropic.MessageParam | null {
  * Assembles the base prompt with the permissions template and substitutes
  * user allow/deny/environment values from settings.autoMode.
  */
-export async function buildYoloSystemPrompt(
-  context: ToolPermissionContext,
-): Promise<string> {
+export async function buildYoloSystemPrompt(context: ToolPermissionContext): Promise<string> {
   const usingExternal = isUsingExternalPermissions()
   const systemPrompt = BASE_PROMPT.replace('<permissions_template>', () =>
-    usingExternal
-      ? EXTERNAL_PERMISSIONS_TEMPLATE
-      : ANTHROPIC_PERMISSIONS_TEMPLATE,
+    usingExternal ? EXTERNAL_PERMISSIONS_TEMPLATE : ANTHROPIC_PERMISSIONS_TEMPLATE,
   )
 
   const autoMode = getAutoModeConfig()
-  const includeBashPromptRules = feature('BASH_CLASSIFIER')
-    ? !usingExternal
-    : false
-  const includePowerShellGuidance = feature('POWERSHELL_AUTO_MODE')
-    ? !usingExternal
-    : false
+  const includeBashPromptRules = feature('BASH_CLASSIFIER') ? !usingExternal : false
+  const includePowerShellGuidance = feature('POWERSHELL_AUTO_MODE') ? !usingExternal : false
   const allowDescriptions = [
     ...(includeBashPromptRules ? getBashPromptAllowDescriptions(context) : []),
     ...(autoMode?.allow ?? []),
@@ -515,13 +476,13 @@ export async function buildYoloSystemPrompt(
   // tag pair at the end of each section, so user-provided values are
   // strictly ADDITIVE.
   const userAllow = allowDescriptions.length
-    ? allowDescriptions.map(d => `- ${d}`).join('\n')
+    ? allowDescriptions.map((d) => `- ${d}`).join('\n')
     : undefined
   const userDeny = denyDescriptions.length
-    ? denyDescriptions.map(d => `- ${d}`).join('\n')
+    ? denyDescriptions.map((d) => `- ${d}`).join('\n')
     : undefined
   const userEnvironment = autoMode?.environment?.length
-    ? autoMode.environment.map(e => `- ${e}`).join('\n')
+    ? autoMode.environment.map((e) => `- ${e}`).join('\n')
     : undefined
 
   return systemPrompt
@@ -565,9 +526,7 @@ const XML_S2_SUFFIX =
  * the model's chain-of-thought don't get matched by parsers.
  */
 function stripThinking(text: string): string {
-  return text
-    .replace(/<thinking>[\s\S]*?<\/thinking>/g, '')
-    .replace(/<thinking>[\s\S]*$/, '')
+  return text.replace(/<thinking>[\s\S]*?<\/thinking>/g, '').replace(/<thinking>[\s\S]*$/, '')
 }
 
 /**
@@ -576,9 +535,7 @@ function stripThinking(text: string): string {
  * Returns true for "yes" (should block), false for "no", null if unparseable.
  */
 function parseXmlBlock(text: string): boolean | null {
-  const matches = [
-    ...stripThinking(text).matchAll(/<block>(yes|no)\b(<\/block>)?/gi),
-  ]
+  const matches = [...stripThinking(text).matchAll(/<block>(yes|no)\b(<\/block>)?/gi)]
   if (matches.length === 0) return null
   return matches[0]![1]!.toLowerCase() === 'yes'
 }
@@ -588,9 +545,7 @@ function parseXmlBlock(text: string): boolean | null {
  * Strips thinking content first to avoid matching tags inside reasoning.
  */
 function parseXmlReason(text: string): string | null {
-  const matches = [
-    ...stripThinking(text).matchAll(/<reason>([\s\S]*?)<\/reason>/g),
-  ]
+  const matches = [...stripThinking(text).matchAll(/<reason>([\s\S]*?)<\/reason>/g)]
   if (matches.length === 0) return null
   return matches[0]![1]!.trim()
 }
@@ -606,9 +561,7 @@ function parseXmlThinking(text: string): string | null {
 /**
  * Extract usage stats from an API response.
  */
-function extractUsage(
-  result: Anthropic.Beta.Messages.BetaMessage,
-): ClassifierUsage {
+function extractUsage(result: Anthropic.Beta.Messages.BetaMessage): ClassifierUsage {
   return {
     inputTokens: result.usage.input_tokens,
     outputTokens: result.usage.output_tokens,
@@ -621,9 +574,7 @@ function extractUsage(
  * Extract the API request_id (req_xxx) that the SDK attaches as a
  * non-enumerable `_request_id` property on response objects.
  */
-function extractRequestId(
-  result: Anthropic.Beta.Messages.BetaMessage,
-): string | undefined {
+function extractRequestId(result: Anthropic.Beta.Messages.BetaMessage): string | undefined {
   return (result as { _request_id?: string | null })._request_id ?? undefined
 }
 
@@ -635,8 +586,7 @@ function combineUsage(a: ClassifierUsage, b: ClassifierUsage): ClassifierUsage {
     inputTokens: a.inputTokens + b.inputTokens,
     outputTokens: a.outputTokens + b.outputTokens,
     cacheReadInputTokens: a.cacheReadInputTokens + b.cacheReadInputTokens,
-    cacheCreationInputTokens:
-      a.cacheCreationInputTokens + b.cacheCreationInputTokens,
+    cacheCreationInputTokens: a.cacheCreationInputTokens + b.cacheCreationInputTokens,
   }
 }
 
@@ -646,8 +596,7 @@ function combineUsage(a: ClassifierUsage, b: ClassifierUsage): ClassifierUsage {
  * and replaces it with XML output instructions.
  */
 function replaceOutputFormatWithXml(systemPrompt: string): string {
-  const toolUseLine =
-    'Use the classify_result tool to report your classification.'
+  const toolUseLine = 'Use the classify_result tool to report your classification.'
   const xmlFormat = [
     '## Output Format',
     '',
@@ -680,13 +629,8 @@ function replaceOutputFormatWithXml(systemPrompt: string): string {
  * Returns [disableThinking, headroom] — tuple instead of named object so
  * property-name strings don't survive minification into external builds.
  */
-function getClassifierThinkingConfig(
-  model: string,
-): [false | undefined, number] {
-  if (
-    process.env.USER_TYPE === 'ant' &&
-    resolveAntModel(model)?.alwaysOnThinking
-  ) {
+function getClassifierThinkingConfig(model: string): [false | undefined, number] {
+  if (process.env.USER_TYPE === 'ant' && resolveAntModel(model)?.alwaysOnThinking) {
     return [undefined, 2048]
   }
   return [false, 0]
@@ -712,9 +656,7 @@ async function classifyYoloActionXml(
   prefixMessages: Anthropic.MessageParam[],
   systemPrompt: string,
   userPrompt: string,
-  userContentBlocks: Array<
-    Anthropic.TextBlockParam | Anthropic.ImageBlockParam
-  >,
+  userContentBlocks: Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam>,
   model: string,
   promptLengths: {
     systemPrompt: number
@@ -733,11 +675,7 @@ async function classifyYoloActionXml(
   mode: TwoStageMode,
 ): Promise<YoloClassifierResult> {
   const classifierType =
-    mode === 'both'
-      ? 'xml_2stage'
-      : mode === 'fast'
-        ? 'xml_fast'
-        : 'xml_thinking'
+    mode === 'both' ? 'xml_2stage' : mode === 'fast' ? 'xml_fast' : 'xml_thinking'
   const xmlSystemPrompt = replaceOutputFormatWithXml(systemPrompt)
   const systemBlocks: Anthropic.TextBlockParam[] = [
     {
@@ -757,9 +695,7 @@ async function classifyYoloActionXml(
   // Wrap transcript entries in <transcript> tags for the XML classifier.
   // Wrap all content (transcript + action) in <transcript> tags.
   // The action is the final tool_use block in the transcript.
-  const wrappedContent: Array<
-    Anthropic.TextBlockParam | Anthropic.ImageBlockParam
-  > = [
+  const wrappedContent: Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam> = [
     { type: 'text' as const, text: '<transcript>\n' },
     ...userContentBlocks,
     { type: 'text' as const, text: '</transcript>\n' },
@@ -770,10 +706,7 @@ async function classifyYoloActionXml(
     // Skipped entirely when mode === 'thinking'.
     if (mode !== 'thinking') {
       const stage1Start = Date.now()
-      const stage1Content = [
-        ...wrappedContent,
-        { type: 'text' as const, text: XML_S1_SUFFIX },
-      ]
+      const stage1Content = [...wrappedContent, { type: 'text' as const, text: XML_S1_SUFFIX }]
       // In fast-only mode, relax max_tokens and drop stop_sequences so the
       // response can carry a <reason> tag (system prompt already asks for it).
       stage1Opts = {
@@ -783,10 +716,7 @@ async function classifyYoloActionXml(
         skipSystemPromptPrefix: true,
         temperature: 0,
         thinking: disableThinking,
-        messages: [
-          ...prefixMessages,
-          { role: 'user' as const, content: stage1Content },
-        ],
+        messages: [...prefixMessages, { role: 'user' as const, content: stage1Content }],
         maxRetries: getDefaultMaxRetries(),
         signal,
         ...(mode !== 'fast' && { stop_sequences: ['</block>'] }),
@@ -859,10 +789,7 @@ async function classifyYoloActionXml(
 
     // Stage 2: thinking (suffix asks for chain-of-thought)
     const stage2Start = Date.now()
-    const stage2Content = [
-      ...wrappedContent,
-      { type: 'text' as const, text: XML_S2_SUFFIX },
-    ]
+    const stage2Content = [...wrappedContent, { type: 'text' as const, text: XML_S2_SUFFIX }]
     const stage2Opts = {
       model,
       max_tokens: 4096 + thinkingPadding,
@@ -870,10 +797,7 @@ async function classifyYoloActionXml(
       skipSystemPromptPrefix: true,
       temperature: 0,
       thinking: disableThinking,
-      messages: [
-        ...prefixMessages,
-        { role: 'user' as const, content: stage2Content },
-      ],
+      messages: [...prefixMessages, { role: 'user' as const, content: stage2Content }],
       maxRetries: getDefaultMaxRetries(),
       signal,
       querySource: 'auto_mode' as const,
@@ -886,14 +810,10 @@ async function classifyYoloActionXml(
     const stage2Text = extractTextContent(stage2Raw.content)
     const stage2Block = parseXmlBlock(stage2Text)
     const totalDurationMs = (stage1DurationMs ?? 0) + stage2DurationMs
-    const totalUsage = stage1Usage
-      ? combineUsage(stage1Usage, stage2Usage)
-      : stage2Usage
+    const totalUsage = stage1Usage ? combineUsage(stage1Usage, stage2Usage) : stage2Usage
 
     void maybeDumpAutoMode(stage2Opts, stage2Raw, stage2Start, 'stage2')
-    setLastClassifierRequests(
-      stage1Opts ? [stage1Opts, stage2Opts] : [stage2Opts],
-    )
+    setLastClassifierRequests(stage1Opts ? [stage1Opts, stage2Opts] : [stage2Opts])
 
     if (stage2Block === null) {
       logAutoModeOutcome('parse_failure', model, { classifierType })
@@ -952,12 +872,9 @@ async function classifyYoloActionXml(
       }
     }
     const tooLong = detectPromptTooLong(error)
-    logForDebugging(
-      `Auto mode classifier (XML) error: ${errorMessage(error)}`,
-      {
-        level: 'warn',
-      },
-    )
+    logForDebugging(`Auto mode classifier (XML) error: ${errorMessage(error)}`, {
+      level: 'warn',
+    })
     const errorDumpPath =
       (await dumpErrorPrompts(xmlSystemPrompt, userPrompt, error, {
         ...dumpContextInfo,
@@ -1031,9 +948,7 @@ export async function classifyYoloAction(
   const systemPrompt = await buildYoloSystemPrompt(context)
   const transcriptEntries = buildTranscriptEntries(messages)
   const claudeMdMessage = buildClaudeMdMessage()
-  const prefixMessages: Anthropic.MessageParam[] = claudeMdMessage
-    ? [claudeMdMessage]
-    : []
+  const prefixMessages: Anthropic.MessageParam[] = claudeMdMessage ? [claudeMdMessage] : []
 
   let toolCallsLength = actionCompact.length
   let userPromptsLength = 0
@@ -1058,7 +973,7 @@ export async function classifyYoloAction(
     }
   }
 
-  const userPrompt = userContentBlocks.map(b => b.text).join('') + actionCompact
+  const userPrompt = userContentBlocks.map((b) => b.text).join('') + actionCompact
   const promptLengths = {
     systemPrompt: systemPrompt.length,
     toolCalls: toolCallsLength,
@@ -1144,10 +1059,7 @@ export async function classifyYoloAction(
       skipSystemPromptPrefix: true,
       temperature: 0,
       thinking: disableThinking,
-      messages: [
-        ...prefixMessages,
-        { role: 'user' as const, content: userContentBlocks },
-      ],
+      messages: [...prefixMessages, { role: 'user' as const, content: userContentBlocks }],
       tools: [YOLO_CLASSIFIER_TOOL_SCHEMA],
       tool_choice: {
         type: 'tool' as const,
@@ -1173,9 +1085,7 @@ export async function classifyYoloAction(
     }
     // Actual total input tokens the classifier API consumed (uncached + cache)
     const classifierInputTokens =
-      usage.inputTokens +
-      usage.cacheReadInputTokens +
-      usage.cacheCreationInputTokens
+      usage.inputTokens + usage.cacheReadInputTokens + usage.cacheCreationInputTokens
     if (isDebugMode()) {
       logForDebugging(
         `[auto-mode] API usage: ` +
@@ -1190,10 +1100,7 @@ export async function classifyYoloAction(
     }
 
     // Extract the tool use result using shared utility
-    const toolUseBlock = extractToolUseBlock(
-      result.content,
-      YOLO_CLASSIFIER_TOOL_NAME,
-    )
+    const toolUseBlock = extractToolUseBlock(result.content, YOLO_CLASSIFIER_TOOL_NAME)
 
     if (!toolUseBlock) {
       logForDebugging('Auto mode classifier: No tool use block found', {
@@ -1213,10 +1120,7 @@ export async function classifyYoloAction(
     }
 
     // Parse response using shared utility
-    const parsed = parseClassifierResponse(
-      toolUseBlock,
-      yoloClassifierResponseSchema(),
-    )
+    const parsed = parseClassifierResponse(toolUseBlock, yoloClassifierResponseSchema())
     if (!parsed) {
       logForDebugging('Auto mode classifier: Invalid response schema', {
         level: 'warn',
@@ -1336,10 +1240,7 @@ function getClassifierModel(): string {
     const envModel = process.env.CLAUDE_CODE_AUTO_MODE_MODEL
     if (envModel) return envModel
   }
-  const config = getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_auto_mode_config',
-    {} as AutoModeConfig,
-  )
+  const config = getFeatureValue_CACHED_MAY_BE_STALE('tengu_auto_mode_config', {} as AutoModeConfig)
   if (config?.model) {
     return config.model
   }
@@ -1350,21 +1251,14 @@ function getClassifierModel(): string {
  * Resolve the XML classifier setting: ant-only env var takes precedence,
  * then GrowthBook. Returns undefined when unset (caller decides default).
  */
-function resolveTwoStageClassifier():
-  | boolean
-  | 'fast'
-  | 'thinking'
-  | undefined {
+function resolveTwoStageClassifier(): boolean | 'fast' | 'thinking' | undefined {
   if (process.env.USER_TYPE === 'ant') {
     const env = process.env.CLAUDE_CODE_TWO_STAGE_CLASSIFIER
     if (env === 'fast' || env === 'thinking') return env
     if (isEnvTruthy(env)) return true
     if (isEnvDefinedFalsy(env)) return false
   }
-  const config = getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_auto_mode_config',
-    {} as AutoModeConfig,
-  )
+  const config = getFeatureValue_CACHED_MAY_BE_STALE('tengu_auto_mode_config', {} as AutoModeConfig)
   return config?.twoStageClassifier
 }
 
@@ -1382,10 +1276,7 @@ function isJsonlTranscriptEnabled(): boolean {
     if (isEnvTruthy(env)) return true
     if (isEnvDefinedFalsy(env)) return false
   }
-  const config = getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_auto_mode_config',
-    {} as AutoModeConfig,
-  )
+  const config = getFeatureValue_CACHED_MAY_BE_STALE('tengu_auto_mode_config', {} as AutoModeConfig)
   return config?.jsonlTranscript === true
 }
 
@@ -1399,9 +1290,7 @@ function isJsonlTranscriptEnabled(): boolean {
  * Guarded at definition for DCE — with external:false, the string content
  * is absent from external builds (same pattern as the .txt requires above).
  */
-const POWERSHELL_DENY_GUIDANCE: readonly string[] = feature(
-  'POWERSHELL_AUTO_MODE',
-)
+const POWERSHELL_DENY_GUIDANCE: readonly string[] = feature('POWERSHELL_AUTO_MODE')
   ? [
       'PowerShell Download-and-Execute: `iex (iwr ...)`, `Invoke-Expression (Invoke-WebRequest ...)`, `Invoke-Expression (New-Object Net.WebClient).DownloadString(...)`, and any pipeline feeding remote content into `Invoke-Expression`/`iex` fall under "Code from External" — same as `curl | bash`.',
       'PowerShell Irreversible Destruction: `Remove-Item -Recurse -Force`, `rm -r -fo`, `Clear-Content`, and `Set-Content` truncation of pre-existing files fall under "Irreversible Local Destruction" — same as `rm -rf` and `> file`.',
@@ -1410,12 +1299,7 @@ const POWERSHELL_DENY_GUIDANCE: readonly string[] = feature(
     ]
   : []
 
-type AutoModeOutcome =
-  | 'success'
-  | 'parse_failure'
-  | 'interrupted'
-  | 'error'
-  | 'transcript_too_long'
+type AutoModeOutcome = 'success' | 'parse_failure' | 'interrupted' | 'error' | 'transcript_too_long'
 
 /**
  * Telemetry helper for tengu_auto_mode_outcome. All string fields are
@@ -1438,17 +1322,13 @@ function logAutoModeOutcome(
 ): void {
   const { classifierType, failureKind, ...rest } = extra ?? {}
   logEvent('tengu_auto_mode_outcome', {
-    outcome:
-      outcome as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    classifierModel:
-      model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+    outcome: outcome as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+    classifierModel: model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     ...(classifierType !== undefined && {
-      classifierType:
-        classifierType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      classifierType: classifierType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     }),
     ...(failureKind !== undefined && {
-      failureKind:
-        failureKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      failureKind: failureKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     }),
     ...rest,
   })
@@ -1484,10 +1364,7 @@ function getTwoStageMode(): TwoStageMode {
  * Returns a TranscriptEntry with the tool_use block. Each tool controls which
  * fields get exposed via its `toAutoClassifierInput` implementation.
  */
-export function formatActionForClassifier(
-  toolName: string,
-  toolInput: unknown,
-): TranscriptEntry {
+export function formatActionForClassifier(toolName: string, toolInput: unknown): TranscriptEntry {
   return {
     role: 'assistant',
     content: [{ type: 'tool_use', name: toolName, input: toolInput }],

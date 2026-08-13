@@ -12,19 +12,19 @@
  *   const related = await wiki.getRelated(paperId)
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import {
-  loadGraph,
-  saveGraph,
-  upsertPaperNode,
   addEntitiesAndRelations,
   getPaperId,
+  type KBEdge,
+  KBGraph,
+  loadGraph,
+  type PaperMetadata,
   queryEntities,
   queryNeighbors,
-  PaperMetadata,
-  KBGraph,
-  KBEdge,
+  saveGraph,
+  upsertPaperNode,
 } from './kb-connector'
 
 // ============================================================================
@@ -118,7 +118,7 @@ export class PaperWiki {
     saveGraph(graph, this.graphPath)
 
     // Upsert into index
-    const existingIndex = index.papers.findIndex(p => p.id === paperId)
+    const existingIndex = index.papers.findIndex((p) => p.id === paperId)
     const fullNote: PaperNote = {
       ...note,
       id: paperId,
@@ -141,18 +141,20 @@ export class PaperWiki {
    */
   async queryNotes(keywords: string[]): Promise<PaperNote[]> {
     const index = this.loadIndex()
-    const kw = keywords.map(k => k.toLowerCase())
+    const kw = keywords.map((k) => k.toLowerCase())
 
-    return index.papers.filter(paper => {
+    return index.papers.filter((paper) => {
       const searchText = [
         paper.title,
         paper.summary,
         ...paper.tags,
         ...paper.entities,
         ...paper.concepts,
-      ].join(' ').toLowerCase()
+      ]
+        .join(' ')
+        .toLowerCase()
 
-      return kw.some(k => searchText.includes(k))
+      return kw.some((k) => searchText.includes(k))
     })
   }
 
@@ -161,7 +163,7 @@ export class PaperWiki {
    */
   async getNote(paperId: string): Promise<PaperNote | null> {
     const index = this.loadIndex()
-    return index.papers.find(p => p.id === paperId) || null
+    return index.papers.find((p) => p.id === paperId) || null
   }
 
   /**
@@ -180,7 +182,7 @@ export class PaperWiki {
 
     // Return only labels for readability
     return {
-      nodes: nodes.map(n => n.label),
+      nodes: nodes.map((n) => n.label),
       edges,
     }
   }
@@ -260,7 +262,7 @@ export class PaperWiki {
   async deleteNote(paperId: string): Promise<boolean> {
     const index = this.loadIndex()
     const initialLength = index.papers.length
-    index.papers = index.papers.filter(p => p.id !== paperId)
+    index.papers = index.papers.filter((p) => p.id !== paperId)
 
     if (index.papers.length < initialLength) {
       this.saveIndex(index)

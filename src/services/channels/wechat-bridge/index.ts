@@ -18,7 +18,7 @@
  *   CLAUDE_MODEL      - Model to use (default: claude-sonnet-4-20250514)
  */
 
-import { spawn, type ChildProcess } from 'node:child_process'
+import { type ChildProcess, spawn } from 'node:child_process'
 import { readline } from 'node:readline/promises'
 import axios from 'axios'
 
@@ -48,7 +48,10 @@ interface McpResponse {
 
 class WechatBridge {
   private weixinProcess: ChildProcess | null = null
-  private pendingRequests: Map<number, { resolve: (v: unknown) => void; reject: (e: Error) => void }> = new Map()
+  private pendingRequests: Map<
+    number,
+    { resolve: (v: unknown) => void; reject: (e: Error) => void }
+  > = new Map()
   private messageCursor: string = ''
   private running = false
   private currentRequestId = 1

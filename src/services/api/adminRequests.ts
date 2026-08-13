@@ -46,9 +46,7 @@ export type AdminRequest = {
  * If a pending request of the same type already exists for this user,
  * returns the existing request instead of creating a new one.
  */
-export async function createAdminRequest(
-  params: AdminRequestCreateParams,
-): Promise<AdminRequest> {
+export async function createAdminRequest(params: AdminRequestCreateParams): Promise<AdminRequest> {
   const { accessToken, orgUUID } = await prepareApiRequest()
 
   const headers = {

@@ -13,11 +13,7 @@ import type { ScopedMcpServerConfig } from '../../services/mcp/types.js'
 import { isInBundledMode } from '../bundledMode.js'
 import { getGlobalConfig, saveGlobalConfig } from '../config.js'
 import { logForDebugging } from '../debug.js'
-import {
-  getClaudeConfigHomeDir,
-  isEnvDefinedFalsy,
-  isEnvTruthy,
-} from '../envUtils.js'
+import { getClaudeConfigHomeDir, isEnvDefinedFalsy, isEnvTruthy } from '../envUtils.js'
 import { execFileNoThrowWithCwd } from '../execFileNoThrow.js'
 import { getPlatform } from '../platform.js'
 import { jsonStringify } from '../slowOperations.js'
@@ -67,7 +63,7 @@ export function shouldEnableClaudeInChrome(chromeFlag?: boolean): boolean {
   return false
 }
 
-let shouldAutoEnable: boolean | undefined = undefined
+let shouldAutoEnable: boolean | undefined
 
 export function shouldAutoEnableClaudeInChrome(): boolean {
   if (shouldAutoEnable !== undefined) {
@@ -94,9 +90,7 @@ export function setupClaudeInChrome(): {
   systemPrompt: string
 } {
   const isNativeBuild = isInBundledMode()
-  const allowedTools = BROWSER_TOOLS.map(
-    tool => `mcp__claude-in-chrome__${tool.name}`,
-  )
+  const allowedTools = BROWSER_TOOLS.map((tool) => `mcp__claude-in-chrome__${tool.name}`)
 
   const env: Record<string, string> = {}
   if (getSessionBypassPermissionsMode()) {
@@ -111,14 +105,11 @@ export function setupClaudeInChrome(): {
 
     // Run asynchronously without blocking; best-effort so swallow errors
     void createWrapperScript(execCommand)
-      .then(manifestBinaryPath =>
-        installChromeNativeHostManifest(manifestBinaryPath),
-      )
-      .catch(e =>
-        logForDebugging(
-          `[Claude in Chrome] Failed to install native host: ${e}`,
-          { level: 'error' },
-        ),
+      .then((manifestBinaryPath) => installChromeNativeHostManifest(manifestBinaryPath))
+      .catch((e) =>
+        logForDebugging(`[Claude in Chrome] Failed to install native host: ${e}`, {
+          level: 'error',
+        }),
       )
 
     return {
@@ -139,17 +130,12 @@ export function setupClaudeInChrome(): {
     const __dirname = join(__filename, '..')
     const cliPath = join(__dirname, 'cli.js')
 
-    void createWrapperScript(
-      `"${process.execPath}" "${cliPath}" --chrome-native-host`,
-    )
-      .then(manifestBinaryPath =>
-        installChromeNativeHostManifest(manifestBinaryPath),
-      )
-      .catch(e =>
-        logForDebugging(
-          `[Claude in Chrome] Failed to install native host: ${e}`,
-          { level: 'error' },
-        ),
+    void createWrapperScript(`"${process.execPath}" "${cliPath}" --chrome-native-host`)
+      .then((manifestBinaryPath) => installChromeNativeHostManifest(manifestBinaryPath))
+      .catch((e) =>
+        logForDebugging(`[Claude in Chrome] Failed to install native host: ${e}`, {
+          level: 'error',
+        }),
       )
 
     const mcpConfig = {
@@ -188,9 +174,7 @@ function getNativeMessagingHostsDirs(): string[] {
   return getAllNativeMessagingHostsDirs().map(({ path }) => path)
 }
 
-export async function installChromeNativeHostManifest(
-  manifestBinaryPath: string,
-): Promise<void> {
+export async function installChromeNativeHostManifest(manifestBinaryPath: string): Promise<void> {
   const manifestDirs = getNativeMessagingHostsDirs()
   if (manifestDirs.length === 0) {
     throw Error('Claude in Chrome Native Host not supported on this platform')
@@ -220,9 +204,7 @@ export async function installChromeNativeHostManifest(
     const manifestPath = join(manifestDir, NATIVE_HOST_MANIFEST_NAME)
 
     // Check if content matches to avoid unnecessary writes
-    const existingContent = await readFile(manifestPath, 'utf-8').catch(
-      () => null,
-    )
+    const existingContent = await readFile(manifestPath, 'utf-8').catch(() => null)
     if (existingContent === manifestContent) {
       continue
     }
@@ -230,15 +212,11 @@ export async function installChromeNativeHostManifest(
     try {
       await mkdir(manifestDir, { recursive: true })
       await writeFile(manifestPath, manifestContent)
-      logForDebugging(
-        `[Claude in Chrome] Installed native host manifest at: ${manifestPath}`,
-      )
+      logForDebugging(`[Claude in Chrome] Installed native host manifest at: ${manifestPath}`)
       anyManifestUpdated = true
     } catch (error) {
       // Log but don't fail - the browser might not be installed
-      logForDebugging(
-        `[Claude in Chrome] Failed to install manifest at ${manifestPath}: ${error}`,
-      )
+      logForDebugging(`[Claude in Chrome] Failed to install manifest at ${manifestPath}: ${error}`)
     }
   }
 
@@ -250,7 +228,7 @@ export async function installChromeNativeHostManifest(
 
   // Restart the native host if we have rewritten any manifest
   if (anyManifestUpdated) {
-    void isChromeExtensionInstalled().then(isInstalled => {
+    void isChromeExtensionInstalled().then((isInstalled) => {
       if (isInstalled) {
         logForDebugging(
           `[Claude in Chrome] First-time install detected, opening reconnect page in browser`,
@@ -284,7 +262,7 @@ function registerWindowsNativeHosts(manifestPath: string): void {
       '/d',
       manifestPath,
       '/f', // Force overwrite without prompt
-    ]).then(result => {
+    ]).then((result) => {
       if (result.code === 0) {
         logForDebugging(
           `[Claude in Chrome] Registered native host for ${browser} in Windows registry: ${fullKey}`,
@@ -339,9 +317,7 @@ exec ${command}
     await chmod(wrapperPath, 0o755)
   }
 
-  logForDebugging(
-    `[Claude in Chrome] Created Chrome native host wrapper script: ${wrapperPath}`,
-  )
+  logForDebugging(`[Claude in Chrome] Created Chrome native host wrapper script: ${wrapperPath}`)
   return wrapperPath
 }
 
@@ -361,7 +337,7 @@ exec ${command}
  */
 function isChromeExtensionInstalled_CACHED_MAY_BE_STALE(): boolean {
   // Update cache in background without blocking
-  void isChromeExtensionInstalled().then(isInstalled => {
+  void isChromeExtensionInstalled().then((isInstalled) => {
     // Only persist positive detections — see docstring. The cost of a stale
     // `true` is one silent MCP connection attempt per session; the cost of a
     // stale `false` is auto-enable never working again without manual repair.
@@ -370,7 +346,7 @@ function isChromeExtensionInstalled_CACHED_MAY_BE_STALE(): boolean {
     }
     const config = getGlobalConfig()
     if (config.cachedChromeExtensionInstalled !== isInstalled) {
-      saveGlobalConfig(prev => ({
+      saveGlobalConfig((prev) => ({
         ...prev,
         cachedChromeExtensionInstalled: isInstalled,
       }))

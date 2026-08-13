@@ -26,6 +26,8 @@ export type NormalizedEvent =
 export interface AgentConfig {
   /** Maximum conversation turns before auto-stop. */
   maxTurns?: number
+  /** Model override (e.g. 'sonnet', 'gpt-4o'). Undefined = use default. */
+  model?: string
   /** Path to a custom system prompt file (claude-code / codex only). */
   systemPromptPath?: string
   /** Extra CLI flags appended to the spawn command (claude-code / codex only). */

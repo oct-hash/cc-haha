@@ -30,8 +30,7 @@ export function isBridgeEnabled(): boolean {
   // Negative pattern (if (!feature(...)) return) does not eliminate
   // inline string literals from external builds.
   return feature('BRIDGE_MODE')
-    ? isClaudeAISubscriber() &&
-        getFeatureValue_CACHED_MAY_BE_STALE('tengu_ccr_bridge', false)
+    ? isClaudeAISubscriber() && getFeatureValue_CACHED_MAY_BE_STALE('tengu_ccr_bridge', false)
     : false
 }
 
@@ -49,8 +48,7 @@ export function isBridgeEnabled(): boolean {
  */
 export async function isBridgeEnabledBlocking(): Promise<boolean> {
   return feature('BRIDGE_MODE')
-    ? isClaudeAISubscriber() &&
-        (await checkGate_CACHED_OR_BLOCKING('tengu_ccr_bridge'))
+    ? isClaudeAISubscriber() && (await checkGate_CACHED_OR_BLOCKING('tengu_ccr_bridge'))
     : false
 }
 
@@ -105,9 +103,7 @@ function hasProfileScope(): boolean {
     return false
   }
 }
-function getOauthAccountInfo(): ReturnType<
-  typeof authModule.getOauthAccountInfo
-> {
+function getOauthAccountInfo(): ReturnType<typeof authModule.getOauthAccountInfo> {
   try {
     return authModule.getOauthAccountInfo()
   } catch {
@@ -140,10 +136,7 @@ export function isEnvLessBridgeEnabled(): boolean {
  */
 export function isCseShimEnabled(): boolean {
   return feature('BRIDGE_MODE')
-    ? getFeatureValue_CACHED_MAY_BE_STALE(
-        'tengu_bridge_repl_v2_cse_shim_enabled',
-        true,
-      )
+    ? getFeatureValue_CACHED_MAY_BE_STALE('tengu_bridge_repl_v2_cse_shim_enabled', true)
     : true
 }
 

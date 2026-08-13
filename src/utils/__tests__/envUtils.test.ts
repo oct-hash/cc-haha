@@ -1,18 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import {
-  isEnvTruthy,
-  isEnvDefinedFalsy,
-  parseEnvVars,
-  hasNodeOption,
-  getClaudeConfigHomeDir,
-  getTeamsDir,
-  isBareMode,
   getAWSRegion,
+  getClaudeConfigHomeDir,
   getDefaultVertexRegion,
-  shouldMaintainProjectWorkingDir,
-  isRunningOnHomespace,
-  isInProtectedNamespace,
+  getTeamsDir,
   getVertexRegionForModel,
+  hasNodeOption,
+  isBareMode,
+  isEnvDefinedFalsy,
+  isEnvTruthy,
+  isInProtectedNamespace,
+  isRunningOnHomespace,
+  parseEnvVars,
+  shouldMaintainProjectWorkingDir,
 } from '../envUtils'
 
 describe('isEnvTruthy', () => {
@@ -38,7 +38,8 @@ describe('isEnvDefinedFalsy', () => {
   it('accepts boolean false', () => expect(isEnvDefinedFalsy(false)).toBe(true))
   it('rejects "1"', () => expect(isEnvDefinedFalsy('1')).toBe(false))
   it('rejects boolean true', () => expect(isEnvDefinedFalsy(true)).toBe(false))
-  it('rejects undefined (not defined at all)', () => expect(isEnvDefinedFalsy(undefined)).toBe(false))
+  it('rejects undefined (not defined at all)', () =>
+    expect(isEnvDefinedFalsy(undefined)).toBe(false))
   it('rejects empty string', () => expect(isEnvDefinedFalsy('')).toBe(false))
 })
 

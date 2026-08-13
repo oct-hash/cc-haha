@@ -3,17 +3,15 @@
 // state block of the REPL component body.
 
 import { feature } from 'bun:bundle'
-import * as React from 'react'
+import type * as React from 'react'
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { REMOTE_SAFE_COMMANDS } from '../commands.js'
+import { useAwaySummary } from 'src/hooks/useAwaySummary.js'
 import type { Command } from '../commands.js'
+import { REMOTE_SAFE_COMMANDS } from '../commands.js'
+import { computeUnseenDivider, useUnseenDivider } from '../components/FullscreenLayout.js'
+import type { MessageActionsNav, MessageActionsState } from '../components/messageActions.js'
 import type { ToolUseConfirm } from '../components/permissions/PermissionRequest.js'
 import type { SpinnerMode } from '../components/Spinner.js'
-import { computeUnseenDivider, useUnseenDivider } from '../components/FullscreenLayout.js'
-import {
-  type MessageActionsNav,
-  type MessageActionsState,
-} from '../components/messageActions.js'
 import { useAssistantHistory } from '../hooks/useAssistantHistory.js'
 import { useDeferredHookMessages } from '../hooks/useDeferredHookMessages.js'
 import { useDirectConnect } from '../hooks/useDirectConnect.js'
@@ -23,7 +21,6 @@ import type { ScrollBoxHandle } from '../ink/components/ScrollBox.js'
 import type { RemoteSessionConfig } from '../remote/RemoteSessionManager.js'
 import type { DirectConnectConfig } from '../server/directConnectManager.js'
 import type { AppState } from '../state/AppState.js'
-import { useAwaySummary } from 'src/hooks/useAwaySummary.js'
 import type { Tool } from '../Tool.js'
 import type { HookResultMessage, Message as MessageType } from '../types/message.js'
 import type { PromptInputMode } from '../types/textInputTypes.js'

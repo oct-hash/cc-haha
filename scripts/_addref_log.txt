@@ -1,0 +1,14 @@
+[copied] R6 -> manuscript_R7_S4bref_v1.docx
+[methods] appended S4b cross-check sentence to methods paragraph
+[results] appended after anchor in paragraph (len now includes S4b)
+results_done=True  methods_done=True
+[saved]
+
+==== AUDIT ====
+R6 paragraphs: 161
+NEW paragraphs: 161  (should equal R6)
+'Figure S4b' occurrences in NEW: 2 at paragraphs [36, 72]
+'Figure S4b' in original R6: 0  (should be 0 = untouched)
+  CHANGED para: ...rministic Moran's I point estimates were additionally cross-checked with an independent R implementation (spdep, analytical variance; Supplementary Figure S4b).
+  CHANGED para: ...ement 14/14; maximum absolute difference 0.026), confirming that the spatial-autocorrelation result is software- and RNG-independent (Supplementary Figure S4b).
+changed paragraphs: 2  (should be 2)

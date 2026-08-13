@@ -1,0 +1,14 @@
+[copied] R12 -> manuscript_R13_auditfix_v1.docx
+[edit] para 12: partial match fix for cardiac I/R duplicate
+[edit] para 82: clarified Fth1 range spans sham+normal controls
+[edit] para 92: removed broken Methods §2.8 cross-reference
+[saved] 3 paragraphs edited
+
+==== AUDIT ====
+R12 paras 161  R13 paras 161  equal=True
+FIX1 [12] cardiac phrase absent: True OK
+FIX1 [13] cardiac phrase present: True OK
+FIX2 [82] clarified range: True OK
+FIX3 [92] Methods §2.8 absent: True OK
+FIX3 [92] coupling numbers preserved: True OK
+citations: refs=51 cited=51 orphan=[] missing=[]

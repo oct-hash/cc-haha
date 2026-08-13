@@ -9,10 +9,7 @@ import { basename, join, sep as pathSeparator, resolve } from 'path'
 import { logEvent } from 'src/services/analytics/index.js'
 import { getIsScrollDraining, getOriginalCwd } from '../bootstrap/state.js'
 import { callIdeRpc } from '../services/mcp/client.js'
-import type {
-  ConnectedMCPServer,
-  MCPServerConnection,
-} from '../services/mcp/types.js'
+import type { ConnectedMCPServer, MCPServerConnection } from '../services/mcp/types.js'
 import { getGlobalConfig, saveGlobalConfig } from './config.js'
 import { env } from './env.js'
 import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
@@ -30,19 +27,15 @@ import { lt } from './semver.js'
 
 // Lazy: IdeOnboardingDialog.tsx pulls React/ink; only needed in interactive onboarding path
 /* eslint-disable @typescript-eslint/no-require-imports */
-const ideOnboardingDialog =
-  (): typeof import('src/components/IdeOnboardingDialog.js') =>
-    require('src/components/IdeOnboardingDialog.js')
+const ideOnboardingDialog = (): typeof import('src/components/IdeOnboardingDialog.js') =>
+  require('src/components/IdeOnboardingDialog.js')
 
 import { createAbortController } from './abortController.js'
 import { logForDebugging } from './debug.js'
 import { envDynamic } from './envDynamic.js'
 import { errorMessage, isFsInaccessible } from './errors.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
-import {
-  checkWSLDistroMatch,
-  WindowsToWSLConverter,
-} from './idePathConversion.js'
+import { checkWSLDistroMatch, WindowsToWSLConverter } from './idePathConversion.js'
 import { sleep } from './sleep.js'
 import { jsonParse } from './slowOperations.js'
 
@@ -62,9 +55,7 @@ function makeAncestorPidLookup(): () => Promise<Set<number>> {
   let promise: Promise<Set<number>> | null = null
   return () => {
     if (!promise) {
-      promise = getAncestorPidsAsync(process.ppid, 10).then(
-        pids => new Set(pids),
-      )
+      promise = getAncestorPidsAsync(process.ppid, 10).then((pids) => new Set(pids))
     }
     return promise
   }
@@ -300,43 +291,40 @@ export async function getSortedIdeLockfiles(): Promise<string[]> {
     const ideLockFilePaths = await getIdeLockfilesPaths()
 
     // Collect all lockfiles from all directories
-    const allLockfiles: Array<{ path: string; mtime: Date }>[] =
-      await Promise.all(
-        ideLockFilePaths.map(async ideLockFilePath => {
-          try {
-            const entries = await getFsImplementation().readdir(ideLockFilePath)
-            const lockEntries = entries.filter(file =>
-              file.name.endsWith('.lock'),
-            )
-            // Stat all lockfiles in parallel; skip ones that fail
-            const stats = await Promise.all(
-              lockEntries.map(async file => {
-                const fullPath = join(ideLockFilePath, file.name)
-                try {
-                  const fileStat = await getFsImplementation().stat(fullPath)
-                  return { path: fullPath, mtime: fileStat.mtime }
-                } catch {
-                  return null
-                }
-              }),
-            )
-            return stats.filter(s => s !== null)
-          } catch (error) {
-            // Candidate paths are pushed without pre-checking existence, so
-            // missing/inaccessible dirs are expected here — skip silently.
-            if (!isFsInaccessible(error)) {
-              logError(error)
-            }
-            return []
+    const allLockfiles: Array<{ path: string; mtime: Date }>[] = await Promise.all(
+      ideLockFilePaths.map(async (ideLockFilePath) => {
+        try {
+          const entries = await getFsImplementation().readdir(ideLockFilePath)
+          const lockEntries = entries.filter((file) => file.name.endsWith('.lock'))
+          // Stat all lockfiles in parallel; skip ones that fail
+          const stats = await Promise.all(
+            lockEntries.map(async (file) => {
+              const fullPath = join(ideLockFilePath, file.name)
+              try {
+                const fileStat = await getFsImplementation().stat(fullPath)
+                return { path: fullPath, mtime: fileStat.mtime }
+              } catch {
+                return null
+              }
+            }),
+          )
+          return stats.filter((s) => s !== null)
+        } catch (error) {
+          // Candidate paths are pushed without pre-checking existence, so
+          // missing/inaccessible dirs are expected here — skip silently.
+          if (!isFsInaccessible(error)) {
+            logError(error)
           }
-        }),
-      )
+          return []
+        }
+      }),
+    )
 
     // Flatten and sort all lockfiles by last modified date (newest first)
     return allLockfiles
       .flat()
       .sort((a, b) => b.mtime.getTime() - a.mtime.getTime())
-      .map(file => file.path)
+      .map((file) => file.path)
   } catch (error) {
     logError(error as Error)
     return []
@@ -368,7 +356,7 @@ async function readIdeLockfile(path: string): Promise<IdeLockfileInfo | null> {
       authToken = parsedContent.authToken
     } catch (_) {
       // Older format- just a list of paths.
-      workspaceFolders = content.split('\n').map(line => line.trim())
+      workspaceFolders = content.split('\n').map((line) => line.trim())
     }
 
     // Extract the port from the filename (e.g., 12345.lock -> 12345)
@@ -399,13 +387,9 @@ async function readIdeLockfile(path: string): Promise<IdeLockfileInfo | null> {
  * @param timeout Optional timeout in milliseconds (defaults to 500ms)
  * @returns true if the port is open, false otherwise
  */
-async function checkIdeConnection(
-  host: string,
-  port: number,
-  timeout = 500,
-): Promise<boolean> {
+async function checkIdeConnection(host: string, port: number, timeout = 500): Promise<boolean> {
   try {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const socket = createConnection({
         host: host,
         port: port,
@@ -536,10 +520,7 @@ export async function cleanupStaleIdeLockfiles(): Promise<void> {
         continue
       }
 
-      const host = await detectHostIP(
-        lockfileInfo.runningInWindows,
-        lockfileInfo.port,
-      )
+      const host = await detectHostIP(lockfileInfo.runningInWindows, lockfileInfo.port)
 
       let shouldDelete = false
 
@@ -550,10 +531,7 @@ export async function cleanupStaleIdeLockfiles(): Promise<void> {
             shouldDelete = true
           } else {
             // The process id may not be reliable in wsl, so also check the connection
-            const isResponding = await checkIdeConnection(
-              host,
-              lockfileInfo.port,
-            )
+            const isResponding = await checkIdeConnection(host, lockfileInfo.port)
             if (!isResponding) {
               shouldDelete = true
             }
@@ -599,7 +577,7 @@ export async function maybeInstallIDEExtension(
     // Set diff tool config to auto if it has not been set already
     const globalConfig = getGlobalConfig()
     if (!globalConfig.diffTool) {
-      saveGlobalConfig(current => ({ ...current, diffTool: 'auto' }))
+      saveGlobalConfig((current) => ({ ...current, diffTool: 'auto' }))
     }
     return {
       installed: true,
@@ -661,9 +639,7 @@ export async function findAvailableIDE(): Promise<DetectedIDEInfo | null> {
  * @param includeInvalid If true, also return IDEs that are invalid (ie. where
  * the workspace directory does not match the cwd)
  */
-export async function detectIDEs(
-  includeInvalid: boolean,
-): Promise<DetectedIDEInfo[]> {
+export async function detectIDEs(includeInvalid: boolean): Promise<DetectedIDEInfo[]> {
   const detectedIDEs: DetectedIDEInfo[] = []
 
   try {
@@ -701,7 +677,7 @@ export async function detectIDEs(
         isValid = true
       } else {
         // Otherwise, check if the current working directory is within the workspace folders
-        isValid = lockfileInfo.workspaceFolders.some(idePath => {
+        isValid = lockfileInfo.workspaceFolders.some((idePath) => {
           if (!idePath) return false
 
           let localPath = idePath
@@ -720,17 +696,12 @@ export async function detectIDEs(
             // Try both the original path and the converted path
             // This handles cases where the IDE might report either format
             const resolvedOriginal = resolve(localPath).normalize('NFC')
-            if (
-              cwd === resolvedOriginal ||
-              cwd.startsWith(resolvedOriginal + pathSeparator)
-            ) {
+            if (cwd === resolvedOriginal || cwd.startsWith(resolvedOriginal + pathSeparator)) {
               return true
             }
 
             // Convert Windows IDE path to WSL local path and check that too
-            const converter = new WindowsToWSLConverter(
-              process.env.WSL_DISTRO_NAME,
-            )
+            const converter = new WindowsToWSLConverter(process.env.WSL_DISTRO_NAME)
             localPath = converter.toLocalPath(idePath)
           }
 
@@ -738,12 +709,9 @@ export async function detectIDEs(
 
           // On Windows, normalize paths for case-insensitive drive letter comparison
           if (getPlatform() === 'windows') {
-            const normalizedCwd = cwd.replace(/^[a-zA-Z]:/, match =>
+            const normalizedCwd = cwd.replace(/^[a-zA-Z]:/, (match) => match.toUpperCase())
+            const normalizedResolvedPath = resolvedPath.replace(/^[a-zA-Z]:/, (match) =>
               match.toUpperCase(),
-            )
-            const normalizedResolvedPath = resolvedPath.replace(
-              /^[a-zA-Z]:/,
-              match => match.toUpperCase(),
             )
             return (
               normalizedCwd === normalizedResolvedPath ||
@@ -751,9 +719,7 @@ export async function detectIDEs(
             )
           }
 
-          return (
-            cwd === resolvedPath || cwd.startsWith(resolvedPath + pathSeparator)
-          )
+          return cwd === resolvedPath || cwd.startsWith(resolvedPath + pathSeparator)
         })
       }
 
@@ -786,10 +752,7 @@ export async function detectIDEs(
         lockfileInfo.ideName ??
         (isSupportedTerminal() ? toIDEDisplayName(envDynamic.terminal) : 'IDE')
 
-      const host = await detectHostIP(
-        lockfileInfo.runningInWindows,
-        lockfileInfo.port,
-      )
+      const host = await detectHostIP(lockfileInfo.runningInWindows, lockfileInfo.port)
       let url
       if (lockfileInfo.useWebSocket) {
         url = `ws://${host}:${lockfileInfo.port}`
@@ -812,9 +775,7 @@ export async function detectIDEs(
     // an extension with a matching envPort, then we will single that one out
     // and return it, otherwise we return all the valid ones.
     if (!includeInvalid && envPort) {
-      const envPortMatch = detectedIDEs.filter(
-        ide => ide.isValid && ide.port === envPort,
-      )
+      const envPortMatch = detectedIDEs.filter((ide) => ide.isValid && ide.port === envPort)
       if (envPortMatch.length === 1) {
         return envPortMatch
       }
@@ -835,34 +796,22 @@ export async function maybeNotifyIDEConnected(client: Client) {
   })
 }
 
-export function hasAccessToIDEExtensionDiffFeature(
-  mcpClients: MCPServerConnection[],
-): boolean {
+export function hasAccessToIDEExtensionDiffFeature(mcpClients: MCPServerConnection[]): boolean {
   // Check if there's a connected IDE client in the provided MCP clients list
-  return mcpClients.some(
-    client => client.type === 'connected' && client.name === 'ide',
-  )
+  return mcpClients.some((client) => client.type === 'connected' && client.name === 'ide')
 }
 
 const EXTENSION_ID =
-  process.env.USER_TYPE === 'ant'
-    ? 'anthropic.claude-code-internal'
-    : 'anthropic.claude-code'
+  process.env.USER_TYPE === 'ant' ? 'anthropic.claude-code-internal' : 'anthropic.claude-code'
 
-export async function isIDEExtensionInstalled(
-  ideType: IdeType,
-): Promise<boolean> {
+export async function isIDEExtensionInstalled(ideType: IdeType): Promise<boolean> {
   if (isVSCodeIde(ideType)) {
     const command = await getVSCodeIDECommand(ideType)
     if (command) {
       try {
-        const result = await execFileNoThrowWithCwd(
-          command,
-          ['--list-extensions'],
-          {
-            env: getInstallationEnv(),
-          },
-        )
+        const result = await execFileNoThrowWithCwd(command, ['--list-extensions'], {
+          env: getInstallationEnv(),
+        })
         if (result.stdout?.includes(EXTENSION_ID)) {
           return true
         }
@@ -928,16 +877,10 @@ function getClaudeCodeVersion() {
   return MACRO.VERSION
 }
 
-async function getInstalledVSCodeExtensionVersion(
-  command: string,
-): Promise<string | null> {
-  const { stdout } = await execFileNoThrow(
-    command,
-    ['--list-extensions', '--show-versions'],
-    {
-      env: getInstallationEnv(),
-    },
-  )
+async function getInstalledVSCodeExtensionVersion(command: string): Promise<string | null> {
+  const { stdout } = await execFileNoThrow(command, ['--list-extensions', '--show-versions'], {
+    env: getInstallationEnv(),
+  })
   const lines = stdout?.split('\n') || []
   for (const line of lines) {
     const [extensionId, version] = line.split('@')
@@ -989,9 +932,7 @@ function getVSCodeIDECommandByParentProcess(): string | null {
             const folderPathEnd = appIndex + appName.length
             // These are all known VSCode variants with the same structure
             return (
-              command.substring(0, folderPathEnd) +
-              '/Contents/Resources/app/bin/' +
-              executableName
+              command.substring(0, folderPathEnd) + '/Contents/Resources/app/bin/' + executableName
             )
           }
         }
@@ -1061,9 +1002,7 @@ export async function isWindsurfInstalled(): Promise<boolean> {
 export async function isVSCodeInstalled(): Promise<boolean> {
   const result = await execFileNoThrow('code', ['--help'])
   // Check if the output indicates this is actually Visual Studio Code
-  return (
-    result.code === 0 && Boolean(result.stdout?.includes('Visual Studio Code'))
-  )
+  return result.code === 0 && Boolean(result.stdout?.includes('Visual Studio Code'))
 }
 
 // Cache for IDE detection results
@@ -1176,18 +1115,14 @@ export function resetDetectRunningIDEs(): void {
   cachedRunningIDEs = null
 }
 
-export function getConnectedIdeName(
-  mcpClients: MCPServerConnection[],
-): string | null {
+export function getConnectedIdeName(mcpClients: MCPServerConnection[]): string | null {
   const ideClient = mcpClients.find(
-    client => client.type === 'connected' && client.name === 'ide',
+    (client) => client.type === 'connected' && client.name === 'ide',
   )
   return getIdeClientName(ideClient)
 }
 
-export function getIdeClientName(
-  ideClient?: MCPServerConnection,
-): string | null {
+export function getIdeClientName(ideClient?: MCPServerConnection): string | null {
   const config = ideClient?.config
   return config?.type === 'sse-ide' || config?.type === 'ws-ide'
     ? config.ideName
@@ -1256,7 +1191,7 @@ export function getConnectedIdeClient(
   }
 
   const ideClient = mcpClients.find(
-    client => client.type === 'connected' && client.name === 'ide',
+    (client) => client.type === 'connected' && client.name === 'ide',
   )
 
   // Type guard to ensure we return the correct type
@@ -1267,9 +1202,7 @@ export function getConnectedIdeClient(
  * Notifies the IDE that a new prompt has been submitted.
  * This triggers IDE-specific actions like closing all diff tabs.
  */
-export async function closeOpenDiffs(
-  ideClient: ConnectedMCPServer,
-): Promise<void> {
+export async function closeOpenDiffs(ideClient: ConnectedMCPServer): Promise<void> {
   try {
     await callIdeRpc('closeAllDiffTabs', {}, ideClient)
   } catch (_) {
@@ -1289,24 +1222,19 @@ export async function initializeIdeIntegration(
   onIdeDetected: (ide: DetectedIDEInfo | null) => void,
   ideToInstallExtension: IdeType | null,
   onShowIdeOnboarding: () => void,
-  onInstallationComplete: (
-    status: IDEExtensionInstallationStatus | null,
-  ) => void,
+  onInstallationComplete: (status: IDEExtensionInstallationStatus | null) => void,
 ): Promise<void> {
   // Don't await so we don't block startup, but return a promise that resolves with the status
   void findAvailableIDE().then(onIdeDetected)
 
   const shouldAutoInstall = getGlobalConfig().autoInstallIdeExtension ?? true
-  if (
-    !isEnvTruthy(process.env.CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL) &&
-    shouldAutoInstall
-  ) {
+  if (!isEnvTruthy(process.env.CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL) && shouldAutoInstall) {
     const ideType = ideToInstallExtension ?? getTerminalIdeType()
     if (ideType) {
       if (isVSCodeIde(ideType)) {
-        void isIDEExtensionInstalled(ideType).then(async isAlreadyInstalled => {
+        void isIDEExtensionInstalled(ideType).then(async (isAlreadyInstalled) => {
           void maybeInstallIDEExtension(ideType)
-            .catch(error => {
+            .catch((error) => {
               const ideInstallationStatus: IDEExtensionInstallationStatus = {
                 installed: false,
                 error: error.message || 'Installation failed',
@@ -1315,7 +1243,7 @@ export async function initializeIdeIntegration(
               }
               return ideInstallationStatus
             })
-            .then(status => {
+            .then((status) => {
               onInstallationComplete(status)
 
               if (status?.installed) {
@@ -1334,11 +1262,8 @@ export async function initializeIdeIntegration(
         })
       } else if (isJetBrainsIde(ideType)) {
         // Always check installation to populate the sync cache used by status notices
-        void isIDEExtensionInstalled(ideType).then(async installed => {
-          if (
-            installed &&
-            !ideOnboardingDialog().hasIdeOnboardingDialogBeenShown()
-          ) {
+        void isIDEExtensionInstalled(ideType).then(async (installed) => {
+          if (installed && !ideOnboardingDialog().hasIdeOnboardingDialogBeenShown()) {
             onShowIdeOnboarding()
           }
         })
@@ -1369,9 +1294,7 @@ const detectHostIP = memoize(
         reject: false,
       })
       if (routeResult.exitCode === 0 && routeResult.stdout) {
-        const gatewayMatch = routeResult.stdout.match(
-          /default via (\d+\.\d+\.\d+\.\d+)/,
-        )
+        const gatewayMatch = routeResult.stdout.match(/default via (\d+\.\d+\.\d+\.\d+)/)
         if (gatewayMatch) {
           const gatewayIP = gatewayMatch[1]!
           if (await checkIdeConnection(gatewayIP, port)) {
@@ -1437,10 +1360,7 @@ async function installFromArtifactory(command: string): Promise<string> {
 
     // Download the .vsix file from artifactory
     const vsixUrl = `https://artifactory.infra.ant.dev/artifactory/armorcode-claude-code-internal/claude-vscode-releases/${version}/claude-code.vsix`
-    const tempVsixPath = join(
-      os.tmpdir(),
-      `claude-code-${version}-${Date.now()}.vsix`,
-    )
+    const tempVsixPath = join(os.tmpdir(), `claude-code-${version}-${Date.now()}.vsix`)
 
     try {
       const vsixResponse = await axios.get(vsixUrl, {
@@ -1485,9 +1405,7 @@ async function installFromArtifactory(command: string): Promise<string> {
     }
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      throw new Error(
-        `Failed to fetch extension version from artifactory: ${error.message}`,
-      )
+      throw new Error(`Failed to fetch extension version from artifactory: ${error.message}`)
     }
     throw error
   }

@@ -25,11 +25,7 @@ const TOOLS_CLEARABLE_RESULTS = [
   WEB_SEARCH_TOOL_NAME,
 ]
 
-const TOOLS_CLEARABLE_USES = [
-  FILE_EDIT_TOOL_NAME,
-  FILE_WRITE_TOOL_NAME,
-  NOTEBOOK_EDIT_TOOL_NAME,
-]
+const TOOLS_CLEARABLE_USES = [FILE_EDIT_TOOL_NAME, FILE_WRITE_TOOL_NAME, NOTEBOOK_EDIT_TOOL_NAME]
 
 // Context management strategy types matching API documentation
 export type ContextEditStrategy =
@@ -91,9 +87,7 @@ export function getAPIContextManagement(options?: {
     return strategies.length > 0 ? { edits: strategies } : undefined
   }
 
-  const useClearToolResults = isEnvTruthy(
-    process.env.USE_API_CLEAR_TOOL_RESULTS,
-  )
+  const useClearToolResults = isEnvTruthy(process.env.USE_API_CLEAR_TOOL_RESULTS)
   const useClearToolUses = isEnvTruthy(process.env.USE_API_CLEAR_TOOL_USES)
 
   // If no tool clearing strategy is enabled, return early

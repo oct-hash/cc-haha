@@ -6,9 +6,7 @@ import { join } from 'path'
 // tests that change the env var get a fresh value without explicit cache.clear.
 export const getClaudeConfigHomeDir = memoize(
   (): string => {
-    return (
-      process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude')
-    ).normalize('NFC')
+    return (process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude')).normalize('NFC')
   },
   () => process.env.CLAUDE_CONFIG_DIR,
 )
@@ -36,9 +34,7 @@ export function isEnvTruthy(envVar: string | boolean | undefined): boolean {
   return ['1', 'true', 'yes', 'on'].includes(normalizedValue)
 }
 
-export function isEnvDefinedFalsy(
-  envVar: string | boolean | undefined,
-): boolean {
+export function isEnvDefinedFalsy(envVar: string | boolean | undefined): boolean {
   if (envVar === undefined) return false
   if (typeof envVar === 'boolean') return !envVar
   if (!envVar) return false
@@ -58,10 +54,7 @@ export function isEnvDefinedFalsy(
  * — notably startKeychainPrefetch() at main.tsx top-level.
  */
 export function isBareMode(): boolean {
-  return (
-    isEnvTruthy(process.env.CLAUDE_CODE_SIMPLE) ||
-    process.argv.includes('--bare')
-  )
+  return isEnvTruthy(process.env.CLAUDE_CODE_SIMPLE) || process.argv.includes('--bare')
 }
 
 /**
@@ -69,9 +62,7 @@ export function isBareMode(): boolean {
  * @param envVars Array of strings in KEY=VALUE format
  * @returns Object with key-value pairs
  */
-export function parseEnvVars(
-  rawEnvArgs: string[] | undefined,
-): Record<string, string> {
+export function parseEnvVars(rawEnvArgs: string[] | undefined): Record<string, string> {
   const parsedEnv: Record<string, string> = {}
 
   // Parse individual env vars
@@ -116,10 +107,7 @@ export function shouldMaintainProjectWorkingDir(): boolean {
  * Check if running on Homespace (ant-internal cloud environment)
  */
 export function isRunningOnHomespace(): boolean {
-  return (
-    process.env.USER_TYPE === 'ant' &&
-    isEnvTruthy(process.env.COO_RUNNING_ON_HOMESPACE)
-  )
+  return process.env.USER_TYPE === 'ant' && isEnvTruthy(process.env.COO_RUNNING_ON_HOMESPACE)
 }
 
 /**
@@ -168,13 +156,9 @@ const VERTEX_REGION_OVERRIDES: ReadonlyArray<[string, string]> = [
  * Get the Vertex AI region for a specific model.
  * Different models may be available in different regions.
  */
-export function getVertexRegionForModel(
-  model: string | undefined,
-): string | undefined {
+export function getVertexRegionForModel(model: string | undefined): string | undefined {
   if (model) {
-    const match = VERTEX_REGION_OVERRIDES.find(([prefix]) =>
-      model.startsWith(prefix),
-    )
+    const match = VERTEX_REGION_OVERRIDES.find(([prefix]) => model.startsWith(prefix))
     if (match) {
       return process.env[match[1]] || getDefaultVertexRegion()
     }

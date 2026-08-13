@@ -7,27 +7,27 @@
 // UseREPLEffectsParams; only module-scope handler/component imports are
 // resolved here directly.
 
-import * as React from 'react'
+import type * as React from 'react'
 import { useEffect } from 'react'
+import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js'
+import {
+  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+  logEvent,
+} from 'src/services/analytics/index.js'
 import {
   getLastInteractionTime,
   getTotalInputTokens,
   updateLastInteractionTime,
 } from '../bootstrap/state.js'
-import { useCostSummary } from '../costHook.js'
 import { useFpsMetrics } from '../context/fpsMetrics.js'
 import type { Notification } from '../context/notifications.js'
+import { useCostSummary } from '../costHook.js'
 import { useAfterFirstRender } from '../hooks/useAfterFirstRender.js'
 import { useLogMessages } from '../hooks/useLogMessages.js'
 import { useQueueProcessor } from '../hooks/useQueueProcessor.js'
-import { Text } from '../ink.js'
 import type { TerminalNotification } from '../ink/useTerminalNotification.js'
+import { Text } from '../ink.js'
 import { sendNotification } from '../services/notifier.js'
-import {
-  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
-import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js'
 import type { Message as MessageType } from '../types/message.js'
 import type { QueuedCommand } from '../types/textInputTypes.js'
 import { activityManager } from '../utils/activityManager.js'

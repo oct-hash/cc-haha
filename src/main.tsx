@@ -465,7 +465,7 @@ function isBeingDebugged() {
 }
 
 // Exit if we detect node debugging or inspection
-if ('external' !== 'ant' && isBeingDebugged()) {
+if (process.env.USER_TYPE !== 'ant' && isBeingDebugged()) {
   // Use process.exit directly here since we're in the top-level code before imports
   // and gracefulShutdown is not yet available
   // eslint-disable-next-line custom-rules/no-top-level-side-effects
@@ -542,7 +542,7 @@ function runMigrations(): void {
     if (feature('TRANSCRIPT_CLASSIFIER')) {
       resetAutoModeOptInForDefaultOffer()
     }
-    if ('external' === 'ant') {
+    if (process.env.USER_TYPE === 'ant') {
       migrateFennecToOpus()
     }
     saveGlobalConfig((prev) =>
@@ -642,7 +642,7 @@ export function startDeferredPrefetches(): void {
   }
 
   // Event loop stall detector — logs when the main thread is blocked >500ms
-  if ('external' === 'ant') {
+  if (process.env.USER_TYPE === 'ant') {
     void import('./utils/eventLoopStallDetector.js').then((m) => m.startEventLoopStallDetector())
   }
 }
@@ -1719,7 +1719,7 @@ async function run(): Promise<CommanderCommand> {
 
       // Extract tasks mode options (ant-only)
       const tasksOption =
-        'external' === 'ant' &&
+        process.env.USER_TYPE === 'ant' &&
         (
           options as {
             tasks?: boolean | string
@@ -1730,7 +1730,7 @@ async function run(): Promise<CommanderCommand> {
           ? tasksOption
           : DEFAULT_TASKS_MODE_TASK_LIST_ID
         : undefined
-      if ('external' === 'ant' && taskListId) {
+      if (process.env.USER_TYPE === 'ant' && taskListId) {
         process.env.CLAUDE_CODE_TASK_LIST_ID = taskListId
       }
 
@@ -2209,7 +2209,7 @@ async function run(): Promise<CommanderCommand> {
       setChromeFlagOverride(chromeOpts.chrome)
       const enableClaudeInChrome =
         shouldEnableClaudeInChrome(chromeOpts.chrome) &&
-        ('external' === 'ant' || isClaudeAISubscriber())
+        (process.env.USER_TYPE === 'ant' || isClaudeAISubscriber())
       const autoEnableClaudeInChrome = !enableClaudeInChrome && shouldAutoEnableClaudeInChrome()
       if (enableClaudeInChrome) {
         const platform = getPlatform()
@@ -2451,7 +2451,7 @@ async function run(): Promise<CommanderCommand> {
       const { warnings, dangerousPermissions, overlyBroadBashPermissions } = initResult
 
       // Handle overly broad shell allow rules for ant users (Bash(*), PowerShell(*))
-      if ('external' === 'ant' && overlyBroadBashPermissions.length > 0) {
+      if (process.env.USER_TYPE === 'ant' && overlyBroadBashPermissions.length > 0) {
         for (const permission of overlyBroadBashPermissions) {
           logForDebugging(
             `Ignoring overly broad shell permission ${permission.ruleDisplay} from ${permission.sourceDisplay}`,
@@ -2755,7 +2755,7 @@ async function run(): Promise<CommanderCommand> {
       //  - flag absent from disk (== null also catches pre-#22279 poisoned null)
       const explicitModel = options.model || process.env.ANTHROPIC_MODEL
       if (
-        'external' === 'ant' &&
+        process.env.USER_TYPE === 'ant' &&
         explicitModel &&
         explicitModel !== 'default' &&
         !hasGrowthBookEnvOverride('tengu_ant_model_override') &&
@@ -2963,7 +2963,7 @@ async function run(): Promise<CommanderCommand> {
           // Log agent memory loaded event for tmux teammates
           if (customAgent.memory) {
             logEvent('tengu_agent_memory_loaded', {
-              ...('external' === 'ant' && {
+              ...(process.env.USER_TYPE === 'ant' && {
                 agent_type:
                   customAgent.agentType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               }),
@@ -3055,7 +3055,7 @@ async function run(): Promise<CommanderCommand> {
         getFpsMetrics = ctx.getFpsMetrics
         stats = ctx.stats
         // Install asciicast recorder before Ink mounts (ant-only, opt-in via CLAUDE_CODE_TERMINAL_RECORDING=1)
-        if ('external' === 'ant') {
+        if (process.env.USER_TYPE === 'ant') {
           installAsciicastRecorder()
         }
         const { createRoot } = await import('./ink.js')
@@ -3719,7 +3719,7 @@ async function run(): Promise<CommanderCommand> {
           void import('./utils/backgroundHousekeeping.js').then((m) =>
             m.startBackgroundHousekeeping(),
           )
-          if ('external' === 'ant') {
+          if (process.env.USER_TYPE === 'ant') {
             void import('./utils/sdkHeapDumpMonitor.js').then((m) => m.startSdkMemoryMonitor())
           }
         }
@@ -3992,7 +3992,7 @@ async function run(): Promise<CommanderCommand> {
       //   - Safety: CLAUDE_CODE_DISABLE_SESSION_DATA_UPLOAD=1 bypasses (tests set this).
       // Import is dynamic + async to avoid adding startup latency.
       const sessionUploaderPromise =
-        'external' === 'ant' ? import('./utils/sessionDataUploader.js') : null
+        process.env.USER_TYPE === 'ant' ? import('./utils/sessionDataUploader.js') : null
 
       // Defer session uploader resolution to the onTurnComplete callback to avoid
       // adding a new top-level await in main.tsx (performance-critical path).
@@ -4628,7 +4628,7 @@ async function run(): Promise<CommanderCommand> {
             }
           }
         }
-        if ('external' === 'ant') {
+        if (process.env.USER_TYPE === 'ant') {
           if (options.resume && typeof options.resume === 'string' && !maybeSessionId) {
             // Check for ccshare URL (e.g. https://go/ccshare/boris-20260311-211036)
             const { parseCcshareId, loadCcshare } = await import('./utils/ccshareResume.js')
@@ -4941,7 +4941,7 @@ async function run(): Promise<CommanderCommand> {
       ).hideHelp(),
     )
   }
-  if ('external' === 'ant') {
+  if (process.env.USER_TYPE === 'ant') {
     program.addOption(
       new Option('--delegate-permissions', '[ANT-ONLY] Alias for --permission-mode auto.').implies({
         permissionMode: 'auto',
@@ -5782,7 +5782,7 @@ async function run(): Promise<CommanderCommand> {
     })
 
   // claude up — run the project's CLAUDE.md "# claude up" setup instructions.
-  if ('external' === 'ant') {
+  if (process.env.USER_TYPE === 'ant') {
     program
       .command('up')
       .description(
@@ -5796,7 +5796,7 @@ async function run(): Promise<CommanderCommand> {
 
   // claude rollback (ant-only)
   // Rolls back to previous releases
-  if ('external' === 'ant') {
+  if (process.env.USER_TYPE === 'ant') {
     program
       .command('rollback [target]')
       .description(
@@ -5843,7 +5843,7 @@ async function run(): Promise<CommanderCommand> {
     )
 
   // ant-only commands
-  if ('external' === 'ant') {
+  if (process.env.USER_TYPE === 'ant') {
     const validateLogId = (value: string) => {
       const maybeSessionId = validateUuid(value)
       if (maybeSessionId) return maybeSessionId
@@ -5898,7 +5898,7 @@ Examples:
         const { exportHandler } = await import('./cli/handlers/ant.js')
         await exportHandler(source, outputFile)
       })
-    if ('external' === 'ant') {
+    if (process.env.USER_TYPE === 'ant') {
       const taskCmd = program.command('task').description('[ANT-ONLY] Manage task list tasks')
       taskCmd
         .command('create <subject>')
@@ -6100,7 +6100,7 @@ async function logTenguInit({
       }),
       autoUpdatesChannel: (getInitialSettings().autoUpdatesChannel ??
         'latest') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      ...('external' === 'ant'
+      ...(process.env.USER_TYPE === 'ant'
         ? (() => {
             const cwd = getCwd()
             const gitRoot = findGitRoot(cwd)

@@ -5,15 +5,15 @@
 
 import axios, { type AxiosInstance } from 'axios'
 import type {
+  QRCodePollResponse,
+  QRCodeResponse,
+  QRCodeStatus,
   WechatAccount,
+  WechatConfig,
+  WechatContact,
   WechatMessage,
   WechatSendMessage,
   WechatUpdate,
-  WechatConfig,
-  QRCodeResponse,
-  QRCodePollResponse,
-  QRCodeStatus,
-  WechatContact,
 } from './types.js'
 
 // Generate random WECHAT-UIN header
@@ -174,10 +174,7 @@ export async function sendTyping(
   })
 }
 
-export async function getUpdates(
-  account: WechatAccount,
-  cursor?: string,
-): Promise<WechatUpdate> {
+export async function getUpdates(account: WechatAccount, cursor?: string): Promise<WechatUpdate> {
   const client = createClient(account.token, account.baseUrl)
   const response = await client.post('/ilink/bot/getupdates', {
     client_id: generateClientId(),
@@ -186,9 +183,7 @@ export async function getUpdates(
   return response.data
 }
 
-export async function getConfig(
-  account: WechatAccount,
-): Promise<WechatConfig> {
+export async function getConfig(account: WechatAccount): Promise<WechatConfig> {
   const client = createClient(account.token, account.baseUrl)
   const response = await client.post('/ilink/bot/getconfig', {
     client_id: generateClientId(),
@@ -207,7 +202,11 @@ export async function uploadMedia(
 
   const formData = new FormData()
   formData.append('client_id', generateClientId())
-  formData.append('file', new Blob([data]), `file.${fileType === 'image' ? 'png' : fileType === 'video' ? 'mp4' : 'bin'}`)
+  formData.append(
+    'file',
+    new Blob([data]),
+    `file.${fileType === 'image' ? 'png' : fileType === 'video' ? 'mp4' : 'bin'}`,
+  )
   formData.append('file_type', fileType === 'image' ? '2' : fileType === 'video' ? '5' : '4')
 
   const response = await client.post('/ilink/bot/uploadmedia', formData, {
@@ -220,9 +219,7 @@ export async function uploadMedia(
 
 // ============ Contact API ============
 
-export async function getContacts(
-  account: WechatAccount,
-): Promise<WechatContact[]> {
+export async function getContacts(account: WechatAccount): Promise<WechatContact[]> {
   const client = createClient(account.token, account.baseUrl)
   const response = await client.post('/ilink/bot/getcontactlist', {
     client_id: generateClientId(),
@@ -235,7 +232,7 @@ export async function getContacts(
 function generateClientId(): string {
   const bytes = new Uint8Array(16)
   crypto.getRandomValues(bytes)
-  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
 }
 
 export const DEFAULT_BASE_URL = 'https://ilinkai.weixin.qq.com'

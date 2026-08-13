@@ -30,7 +30,7 @@ export const RATE_LIMIT_ERROR_PREFIXES = [
  * Check if a message is a rate limit error
  */
 export function isRateLimitErrorMessage(text: string): boolean {
-  return RATE_LIMIT_ERROR_PREFIXES.some(prefix => text.startsWith(prefix))
+  return RATE_LIMIT_ERROR_PREFIXES.some((prefix) => text.startsWith(prefix))
 }
 
 export type RateLimitMessage = {
@@ -70,26 +70,17 @@ export function getRateLimitMessage(
     // This prevents false warnings after week reset when API may send
     // allowed_warning with stale data at low usage levels
     const WARNING_THRESHOLD = 0.7
-    if (
-      limits.utilization !== undefined &&
-      limits.utilization < WARNING_THRESHOLD
-    ) {
+    if (limits.utilization !== undefined && limits.utilization < WARNING_THRESHOLD) {
       return null
     }
 
     // Don't warn non-billing Team/Enterprise users about approaching plan limits
     // if overages are enabled - they'll seamlessly roll into overage
     const subscriptionType = getSubscriptionType()
-    const isTeamOrEnterprise =
-      subscriptionType === 'team' || subscriptionType === 'enterprise'
-    const hasExtraUsageEnabled =
-      getOauthAccountInfo()?.hasExtraUsageEnabled === true
+    const isTeamOrEnterprise = subscriptionType === 'team' || subscriptionType === 'enterprise'
+    const hasExtraUsageEnabled = getOauthAccountInfo()?.hasExtraUsageEnabled === true
 
-    if (
-      isTeamOrEnterprise &&
-      hasExtraUsageEnabled &&
-      !hasClaudeAiBillingAccess()
-    ) {
+    if (isTeamOrEnterprise && hasExtraUsageEnabled && !hasClaudeAiBillingAccess()) {
       return null
     }
 
@@ -107,10 +98,7 @@ export function getRateLimitMessage(
  * Get error message for API errors (used in errors.ts)
  * Returns the message string or null if no error message should be shown
  */
-export function getRateLimitErrorMessage(
-  limits: ClaudeAILimits,
-  model: string,
-): string | null {
+export function getRateLimitErrorMessage(limits: ClaudeAILimits, model: string): string | null {
   const message = getRateLimitMessage(limits, model)
 
   // Only return error messages, not warnings
@@ -125,10 +113,7 @@ export function getRateLimitErrorMessage(
  * Get warning message for UI footer
  * Returns the warning message string or null if no warning should be shown
  */
-export function getRateLimitWarning(
-  limits: ClaudeAILimits,
-  model: string,
-): string | null {
+export function getRateLimitWarning(limits: ClaudeAILimits, model: string): string | null {
   const message = getRateLimitMessage(limits, model)
 
   // Only return warnings for the footer - errors are shown in AssistantTextMessages
@@ -174,8 +159,7 @@ function getLimitReachedText(limits: ClaudeAILimits, model: string): string {
 
   if (limits.rateLimitType === 'seven_day_sonnet') {
     const subscriptionType = getSubscriptionType()
-    const isProOrEnterprise =
-      subscriptionType === 'pro' || subscriptionType === 'enterprise'
+    const isProOrEnterprise = subscriptionType === 'pro' || subscriptionType === 'enterprise'
     // For pro and enterprise, Sonnet limit is the same as weekly
     const limit = isProOrEnterprise ? 'weekly limit' : 'Sonnet limit'
     return formatLimitReachedText(limit, resetMessage, model)
@@ -219,12 +203,8 @@ function getEarlyWarningText(limits: ClaudeAILimits): string | null {
   }
 
   // utilization and resetsAt should be defined since early warning is calculated with them
-  const used = limits.utilization
-    ? Math.floor(limits.utilization * 100)
-    : undefined
-  const resetTime = limits.resetsAt
-    ? formatResetTime(limits.resetsAt, true)
-    : undefined
+  const used = limits.utilization ? Math.floor(limits.utilization * 100) : undefined
+  const resetTime = limits.resetsAt ? formatResetTime(limits.resetsAt, true) : undefined
 
   // Get upsell command based on subscription type and limit type
   const upsell = getWarningUpsellText(limits.rateLimitType)
@@ -258,12 +238,9 @@ function getEarlyWarningText(limits: ClaudeAILimits): string | null {
  * Returns null if no upsell should be shown.
  * Only used for warnings because actual rate limit hits will see an interactive menu of options.
  */
-function getWarningUpsellText(
-  rateLimitType: ClaudeAILimits['rateLimitType'],
-): string | null {
+function getWarningUpsellText(rateLimitType: ClaudeAILimits['rateLimitType']): string | null {
   const subscriptionType = getSubscriptionType()
-  const hasExtraUsageEnabled =
-    getOauthAccountInfo()?.hasExtraUsageEnabled === true
+  const hasExtraUsageEnabled = getOauthAccountInfo()?.hasExtraUsageEnabled === true
 
   // 5-hour session limit warning
   if (rateLimitType === 'five_hour') {
@@ -301,9 +278,7 @@ function getWarningUpsellText(
  * Used for transient notifications when entering overage mode
  */
 export function getUsingOverageText(limits: ClaudeAILimits): string {
-  const resetTime = limits.resetsAt
-    ? formatResetTime(limits.resetsAt, true)
-    : ''
+  const resetTime = limits.resetsAt ? formatResetTime(limits.resetsAt, true) : ''
 
   let limitName = ''
   if (limits.rateLimitType === 'five_hour') {
@@ -314,8 +289,7 @@ export function getUsingOverageText(limits: ClaudeAILimits): string {
     limitName = 'Opus limit'
   } else if (limits.rateLimitType === 'seven_day_sonnet') {
     const subscriptionType = getSubscriptionType()
-    const isProOrEnterprise =
-      subscriptionType === 'pro' || subscriptionType === 'enterprise'
+    const isProOrEnterprise = subscriptionType === 'pro' || subscriptionType === 'enterprise'
     // For pro and enterprise, Sonnet limit is the same as weekly
     limitName = isProOrEnterprise ? 'weekly limit' : 'Sonnet limit'
   }
@@ -324,17 +298,11 @@ export function getUsingOverageText(limits: ClaudeAILimits): string {
     return 'Now using extra usage'
   }
 
-  const resetMessage = resetTime
-    ? ` · Your ${limitName} resets ${resetTime}`
-    : ''
+  const resetMessage = resetTime ? ` · Your ${limitName} resets ${resetTime}` : ''
   return `You're now using extra usage${resetMessage}`
 }
 
-function formatLimitReachedText(
-  limit: string,
-  resetMessage: string,
-  _model: string,
-): string {
+function formatLimitReachedText(limit: string, resetMessage: string, _model: string): string {
   // Enhanced messaging for Ant users
   if (process.env.USER_TYPE === 'ant') {
     return `You've hit your ${limit}${resetMessage}. If you have feedback about this limit, post in ${FEEDBACK_CHANNEL_ANT}. You can reset your limits with /reset-limits`

@@ -31,16 +31,12 @@ export function getMaxMcpOutputTokens(): number {
       return parsed
     }
   }
-  const overrides = getFeatureValue_CACHED_MAY_BE_STALE<Record<
-    string,
-    number
-  > | null>('tengu_satin_quoll', {})
+  const overrides = getFeatureValue_CACHED_MAY_BE_STALE<Record<string, number> | null>(
+    'tengu_satin_quoll',
+    {},
+  )
   const override = overrides?.['mcp_tool']
-  if (
-    typeof override === 'number' &&
-    Number.isFinite(override) &&
-    override > 0
-  ) {
+  if (typeof override === 'number' && Number.isFinite(override) && override > 0) {
     return override
   }
   return DEFAULT_MAX_MCP_OUTPUT_TOKENS
@@ -124,10 +120,7 @@ async function truncateContentBlocks(
           // base64 uses ~4/3 the original size, so we calculate max bytes
           const remainingBytes = Math.floor(remainingChars * 0.75)
           try {
-            const compressedBlock = await compressImageBlock(
-              block,
-              remainingBytes,
-            )
+            const compressedBlock = await compressImageBlock(block, remainingBytes)
             result.push(compressedBlock)
             // Update currentChars based on compressed image size
             if (compressedBlock.source.type === 'base64') {
@@ -148,17 +141,12 @@ async function truncateContentBlocks(
   return result
 }
 
-export async function mcpContentNeedsTruncation(
-  content: MCPToolResult,
-): Promise<boolean> {
+export async function mcpContentNeedsTruncation(content: MCPToolResult): Promise<boolean> {
   if (!content) return false
 
   // Use size check as a heuristic to avoid unnecessary token counting API calls
   const contentSizeEstimate = getContentSizeEstimate(content)
-  if (
-    contentSizeEstimate <=
-    getMaxMcpOutputTokens() * MCP_TOKEN_COUNT_THRESHOLD_FACTOR
-  ) {
+  if (contentSizeEstimate <= getMaxMcpOutputTokens() * MCP_TOKEN_COUNT_THRESHOLD_FACTOR) {
     return false
   }
 
@@ -177,9 +165,7 @@ export async function mcpContentNeedsTruncation(
   }
 }
 
-export async function truncateMcpContent(
-  content: MCPToolResult,
-): Promise<MCPToolResult> {
+export async function truncateMcpContent(content: MCPToolResult): Promise<MCPToolResult> {
   if (!content) return content
 
   const maxChars = getMaxMcpOutputChars()
@@ -188,18 +174,13 @@ export async function truncateMcpContent(
   if (typeof content === 'string') {
     return truncateString(content, maxChars) + truncationMsg
   } else {
-    const truncatedBlocks = await truncateContentBlocks(
-      content as ContentBlockParam[],
-      maxChars,
-    )
+    const truncatedBlocks = await truncateContentBlocks(content as ContentBlockParam[], maxChars)
     truncatedBlocks.push({ type: 'text', text: truncationMsg })
     return truncatedBlocks
   }
 }
 
-export async function truncateMcpContentIfNeeded(
-  content: MCPToolResult,
-): Promise<MCPToolResult> {
+export async function truncateMcpContentIfNeeded(content: MCPToolResult): Promise<MCPToolResult> {
   if (!(await mcpContentNeedsTruncation(content))) {
     return content
   }

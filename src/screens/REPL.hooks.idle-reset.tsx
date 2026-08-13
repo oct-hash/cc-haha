@@ -4,15 +4,15 @@
 
 import * as React from 'react'
 import { useCallback, useRef } from 'react'
+import { getTipToShowOnSpinner, recordShownTip } from 'src/services/tips/tipScheduler.js'
+import type { Theme, ThemeName } from 'src/utils/theme.js'
 import { clearSpeculativeChecks } from '../tools/BashTool/bashPermissions.js'
 import type { Message as MessageType } from '../types/message.js'
 import type { FileStateCache } from '../utils/fileStateCache.js'
 import type { SetAppState } from '../utils/messageQueueManager.js'
+import type { StreamingToolUse } from '../utils/messages.js'
 import { extractBashToolsFromMessages } from '../utils/queryHelpers.js'
 import { endInteractionSpan } from '../utils/telemetry/sessionTracing.js'
-import { getTipToShowOnSpinner, recordShownTip } from 'src/services/tips/tipScheduler.js'
-import { type StreamingToolUse } from '../utils/messages.js'
-import type { Theme, ThemeName } from 'src/utils/theme.js'
 
 export interface UseREPLIdleResetParams {
   setAppState: SetAppState

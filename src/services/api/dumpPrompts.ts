@@ -78,21 +78,13 @@ function initFingerprint(req: Record<string, unknown>): string {
     typeof system === 'string'
       ? system.length
       : Array.isArray(system)
-        ? system.reduce(
-            (n: number, b) => n + ((b as { text?: string }).text?.length ?? 0),
-            0,
-          )
+        ? system.reduce((n: number, b) => n + ((b as { text?: string }).text?.length ?? 0), 0)
         : 0
-  const toolNames = tools?.map(t => t.name ?? '').join(',') ?? ''
+  const toolNames = tools?.map((t) => t.name ?? '').join(',') ?? ''
   return `${req.model}|${toolNames}|${sysLen}`
 }
 
-function dumpRequest(
-  body: string,
-  ts: string,
-  state: DumpState,
-  filePath: string,
-): void {
+function dumpRequest(body: string, ts: string, state: DumpState, filePath: string): void {
   try {
     const req = jsonParse(body) as Record<string, unknown>
     addApiRequestToCache(req)
@@ -116,23 +108,17 @@ function dumpRequest(
         state.lastInitDataHash = initDataHash
         // Reuse initDataStr rather than re-serializing initData inside a wrapper.
         // timestamp from toISOString() contains no chars needing JSON escaping.
-        entries.push(
-          `{"type":"init","timestamp":"${ts}","data":${initDataStr}}`,
-        )
+        entries.push(`{"type":"init","timestamp":"${ts}","data":${initDataStr}}`)
       } else if (initDataHash !== state.lastInitDataHash) {
         state.lastInitDataHash = initDataHash
-        entries.push(
-          `{"type":"system_update","timestamp":"${ts}","data":${initDataStr}}`,
-        )
+        entries.push(`{"type":"system_update","timestamp":"${ts}","data":${initDataStr}}`)
       }
     }
 
     // Write only new user messages (assistant messages captured in response)
     for (const msg of messages.slice(state.messageCountSeen)) {
       if (msg.role === 'user') {
-        entries.push(
-          jsonStringify({ type: 'message', timestamp: ts, data: msg }),
-        )
+        entries.push(jsonStringify({ type: 'message', timestamp: ts, data: msg }))
       }
     }
     state.messageCountSeen = messages.length
@@ -143,9 +129,7 @@ function dumpRequest(
   }
 }
 
-export function createDumpPromptsFetch(
-  agentIdOrSessionId: string,
-): ClientOptions['fetch'] {
+export function createDumpPromptsFetch(agentIdOrSessionId: string): ClientOptions['fetch'] {
   const filePath = getDumpPromptsPath(agentIdOrSessionId)
 
   return async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -175,9 +159,7 @@ export function createDumpPromptsFetch(
       const cloned = response.clone()
       void (async () => {
         try {
-          const isStreaming = cloned.headers
-            .get('content-type')
-            ?.includes('text/event-stream')
+          const isStreaming = cloned.headers.get('content-type')?.includes('text/event-stream')
 
           let data: unknown
           if (isStreaming && cloned.body) {
@@ -211,10 +193,7 @@ export function createDumpPromptsFetch(
             data = await cloned.json()
           }
 
-          await fs.appendFile(
-            filePath,
-            jsonStringify({ type: 'response', timestamp, data }) + '\n',
-          )
+          await fs.appendFile(filePath, jsonStringify({ type: 'response', timestamp, data }) + '\n')
         } catch {
           // Best effort
         }

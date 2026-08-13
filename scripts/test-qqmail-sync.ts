@@ -1,12 +1,21 @@
 /**
  * 直接测试 QQ Mail 同步（绕过 MCP）
  */
-import { createQQMailIMAP } from './src/services/channels/qqmail/imap.js'
-import { createMatcher } from './src/services/channels/qqmail/matcher.js'
-import { createDownloader } from './src/services/channels/qqmail/downloader.js'
+
+import { createDownloader } from '../src/services/channels/qqmail/downloader.js'
+import { createQQMailIMAP } from '../src/services/channels/qqmail/imap.js'
+import { createMatcher } from '../src/services/channels/qqmail/matcher.js'
+
+function requireEnv(name: string): string {
+  const value = process.env[name]
+  if (!value) {
+    throw new Error(`${name} is required. Set it in .env (see .env.example)`)
+  }
+  return value
+}
 
 const QQ_USER = process.env.QQ_USER || '35050503@qq.com'
-const QQ_AUTH_CODE = process.env.QQ_AUTH_CODE || 'ylzerpgiktfebiac'
+const QQ_AUTH_CODE = requireEnv('QQ_AUTH_CODE')
 const KB_INDEX_PATH = process.env.KB_INDEX_PATH || 'D:/hermes-kb/wiki/papertree/index.json'
 const KB_GRAPH_PATH = process.env.KB_GRAPH_PATH || 'D:/hermes-kb/wiki/papertree/graph.json'
 
@@ -47,7 +56,7 @@ async function main() {
   console.log('Done!')
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error('Error:', err.message)
   process.exit(1)
 })

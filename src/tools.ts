@@ -15,13 +15,10 @@ import { BrowserTool } from './tools/BrowserTool/BrowserTool.js'
 // Dead code elimination: conditional import for ant-only tools
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
 const REPLTool =
-  process.env.USER_TYPE === 'ant'
-    ? require('./tools/REPLTool/REPLTool.js').REPLTool
-    : null
+  process.env.USER_TYPE === 'ant' ? require('./tools/REPLTool/REPLTool.js').REPLTool : null
 const SuggestBackgroundPRTool =
   process.env.USER_TYPE === 'ant'
-    ? require('./tools/SuggestBackgroundPRTool/SuggestBackgroundPRTool.js')
-        .SuggestBackgroundPRTool
+    ? require('./tools/SuggestBackgroundPRTool/SuggestBackgroundPRTool.js').SuggestBackgroundPRTool
     : null
 const SleepTool =
   feature('PROACTIVE') || feature('KAIROS')
@@ -45,8 +42,7 @@ const SendUserFileTool = feature('KAIROS')
   : null
 const PushNotificationTool =
   feature('KAIROS') || feature('KAIROS_PUSH_NOTIFICATION')
-    ? require('./tools/PushNotificationTool/PushNotificationTool.js')
-        .PushNotificationTool
+    ? require('./tools/PushNotificationTool/PushNotificationTool.js').PushNotificationTool
     : null
 const SubscribePRTool = feature('KAIROS_GITHUB_WEBHOOKS')
   ? require('./tools/SubscribePRTool/SubscribePRTool.js').SubscribePRTool
@@ -91,8 +87,7 @@ import { isTodoV2Enabled } from './utils/tasks.js'
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
 const VerifyPlanExecutionTool =
   process.env.CLAUDE_CODE_VERIFY_PLAN === 'true'
-    ? require('./tools/VerifyPlanExecutionTool/VerifyPlanExecutionTool.js')
-        .VerifyPlanExecutionTool
+    ? require('./tools/VerifyPlanExecutionTool/VerifyPlanExecutionTool.js').VerifyPlanExecutionTool
     : null
 /* eslint-enable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
 import { SYNTHETIC_OUTPUT_TOOL_NAME } from './tools/SyntheticOutputTool/SyntheticOutputTool.js'
@@ -112,8 +107,7 @@ const CtxInspectTool = feature('CONTEXT_COLLAPSE')
   ? require('./tools/CtxInspectTool/CtxInspectTool.js').CtxInspectTool
   : null
 const TerminalCaptureTool = feature('TERMINAL_PANEL')
-  ? require('./tools/TerminalCaptureTool/TerminalCaptureTool.js')
-      .TerminalCaptureTool
+  ? require('./tools/TerminalCaptureTool/TerminalCaptureTool.js').TerminalCaptureTool
   : null
 const WebBrowserTool = feature('WEB_BROWSER_TOOL')
   ? require('./tools/WebBrowserTool/WebBrowserTool.js').WebBrowserTool
@@ -121,9 +115,7 @@ const WebBrowserTool = feature('WEB_BROWSER_TOOL')
 const coordinatorModeModule = feature('COORDINATOR_MODE')
   ? (require('./coordinator/coordinatorMode.js') as typeof import('./coordinator/coordinatorMode.js'))
   : null
-const SnipTool = feature('HISTORY_SNIP')
-  ? require('./tools/SnipTool/SnipTool.js').SnipTool
-  : null
+const SnipTool = feature('HISTORY_SNIP') ? require('./tools/SnipTool/SnipTool.js').SnipTool : null
 const ListPeersTool = feature('UDS_INBOX')
   ? require('./tools/ListPeersTool/ListPeersTool.js').ListPeersTool
   : null
@@ -141,11 +133,7 @@ import { isEnvTruthy } from './utils/envUtils.js'
 import { isPowerShellToolEnabled } from './utils/shell/shellToolUtils.js'
 import { isAgentSwarmsEnabled } from './utils/agentSwarmsEnabled.js'
 import { isWorktreeModeEnabled } from './utils/worktreeModeEnabled.js'
-import {
-  REPL_TOOL_NAME,
-  REPL_ONLY_TOOLS,
-  isReplModeEnabled,
-} from './tools/REPLTool/constants.js'
+import { REPL_TOOL_NAME, REPL_ONLY_TOOLS, isReplModeEnabled } from './tools/REPLTool/constants.js'
 export { REPL_ONLY_TOOLS }
 /* eslint-disable @typescript-eslint/no-require-imports */
 const getPowerShellTool = () => {
@@ -179,8 +167,8 @@ export function parseToolPreset(preset: string): ToolPreset | null {
  */
 export function getToolsForDefaultPreset(): string[] {
   const tools = getAllBaseTools()
-  const isEnabled = tools.map(tool => tool.isEnabled())
-  return tools.filter((_, i) => isEnabled[i]).map(tool => tool.name)
+  const isEnabled = tools.map((tool) => tool.isEnabled())
+  return tools.filter((_, i) => isEnabled[i]).map((tool) => tool.name)
 }
 
 /**
@@ -217,9 +205,7 @@ export function getAllBaseTools(): Tools {
     ...(process.env.USER_TYPE === 'ant' ? [TungstenTool] : []),
     ...(SuggestBackgroundPRTool ? [SuggestBackgroundPRTool] : []),
     ...(WebBrowserTool ? [WebBrowserTool] : []),
-    ...(isTodoV2Enabled()
-      ? [TaskCreateTool, TaskGetTool, TaskUpdateTool, TaskListTool]
-      : []),
+    ...(isTodoV2Enabled() ? [TaskCreateTool, TaskGetTool, TaskUpdateTool, TaskListTool] : []),
     ...(OverflowTestTool ? [OverflowTestTool] : []),
     ...(CtxInspectTool ? [CtxInspectTool] : []),
     ...(TerminalCaptureTool ? [TerminalCaptureTool] : []),
@@ -227,9 +213,7 @@ export function getAllBaseTools(): Tools {
     ...(isWorktreeModeEnabled() ? [EnterWorktreeTool, ExitWorktreeTool] : []),
     getSendMessageTool(),
     ...(ListPeersTool ? [ListPeersTool] : []),
-    ...(isAgentSwarmsEnabled()
-      ? [getTeamCreateTool(), getTeamDeleteTool()]
-      : []),
+    ...(isAgentSwarmsEnabled() ? [getTeamCreateTool(), getTeamDeleteTool()] : []),
     ...(VerifyPlanExecutionTool ? [VerifyPlanExecutionTool] : []),
     ...(process.env.USER_TYPE === 'ant' && REPLTool ? [REPLTool] : []),
     ...(WorkflowTool ? [WorkflowTool] : []),
@@ -267,7 +251,7 @@ export function filterToolsByDenyRules<
     mcpInfo?: { serverName: string; toolName: string }
   },
 >(tools: readonly T[], permissionContext: ToolPermissionContext): T[] {
-  return tools.filter(tool => !getDenyRuleForTool(permissionContext, tool))
+  return tools.filter((tool) => !getDenyRuleForTool(permissionContext, tool))
 }
 
 export const getTools = (permissionContext: ToolPermissionContext): Tools => {
@@ -278,10 +262,7 @@ export const getTools = (permissionContext: ToolPermissionContext): Tools => {
     // below which also hides REPL_ONLY_TOOLS when REPL is enabled.
     if (isReplModeEnabled() && REPLTool) {
       const replSimple: Tool[] = [REPLTool]
-      if (
-        feature('COORDINATOR_MODE') &&
-        coordinatorModeModule?.isCoordinatorMode()
-      ) {
+      if (feature('COORDINATOR_MODE') && coordinatorModeModule?.isCoordinatorMode()) {
         replSimple.push(TaskStopTool, getSendMessageTool())
       }
       return filterToolsByDenyRules(replSimple, permissionContext)
@@ -290,10 +271,7 @@ export const getTools = (permissionContext: ToolPermissionContext): Tools => {
     // When coordinator mode is also active, include AgentTool and TaskStopTool
     // so the coordinator gets Task+TaskStop (via useMergedTools filtering) and
     // workers get Bash/Read/Edit (via filterToolsForAgent filtering).
-    if (
-      feature('COORDINATOR_MODE') &&
-      coordinatorModeModule?.isCoordinatorMode()
-    ) {
+    if (feature('COORDINATOR_MODE') && coordinatorModeModule?.isCoordinatorMode()) {
       simpleTools.push(AgentTool, TaskStopTool, getSendMessageTool())
     }
     return filterToolsByDenyRules(simpleTools, permissionContext)
@@ -306,7 +284,7 @@ export const getTools = (permissionContext: ToolPermissionContext): Tools => {
     SYNTHETIC_OUTPUT_TOOL_NAME,
   ])
 
-  const tools = getAllBaseTools().filter(tool => !specialTools.has(tool.name))
+  const tools = getAllBaseTools().filter((tool) => !specialTools.has(tool.name))
 
   // Filter out tools that are denied by the deny rules
   let allowedTools = filterToolsByDenyRules(tools, permissionContext)
@@ -314,17 +292,13 @@ export const getTools = (permissionContext: ToolPermissionContext): Tools => {
   // When REPL mode is enabled, hide primitive tools from direct use.
   // They're still accessible inside REPL via the VM context.
   if (isReplModeEnabled()) {
-    const replEnabled = allowedTools.some(tool =>
-      toolMatchesName(tool, REPL_TOOL_NAME),
-    )
+    const replEnabled = allowedTools.some((tool) => toolMatchesName(tool, REPL_TOOL_NAME))
     if (replEnabled) {
-      allowedTools = allowedTools.filter(
-        tool => !REPL_ONLY_TOOLS.has(tool.name),
-      )
+      allowedTools = allowedTools.filter((tool) => !REPL_ONLY_TOOLS.has(tool.name))
     }
   }
 
-  const isEnabled = allowedTools.map(_ => _.isEnabled())
+  const isEnabled = allowedTools.map((_) => _.isEnabled())
   return allowedTools.filter((_, i) => isEnabled[i])
 }
 
@@ -344,10 +318,7 @@ export const getTools = (permissionContext: ToolPermissionContext): Tools => {
  * @param mcpTools - MCP tools from appState.mcp.tools
  * @returns Combined, deduplicated array of built-in and MCP tools
  */
-export function assembleToolPool(
-  permissionContext: ToolPermissionContext,
-  mcpTools: Tools,
-): Tools {
+export function assembleToolPool(permissionContext: ToolPermissionContext, mcpTools: Tools): Tools {
   const builtInTools = getTools(permissionContext)
 
   // Filter out MCP tools that are in the deny list
@@ -362,10 +333,7 @@ export function assembleToolPool(
   // Avoid Array.toSorted (Node 20+) — we support Node 18. builtInTools is
   // readonly so copy-then-sort; allowedMcpTools is a fresh .filter() result.
   const byName = (a: Tool, b: Tool) => a.name.localeCompare(b.name)
-  return uniqBy(
-    [...builtInTools].sort(byName).concat(allowedMcpTools.sort(byName)),
-    'name',
-  )
+  return uniqBy([...builtInTools].sort(byName).concat(allowedMcpTools.sort(byName)), 'name')
 }
 
 /**
@@ -382,10 +350,7 @@ export function assembleToolPool(
  * @param mcpTools - MCP tools from appState.mcp.tools
  * @returns Combined array of built-in and MCP tools
  */
-export function getMergedTools(
-  permissionContext: ToolPermissionContext,
-  mcpTools: Tools,
-): Tools {
+export function getMergedTools(permissionContext: ToolPermissionContext, mcpTools: Tools): Tools {
   const builtInTools = getTools(permissionContext)
   return [...builtInTools, ...mcpTools]
 }

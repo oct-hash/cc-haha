@@ -2,7 +2,7 @@
 // messages array plus the eager messagesRef-syncing setMessages wrapper, the
 // idle-hint flag, and the input-on-processing placeholder baseline setter.
 
-import * as React from 'react'
+import type * as React from 'react'
 import { useCallback, useRef, useState } from 'react'
 import type { Message as MessageType } from '../types/message.js'
 import { isHumanTurn } from '../utils/messagePredicates.js'

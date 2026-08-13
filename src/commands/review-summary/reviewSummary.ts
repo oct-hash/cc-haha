@@ -25,7 +25,7 @@ export function aggregateReviews(): ReviewSummary {
       commonErrors: [],
       commonMissedTools: [],
       improvementSuggestions: [],
-      goodPatterns: []
+      goodPatterns: [],
     }
   }
 
@@ -35,7 +35,7 @@ export function aggregateReviews(): ReviewSummary {
     commonErrors: [],
     commonMissedTools: [],
     improvementSuggestions: [],
-    goodPatterns: []
+    goodPatterns: [],
   }
 
   // Aggregate errors
@@ -97,9 +97,7 @@ export function formatSummaryForDisplay(summary: ReviewSummary): string {
     return '暂无复盘数据。请先完成任务后输入"任务完成"触发复盘。'
   }
 
-  const lines: string[] = [
-    `📊 复盘汇总（共 ${summary.totalReviews} 次任务）\n`
-  ]
+  const lines: string[] = [`📊 复盘汇总（共 ${summary.totalReviews} 次任务）\n`]
 
   if (summary.commonErrors.length > 0) {
     lines.push('--- 常见错误 ---')

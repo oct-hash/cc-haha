@@ -1,0 +1,70 @@
+==== supplementary dirs (mtime/ctime/size) ====
+-- supplementary : exists=True --
+   [DIR] mtime=2026-07-07 19:36 ctime=2026-07-07 19:36 size=0
+
+-- supplementary\figures : exists=True --
+   [DIR] mtime=2026-07-07 19:48 ctime=2026-07-07 19:36 size=4096
+   bach1_correlation_3datasets.png   mtime=2026-06-15 19:26 ctime=2026-06-15 19:26 size=174979
+   bach1_intersection_heatmap.png   mtime=2026-06-15 19:25 ctime=2026-06-15 19:25 size=180292
+   Figure_CrossDataset_Concordance.png   mtime=2026-06-17 13:58 ctime=2026-06-17 13:58 size=203935
+   Figure_CrossDataset_Concordance_preview.png   mtime=2026-06-17 13:59 ctime=2026-06-17 13:59 size=150279
+   protein_coverage_comparison.png   mtime=2026-06-15 19:26 ctime=2026-06-15 19:26 size=242792
+
+-- 交付最终版\supplementary : exists=True --
+   [DIR] mtime=2026-07-13 22:07 ctime=2026-07-13 22:07 size=4096
+   FigS1_SPP1_validation_v1.pdf   mtime=2026-07-13 19:18 ctime=2026-07-13 22:07 size=52785
+   FigS1_SPP1_validation_v1.png   mtime=2026-07-13 19:18 ctime=2026-07-13 22:07 size=270608
+   FigS2_bulk_Spp1_timecourse_v1.pdf   mtime=2026-07-13 00:28 ctime=2026-07-13 22:07 size=51736
+   FigS2_bulk_Spp1_timecourse_v1.png   mtime=2026-07-13 00:28 ctime=2026-07-13 22:07 size=196048
+   FigS3_scRNA_replication_v1.pdf   mtime=2026-07-13 01:46 ctime=2026-07-13 22:07 size=196456
+   FigS3_scRNA_replication_v1.png   mtime=2026-07-13 01:46 ctime=2026-07-13 22:07 size=575184
+   FigS4_spatial_coloc_v1.pdf   mtime=2026-07-13 18:32 ctime=2026-07-13 22:07 size=1559476
+   FigS4_spatial_coloc_v1.png   mtime=2026-07-13 18:32 ctime=2026-07-13 22:07 size=1150057
+
+-- 交付最终版\figures : exists=True --
+   [DIR] mtime=2026-07-14 01:55 ctime=2026-07-13 22:07 size=4096
+   Fig1.pdf   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=76247
+   Fig1.png   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=211200
+   Fig2.pdf   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=39463
+   Fig2.png   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=352683
+   Fig3.pdf   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=29654
+   Fig3.png   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=199148
+   Fig4.pdf   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=53696
+   Fig4.png   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=489165
+   Fig5.pdf   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=40335
+   Fig5.png   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=310556
+   Fig6.pdf   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=34946
+   Fig6.png   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=408661
+   Fig7.pdf   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=46414
+   Fig7.png   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=310432
+   Fig8.pdf   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=261322
+   Fig8.png   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=400557
+   FigS1_SPP1_validation_v1.pdf   mtime=2026-07-14 01:55 ctime=2026-07-14 01:55 size=52785
+   FigS1_SPP1_validation_v1.png   mtime=2026-07-14 01:55 ctime=2026-07-14 01:55 size=270608
+   FigS2_bulk_Spp1_timecourse_v1.pdf   mtime=2026-07-14 01:55 ctime=2026-07-14 01:55 size=51736
+   FigS2_bulk_Spp1_timecourse_v1.png   mtime=2026-07-14 01:55 ctime=2026-07-14 01:55 size=196048
+   FigS3_scRNA_replication_v1.pdf   mtime=2026-07-14 01:55 ctime=2026-07-14 01:55 size=196456
+   FigS3_scRNA_replication_v1.png   mtime=2026-07-14 01:55 ctime=2026-07-14 01:55 size=575184
+   FigS4_spatial_coloc_v1.pdf   mtime=2026-07-14 01:55 ctime=2026-07-14 01:55 size=1559476
+   FigS4_spatial_coloc_v1.png   mtime=2026-07-14 01:55 ctime=2026-07-14 01:55 size=1150057
+   MAPPING.md   mtime=2026-07-14 01:53 ctime=2026-07-13 22:07 size=559
+
+-- manuscript : exists=True --
+   [DIR] mtime=2026-07-14 23:47 ctime=2026-07-07 19:36 size=16384
+   _R5_extracted.txt   mtime=2026-07-14 19:15 ctime=2026-07-14 19:15 size=53370
+   _R6_Rpipeline_extracted.txt   mtime=2026-07-14 22:39 ctime=2026-07-14 22:39 size=55220
+   FigS1_SPP1_validation_v1.pdf   mtime=2026-07-13 19:18 ctime=2026-07-13 19:18 size=52785
+   FigS1_SPP1_validation_v1.png   mtime=2026-07-13 19:18 ctime=2026-07-13 19:18 size=270608
+   FigS2_bulk_Spp1_timecourse_v1.pdf   mtime=2026-07-13 00:28 ctime=2026-07-13 00:28 size=51736
+   FigS2_bulk_Spp1_timecourse_v1.png   mtime=2026-07-13 00:28 ctime=2026-07-13 00:28 size=196048
+   FigS3_scRNA_replication_v1.pdf   mtime=2026-07-13 01:46 ctime=2026-07-13 01:46 size=196456
+   FigS3_scRNA_replication_v1.png   mtime=2026-07-13 01:46 ctime=2026-07-13 01:46 size=575184
+   FigS4_spatial_coloc_v1.pdf   mtime=2026-07-13 18:32 ctime=2026-07-13 18:32 size=1559476
+   FigS4_spatial_coloc_v1.png   mtime=2026-07-13 18:32 ctime=2026-07-13 18:32 size=1150057
+   FigS4b_moran_spdep_crosscheck_v1.pdf   mtime=2026-07-14 23:47 ctime=2026-07-14 23:47 size=34014
+   FigS4b_moran_spdep_crosscheck_v1.png   mtime=2026-07-14 23:47 ctime=2026-07-14 23:47 size=215196
+   manuscript_R5.docx   mtime=2026-07-13 21:24 ctime=2026-07-11 10:31 size=2373665
+   manuscript_R6_Rpipeline.docx   mtime=2026-07-14 22:39 ctime=2026-07-14 22:39 size=57946
+   ~$nuscript_R5.docx   mtime=2026-07-13 21:37 ctime=2026-07-13 21:37 size=162
+
+==== candidate legend text files (search *legend*, *supp*, *.txt/.md under non-process dirs) ====

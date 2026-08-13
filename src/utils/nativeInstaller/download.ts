@@ -27,9 +27,7 @@ const GCS_BUCKET_URL =
 export const ARTIFACTORY_REGISTRY_URL =
   'https://artifactory.infra.ant.dev/artifactory/api/npm/npm-all/'
 
-export async function getLatestVersionFromArtifactory(
-  tag: string = 'latest',
-): Promise<string> {
+export async function getLatestVersionFromArtifactory(tag: string = 'latest'): Promise<string> {
   const startTime = Date.now()
   const { stdout, code, stderr } = await execFileNoThrowWithCwd(
     'npm',
@@ -64,9 +62,7 @@ export async function getLatestVersionFromArtifactory(
     latency_ms: latencyMs,
     source_npm: true,
   })
-  logForDebugging(
-    `npm view ${MACRO.NATIVE_PACKAGE_URL}@${tag} version: ${stdout}`,
-  )
+  logForDebugging(`npm view ${MACRO.NATIVE_PACKAGE_URL}@${tag} version: ${stdout}`)
   const latestVersion = stdout.trim()
   return latestVersion
 }
@@ -109,9 +105,7 @@ export async function getLatestVersionFromBinaryRepo(
   }
 }
 
-export async function getLatestVersion(
-  channelOrVersion: string,
-): Promise<string> {
+export async function getLatestVersion(channelOrVersion: string): Promise<string> {
   // Direct version - match internal format too (e.g. 1.0.30-dev.shaf4937ce)
   if (/^v?\d+\.\d+\.\d+(-\S+)?$/.test(channelOrVersion)) {
     const normalized = channelOrVersion.startsWith('v')
@@ -132,9 +126,7 @@ export async function getLatestVersion(
   // ReleaseChannel validation
   const channel = channelOrVersion as ReleaseChannel
   if (channel !== 'stable' && channel !== 'latest') {
-    throw new Error(
-      `Invalid channel: ${channelOrVersion}. Use 'stable' or 'latest'`,
-    )
+    throw new Error(`Invalid channel: ${channelOrVersion}. Use 'stable' or 'latest'`)
   }
 
   // Route to appropriate source
@@ -148,10 +140,7 @@ export async function getLatestVersion(
   return getLatestVersionFromBinaryRepo(channel, GCS_BUCKET_URL)
 }
 
-export async function downloadVersionFromArtifactory(
-  version: string,
-  stagingPath: string,
-) {
+export async function downloadVersionFromArtifactory(version: string, stagingPath: string) {
   const fs = getFsImplementation()
 
   // If we get here, we own the lock and can delete a partial download
@@ -162,9 +151,7 @@ export async function downloadVersionFromArtifactory(
   const platformPackageName = `${MACRO.NATIVE_PACKAGE_URL}-${platform}`
 
   // Fetch integrity hash for the platform-specific package
-  logForDebugging(
-    `Fetching integrity hash for ${platformPackageName}@${version}`,
-  )
+  logForDebugging(`Fetching integrity hash for ${platformPackageName}@${version}`)
   const {
     stdout: integrityOutput,
     code,
@@ -190,9 +177,7 @@ export async function downloadVersionFromArtifactory(
 
   const integrity = integrityOutput.trim()
   if (!integrity) {
-    throw new Error(
-      `Failed to fetch integrity hash for ${platformPackageName}@${version}`,
-    )
+    throw new Error(`Failed to fetch integrity hash for ${platformPackageName}@${version}`)
   }
 
   logForDebugging(`Got integrity hash for ${platform}: ${integrity}`)
@@ -235,11 +220,10 @@ export async function downloadVersionFromArtifactory(
     },
   }
 
-  writeFileSync_DEPRECATED(
-    join(stagingPath, 'package.json'),
-    jsonStringify(packageJson, null, 2),
-    { encoding: 'utf8', flush: true },
-  )
+  writeFileSync_DEPRECATED(join(stagingPath, 'package.json'), jsonStringify(packageJson, null, 2), {
+    encoding: 'utf8',
+    flush: true,
+  })
 
   writeFileSync_DEPRECATED(
     join(stagingPath, 'package-lock.json'),
@@ -263,9 +247,7 @@ export async function downloadVersionFromArtifactory(
     throw new Error(`npm ci failed with code ${result.code}: ${result.stderr}`)
   }
 
-  logForDebugging(
-    `Successfully downloaded and verified ${MACRO.NATIVE_PACKAGE_URL}@${version}`,
-  )
+  logForDebugging(`Successfully downloaded and verified ${MACRO.NATIVE_PACKAGE_URL}@${version}`)
 }
 
 // Stall timeout: abort if no bytes received for this duration
@@ -273,10 +255,7 @@ const DEFAULT_STALL_TIMEOUT_MS = 60000 // 60 seconds
 const MAX_DOWNLOAD_RETRIES = 3
 
 function getStallTimeoutMs(): number {
-  return (
-    Number(process.env.CLAUDE_CODE_STALL_TIMEOUT_MS_FOR_TESTING) ||
-    DEFAULT_STALL_TIMEOUT_MS
-  )
+  return Number(process.env.CLAUDE_CODE_STALL_TIMEOUT_MS_FOR_TESTING) || DEFAULT_STALL_TIMEOUT_MS
 }
 
 class StallTimeoutError extends Error {
@@ -311,7 +290,7 @@ async function downloadAndVerifyBinary(
 
     const resetStallTimer = () => {
       clearStallTimer()
-      stallTimer = setTimeout(c => c.abort(), getStallTimeoutMs(), controller)
+      stallTimer = setTimeout((c) => c.abort(), getStallTimeoutMs(), controller)
     }
 
     try {
@@ -337,9 +316,7 @@ async function downloadAndVerifyBinary(
       const actualChecksum = hash.digest('hex')
 
       if (actualChecksum !== expectedChecksum) {
-        throw new Error(
-          `Checksum mismatch: expected ${expectedChecksum}, got ${actualChecksum}`,
-        )
+        throw new Error(`Checksum mismatch: expected ${expectedChecksum}, got ${actualChecksum}`)
       }
 
       // Write binary to disk
@@ -403,14 +380,11 @@ export async function downloadVersionFromBinaryRepo(
   // Fetch manifest to get checksum
   let manifest
   try {
-    const manifestResponse = await axios.get(
-      `${baseUrl}/${version}/manifest.json`,
-      {
-        timeout: 10000,
-        responseType: 'json',
-        ...authConfig,
-      },
-    )
+    const manifestResponse = await axios.get(`${baseUrl}/${version}/manifest.json`, {
+      timeout: 10000,
+      responseType: 'json',
+      ...authConfig,
+    })
     manifest = manifestResponse.data
   } catch (error) {
     const latencyMs = Date.now() - startTime
@@ -437,9 +411,7 @@ export async function downloadVersionFromBinaryRepo(
 
   if (!platformInfo) {
     logEvent('tengu_binary_platform_not_found', {})
-    throw new Error(
-      `Platform ${platform} not found in manifest for version ${version}`,
-    )
+    throw new Error(`Platform ${platform} not found in manifest for version ${version}`)
   }
 
   const expectedChecksum = platformInfo.checksum
@@ -453,12 +425,7 @@ export async function downloadVersionFromBinaryRepo(
   const binaryPath = join(stagingPath, binaryName)
 
   try {
-    await downloadAndVerifyBinary(
-      binaryUrl,
-      expectedChecksum,
-      binaryPath,
-      authConfig || {},
-    )
+    await downloadAndVerifyBinary(binaryUrl, expectedChecksum, binaryPath, authConfig || {})
     const latencyMs = Date.now() - startTime
     logEvent('tengu_binary_download_success', {
       latency_ms: latencyMs,
@@ -477,9 +444,7 @@ export async function downloadVersionFromBinaryRepo(
       is_timeout: errorMessage.includes('timeout'),
       is_checksum_mismatch: errorMessage.includes('Checksum mismatch'),
     })
-    logError(
-      new Error(`Failed to download binary from ${binaryUrl}: ${errorMessage}`),
-    )
+    logError(new Error(`Failed to download binary from ${binaryUrl}: ${errorMessage}`))
     throw error
   }
 }
@@ -493,10 +458,7 @@ export async function downloadVersion(
   // never exist in compiled binaries. Same gcloud-token pattern as
   // remoteSkillLoader.ts:175-195.
   if (feature('ALLOW_TEST_VERSIONS') && /^99\.99\./.test(version)) {
-    const { stdout } = await execFileNoThrowWithCwd('gcloud', [
-      'auth',
-      'print-access-token',
-    ])
+    const { stdout } = await execFileNoThrowWithCwd('gcloud', ['auth', 'print-access-token'])
     await downloadVersionFromBinaryRepo(
       version,
       stagingPath,
@@ -518,6 +480,6 @@ export async function downloadVersion(
 }
 
 // Exported for testing
-export { StallTimeoutError, MAX_DOWNLOAD_RETRIES }
+export { MAX_DOWNLOAD_RETRIES, StallTimeoutError }
 export const STALL_TIMEOUT_MS = DEFAULT_STALL_TIMEOUT_MS
 export const _downloadAndVerifyBinaryForTesting = downloadAndVerifyBinary

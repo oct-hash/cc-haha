@@ -1,8 +1,5 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
-import type {
-  ToolResultBlockParam,
-  ToolUseBlock,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+import type { ToolResultBlockParam, ToolUseBlock } from '@anthropic-ai/sdk/resources/index.mjs'
 import type { CanUseToolFn } from './hooks/useCanUseTool.js'
 import { FallbackTriggeredError } from './services/api/withRetry.js'
 import {
@@ -38,10 +35,7 @@ import type {
   TombstoneMessage,
 } from './types/message.js'
 import { logError } from './utils/log.js'
-import {
-  PROMPT_TOO_LONG_ERROR_MESSAGE,
-  isPromptTooLongMessage,
-} from './services/api/errors.js'
+import { PROMPT_TOO_LONG_ERROR_MESSAGE, isPromptTooLongMessage } from './services/api/errors.js'
 import { logAntError, logForDebugging } from './utils/debug.js'
 import {
   createUserMessage,
@@ -77,10 +71,7 @@ import {
 } from './utils/messageQueueManager.js'
 import { notifyCommandLifecycle } from './utils/commandLifecycle.js'
 import { headlessProfilerCheckpoint } from './utils/headlessProfiler.js'
-import {
-  getRuntimeMainLoopModel,
-  renderModelName,
-} from './utils/model/model.js'
+import { getRuntimeMainLoopModel, renderModelName } from './utils/model/model.js'
 import {
   doesMostRecentAssistantMessageExceed200k,
   finalContextTokensFromLastResponse,
@@ -102,6 +93,8 @@ import { handleStopHooks } from './query/stopHooks.js'
 import { buildQueryConfig } from './query/config.js'
 import { productionDeps, type QueryDeps } from './query/deps.js'
 import type { Terminal, Continue } from './query/transitions.js'
+import { isDecisionQuestion } from './utils/decisionDetector.js'
+import { runAutoDebate, type QueryFn } from './services/agents/autoDebateEntry.js'
 import { feature } from 'bun:bundle'
 import {
   getCurrentTurnTokenBudget,
@@ -127,7 +120,7 @@ function* yieldMissingToolResultBlocks(
   for (const assistantMessage of assistantMessages) {
     // Extract all tool use blocks from this assistant message
     const toolUseBlocks = assistantMessage.message.content.filter(
-      content => content.type === 'tool_use',
+      (content) => content.type === 'tool_use',
     ) as ToolUseBlock[]
 
     // Emit an interruption message for each tool use
@@ -172,6 +165,25 @@ const MAX_OUTPUT_TOKENS_RECOVERY_LIMIT = 3
  *
  * Mirrors reactiveCompact.isWithheldPromptTooLong.
  */
+/** Extract the text content from the last (non-meta) user message. */
+function getLastUserMessageText(messages: Message[]): string | null {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i] as { type: string; isMeta?: boolean; content: unknown }
+    if (msg.type === 'user' && !msg.isMeta) {
+      if (typeof msg.content === 'string') return msg.content
+      if (Array.isArray(msg.content)) {
+        const textBlocks = msg.content.filter(
+          (b: { type?: string; text?: string }) => b.type === 'text',
+        )
+        if (textBlocks.length > 0) {
+          return textBlocks.map((b: { text?: string }) => b.text ?? '').join(' ')
+        }
+      }
+    }
+  }
+  return null
+}
+
 function isWithheldMaxOutputTokens(
   msg: Message | StreamEvent | undefined,
 ): msg is AssistantMessage {
@@ -190,6 +202,10 @@ export type QueryParams = {
   maxOutputTokensOverride?: number
   maxTurns?: number
   skipCacheWrite?: boolean
+  /** Suppress auto-debate routing for inner query calls (prevents recursion). */
+  skipAutoDebate?: boolean
+  /** Model to use for auto-debate queries (override for heterogeneity). */
+  model?: string
   // API task_budget (output_config.task_budget, beta task-budgets-2026-03-13).
   // Distinct from the tokenBudget +500k auto-continue feature. `total` is the
   // budget for the whole agentic turn; `remaining` is computed per iteration
@@ -219,13 +235,34 @@ type State = {
 export async function* query(
   params: QueryParams,
 ): AsyncGenerator<
-  | StreamEvent
-  | RequestStartEvent
-  | Message
-  | TombstoneMessage
-  | ToolUseSummaryMessage,
+  StreamEvent | RequestStartEvent | Message | TombstoneMessage | ToolUseSummaryMessage,
   Terminal
 > {
+  // ── Auto-debate routing for decision-type questions ──────────────────────
+  const lastUserText = getLastUserMessageText(params.messages)
+  if (!params.skipAutoDebate && lastUserText && isDecisionQuestion(lastUserText)) {
+    const queryFn: QueryFn = async function* (prompt, abortController, modelOverride) {
+      const innerParams: QueryParams = {
+        ...params,
+        messages: [createUserMessage({ content: prompt })],
+        maxTurns: 5,
+        skipCacheWrite: true,
+        skipAutoDebate: true,
+        canUseTool: () => false,
+        model: modelOverride ?? params.model,
+      }
+      yield* query(innerParams)
+    }
+
+    for await (const event of runAutoDebate(lastUserText, queryFn)) {
+      if (event.type === 'text_chunk') {
+        yield { type: 'stream', text: event.content } as StreamEvent
+      }
+    }
+    return { reason: 'completed' } as Terminal
+  }
+
+  // ── Normal query path ────────────────────────────────────────────────────
   const consumedCommandUuids: string[] = []
   const terminal = yield* queryLoop(params, consumedCommandUuids)
   // Only reached if queryLoop returned normally. Skipped on throw (error
@@ -242,11 +279,7 @@ async function* queryLoop(
   params: QueryParams,
   consumedCommandUuids: string[],
 ): AsyncGenerator<
-  | StreamEvent
-  | RequestStartEvent
-  | Message
-  | TombstoneMessage
-  | ToolUseSummaryMessage,
+  StreamEvent | RequestStartEvent | Message | TombstoneMessage | ToolUseSummaryMessage,
   Terminal
 > {
   // Immutable params — never reassigned during the query loop.
@@ -288,7 +321,7 @@ async function* queryLoop(
   // multiple compacts: each subtracts the final context at that compact's
   // trigger point. Loop-local (not on State) to avoid touching the 7 continue
   // sites.
-  let taskBudgetRemaining: number | undefined = undefined
+  let taskBudgetRemaining: number | undefined
 
   // Snapshot immutable env/statsig/session state once at entry. See QueryConfig
   // for what's included and why feature() gates are intentionally excluded.
@@ -298,10 +331,7 @@ async function* queryLoop(
   // so per-iteration firing would ask sideQuery the same question N times.
   // Consume point polls settledAt (never blocks). `using` disposes on all
   // generator exit paths — see MemoryPrefetch for dispose/telemetry semantics.
-  using pendingMemoryPrefetch = startRelevantMemoryPrefetch(
-    state.messages,
-    state.toolUseContext,
-  )
+  using pendingMemoryPrefetch = startRelevantMemoryPrefetch(state.messages, state.toolUseContext)
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -374,22 +404,18 @@ async function* queryLoop(
     // routes to sidechain file (AgentTool resume) or session file (/resume).
     // Ephemeral runForkedAgent callers (agent_summary etc.) don't persist.
     const persistReplacements =
-      querySource.startsWith('agent:') ||
-      querySource.startsWith('repl_main_thread')
+      querySource.startsWith('agent:') || querySource.startsWith('repl_main_thread')
     messagesForQuery = await applyToolResultBudget(
       messagesForQuery,
       toolUseContext.contentReplacementState,
       persistReplacements
-        ? records =>
-            void recordContentReplacement(
-              records,
-              toolUseContext.agentId,
-            ).catch(logError)
+        ? (records) =>
+            void recordContentReplacement(records, toolUseContext.agentId).catch(logError)
         : undefined,
       new Set(
         toolUseContext.options.tools
-          .filter(t => !Number.isFinite(t.maxResultSizeChars))
-          .map(t => t.name),
+          .filter((t) => !Number.isFinite(t.maxResultSizeChars))
+          .map((t) => t.name),
       ),
     )
 
@@ -446,9 +472,7 @@ async function* queryLoop(
       messagesForQuery = collapseResult.messages
     }
 
-    const fullSystemPrompt = asSystemPrompt(
-      appendSystemContext(systemPrompt, systemContext),
-    )
+    const fullSystemPrompt = asSystemPrompt(appendSystemContext(systemPrompt, systemContext))
 
     queryCheckpoint('query_autocompact_start')
     const { compactionResult, consecutiveFailures } = await deps.autocompact(
@@ -486,10 +510,8 @@ async function* queryLoop(
         truePostCompactTokenCount,
         compactionInputTokens: compactionUsage?.input_tokens,
         compactionOutputTokens: compactionUsage?.output_tokens,
-        compactionCacheReadTokens:
-          compactionUsage?.cache_read_input_tokens ?? 0,
-        compactionCacheCreationTokens:
-          compactionUsage?.cache_creation_input_tokens ?? 0,
+        compactionCacheReadTokens: compactionUsage?.cache_read_input_tokens ?? 0,
+        compactionCacheCreationTokens: compactionUsage?.cache_creation_input_tokens ?? 0,
         compactionTotalTokens: compactionUsage
           ? compactionUsage.input_tokens +
             (compactionUsage.cache_creation_input_tokens ?? 0) +
@@ -506,8 +528,7 @@ async function* queryLoop(
       // iterations[-1] is the authoritative final window (post server tool
       // loops); see #304930.
       if (params.taskBudget) {
-        const preCompactContext =
-          finalContextTokensFromLastResponse(messagesForQuery)
+        const preCompactContext = finalContextTokensFromLastResponse(messagesForQuery)
         taskBudgetRemaining = Math.max(
           0,
           (taskBudgetRemaining ?? params.taskBudget.total) - preCompactContext,
@@ -560,11 +581,7 @@ async function* queryLoop(
     queryCheckpoint('query_setup_start')
     const useStreamingToolExecution = config.gates.streamingToolExecution
     let streamingToolExecutor = useStreamingToolExecution
-      ? new StreamingToolExecutor(
-          toolUseContext.options.tools,
-          canUseTool,
-          toolUseContext,
-        )
+      ? new StreamingToolExecutor(toolUseContext.options.tools, canUseTool, toolUseContext)
       : null
 
     const appState = toolUseContext.getAppState()
@@ -573,8 +590,7 @@ async function* queryLoop(
       permissionMode,
       mainLoopModel: toolUseContext.options.mainLoopModel,
       exceeds200kTokens:
-        permissionMode === 'plan' &&
-        doesMostRecentAssistantMessageExceed200k(messagesForQuery),
+        permissionMode === 'plan' && doesMostRecentAssistantMessageExceed200k(messagesForQuery),
     })
 
     queryCheckpoint('query_setup_end')
@@ -615,23 +631,19 @@ async function* queryLoop(
     let collapseOwnsIt = false
     if (feature('CONTEXT_COLLAPSE')) {
       collapseOwnsIt =
-        (contextCollapse?.isContextCollapseEnabled() ?? false) &&
-        isAutoCompactEnabled()
+        (contextCollapse?.isContextCollapseEnabled() ?? false) && isAutoCompactEnabled()
     }
     // Hoist media-recovery gate once per turn. Withholding (inside the
     // stream loop) and recovery (after) must agree; CACHED_MAY_BE_STALE can
     // flip during the 5-30s stream, and withhold-without-recover would eat
     // the message. PTL doesn't hoist because its withholding is ungated —
     // it predates the experiment and is already the control-arm baseline.
-    const mediaRecoveryEnabled =
-      reactiveCompact?.isReactiveCompactEnabled() ?? false
+    const mediaRecoveryEnabled = reactiveCompact?.isReactiveCompactEnabled() ?? false
     if (
       !compactionResult &&
       querySource !== 'compact' &&
       querySource !== 'session_memory' &&
-      !(
-        reactiveCompact?.isReactiveCompactEnabled() && isAutoCompactEnabled()
-      ) &&
+      !(reactiveCompact?.isReactiveCompactEnabled() && isAutoCompactEnabled()) &&
       !collapseOwnsIt
     ) {
       const { isAtBlockingLimit } = calculateTokenWarningState(
@@ -672,24 +684,19 @@ async function* queryLoop(
                 fastMode: appState.fastMode,
               }),
               toolChoice: undefined,
-              isNonInteractiveSession:
-                toolUseContext.options.isNonInteractiveSession,
+              isNonInteractiveSession: toolUseContext.options.isNonInteractiveSession,
               fallbackModel,
               onStreamingFallback: () => {
                 streamingFallbackOccured = true
               },
               querySource,
               agents: toolUseContext.options.agentDefinitions.activeAgents,
-              allowedAgentTypes:
-                toolUseContext.options.agentDefinitions.allowedAgentTypes,
-              hasAppendSystemPrompt:
-                !!toolUseContext.options.appendSystemPrompt,
+              allowedAgentTypes: toolUseContext.options.agentDefinitions.allowedAgentTypes,
+              hasAppendSystemPrompt: !!toolUseContext.options.appendSystemPrompt,
               maxOutputTokensOverride,
               fetchOverride: dumpPromptsFetch,
               mcpTools: appState.mcp.tools,
-              hasPendingMcpServers: appState.mcp.clients.some(
-                c => c.type === 'pending',
-              ),
+              hasPendingMcpServers: appState.mcp.clients.some((c) => c.type === 'pending'),
               queryTracking,
               effortValue: appState.effortValue,
               advisorModel: appState.advisorModel,
@@ -754,10 +761,7 @@ async function* queryLoop(
                   typeof block.input === 'object' &&
                   block.input !== null
                 ) {
-                  const tool = findToolByName(
-                    toolUseContext.options.tools,
-                    block.name,
-                  )
+                  const tool = findToolByName(toolUseContext.options.tools, block.name)
                   if (tool?.backfillObservableInput) {
                     const originalInput = block.input as Record<string, unknown>
                     const inputCopy = { ...originalInput }
@@ -768,9 +772,7 @@ async function* queryLoop(
                     // transcript and break VCR fixture hashes on resume,
                     // while adding nothing the SDK stream needs — hooks get
                     // the expanded path via toolExecution.ts separately.
-                    const addedFields = Object.keys(inputCopy).some(
-                      k => !(k in originalInput),
-                    )
+                    const addedFields = Object.keys(inputCopy).some((k) => !(k in originalInput))
                     if (addedFields) {
                       clonedContent ??= [...message.message.content]
                       clonedContent[i] = { ...block, input: inputCopy }
@@ -811,10 +813,7 @@ async function* queryLoop(
             if (reactiveCompact?.isWithheldPromptTooLong(message)) {
               withheld = true
             }
-            if (
-              mediaRecoveryEnabled &&
-              reactiveCompact?.isWithheldMediaSizeError(message)
-            ) {
+            if (mediaRecoveryEnabled && reactiveCompact?.isWithheldMediaSizeError(message)) {
               withheld = true
             }
             if (isWithheldMaxOutputTokens(message)) {
@@ -827,27 +826,21 @@ async function* queryLoop(
               assistantMessages.push(message)
 
               const msgToolUseBlocks = message.message.content.filter(
-                content => content.type === 'tool_use',
+                (content) => content.type === 'tool_use',
               ) as ToolUseBlock[]
               if (msgToolUseBlocks.length > 0) {
                 toolUseBlocks.push(...msgToolUseBlocks)
                 needsFollowUp = true
               }
 
-              if (
-                streamingToolExecutor &&
-                !toolUseContext.abortController.signal.aborted
-              ) {
+              if (streamingToolExecutor && !toolUseContext.abortController.signal.aborted) {
                 for (const toolBlock of msgToolUseBlocks) {
                   streamingToolExecutor.addTool(toolBlock, message)
                 }
               }
             }
 
-            if (
-              streamingToolExecutor &&
-              !toolUseContext.abortController.signal.aborted
-            ) {
+            if (streamingToolExecutor && !toolUseContext.abortController.signal.aborted) {
               for (const result of streamingToolExecutor.getCompletedResults()) {
                 if (result.message) {
                   yield result.message
@@ -855,7 +848,7 @@ async function* queryLoop(
                     ...normalizeMessagesForAPI(
                       [result.message],
                       toolUseContext.options.tools,
-                    ).filter(_ => _.type === 'user'),
+                    ).filter((_) => _.type === 'user'),
                   )
                 }
               }
@@ -873,8 +866,7 @@ async function* queryLoop(
             // subtract the baseline captured before this request to get the delta.
             const usage = lastAssistant?.message.usage
             const cumulativeDeleted = usage
-              ? ((usage as unknown as Record<string, number>)
-                  .cache_deleted_input_tokens ?? 0)
+              ? ((usage as unknown as Record<string, number>).cache_deleted_input_tokens ?? 0)
               : 0
             const deletedTokens = Math.max(
               0,
@@ -897,10 +889,7 @@ async function* queryLoop(
             attemptWithFallback = true
 
             // Clear assistant messages since we'll retry the entire request
-            yield* yieldMissingToolResultBlocks(
-              assistantMessages,
-              'Model fallback triggered',
-            )
+            yield* yieldMissingToolResultBlocks(assistantMessages, 'Model fallback triggered')
             assistantMessages.length = 0
             toolResults.length = 0
             toolUseBlocks.length = 0
@@ -934,8 +923,7 @@ async function* queryLoop(
                 innerError.originalModel as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               fallback_model:
                 fallbackModel as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              entrypoint:
-                'cli' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+              entrypoint: 'cli' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               queryChainId: queryChainIdForAnalytics,
               queryDepth: queryTracking.depth,
             })
@@ -954,12 +942,11 @@ async function* queryLoop(
       }
     } catch (error) {
       logError(error)
-      const errorMessage =
-        error instanceof Error ? error.message : String(error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
       logEvent('tengu_query_error', {
         assistantMessages: assistantMessages.length,
-        toolUses: assistantMessages.flatMap(_ =>
-          _.message.content.filter(content => content.type === 'tool_use'),
+        toolUses: assistantMessages.flatMap((_) =>
+          _.message.content.filter((content) => content.type === 'tool_use'),
         ).length,
 
         queryChainId: queryChainIdForAnalytics,
@@ -967,10 +954,7 @@ async function* queryLoop(
       })
 
       // Handle image size/resize errors with user-friendly messages
-      if (
-        error instanceof ImageSizeError ||
-        error instanceof ImageResizeError
-      ) {
+      if (error instanceof ImageSizeError || error instanceof ImageResizeError) {
         yield createAssistantAPIErrorMessage({
           content: error.message,
         })
@@ -1022,19 +1006,14 @@ async function* queryLoop(
           }
         }
       } else {
-        yield* yieldMissingToolResultBlocks(
-          assistantMessages,
-          'Interrupted by user',
-        )
+        yield* yieldMissingToolResultBlocks(assistantMessages, 'Interrupted by user')
       }
       // chicago MCP: auto-unhide + lock release on interrupt. Same cleanup
       // as the natural turn-end path in stopHooks.ts. Main thread only —
       // see stopHooks.ts for the subagent-releasing-main's-lock rationale.
       if (feature('CHICAGO_MCP') && !toolUseContext.agentId) {
         try {
-          const { cleanupComputerUseAfterTurn } = await import(
-            './utils/computerUse/cleanup.js'
-          )
+          const { cleanupComputerUseAfterTurn } = await import('./utils/computerUse/cleanup.js')
           await cleanupComputerUseAfterTurn(toolUseContext)
         } catch {
           // Failures are silent — this is dogfooding cleanup, not critical path
@@ -1080,8 +1059,7 @@ async function* queryLoop(
       // post-compact turn will media-error again; hasAttemptedReactiveCompact
       // prevents a spiral and the error surfaces.
       const isWithheldMedia =
-        mediaRecoveryEnabled &&
-        reactiveCompact?.isWithheldMediaSizeError(lastMessage)
+        mediaRecoveryEnabled && reactiveCompact?.isWithheldMediaSizeError(lastMessage)
       if (isWithheld413) {
         // First: drain all staged context-collapses. Gated on the PREVIOUS
         // transition not being collapse_drain_retry — if we already drained
@@ -1091,10 +1069,7 @@ async function* queryLoop(
           contextCollapse &&
           state.transition?.reason !== 'collapse_drain_retry'
         ) {
-          const drained = contextCollapse.recoverFromOverflow(
-            messagesForQuery,
-            querySource,
-          )
+          const drained = contextCollapse.recoverFromOverflow(messagesForQuery, querySource)
           if (drained.committed > 0) {
             const next: State = {
               messages: drained.messages,
@@ -1136,12 +1111,10 @@ async function* queryLoop(
           // messagesForQuery still holds the pre-compact array here (the
           // 413-failed attempt's input).
           if (params.taskBudget) {
-            const preCompactContext =
-              finalContextTokensFromLastResponse(messagesForQuery)
+            const preCompactContext = finalContextTokensFromLastResponse(messagesForQuery)
             taskBudgetRemaining = Math.max(
               0,
-              (taskBudgetRemaining ?? params.taskBudget.total) -
-                preCompactContext,
+              (taskBudgetRemaining ?? params.taskBudget.total) - preCompactContext,
             )
           }
 
@@ -1192,10 +1165,7 @@ async function* queryLoop(
         // override check), then falls through to multi-turn recovery if
         // 64k also hits the cap.
         // 3P default: false (not validated on Bedrock/Vertex)
-        const capEnabled = getFeatureValue_CACHED_MAY_BE_STALE(
-          'tengu_otk_slot_v1',
-          false,
-        )
+        const capEnabled = getFeatureValue_CACHED_MAY_BE_STALE('tengu_otk_slot_v1', false)
         if (
           capEnabled &&
           maxOutputTokensOverride === undefined &&
@@ -1229,11 +1199,7 @@ async function* queryLoop(
           })
 
           const next: State = {
-            messages: [
-              ...messagesForQuery,
-              ...assistantMessages,
-              recoveryMessage,
-            ],
+            messages: [...messagesForQuery, ...assistantMessages, recoveryMessage],
             toolUseContext,
             autoCompactTracking: tracking,
             maxOutputTokensRecoveryCount: maxOutputTokensRecoveryCount + 1,
@@ -1281,11 +1247,7 @@ async function* queryLoop(
 
       if (stopHookResult.blockingErrors.length > 0) {
         const next: State = {
-          messages: [
-            ...messagesForQuery,
-            ...assistantMessages,
-            ...stopHookResult.blockingErrors,
-          ],
+          messages: [...messagesForQuery, ...assistantMessages, ...stopHookResult.blockingErrors],
           toolUseContext,
           autoCompactTracking: tracking,
           maxOutputTokensRecoveryCount: 0,
@@ -1362,7 +1324,6 @@ async function* queryLoop(
 
     queryCheckpoint('query_tool_execution_start')
 
-
     if (streamingToolExecutor) {
       logEvent('tengu_streaming_tool_execution_used', {
         tool_count: toolUseBlocks.length,
@@ -1393,10 +1354,9 @@ async function* queryLoop(
         }
 
         toolResults.push(
-          ...normalizeMessagesForAPI(
-            [update.message],
-            toolUseContext.options.tools,
-          ).filter(_ => _.type === 'user'),
+          ...normalizeMessagesForAPI([update.message], toolUseContext.options.tools).filter(
+            (_) => _.type === 'user',
+          ),
         )
       }
       if (update.newContext) {
@@ -1409,9 +1369,7 @@ async function* queryLoop(
     queryCheckpoint('query_tool_execution_end')
 
     // Generate tool use summary after tool batch completes — passed to next recursive call
-    let nextPendingToolUseSummary:
-      | Promise<ToolUseSummaryMessage | null>
-      | undefined
+    let nextPendingToolUseSummary: Promise<ToolUseSummaryMessage | null> | undefined
     if (
       config.gates.emitToolUseSummaries &&
       toolUseBlocks.length > 0 &&
@@ -1423,7 +1381,7 @@ async function* queryLoop(
       let lastAssistantText: string | undefined
       if (lastAssistantMessage) {
         const textBlocks = lastAssistantMessage.message.content.filter(
-          block => block.type === 'text',
+          (block) => block.type === 'text',
         )
         if (textBlocks.length > 0) {
           const lastTextBlock = textBlocks.at(-1)
@@ -1434,22 +1392,19 @@ async function* queryLoop(
       }
 
       // Collect tool info for summary generation
-      const toolUseIds = toolUseBlocks.map(block => block.id)
-      const toolInfoForSummary = toolUseBlocks.map(block => {
+      const toolUseIds = toolUseBlocks.map((block) => block.id)
+      const toolInfoForSummary = toolUseBlocks.map((block) => {
         // Find the corresponding tool result
         const toolResult = toolResults.find(
-          result =>
+          (result) =>
             result.type === 'user' &&
             Array.isArray(result.message.content) &&
             result.message.content.some(
-              content =>
-                content.type === 'tool_result' &&
-                content.tool_use_id === block.id,
+              (content) => content.type === 'tool_result' && content.tool_use_id === block.id,
             ),
         )
         const resultContent =
-          toolResult?.type === 'user' &&
-          Array.isArray(toolResult.message.content)
+          toolResult?.type === 'user' && Array.isArray(toolResult.message.content)
             ? toolResult.message.content.find(
                 (c): c is ToolResultBlockParam =>
                   c.type === 'tool_result' && c.tool_use_id === block.id,
@@ -1458,10 +1413,7 @@ async function* queryLoop(
         return {
           name: block.name,
           input: block.input,
-          output:
-            resultContent && 'content' in resultContent
-              ? resultContent.content
-              : null,
+          output: resultContent && 'content' in resultContent ? resultContent.content : null,
         }
       })
 
@@ -1472,7 +1424,7 @@ async function* queryLoop(
         isNonInteractiveSession: toolUseContext.options.isNonInteractiveSession,
         lastAssistantText,
       })
-        .then(summary => {
+        .then((summary) => {
           if (summary) {
             return createToolUseSummaryMessage(summary, toolUseIds)
           }
@@ -1488,9 +1440,7 @@ async function* queryLoop(
       // Main thread only — see stopHooks.ts for the subagent rationale.
       if (feature('CHICAGO_MCP') && !toolUseContext.agentId) {
         try {
-          const { cleanupComputerUseAfterTurn } = await import(
-            './utils/computerUse/cleanup.js'
-          )
+          const { cleanupComputerUseAfterTurn } = await import('./utils/computerUse/cleanup.js')
           await cleanupComputerUseAfterTurn(toolUseContext)
         } catch {
           // Failures are silent — this is dogfooding cleanup, not critical path
@@ -1523,8 +1473,7 @@ async function* queryLoop(
     if (tracking?.compacted) {
       tracking.turnCounter++
       logEvent('tengu_post_autocompact_turn', {
-        turnId:
-          tracking.turnId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+        turnId: tracking.turnId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         turnCounter: tracking.turnCounter,
 
         queryChainId: queryChainIdForAnalytics,
@@ -1563,19 +1512,18 @@ async function* queryLoop(
     // drain their own agentId. User prompts (mode:'prompt') still go to main
     // only; subagents never see the prompt stream.
     // eslint-disable-next-line custom-rules/require-tool-match-name -- ToolUseBlock.name has no aliases
-    const sleepRan = toolUseBlocks.some(b => b.name === SLEEP_TOOL_NAME)
-    const isMainThread =
-      querySource.startsWith('repl_main_thread') || querySource === 'sdk'
+    const sleepRan = toolUseBlocks.some((b) => b.name === SLEEP_TOOL_NAME)
+    const isMainThread = querySource.startsWith('repl_main_thread') || querySource === 'sdk'
     const currentAgentId = toolUseContext.agentId
-    const queuedCommandsSnapshot = getCommandsByMaxPriority(
-      sleepRan ? 'later' : 'next',
-    ).filter(cmd => {
-      if (isSlashCommand(cmd)) return false
-      if (isMainThread) return cmd.agentId === undefined
-      // Subagents only drain task-notifications addressed to them — never
-      // user prompts, even if someone stamps an agentId on one.
-      return cmd.mode === 'task-notification' && cmd.agentId === currentAgentId
-    })
+    const queuedCommandsSnapshot = getCommandsByMaxPriority(sleepRan ? 'later' : 'next').filter(
+      (cmd) => {
+        if (isSlashCommand(cmd)) return false
+        if (isMainThread) return cmd.agentId === undefined
+        // Subagents only drain task-notifications addressed to them — never
+        // user prompts, even if someone stamps an agentId on one.
+        return cmd.mode === 'task-notification' && cmd.agentId === currentAgentId
+      },
+    )
 
     for await (const attachment of getAttachmentMessages(
       null,
@@ -1613,7 +1561,6 @@ async function* queryLoop(
       pendingMemoryPrefetch.consumedOnIteration = turnCount - 1
     }
 
-
     // Inject prefetched skill discovery. collectSkillDiscoveryPrefetch emits
     // hidden_by_main_turn — true when the prefetch resolved before this point
     // (should be >98% at AKI@250ms / Haiku@573ms vs turn durations of 2-30s).
@@ -1630,7 +1577,7 @@ async function* queryLoop(
     // Remove only commands that were actually consumed as attachments.
     // Prompt and task-notification commands are converted to attachments above.
     const consumedCommands = queuedCommandsSnapshot.filter(
-      cmd => cmd.mode === 'prompt' || cmd.mode === 'task-notification',
+      (cmd) => cmd.mode === 'prompt' || cmd.mode === 'task-notification',
     )
     if (consumedCommands.length > 0) {
       for (const cmd of consumedCommands) {
@@ -1645,8 +1592,7 @@ async function* queryLoop(
     // Instrumentation: Track file change attachments after they're added
     const fileChangeAttachmentCount = count(
       toolResults,
-      tr =>
-        tr.type === 'attachment' && tr.attachment.type === 'edited_text_file',
+      (tr) => tr.type === 'attachment' && tr.attachment.type === 'edited_text_file',
     )
 
     logEvent('tengu_query_after_attachments', {
@@ -1683,20 +1629,13 @@ async function* queryLoop(
     // only on !agentId so every top-level conversation (REPL, SDK, HFI,
     // remote) generates summaries; subagents/forks don't.
     if (feature('BG_SESSIONS')) {
-      if (
-        !toolUseContext.agentId &&
-        taskSummaryModule!.shouldGenerateTaskSummary()
-      ) {
+      if (!toolUseContext.agentId && taskSummaryModule!.shouldGenerateTaskSummary()) {
         taskSummaryModule!.maybeGenerateTaskSummary({
           systemPrompt,
           userContext,
           systemContext,
           toolUseContext,
-          forkContextMessages: [
-            ...messagesForQuery,
-            ...assistantMessages,
-            ...toolResults,
-          ],
+          forkContextMessages: [...messagesForQuery, ...assistantMessages, ...toolResults],
         })
       }
     }

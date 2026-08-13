@@ -37,10 +37,7 @@ export function createMovedToPluginCommand({
       return name
     },
     source: 'builtin',
-    async getPromptForCommand(
-      args: string,
-      context: ToolUseContext,
-    ): Promise<ContentBlockParam[]> {
+    async getPromptForCommand(args: string, context: ToolUseContext): Promise<ContentBlockParam[]> {
       if (process.env.USER_TYPE === 'ant') {
         return [
           {

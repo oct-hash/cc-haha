@@ -94,11 +94,11 @@ const VoiceKeybindingHandler: typeof import('../hooks/useVoiceIntegration.js').V
     ? require('../hooks/useVoiceIntegration.js').VoiceKeybindingHandler
     : () => null
 const AntModelSwitchCallout =
-  'external' === 'ant'
+  process.env.USER_TYPE === 'ant'
     ? require('../components/AntModelSwitchCallout.js').AntModelSwitchCallout
     : null
 const UndercoverAutoCallout =
-  'external' === 'ant'
+  process.env.USER_TYPE === 'ant'
     ? require('../components/UndercoverAutoCallout.js').UndercoverAutoCallout
     : null
 const WebBrowserPanelModule = feature('WEB_BROWSER_TOOL')
@@ -1057,7 +1057,7 @@ export function MainRender(props: MainRenderProps): ReactNode {
                     {toolJSX.jsx}
                   </Box>
                 )}
-              {'external' === 'ant' && <TungstenLiveMonitor />}
+              {process.env.USER_TYPE === 'ant' && <TungstenLiveMonitor />}
               {feature('WEB_BROWSER_TOOL')
                 ? WebBrowserPanelModule && <WebBrowserPanelModule.WebBrowserPanel />
                 : null}
@@ -1370,7 +1370,7 @@ export function MainRender(props: MainRenderProps): ReactNode {
                     installationStatus={ideInstallationStatus}
                   />
                 )}
-                {'external' === 'ant' &&
+                {process.env.USER_TYPE === 'ant' &&
                   focusedInputDialog === 'model-switch' &&
                   AntModelSwitchCallout && (
                     <AntModelSwitchCallout
@@ -1386,7 +1386,7 @@ export function MainRender(props: MainRenderProps): ReactNode {
                       }}
                     />
                   )}
-                {'external' === 'ant' &&
+                {process.env.USER_TYPE === 'ant' &&
                   focusedInputDialog === 'undercover-callout' &&
                   UndercoverAutoCallout && (
                     <UndercoverAutoCallout onDone={() => setShowUndercoverCallout(false)} />
@@ -1554,7 +1554,7 @@ export function MainRender(props: MainRenderProps): ReactNode {
                         />
                       )}
                       {/* Skill improvement survey - appears when improvements detected (ant-only) */}
-                      {'external' === 'ant' && skillImprovementSurvey.suggestion && (
+                      {process.env.USER_TYPE === 'ant' && skillImprovementSurvey.suggestion && (
                         <SkillImprovementSurvey
                           isOpen={skillImprovementSurvey.isOpen}
                           skillName={skillImprovementSurvey.suggestion.skillName}
@@ -1647,7 +1647,7 @@ export function MainRender(props: MainRenderProps): ReactNode {
                     }}
                   />
                 )}
-                {'external' === 'ant' && <DevBar />}
+                {process.env.USER_TYPE === 'ant' && <DevBar />}
               </Box>
               {!(companionNarrow && isFullscreenEnvEnabled()) && companionVisible ? (
                 <CompanionSprite />

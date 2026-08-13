@@ -1,15 +1,8 @@
 import { feature } from 'bun:bundle'
 import memoize from 'lodash-es/memoize.js'
-import {
-  getAdditionalDirectoriesForClaudeMd,
-  setCachedClaudeMdContent,
-} from './bootstrap/state.js'
+import { getAdditionalDirectoriesForClaudeMd, setCachedClaudeMdContent } from './bootstrap/state.js'
 import { getLocalISODate } from './constants/common.js'
-import {
-  filterInjectedMemoryFiles,
-  getClaudeMds,
-  getMemoryFiles,
-} from './utils/claudemd.js'
+import { filterInjectedMemoryFiles, getClaudeMds, getMemoryFiles } from './utils/claudemd.js'
 import { logForDiagnosticsNoPII } from './utils/diagLogs.js'
 import { isBareMode, isEnvTruthy } from './utils/envUtils.js'
 import { execFileNoThrow } from './utils/execFileNoThrow.js'
@@ -64,13 +57,9 @@ export const getGitStatus = memoize(async (): Promise<string | null> => {
       execFileNoThrow(gitExe(), ['--no-optional-locks', 'status', '--short'], {
         preserveOutputOnError: false,
       }).then(({ stdout }) => stdout.trim()),
-      execFileNoThrow(
-        gitExe(),
-        ['--no-optional-locks', 'log', '--oneline', '-n', '5'],
-        {
-          preserveOutputOnError: false,
-        },
-      ).then(({ stdout }) => stdout.trim()),
+      execFileNoThrow(gitExe(), ['--no-optional-locks', 'log', '--oneline', '-n', '5'], {
+        preserveOutputOnError: false,
+      }).then(({ stdout }) => stdout.trim()),
       execFileNoThrow(gitExe(), ['config', 'user.name'], {
         preserveOutputOnError: false,
       }).then(({ stdout }) => stdout.trim()),
@@ -122,15 +111,12 @@ export const getSystemContext = memoize(
 
     // Skip git status in CCR (unnecessary overhead on resume) or when git instructions are disabled
     const gitStatus =
-      isEnvTruthy(process.env.CLAUDE_CODE_REMOTE) ||
-      !shouldIncludeGitInstructions()
+      isEnvTruthy(process.env.CLAUDE_CODE_REMOTE) || !shouldIncludeGitInstructions()
         ? null
         : await getGitStatus()
 
     // Include system prompt injection if set (for cache breaking, ant-only)
-    const injection = feature('BREAK_CACHE_COMMAND')
-      ? getSystemPromptInjection()
-      : null
+    const injection = feature('BREAK_CACHE_COMMAND') ? getSystemPromptInjection() : null
 
     logForDiagnosticsNoPII('info', 'system_context_completed', {
       duration_ms: Date.now() - startTime,

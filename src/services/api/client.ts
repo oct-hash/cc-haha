@@ -12,22 +12,12 @@ import {
 } from 'src/utils/auth.js'
 import { getUserAgent } from 'src/utils/http.js'
 import { getSmallFastModel } from 'src/utils/model/model.js'
-import {
-  getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
-} from 'src/utils/model/providers.js'
+import { getAPIProvider, isFirstPartyAnthropicBaseUrl } from 'src/utils/model/providers.js'
 import { getProxyFetchOptions } from 'src/utils/proxy.js'
-import {
-  getIsNonInteractiveSession,
-  getSessionId,
-} from '../../bootstrap/state.js'
+import { getIsNonInteractiveSession, getSessionId } from '../../bootstrap/state.js'
 import { getOauthConfig } from '../../constants/oauth.js'
 import { isDebugToStdErr, logForDebugging } from '../../utils/debug.js'
-import {
-  getAWSRegion,
-  getVertexRegionForModel,
-  isEnvTruthy,
-} from '../../utils/envUtils.js'
+import { getAWSRegion, getVertexRegionForModel, isEnvTruthy } from '../../utils/envUtils.js'
 
 /**
  * Environment variables for different client types:
@@ -108,9 +98,7 @@ export async function getAnthropicClient({
     'X-Claude-Code-Session-Id': getSessionId(),
     ...customHeaders,
     ...(containerId ? { 'x-claude-remote-container-id': containerId } : {}),
-    ...(remoteSessionId
-      ? { 'x-claude-remote-session-id': remoteSessionId }
-      : {}),
+    ...(remoteSessionId ? { 'x-claude-remote-session-id': remoteSessionId } : {}),
     // SDK consumers can identify their app/library for backend analytics
     ...(clientApp ? { 'x-client-app': clientApp } : {}),
   }
@@ -121,9 +109,7 @@ export async function getAnthropicClient({
   )
 
   // Add additional protection header if enabled via env var
-  const additionalProtectionEnabled = isEnvTruthy(
-    process.env.CLAUDE_CODE_ADDITIONAL_PROTECTION,
-  )
+  const additionalProtectionEnabled = isEnvTruthy(process.env.CLAUDE_CODE_ADDITIONAL_PROTECTION)
   if (additionalProtectionEnabled) {
     defaultHeaders['x-anthropic-additional-protection'] = 'true'
   }
@@ -154,8 +140,7 @@ export async function getAnthropicClient({
     const { AnthropicBedrock } = await import('@anthropic-ai/bedrock-sdk')
     // Use region override for small fast model if specified
     const awsRegion =
-      model === getSmallFastModel() &&
-      process.env.ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION
+      model === getSmallFastModel() && process.env.ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION
         ? process.env.ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION
         : getAWSRegion()
 
@@ -199,10 +184,9 @@ export async function getAnthropicClient({
         azureADTokenProvider = () => Promise.resolve('')
       } else {
         // Use real Azure AD authentication with DefaultAzureCredential
-        const {
-          DefaultAzureCredential: AzureCredential,
-          getBearerTokenProvider,
-        } = await import('@azure/identity')
+        const { DefaultAzureCredential: AzureCredential, getBearerTokenProvider } = await import(
+          '@azure/identity'
+        )
         azureADTokenProvider = getBearerTokenProvider(
           new AzureCredential(),
           'https://cognitiveservices.azure.com/.default',
@@ -260,8 +244,7 @@ export async function getAnthropicClient({
     // Note: We're checking both standard and lowercase variants to be safe,
     // though we should verify what google-auth-library actually checks
     const hasKeyFile =
-      process.env['GOOGLE_APPLICATION_CREDENTIALS'] ||
-      process.env['google_application_credentials']
+      process.env['GOOGLE_APPLICATION_CREDENTIALS'] || process.env['google_application_credentials']
 
     const googleAuth = isEnvTruthy(process.env.CLAUDE_CODE_SKIP_VERTEX_AUTH)
       ? ({
@@ -300,12 +283,9 @@ export async function getAnthropicClient({
   // Determine authentication method based on available tokens
   const clientConfig: ConstructorParameters<typeof Anthropic>[0] = {
     apiKey: isClaudeAISubscriber() ? null : apiKey || getAnthropicApiKey(),
-    authToken: isClaudeAISubscriber()
-      ? getClaudeAIOAuthTokens()?.accessToken
-      : undefined,
+    authToken: isClaudeAISubscriber() ? getClaudeAIOAuthTokens()?.accessToken : undefined,
     // Set baseURL from OAuth config when using staging OAuth
-    ...(process.env.USER_TYPE === 'ant' &&
-    isEnvTruthy(process.env.USE_STAGING_OAUTH)
+    ...(process.env.USER_TYPE === 'ant' && isEnvTruthy(process.env.USE_STAGING_OAUTH)
       ? { baseURL: getOauthConfig().BASE_API_URL }
       : {}),
     ...ARGS,
@@ -331,9 +311,7 @@ export async function getAnthropicClient({
     // apiKeyHelper). Must be cleared so the SDK's authToken-based
     // Authorization header is the only one sent.
     delete defaultHeaders['Authorization']
-    logForDebugging(
-      `[API:routing] Using MiniMax endpoint for model: ${model}`,
-    )
+    logForDebugging(`[API:routing] Using MiniMax endpoint for model: ${model}`)
   } else if (isMiniMaxModel && !process.env.MINIMAX_API_KEY) {
     logForDebugging(
       `[API:routing] MiniMax model requested but MINIMAX_API_KEY not set, using default endpoint`,
@@ -352,8 +330,7 @@ async function configureApiKeyHeaders(
   isNonInteractiveSession: boolean,
 ): Promise<void> {
   const token =
-    process.env.ANTHROPIC_AUTH_TOKEN ||
-    (await getApiKeyFromApiKeyHelper(isNonInteractiveSession))
+    process.env.ANTHROPIC_AUTH_TOKEN || (await getApiKeyFromApiKeyHelper(isNonInteractiveSession))
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
@@ -395,8 +372,7 @@ function buildFetch(
   const inner = fetchOverride ?? globalThis.fetch
   // Only send to the first-party API — Bedrock/Vertex/Foundry don't log it
   // and unknown headers risk rejection by strict proxies (inc-4029 class).
-  const injectClientRequestId =
-    getAPIProvider() === 'firstParty' && isFirstPartyAnthropicBaseUrl()
+  const injectClientRequestId = getAPIProvider() === 'firstParty' && isFirstPartyAnthropicBaseUrl()
   return (input, init) => {
     // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
     const headers = new Headers(init?.headers)

@@ -64,12 +64,7 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
     name: 'Brave',
     macos: {
       appName: 'Brave Browser',
-      dataPath: [
-        'Library',
-        'Application Support',
-        'BraveSoftware',
-        'Brave-Browser',
-      ],
+      dataPath: ['Library', 'Application Support', 'BraveSoftware', 'Brave-Browser'],
       nativeMessagingPath: [
         'Library',
         'Application Support',
@@ -81,17 +76,11 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
     linux: {
       binaries: ['brave-browser', 'brave'],
       dataPath: ['.config', 'BraveSoftware', 'Brave-Browser'],
-      nativeMessagingPath: [
-        '.config',
-        'BraveSoftware',
-        'Brave-Browser',
-        'NativeMessagingHosts',
-      ],
+      nativeMessagingPath: ['.config', 'BraveSoftware', 'Brave-Browser', 'NativeMessagingHosts'],
     },
     windows: {
       dataPath: ['BraveSoftware', 'Brave-Browser', 'User Data'],
-      registryKey:
-        'HKCU\\Software\\BraveSoftware\\Brave-Browser\\NativeMessagingHosts',
+      registryKey: 'HKCU\\Software\\BraveSoftware\\Brave-Browser\\NativeMessagingHosts',
     },
   },
   arc: {
@@ -124,12 +113,7 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
     macos: {
       appName: 'Chromium',
       dataPath: ['Library', 'Application Support', 'Chromium'],
-      nativeMessagingPath: [
-        'Library',
-        'Application Support',
-        'Chromium',
-        'NativeMessagingHosts',
-      ],
+      nativeMessagingPath: ['Library', 'Application Support', 'Chromium', 'NativeMessagingHosts'],
     },
     linux: {
       binaries: ['chromium', 'chromium-browser'],
@@ -156,11 +140,7 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
     linux: {
       binaries: ['microsoft-edge', 'microsoft-edge-stable'],
       dataPath: ['.config', 'microsoft-edge'],
-      nativeMessagingPath: [
-        '.config',
-        'microsoft-edge',
-        'NativeMessagingHosts',
-      ],
+      nativeMessagingPath: ['.config', 'microsoft-edge', 'NativeMessagingHosts'],
     },
     windows: {
       dataPath: ['Microsoft', 'Edge', 'User Data'],
@@ -172,12 +152,7 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
     macos: {
       appName: 'Vivaldi',
       dataPath: ['Library', 'Application Support', 'Vivaldi'],
-      nativeMessagingPath: [
-        'Library',
-        'Application Support',
-        'Vivaldi',
-        'NativeMessagingHosts',
-      ],
+      nativeMessagingPath: ['Library', 'Application Support', 'Vivaldi', 'NativeMessagingHosts'],
     },
     linux: {
       binaries: ['vivaldi', 'vivaldi-stable'],
@@ -208,8 +183,7 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
     },
     windows: {
       dataPath: ['Opera Software', 'Opera Stable'],
-      registryKey:
-        'HKCU\\Software\\Opera Software\\Opera Stable\\NativeMessagingHosts',
+      registryKey: 'HKCU\\Software\\Opera Software\\Opera Stable\\NativeMessagingHosts',
       useRoaming: true, // Opera uses Roaming AppData, not Local
     },
   },
@@ -355,9 +329,7 @@ export async function detectAvailableBrowser(): Promise<ChromiumBrowser | null> 
         try {
           const stats = await stat(appPath)
           if (stats.isDirectory()) {
-            logForDebugging(
-              `[Claude in Chrome] Detected browser: ${config.name}`,
-            )
+            logForDebugging(`[Claude in Chrome] Detected browser: ${config.name}`)
             return browserId
           }
         } catch (e) {
@@ -371,9 +343,7 @@ export async function detectAvailableBrowser(): Promise<ChromiumBrowser | null> 
         // Check if any binary exists
         for (const binary of config.linux.binaries) {
           if (await which(binary).catch(() => null)) {
-            logForDebugging(
-              `[Claude in Chrome] Detected browser: ${config.name}`,
-            )
+            logForDebugging(`[Claude in Chrome] Detected browser: ${config.name}`)
             return browserId
           }
         }
@@ -390,9 +360,7 @@ export async function detectAvailableBrowser(): Promise<ChromiumBrowser | null> 
           try {
             const stats = await stat(dataPath)
             if (stats.isDirectory()) {
-              logForDebugging(
-                `[Claude in Chrome] Detected browser: ${config.name}`,
-              )
+              logForDebugging(`[Claude in Chrome] Detected browser: ${config.name}`)
               return browserId
             }
           } catch (e) {
@@ -441,11 +409,7 @@ export async function openInChrome(url: string): Promise<boolean> {
 
   switch (currentPlatform) {
     case 'macos': {
-      const { code } = await execFileNoThrow('open', [
-        '-a',
-        config.macos.appName,
-        url,
-      ])
+      const { code } = await execFileNoThrow('open', ['-a', config.macos.appName, url])
       return code === 0
     }
     case 'windows': {

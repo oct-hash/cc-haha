@@ -18,15 +18,8 @@ import { basename } from 'path'
 import { getIsRemoteMode } from '../../bootstrap/state.js'
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import { ENTRYPOINT_NAME } from '../../memdir/memdir.js'
-import {
-  formatMemoryManifest,
-  scanMemoryFiles,
-} from '../../memdir/memoryScan.js'
-import {
-  getAutoMemPath,
-  isAutoMemoryEnabled,
-  isAutoMemPath,
-} from '../../memdir/paths.js'
+import { formatMemoryManifest, scanMemoryFiles } from '../../memdir/memoryScan.js'
+import { getAutoMemPath, isAutoMemoryEnabled, isAutoMemPath } from '../../memdir/paths.js'
 import type { Tool } from '../../Tool.js'
 import { BASH_TOOL_NAME } from '../../tools/BashTool/toolName.js'
 import { FILE_EDIT_TOOL_NAME } from '../../tools/FileEditTool/constants.js'
@@ -44,22 +37,13 @@ import type {
 import { createAbortController } from '../../utils/abortController.js'
 import { count, uniq } from '../../utils/array.js'
 import { logForDebugging } from '../../utils/debug.js'
-import {
-  createCacheSafeParams,
-  runForkedAgent,
-} from '../../utils/forkedAgent.js'
+import { createCacheSafeParams, runForkedAgent } from '../../utils/forkedAgent.js'
 import type { REPLHookContext } from '../../utils/hooks/postSamplingHooks.js'
-import {
-  createMemorySavedMessage,
-  createUserMessage,
-} from '../../utils/messages.js'
+import { createMemorySavedMessage, createUserMessage } from '../../utils/messages.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../analytics/growthbook.js'
 import { logEvent } from '../analytics/index.js'
 import { sanitizeToolNameForAnalytics } from '../analytics/metadata.js'
-import {
-  buildExtractAutoOnlyPrompt,
-  buildExtractCombinedPrompt,
-} from './prompts.js'
+import { buildExtractAutoOnlyPrompt, buildExtractCombinedPrompt } from './prompts.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const teamMemPaths = feature('TEAMMEM')
@@ -118,10 +102,7 @@ function countModelVisibleMessagesSince(
  * agent and advances the cursor past this range, making the main agent
  * and the background agent mutually exclusive per turn.
  */
-function hasMemoryWritesSince(
-  messages: Message[],
-  sinceUuid: string | undefined,
-): boolean {
+function hasMemoryWritesSince(messages: Message[], sinceUuid: string | undefined): boolean {
   let foundStart = sinceUuid === undefined
   for (const message of messages) {
     if (!foundStart) {
@@ -204,8 +185,7 @@ export function createAutoMemCanUseTool(memoryDir: string): CanUseToolFn {
     }
 
     if (
-      (tool.name === FILE_EDIT_TOOL_NAME ||
-        tool.name === FILE_WRITE_TOOL_NAME) &&
+      (tool.name === FILE_EDIT_TOOL_NAME || tool.name === FILE_WRITE_TOOL_NAME) &&
       'file_path' in input
     ) {
       const filePath = input.file_path
@@ -272,16 +252,11 @@ function extractWrittenPaths(agentMessages: Message[]): string[] {
 // Initialization & Closure-scoped State
 // ============================================================================
 
-type AppendSystemMessageFn = (
-  msg: Exclude<SystemMessage, SystemLocalCommandMessage>,
-) => void
+type AppendSystemMessageFn = (msg: Exclude<SystemMessage, SystemLocalCommandMessage>) => void
 
 /** The active extractor function, set by initExtractMemories(). */
 let extractor:
-  | ((
-      context: REPLHookContext,
-      appendSystemMessage?: AppendSystemMessageFn,
-    ) => Promise<void>)
+  | ((context: REPLHookContext, appendSystemMessage?: AppendSystemMessageFn) => Promise<void>)
   | null = null
 
 /** The active drain function, set by initExtractMemories(). No-op until init. */
@@ -337,18 +312,13 @@ export function initExtractMemories(): void {
   }): Promise<void> {
     const { messages } = context
     const memoryDir = getAutoMemPath()
-    const newMessageCount = countModelVisibleMessagesSince(
-      messages,
-      lastMemoryMessageUuid,
-    )
+    const newMessageCount = countModelVisibleMessagesSince(messages, lastMemoryMessageUuid)
 
     // Mutual exclusion: when the main agent wrote memories, skip the
     // forked agent and advance the cursor past this range so the next
     // extraction only considers messages after the main agent's write.
     if (hasMemoryWritesSince(messages, lastMemoryMessageUuid)) {
-      logForDebugging(
-        '[extractMemories] skipping — conversation already wrote to memory files',
-      )
+      logForDebugging('[extractMemories] skipping — conversation already wrote to memory files')
       const lastMessage = messages.at(-1)
       if (lastMessage?.uuid) {
         lastMemoryMessageUuid = lastMessage.uuid
@@ -359,14 +329,9 @@ export function initExtractMemories(): void {
       return
     }
 
-    const teamMemoryEnabled = feature('TEAMMEM')
-      ? teamMemPaths!.isTeamMemoryEnabled()
-      : false
+    const teamMemoryEnabled = feature('TEAMMEM') ? teamMemPaths!.isTeamMemoryEnabled() : false
 
-    const skipIndex = getFeatureValue_CACHED_MAY_BE_STALE(
-      'tengu_moth_copse',
-      false,
-    )
+    const skipIndex = getFeatureValue_CACHED_MAY_BE_STALE('tengu_moth_copse', false)
 
     const canUseTool = createAutoMemCanUseTool(memoryDir)
     const cacheSafeParams = createCacheSafeParams(context)
@@ -401,16 +366,8 @@ export function initExtractMemories(): void {
 
       const userPrompt =
         feature('TEAMMEM') && teamMemoryEnabled
-          ? buildExtractCombinedPrompt(
-              newMessageCount,
-              existingMemories,
-              skipIndex,
-            )
-          : buildExtractAutoOnlyPrompt(
-              newMessageCount,
-              existingMemories,
-              skipIndex,
-            )
+          ? buildExtractCombinedPrompt(newMessageCount, existingMemories, skipIndex)
+          : buildExtractAutoOnlyPrompt(newMessageCount, existingMemories, skipIndex)
 
       const result = await runForkedAgent({
         promptMessages: [createUserMessage({ content: userPrompt })],
@@ -435,7 +392,7 @@ export function initExtractMemories(): void {
       }
 
       const writtenPaths = extractWrittenPaths(result.messages)
-      const turnCount = count(result.messages, m => m.type === 'assistant')
+      const turnCount = count(result.messages, (m) => m.type === 'assistant')
 
       const totalInput =
         result.totalUsage.input_tokens +
@@ -443,39 +400,29 @@ export function initExtractMemories(): void {
         result.totalUsage.cache_read_input_tokens
       const hitPct =
         totalInput > 0
-          ? (
-              (result.totalUsage.cache_read_input_tokens / totalInput) *
-              100
-            ).toFixed(1)
+          ? ((result.totalUsage.cache_read_input_tokens / totalInput) * 100).toFixed(1)
           : '0.0'
       logForDebugging(
         `[extractMemories] finished — ${writtenPaths.length} files written, cache: read=${result.totalUsage.cache_read_input_tokens} create=${result.totalUsage.cache_creation_input_tokens} input=${result.totalUsage.input_tokens} (${hitPct}% hit)`,
       )
 
       if (writtenPaths.length > 0) {
-        logForDebugging(
-          `[extractMemories] memories saved: ${writtenPaths.join(', ')}`,
-        )
+        logForDebugging(`[extractMemories] memories saved: ${writtenPaths.join(', ')}`)
       } else {
         logForDebugging('[extractMemories] no memories saved this run')
       }
 
       // Index file updates are mechanical — the agent touches MEMORY.md to add
       // a topic link, but the user-visible "memory" is the topic file itself.
-      const memoryPaths = writtenPaths.filter(
-        p => basename(p) !== ENTRYPOINT_NAME,
-      )
-      const teamCount = feature('TEAMMEM')
-        ? count(memoryPaths, teamMemPaths!.isTeamMemPath)
-        : 0
+      const memoryPaths = writtenPaths.filter((p) => basename(p) !== ENTRYPOINT_NAME)
+      const teamCount = feature('TEAMMEM') ? count(memoryPaths, teamMemPaths!.isTeamMemPath) : 0
 
       // Log extraction event with usage from the forked agent
       logEvent('tengu_extract_memories_extraction', {
         input_tokens: result.totalUsage.input_tokens,
         output_tokens: result.totalUsage.output_tokens,
         cache_read_input_tokens: result.totalUsage.cache_read_input_tokens,
-        cache_creation_input_tokens:
-          result.totalUsage.cache_creation_input_tokens,
+        cache_creation_input_tokens: result.totalUsage.cache_creation_input_tokens,
         message_count: newMessageCount,
         turn_count: turnCount,
         files_written: writtenPaths.length,
@@ -510,9 +457,7 @@ export function initExtractMemories(): void {
       const trailing = pendingContext
       pendingContext = undefined
       if (trailing) {
-        logForDebugging(
-          '[extractMemories] running trailing extraction for stashed context',
-        )
+        logForDebugging('[extractMemories] running trailing extraction for stashed context')
         await runExtraction({
           context: trailing.context,
           appendSystemMessage: trailing.appendSystemMessage,
@@ -555,9 +500,7 @@ export function initExtractMemories(): void {
     // trailing run (overwrites any previously stashed context — only the
     // latest matters since it has the most messages).
     if (inProgress) {
-      logForDebugging(
-        '[extractMemories] extraction in progress — stashing for trailing run',
-      )
+      logForDebugging('[extractMemories] extraction in progress — stashing for trailing run')
       logEvent('tengu_extract_memories_coalesced', {})
       pendingContext = { context, appendSystemMessage }
       return
@@ -581,7 +524,7 @@ export function initExtractMemories(): void {
     await Promise.race([
       Promise.all(inFlightExtractions).catch(() => {}),
       // eslint-disable-next-line no-restricted-syntax -- sleep() has no .unref(); timer must not block exit
-      new Promise<void>(r => setTimeout(r, timeoutMs).unref()),
+      new Promise<void>((r) => setTimeout(r, timeoutMs).unref()),
     ])
   }
 }
@@ -608,8 +551,6 @@ export async function executeExtractMemories(
  * gracefulShutdownSync, so the forked agent completes before the 5s shutdown
  * failsafe kills it. No-op until initExtractMemories() has been called.
  */
-export async function drainPendingExtraction(
-  timeoutMs?: number,
-): Promise<void> {
+export async function drainPendingExtraction(timeoutMs?: number): Promise<void> {
   await drainer(timeoutMs)
 }

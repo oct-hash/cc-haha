@@ -2,26 +2,26 @@
 // useREPLStreamState is the second state block of the REPL component body.
 
 import { feature } from 'bun:bundle'
+import type { NetworkHostPattern } from '@anthropic-ai/sandbox-runtime'
 import * as React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { NetworkHostPattern } from '@anthropic-ai/sandbox-runtime'
 import { getSessionId } from '../bootstrap/state.js'
 import type { ToolUseConfirm } from '../components/permissions/PermissionRequest.js'
 import type { SpinnerMode } from '../components/Spinner.js'
 import type { Notification } from '../context/notifications.js'
 import type { ScrollBoxHandle } from '../ink/components/ScrollBox.js'
-import { useTabStatus } from '../ink.js'
 import type { TabStatusKind } from '../ink/hooks/use-tab-status.js'
+import { useTabStatus } from '../ink.js'
 import type { RemoteSessionConfig } from '../remote/RemoteSessionManager.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { startPreventSleep, stopPreventSleep } from '../services/preventSleep.js'
 import { useAppState } from '../state/AppState.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
-import type { Message as MessageType, UserMessage } from '../types/message.js'
 import type { PromptRequest, PromptResponse } from '../types/hooks.js'
+import type { Message as MessageType, UserMessage } from '../types/message.js'
 import type { AutoUpdaterResult } from '../utils/autoUpdater.js'
-import { getGlobalConfig } from '../utils/config.js'
 import { updateSessionActivity } from '../utils/concurrentSessions.ts'
+import { getGlobalConfig } from '../utils/config.js'
 import { isFullscreenEnvEnabled, maybeGetTmuxMouseHint } from '../utils/fullscreen.js'
 import type { StreamingThinking, StreamingToolUse } from '../utils/messages.js'
 import { QueryGuard } from '../utils/QueryGuard.js'
@@ -239,7 +239,7 @@ export function useREPLStreamState(params: UseREPLStreamStateParams) {
   }, [])
   const [showUndercoverCallout, setShowUndercoverCallout] = useState(false)
   useEffect(() => {
-    if ('external' === 'ant') {
+    if (process.env.USER_TYPE === 'ant') {
       void (async () => {
         // Wait for repo classification to settle (memoized, no-op if primed).
         const { isInternalModelRepo } = await import('../utils/commitAttribution.js')

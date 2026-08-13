@@ -28,23 +28,14 @@ import {
   type REPLHookContext,
   registerPostSamplingHook,
 } from '../../utils/hooks/postSamplingHooks.js'
-import {
-  createUserMessage,
-  hasToolCallsInLastAssistantTurn,
-} from '../../utils/messages.js'
-import {
-  getSessionMemoryDir,
-  getSessionMemoryPath,
-} from '../../utils/permissions/filesystem.js'
+import { createUserMessage, hasToolCallsInLastAssistantTurn } from '../../utils/messages.js'
+import { getSessionMemoryDir, getSessionMemoryPath } from '../../utils/permissions/filesystem.js'
 import { sequential } from '../../utils/sequential.js'
 import { asSystemPrompt } from '../../utils/systemPromptType.js'
 import { getTokenUsage, tokenCountWithEstimation } from '../../utils/tokens.js'
 import { logEvent } from '../analytics/index.js'
 import { isAutoCompactEnabled } from '../compact/autoCompact.js'
-import {
-  buildSessionMemoryUpdatePrompt,
-  loadSessionMemoryTemplate,
-} from './prompts.js'
+import { buildSessionMemoryUpdatePrompt, loadSessionMemoryTemplate } from './prompts.js'
 import {
   DEFAULT_SESSION_MEMORY_CONFIG,
   getSessionMemoryConfig,
@@ -86,10 +77,7 @@ function isSessionMemoryGateEnabled(): boolean {
  * Returns immediately without blocking - value may be stale.
  */
 function getSessionMemoryRemoteConfig(): Partial<SessionMemoryConfig> {
-  return getDynamicConfig_CACHED_MAY_BE_STALE<Partial<SessionMemoryConfig>>(
-    'tengu_sm_config',
-    {},
-  )
+  return getDynamicConfig_CACHED_MAY_BE_STALE<Partial<SessionMemoryConfig>>('tengu_sm_config', {})
 }
 
 // ============================================================================
@@ -105,10 +93,7 @@ export function resetLastMemoryMessageUuid(): void {
   lastMemoryMessageUuid = undefined
 }
 
-function countToolCallsSince(
-  messages: Message[],
-  sinceUuid: string | undefined,
-): number {
+function countToolCallsSince(messages: Message[], sinceUuid: string | undefined): number {
   let toolCallCount = 0
   let foundStart = sinceUuid === null || sinceUuid === undefined
 
@@ -123,7 +108,7 @@ function countToolCallsSince(
     if (message.type === 'assistant') {
       const content = message.message.content
       if (Array.isArray(content)) {
-        toolCallCount += count(content, block => block.type === 'tool_use')
+        toolCallCount += count(content, (block) => block.type === 'tool_use')
       }
     }
   }
@@ -147,12 +132,8 @@ export function shouldExtractMemory(messages: Message[]): boolean {
   const hasMetTokenThreshold = hasMetUpdateThreshold(currentTokenCount)
 
   // Check if we've met the tool calls threshold
-  const toolCallsSinceLastUpdate = countToolCallsSince(
-    messages,
-    lastMemoryMessageUuid,
-  )
-  const hasMetToolCallThreshold =
-    toolCallsSinceLastUpdate >= getToolCallsBetweenUpdates()
+  const toolCallsSinceLastUpdate = countToolCallsSince(messages, lastMemoryMessageUuid)
+  const hasMetToolCallThreshold = toolCallsSinceLastUpdate >= getToolCallsBetweenUpdates()
 
   // Check if the last assistant turn has no tool calls (safe to extract)
   const hasToolCallsInLastTurn = hasToolCallsInLastAssistantTurn(messages)
@@ -214,10 +195,7 @@ async function setupSessionMemoryFile(
   // Drop any cached entry so FileReadTool's dedup doesn't return a
   // file_unchanged stub — we need the actual content. The Read repopulates it.
   toolUseContext.readFileState.delete(memoryPath)
-  const result = await FileReadTool.call(
-    { file_path: memoryPath },
-    toolUseContext,
-  )
+  const result = await FileReadTool.call({ file_path: memoryPath }, toolUseContext)
   let currentMemory = ''
 
   const output = result.data as FileReadToolOutput
@@ -245,18 +223,15 @@ const initSessionMemoryConfigIfNeeded = memoize((): void => {
   // This ensures sensible defaults aren't overridden by zero values
   const config: SessionMemoryConfig = {
     minimumMessageTokensToInit:
-      remoteConfig.minimumMessageTokensToInit &&
-      remoteConfig.minimumMessageTokensToInit > 0
+      remoteConfig.minimumMessageTokensToInit && remoteConfig.minimumMessageTokensToInit > 0
         ? remoteConfig.minimumMessageTokensToInit
         : DEFAULT_SESSION_MEMORY_CONFIG.minimumMessageTokensToInit,
     minimumTokensBetweenUpdate:
-      remoteConfig.minimumTokensBetweenUpdate &&
-      remoteConfig.minimumTokensBetweenUpdate > 0
+      remoteConfig.minimumTokensBetweenUpdate && remoteConfig.minimumTokensBetweenUpdate > 0
         ? remoteConfig.minimumTokensBetweenUpdate
         : DEFAULT_SESSION_MEMORY_CONFIG.minimumTokensBetweenUpdate,
     toolCallsBetweenUpdates:
-      remoteConfig.toolCallsBetweenUpdates &&
-      remoteConfig.toolCallsBetweenUpdates > 0
+      remoteConfig.toolCallsBetweenUpdates && remoteConfig.toolCallsBetweenUpdates > 0
         ? remoteConfig.toolCallsBetweenUpdates
         : DEFAULT_SESSION_MEMORY_CONFIG.toolCallsBetweenUpdates,
   }
@@ -269,9 +244,7 @@ const initSessionMemoryConfigIfNeeded = memoize((): void => {
 // Track if we've logged the gate check failure this session (to avoid spam)
 let hasLoggedGateFailure = false
 
-const extractSessionMemory = sequential(async function (
-  context: REPLHookContext,
-): Promise<void> {
+const extractSessionMemory = sequential(async (context: REPLHookContext): Promise<void> => {
   const { messages, toolUseContext, querySource } = context
 
   // Only run session memory on main REPL thread
@@ -303,14 +276,10 @@ const extractSessionMemory = sequential(async function (
   const setupContext = createSubagentContext(toolUseContext)
 
   // Set up file system and read current state with isolated context
-  const { memoryPath, currentMemory } =
-    await setupSessionMemoryFile(setupContext)
+  const { memoryPath, currentMemory } = await setupSessionMemoryFile(setupContext)
 
   // Create extraction message
-  const userPrompt = await buildSessionMemoryUpdatePrompt(
-    currentMemory,
-    memoryPath,
-  )
+  const userPrompt = await buildSessionMemoryUpdatePrompt(currentMemory, memoryPath)
 
   // Run session memory extraction using runForkedAgent for prompt caching
   // runForkedAgent creates an isolated context to prevent mutation of parent state
@@ -333,8 +302,7 @@ const extractSessionMemory = sequential(async function (
     input_tokens: usage?.input_tokens,
     output_tokens: usage?.output_tokens,
     cache_read_input_tokens: usage?.cache_read_input_tokens ?? undefined,
-    cache_creation_input_tokens:
-      usage?.cache_creation_input_tokens ?? undefined,
+    cache_creation_input_tokens: usage?.cache_creation_input_tokens ?? undefined,
     config_min_message_tokens_to_init: config.minimumMessageTokensToInit,
     config_min_tokens_between_update: config.minimumTokensBetweenUpdate,
     config_tool_calls_between_updates: config.toolCallsBetweenUpdates,
@@ -398,14 +366,10 @@ export async function manuallyExtractSessionMemory(
     const setupContext = createSubagentContext(toolUseContext)
 
     // Set up file system and read current state with isolated context
-    const { memoryPath, currentMemory } =
-      await setupSessionMemoryFile(setupContext)
+    const { memoryPath, currentMemory } = await setupSessionMemoryFile(setupContext)
 
     // Create extraction message
-    const userPrompt = await buildSessionMemoryUpdatePrompt(
-      currentMemory,
-      memoryPath,
-    )
+    const userPrompt = await buildSessionMemoryUpdatePrompt(currentMemory, memoryPath)
 
     // Get system prompt for cache-safe params
     const { tools, mainLoopModel } = toolUseContext.options

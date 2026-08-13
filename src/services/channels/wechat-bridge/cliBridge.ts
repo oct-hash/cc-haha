@@ -168,7 +168,7 @@ class WechatBridge {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${CONFIG.claudeApiKey}`,
+            Authorization: `Bearer ${CONFIG.claudeApiKey}`,
             'anthropic-version': '2023-06-01',
           },
           timeout: CONFIG.maxResponseTimeMs,
@@ -183,7 +183,9 @@ class WechatBridge {
       return '抱歉，我没有收到有效的回复。'
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        console.error(`[Bridge] Claude API error: ${err.response?.data?.error?.message || err.message}`)
+        console.error(
+          `[Bridge] Claude API error: ${err.response?.data?.error?.message || err.message}`,
+        )
       } else {
         console.error(`[Bridge] Claude API error: ${err}`)
       }

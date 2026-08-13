@@ -42,8 +42,7 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
       if (isEnvDefinedFalsy(process.env.ENABLE_CLAUDEAI_MCP_SERVERS)) {
         logForDebugging('[claudeai-mcp] Disabled via env var')
         logEvent('tengu_claudeai_mcp_eligibility', {
-          state:
-            'disabled_env_var' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+          state: 'disabled_env_var' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         })
         return {}
       }
@@ -52,8 +51,7 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
       if (!tokens?.accessToken) {
         logForDebugging('[claudeai-mcp] No access token')
         logEvent('tengu_claudeai_mcp_eligibility', {
-          state:
-            'no_oauth_token' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+          state: 'no_oauth_token' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         })
         return {}
       }
@@ -68,8 +66,7 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
           `[claudeai-mcp] Missing user:mcp_servers scope (scopes=${tokens.scopes?.join(',') || 'none'})`,
         )
         logEvent('tengu_claudeai_mcp_eligibility', {
-          state:
-            'missing_scope' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+          state: 'missing_scope' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         })
         return {}
       }
@@ -118,12 +115,9 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
         }
       }
 
-      logForDebugging(
-        `[claudeai-mcp] Fetched ${Object.keys(configs).length} servers`,
-      )
+      logForDebugging(`[claudeai-mcp] Fetched ${Object.keys(configs).length} servers`)
       logEvent('tengu_claudeai_mcp_eligibility', {
-        state:
-          'eligible' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+        state: 'eligible' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       })
       return configs
     } catch {
@@ -152,7 +146,7 @@ export function clearClaudeAIMcpConfigsCache(): void {
  * it showed up is one the user has demonstrably ignored.
  */
 export function markClaudeAiMcpConnected(name: string): void {
-  saveGlobalConfig(current => {
+  saveGlobalConfig((current) => {
     const seen = current.claudeAiMcpEverConnected ?? []
     if (seen.includes(name)) return current
     return { ...current, claudeAiMcpEverConnected: [...seen, name] }

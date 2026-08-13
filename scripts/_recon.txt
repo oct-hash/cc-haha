@@ -1,0 +1,297 @@
+==== IMAGE ASSETS (png/pdf/tif) by folder ====
+-- code\revision_kidney (1) --
+   Rplots.pdf
+-- code\revision_kidney\figs_cellchat (17) --
+   PA_circle_Control_12h_2d.png
+   PB_rankNet_infoflow.png
+   PC1_SPP1_temporal.png
+   PC2_SPP1_chord_12h.png
+   P_interactions_bar.png
+   R2_SPP1_bubble_pretty.png
+   R2_SPP1_chord_grouped.png
+   R2_SPP1_role_network.png
+   R2_overview_heatmaps_2x3.png
+   R3_SPP1_bubble_compact.png
+   R3_SPP1_heatmap_clean.png
+   R3b_SPP1_bubble_topsenders.png
+   R_SPP1_bubble_12h.png
+   R_SPP1_heatmap_12h.png
+   R_absolute_infoflow_lines.png
+   R_circle_12h_top20.png
+   R_heatmap_12h_all.png
+-- data\geo\GSE269622_visium\hour12\spatial (1) --
+   tissue_hires_image.png
+-- data\geo\GSE269622_visium\sham\spatial (1) --
+   tissue_hires_image.png
+-- figures (26) --
+   Figure1_cell_atlas.pdf
+   Figure1_cell_atlas.png
+   Figure1_cell_atlas_Rv1.pdf
+   Figure1_cell_atlas_Rv1.png
+   Figure2_temporal_coordination.pdf
+   Figure2_temporal_coordination.png
+   Figure2_temporal_coordination_Rv1.pdf
+   Figure2_temporal_coordination_Rv1.png
+   Figure3_coexpression_network_Rv1.pdf
+   Figure3_coexpression_network_Rv1.png
+   Figure3_metabolic_flux.pdf
+   Figure3_metabolic_flux.png
+   Figure3_metabolic_flux_Rv1.pdf
+   Figure3_metabolic_flux_Rv1.png
+   Figure4_coexpression_network.pdf
+   Figure4_coexpression_network.png
+   Figure5_boolean_network.pdf
+   Figure5_boolean_network.png
+   Figure6_drug_connectivity.pdf
+   Figure6_drug_connectivity.png
+   Figure6_drug_screening.pdf
+   Figure6_drug_screening.png
+   Figure7_drug_detail.pdf
+   Figure7_drug_detail.png
+   Figure8_cross_organ.pdf
+   Figure8_cross_organ.png
+-- figures\final (16) --
+   Fig1.pdf
+   Fig1.png
+   Fig2.pdf
+   Fig2.png
+   Fig3.pdf
+   Fig3.png
+   Fig4.pdf
+   Fig4.png
+   Fig5.pdf
+   Fig5.png
+   Fig6.pdf
+   Fig6.png
+   Fig7.pdf
+   Fig7.png
+   Fig8.pdf
+   Fig8.png
+-- manuscript (10) --
+   FigS1_SPP1_validation_v1.pdf
+   FigS1_SPP1_validation_v1.png
+   FigS2_bulk_Spp1_timecourse_v1.pdf
+   FigS2_bulk_Spp1_timecourse_v1.png
+   FigS3_scRNA_replication_v1.pdf
+   FigS3_scRNA_replication_v1.png
+   FigS4_spatial_coloc_v1.pdf
+   FigS4_spatial_coloc_v1.png
+   FigS4b_moran_spdep_crosscheck_v1.pdf
+   FigS4b_moran_spdep_crosscheck_v1.png
+-- manuscript\figures\cellchat (7) --
+   Figure8_cellchat.png
+   Supp_SPP1_role_network.png
+   Supp_overview_heatmaps.png
+   Xa_interactions_temporal.png
+   Xb_SPP1_pulse.png
+   Xc_absolute_infoflow.png
+   Xd_MAIN_SPP1_heatmap.png
+-- results\qc (5) --
+   qc_celltype_composition.pdf
+   qc_postfilter_metrics.pdf
+   qc_postfilter_umap.pdf
+   qc_prefilter_scatter.pdf
+   qc_prefilter_violin.pdf
+-- supplementary\figures (5) --
+   Figure_CrossDataset_Concordance.png
+   Figure_CrossDataset_Concordance_preview.png
+   bach1_correlation_3datasets.png
+   bach1_intersection_heatmap.png
+   protein_coverage_comparison.png
+-- 交付最终版\figures (24) --
+   Fig1.pdf
+   Fig1.png
+   Fig2.pdf
+   Fig2.png
+   Fig3.pdf
+   Fig3.png
+   Fig4.pdf
+   Fig4.png
+   Fig5.pdf
+   Fig5.png
+   Fig6.pdf
+   Fig6.png
+   Fig7.pdf
+   Fig7.png
+   Fig8.pdf
+   Fig8.png
+   FigS1_SPP1_validation_v1.pdf
+   FigS1_SPP1_validation_v1.png
+   FigS2_bulk_Spp1_timecourse_v1.pdf
+   FigS2_bulk_Spp1_timecourse_v1.png
+   FigS3_scRNA_replication_v1.pdf
+   FigS3_scRNA_replication_v1.png
+   FigS4_spatial_coloc_v1.pdf
+   FigS4_spatial_coloc_v1.png
+-- 交付最终版\supplementary (8) --
+   FigS1_SPP1_validation_v1.pdf
+   FigS1_SPP1_validation_v1.png
+   FigS2_bulk_Spp1_timecourse_v1.pdf
+   FigS2_bulk_Spp1_timecourse_v1.png
+   FigS3_scRNA_replication_v1.pdf
+   FigS3_scRNA_replication_v1.png
+   FigS4_spatial_coloc_v1.pdf
+   FigS4_spatial_coloc_v1.png
+
+==== R6 ALL PARAGRAPHS (idx | style | text) ====
+[  0] <Normal> Coordinated Multi-Cellular Stress Response in Kidney Ischemia-Reperfusion Injury: Nrf2-Driven Ferroptosis Defense Revealed by Virtual Cell Integration
+[  1] <Normal> Abstract
+[  2] <Normal> Background: Kidney ischemia-reperfusion injury (IRI) is a major cause of acute kidney injury, yet no effective pharmacological therapy exists. The Nrf2-ferropto
+[  3] <Normal> Methods: We integrated three independent transcriptomic datasets spanning over 178,000 cells/nuclei: snRNA-seq (GSE139107, 126,578 nuclei, 6 timepoints), scRNA-
+[  4] <Normal> Results: (1) I/R induces coordinated temporal waves — Hmox1, Gclc, and Fth1 upregulation — spanning epithelial, endothelial, stromal, and immune compartments, c
+[  5] <Normal> Conclusions: This virtual cell framework demonstrates that renal I/R ferroptosis defense is a coordinated multi-cellular program orchestrated by Nrf2, not a cel
+[  6] <Normal> Keywords: kidney IRI, single-nucleus RNA-seq, O-GlcNAc, Nrf2, ferroptosis, Boolean network, virtual perturbation, coordinated stress response
+[  7] <Normal> ____________________________________________________________
+[  8] <Normal> 1. Introduction
+[  9] <Normal> 1.1 The Clinical Problem
+[ 10] <Normal> Acute kidney injury (AKI) affects 13.3 million patients annually worldwide, and ischemia-reperfusion injury (IRI) is its leading cause in hospitalized patients 
+[ 11] <Normal> 1.2 The Biological Gap
+[ 12] <Normal> The O-GlcNAc post-translational modification, regulated by O-GlcNAc transferase (OGT) and O-GlcNAcase (OGA), functions as a cellular stress sensor [9-11]. The N
+[ 13] <Normal> In cardiac I/R, protein O-GlcNAcylation is a well-characterized, cardiomyocyte-intrinsic cytoprotective response that operates alongside Nrf2-dependent antioxid
+[ 14] <Normal> 1.3 Study Strategy
+[ 15] <Normal> To address these questions, we analyzed three publicly available transcriptomic datasets totaling over 178,000 single cells/nuclei, combined with Boolean networ
+[ 16] <Normal> ____________________________________________________________
+[ 17] <Normal> 2. Methods
+[ 18] <Normal> 2.1 Data Acquisition
+[ 19] <Normal> Three publicly available mouse kidney ischemia-reperfusion transcriptomic datasets were obtained from the NCBI Gene Expression Omnibus (GEO). GSE139107 provides
+[ 20] <Normal> 2.2 Virtual Cell Atlas (Figure 1)
+[ 21] <Normal> GSE139107 DGE files were parsed for 17 key genes spanning three pathways: O-GlcNAc (Ogt, Oga, Gfpt1, Gfpt2), Nrf2/ARE (Nfe2l2, Keap1, Hmox1, Nqo1, Gclc, Gclm, T
+[ 22] <Normal> 2.3 Cross-Dataset Temporal Coordination Analysis (Figure 2)
+[ 23] <Normal> For each gene, temporal expression traces were constructed per cell type across the four early timepoints (Control, 4 h, 12 h, 2 d) of the six available in GSE1
+[ 24] <Normal> Independent validation used GSE274819 scRNA-seq (Sham: 13,433 cells; early I/R: 38,875 cells pooled from three reperfusion timepoints — 4 h, 12 h, and 1 day) an
+[ 25] <Normal> 2.4 Co-expression Network Analysis (Figure 3)
+[ 26] <Normal> Gene-gene co-expression was quantified as pairwise Spearman correlations (ρ) between pathway genes across cell types at each timepoint (Control, 4 h, 12 h, and 
+[ 27] <Normal> 2.5 Virtual Metabolic Flux Scoring (Figure 4)
+[ 28] <Normal> Pathway-level metabolic activity was scored for each cell type at each timepoint across 9 metabolic pathways defined by a curated 77-gene set spanning GSH synth
+[ 29] <Normal> 2.6 Boolean Network Modeling (Figure 5)
+[ 30] <Normal> A 15-node Boolean network was constructed with nodes representing IRI trigger, O-GlcNAc cycle (Ogt, Oga, O-GlcNAc), Nrf2 pathway (Keap1, Nfe2l2, Bach1, Hmox1, G
+[ 31] <Normal> 2.7 Drug-Connectivity Analysis (Figure 6)
+[ 32] <Normal> A genome-wide kidney ischemia-reperfusion query signature was derived directly from the raw GSE139107 single-cell DGE matrices by pseudobulking each timepoint (
+[ 33] <Normal> 2.8 Cell-Cell Communication Inference (Figure 8) For spatial co-localization (Supplementary Figure S4), the 10x Visium CytAssist mouse kidney I/R dataset (GSE26
+[ 34] <Normal> Cell-cell communication was inferred with CellChat (v2.2.0) using the mouse ligand-receptor interaction database (CellChatDB.mouse). For each of the six I/R tim
+[ 35] <Normal> 2.9 Statistical Analysis
+[ 36] <Normal> Bootstrap 95% confidence intervals (1,000 resamples) and Mann-Whitney U tests were used for cell-type comparisons. Spearman's ρ with Benjamini-Hochberg correcti
+[ 37] <Normal> ____________________________________________________________
+[ 38] <Normal> 3. Results
+[ 39] <Normal> 3.1 Virtual Cell Atlas: O-GlcNAc and Ferroptosis Pathways Are Broadly Distributed Across Renal Cell Types (Figure 1)
+[ 40] <Normal> Analysis of 26,653 control nuclei from GSE139107 revealed that Ogt, the catalytic subunit of O-GlcNAc transferase, is broadly expressed across all 26 renal cell
+[ 41] <Normal> The ferroptosis defense gene Fth1 was nearly undetectable under control conditions (%detected: 0–0.2%), consistent with its known role as a stress-inducible pro
+[ 42] <Normal> Figure 1. Virtual cell atlas of O-GlcNAc, Nrf2, and ferroptosis pathway genes across 26 renal cell types (GSE139107, 26,653 control nuclei). Heatmap of per-cell
+[ 43] <Normal> 3.2 I/R Induces Coordinated Temporal Waves Across Cell Types (Figure 2)
+[ 44] <Normal> Comparison of Control versus I/R timepoints revealed three distinct temporal waves of gene induction across the renal cellular ecosystem: Wave 1 (4 h, early acu
+[ 45] <Normal> Wave 1 (4 hours, Early Acute Response): Hmox1 and Gclc showed the earliest and strongest induction. Hmox1 increased from near-zero in control to detectable leve
+[ 46] <Normal> Wave 2 (12 hours, Iron Sequestration): Fth1 emerged as the dominant mid-phase responder. In proximal tubule cells, Fth1 increased from 0.004 to 0.429 (%detected
+[ 47] <Normal> Wave 3 (2 days, Late Adaptive Response): Ogt showed delayed upregulation at 2 days post-IRI in multiple cell types, with the largest increases in T cells (+0.46
+[ 48] <Normal> The five stress genes showed heterogeneous temporal coordination across cell types (mean pairwise Spearman ρ: Fth1 = 0.84, Ogt = 0.62, Gclc = 0.32, Hmox1 = 0.26
+[ 49] <Normal> Independent validation in GSE274819 scRNA-seq confirmed the key findings: Ogt increased 60% from Sham to early I/R (4 h–1 day; 0.40 to 0.64), Gclc increased 41%
+[ 50] <Normal> Figure 2. Temporal coordination of the renal stress program and cross-dataset validation. (Top) Three temporal waves of gene induction after I/R: Hmox1/Gclc (4 
+[ 51] <Normal> 3.3 Co-expression Network Dynamics Reveal I/R-Induced Module Reorganization (Figure 3)
+[ 52] <Normal> Gene-gene co-expression analysis across cell types revealed dynamic network reorganization during I/R progression, with the number of significant edges (|ρ| ≥ 0
+[ 53] <Normal> Figure 3. Co-expression network dynamics during I/R progression. Gene-gene Spearman correlation networks at Control, 4 h, 12 h, and 2 d. Baseline Ogt anticorrel
+[ 54] <Normal> 3.4 Virtual Metabolic Flux Reveals Coordinated GSH-Iron-Lipid Metabolic Reprogramming (Figure 4)
+[ 55] <Normal> To determine whether the transcriptional coordination extends to the metabolic level, we performed pathway-level metabolic scoring across nine pathways using a 
+[ 56] <Normal> In proximal tubule cells, the GSH synthesis pathway showed a 5.1-fold increase at 4 h post-IRI (from 0.047 to 0.240), followed by a gradual decline (0.152 at 12
+[ 57] <Normal> The classic ischemia metabolic hallmark, the OXPHOS-to-glycolysis switch, was confirmed in most cell types (proximal tubule segments most consistently). These s
+[ 58] <Normal> Figure 4. Virtual metabolic flux reprogramming. Pathway-level scores (77 metabolic genes, 9 pathways) across timepoints. iron homeostasis (ρ=0.40), GSH synthesi
+[ 59] <Normal> 3.5 Boolean Network Identifies Nrf2 as the Master Regulator of Ferroptosis Defense (Figure 5)
+[ 60] <Normal> Our 15-node Boolean network reached stable attractors for all nine perturbation conditions. In the WT_IR state, ferroptosis was blocked (Ferroptosis = 0) becaus
+[ 61] <Normal> Figure 5. Boolean network model and in silico perturbation. A 15-node network of the IRI→O-GlcNAc→Nrf2→ferroptosis axis with attractor states for 9 perturbation
+[ 62] <Normal> 3.6 Drug-Connectivity Analysis Ranks Signature Reversers (Figure 6)
+[ 63] <Normal> Rather than relying on a hand-curated shortlist, we ranked 271 compounds by their measured ability to reverse the genome-wide kidney I/R signature. The most rob
+[ 64] <Normal> Figure 6. Data-driven drug connectivity on the genome-wide kidney I/R signature (CREEDS, 271 compounds). (A) Top signature-reversing candidates ranked by median
+[ 65] <Normal> 3.7 Cross-Organ Comparison: Kidney vs. Heart I/R (Figure 7)
+[ 66] <Normal> Comparison with published cardiac I/R data revealed both conserved and organ-specific features. The O-GlcNAc-Nrf2-ferroptosis axis is conserved across organs, b
+[ 67] <Normal> Figure 7. Cross-organ comparison of kidney versus heart I/R. The O-GlcNAc-Nrf2-ferroptosis axis is conserved, but cellular execution differs: the heart uses a G
+[ 68] <Normal> 3.8 Intercellular Communication Peaks Transiently at 12 h and Is Led by an SPP1 Repair-Initiation Pulse (Figure 8)
+[ 69] <Normal> Aggregating communication across all six timepoints revealed that intercellular signaling is not gradually remodeled but acutely and transiently amplified at 12
+[ 70] <Normal> This surge was dominated by SPP1 (osteopontin) signaling. SPP1 communication was undetectable at Control and 4 h, rose sharply to a total communication probabil
+[ 71] <Normal> Resolving the SPP1 network at cell-type resolution clarified its directional architecture (Figure 8d). SPP1 was secreted principally by macrophages and thick as
+[ 72] <Normal> To ensure these findings were not artifacts of a single inference method, we cross-validated the 12 h SPP1 signal using two orthogonal computational approaches.
+[ 73] <Normal> As further external validation beyond the discovery dataset, we examined an independent wild-type mouse kidney I/R bulk RNA-seq time course (GSE267650 [51], 41 
+[ 74] <Normal> Figure 8. Intercellular communication peaks transiently at 12 h post-IRI and is led by an SPP1 repair-initiation pulse. (a) Number of significant ligand-recepto
+[ 75] <Normal> ____________________________________________________________
+[ 76] <Normal> 4. Discussion
+[ 77] <Normal> 4.1 A Tissue-Level Coordinated Stress Response
+[ 78] <Normal> The central finding of this study — that I/R induces a coordinated multi-cellular stress program rather than cell-autonomous responses — challenges the prevaili
+[ 79] <Normal> The temporal and spatial convergence of the SPP1 pulse with the Fth1 iron-sequestration response at 12 h suggests a mechanistic link rather than coincidence. Os
+[ 80] <Normal> Two orthogonal computational analyses now provide initial in silico support for this hypothesis (Section 3.8). A five-method consensus (LIANA) confirmed that th
+[ 81] <Normal> 4.2 Fth1 as the Dominant Renal Ferroptosis Defense
+[ 82] <Normal> The finding that Fth1, not Gpx4, is the most highly expressed ferroptosis-related gene in the kidney (98% detection, 5,721–6,862 bulk counts) is unexpected and 
+[ 83] <Normal> 4.3 O-GlcNAc as a Modulator, Not a Gatekeeper
+[ 84] <Normal> Our Boolean model demonstrates that O-GlcNAc modulation (Ogt OE or KO) does not change the ferroptosis attractor state, while Nfe2l2 KO does. This positions O-G
+[ 85] <Normal> 4.4 The 12-Hour Co-Regulation Peak
+[ 86] <Normal> The gene-gene co-expression network reaches its densest connectivity at 12 h post-IRI (13 significant edges versus 4 at baseline), coinciding with the peak of F
+[ 87] <Normal> 4.5 Cross-Organ Conservation and Divergence
+[ 88] <Normal> The comparison with cardiac I/R indicates that the O-GlcNAc-Nrf2-ferroptosis axis is a conserved stress-response module, yet its cellular execution appears orga
+[ 89] <Normal> 4.6 Data-Driven Drug Nominations
+[ 90] <Normal> The data-driven connectivity screen reframes the therapeutic question. Rather than confirming canonical Nrf2 activators, the unbiased CREEDS analysis ranked tyr
+[ 91] <Normal> 4.7 Limitations
+[ 92] <Normal> (1) The scRNA-seq validation dataset (GSE274819) was analyzed only at Sham and early I/R (4 h, 12 h, 1 day reperfusion) timepoints; the later timepoints (Day 5/
+[ 93] <Normal> 4.8 Future Directions
+[ 94] <Normal> Building on the Visium spatial evidence presented here (Supplementary Figure S4), future studies at single-cell spatial resolution (e.g., MERFISH, Xenium) could
+[ 95] <Normal> ____________________________________________________________
+[ 96] <Normal> 5. Conclusions
+[ 97] <Normal> 1. O-GlcNAc machinery is broadly expressed across all renal cell types without PT specificity, and IRI induces dynamic Ogt regulation in multiple compartments. 
+[ 98] <Normal> 2. Renal I/R ferroptosis defense shows gene-dependent temporal coordination across cell types (mean cross-cell-type ρ = 0.26–0.84), strongest for the dominant i
+[ 99] <Normal> 3. The kidney employs an Fth1/Gclc-dominant ferroptosis defense distinct from the Gpx4-centric cardiac mechanism.
+[100] <Normal> 4. Nfe2l2 is the master regulator of ferroptosis defense; O-GlcNAc elevation cannot compensate for Nrf2 loss.
+[101] <Normal> 5. Unbiased CREEDS connectivity analysis of the kidney I/R signature ranks tyrosine-kinase inhibitors (imatinib, nilotinib, dasatinib) as the most robust revers
+[102] <Normal> 6. The seven-step virtual cell framework developed here — atlas → temporal coordination → co-expression network → metabolic flux → Boolean perturbation → drug c
+[103] <Normal> ____________________________________________________________
+[104] <Normal> Data Availability
+[105] <Normal> All datasets are publicly available at NCBI Gene Expression Omnibus: GSE139107, GSE274819, GSE98622, GSE267650. Analysis code is available at https://github.com
+[106] <Normal> Author Contributions
+[107] <Normal> [To be completed]
+[108] <Normal> References
+[109] <Normal> 1. Ronco C, Bellomo R, Kellum JA. Acute kidney injury. Lancet. 2019;394(10212):1949-1964.
+[110] <Normal> 2. Basile DP, Anderson MD, Sutton TA. Pathophysiology of acute kidney injury. Compr Physiol. 2012;2(2):1303-1353.
+[111] <Normal> 3. Zuk A, Bonventre JV. Acute kidney injury. Annu Rev Med. 2016;67:293-307.
+[112] <Normal> 4. Hoste EAJ, Kellum JA, Selby NM, et al. Global epidemiology and outcomes of acute kidney injury. Nat Rev Nephrol. 2018;14(10):607-625.
+[113] <Normal> 5. Pickkers P, Darmon M, Hoste E, et al. Acute kidney injury in the critically ill: an updated review on pathophysiology and management. Intensive Care Med. 202
+[114] <Normal> 6. Park J, Shrestha R, Qiu C, et al. Single-cell transcriptomics of the mouse kidney reveals potential cellular targets of kidney disease. Science. 2018;360(639
+[115] <Normal> 7. Liu J, Krautzberger AM, Sui SH, et al. Cell-specific translational profiling in acute kidney injury. J Clin Invest. 2014;124(3):1242-1254.
+[116] <Normal> 8. Balzer MS, Rohacs T, Susztak K. How many cell types are in the kidney and what do they do? Annu Rev Physiol. 2022;84:507-529.
+[117] <Normal> 9. Yang X, Qian K. Protein O-GlcNAcylation: emerging mechanisms and functions. Nat Rev Mol Cell Biol. 2017;18(7):452-465.
+[118] <Normal> 10. Seo K, Lee J, Park J, et al. O-GlcNAcylation regulates ischemia-reperfusion injury in the kidney. Am J Physiol Renal Physiol. 2020;319(3):F543-F553.
+[119] <Normal> 11. Hart GW, Housley MP, Slawson C. Cycling of O-linked beta-N-acetylglucosamine on nucleocytoplasmic proteins. Nature. 2007;446(7139):1017-1022.
+[120] <Normal> 12. Dodson M, Castro-Portuguez R, Zhang DD. NRF2 plays a critical role in mitigating lipid peroxidation and ferroptosis. Redox Biol. 2019;23:101107.
+[121] <Normal> 13. Silva-Palacios A, Ostolga-Chavarria M, Zazueta C, Konigsberg M. Nrf2: molecular and epigenetic regulation during aging. Ageing Res Rev. 2018;47:31-40.
+[122] <Normal> 14. Tonelli C, Chio IIC, Tuveson DA. Transcriptional regulation by Nrf2. Antioxid Redox Signal. 2018;29(17):1727-1745.
+[123] <Normal> 15. Stockwell BR. Ferroptosis turns 10: Emerging mechanisms, physiological functions, and therapeutic applications. Cell. 2022;185(14):2401-2421.
+[124] <Normal> 16. Linkermann A, Skouta R, Himmerkus N, et al. Synchronized renal tubular cell death involves ferroptosis. Proc Natl Acad Sci USA. 2014;111(47):16836-16841.
+[125] <Normal> 17. Tonnus W, Meyer C, Paliege A, et al. The pathological features of regulated necrosis. J Pathol. 2019;247(5):697-707.
+[126] <Normal> 18. Tang D, Chen X, Kang R, Kroemer G. Ferroptosis: molecular mechanisms and health implications. Cell Res. 2021;31(2):107-125.
+[127] <Normal> 19. Deng F, Sharma I, Dai Y, et al. Ferroptosis in acute kidney injury. Cell Death Dis. 2021;12(2):182.
+[128] <Normal> 20. Dixon SJ, Lemberg KM, Lamprecht MR, et al. Ferroptosis: an iron-dependent form of nonapoptotic cell death. Cell. 2012;149(5):1060-1072.
+[129] <Normal> 21. Jiang X, Stockwell BR, Conrad M. Ferroptosis: mechanisms, biology and role in disease. Nat Rev Mol Cell Biol. 2021;22(4):266-282.
+[130] <Normal> 22. Ng YH, Okolo CA, Erickson JR, Baldi JC, Jones PP. Protein O-GlcNAcylation in the heart. Acta Physiol (Oxf). 2021;233(1):e13696.
+[131] <Normal> 23. Muller T, Dewitz C, Schmitz J, et al. Necroptosis and ferroptosis are alternative cell death pathways that operate in acute kidney failure. Cell Mol Life Sc
+[132] <Normal> 24. Belavgeni A, Meyer C, Stumpf J, et al. Ferroptosis and necroptosis in the kidney. Cell Chem Biol. 2020;27(4):448-462.
+[133] <Normal> 25. Wolf FA, Angerer P, Theis FJ. SCANPY: large-scale single-cell gene expression data analysis. Genome Biol. 2018;19(1):15.
+[134] <Normal> 26. Kirita Y, Wu H, Uchimura K, et al. Cell profiling of mouse acute kidney injury reveals conserved cellular responses to injury. Proc Natl Acad Sci USA. 2020;
+[135] <Normal> 27. Gerhardt LMS, Liu J, Koppitch K, Cippa PE, McMahon AP. Single-nuclear transcriptomics reveals diversity of proximal tubule cell states in a dynamic response
+[136] <Normal> 28. Wu H, Kirita Y, Donnelly EL, Humphreys BD. Advantages of single-nucleus over single-cell RNA sequencing in adult kidney. J Am Soc Nephrol. 2019;30(1):23-32.
+[137] <Normal> 29. Kfoury J, Guo M, Bhatt K, et al. Single-cell and spatial transcriptomics of kidney ischemia-reperfusion injury. Kidney Int. 2024;105(1):89-103.
+[138] <Normal> 30. Mussel C, Hopfensitz M, Kestler HA. BoolNet--an R package for generation, reconstruction and analysis of Boolean networks. Bioinformatics. 2010;26(10):1378-
+[139] <Normal> 31. Subramanian A, Narayan R, Corsello SM, et al. A Next Generation Connectivity Map: L1000 platform and the first 1,000,000 profiles. Cell. 2017;171(6):1437-14
+[140] <Normal> 32. Benjamini Y, Hochberg Y. Controlling the false discovery rate: a practical and powerful approach to multiple testing. J R Stat Soc Series B. 1995;57(1):289-
+[141] <Normal> 33. Riegman M, Sagie L, Galed C, et al. Ferroptosis occurs through an osmotic mechanism and propagates independently of cell rupture. Nat Cell Biol. 2020;22(9):
+[142] <Normal> 34. Jang HR, Rabb H. Immune cells in experimental acute kidney injury. Nat Rev Nephrol. 2015;11(2):88-101.
+[143] <Normal> 35. Doll S, Freitas FP, Shah R, et al. FSP1 is a glutathione-independent ferroptosis suppressor. Nature. 2019;575(7784):693-698.
+[144] <Normal> 36. Bersuker K, Hendricks JM, Li Z, et al. The CoQ oxidoreductase FSP1 acts parallel to GPX4 to inhibit ferroptosis. Nature. 2019;575(7784):688-692.
+[145] <Normal> 37. Yang WS, Sriramaratnam R, Welsch M, et al. Regulation of ferroptotic cancer cell death by GPX4. Cell. 2014;156(1-2):317-331.
+[146] <Normal> 38. Wenzel SE, Tyurina YY, Zhao J, et al. PEBP1 wardens ferroptosis by enabling lipoxygenase generation of lipid death signals. Cell. 2017;171(3):628-641.
+[147] <Normal> 39. Ide S, Kobayashi Y, Ide K, et al. Ferroptotic cell death triggered by conjugated linolenic acids is prevented by DPP4 inhibition. Cell Death Discov. 2022;8:
+[148] <Normal> 40. Paller MS, Hedlund BE, Sikora JJ, et al. Role of iron in postischemic renal injury in the rat. Kidney Int. 1988;34(4):474-480.
+[149] <Normal> 41. Fang X, Wang H, Han D, et al. Ferroptosis as a target for protection against cardiomyopathy. Proc Natl Acad Sci USA. 2019;116(7):2672-2680.
+[150] <Normal> 42. Linkermann A, Chen G, Dong G, et al. Regulated cell death in AKI. J Am Soc Nephrol. 2014;25(12):2689-2701.
+[151] <Normal> 43. Wang Z, Monteiro CD, Jagodnik KM, et al. Extraction and analysis of signatures from the Gene Expression Omnibus by the crowd. Nat Commun. 2016;7:12846.
+[152] <Normal> 44. Gong N, Wang WJ, Fu YF, et al. The SPP1-CD44 Signaling Axis Orchestrates Macrophage Metabolism to Promote Early Inflammation in Acute Kidney Injury. Int J B
+[153] <Normal> 45. Li PP, Tao ZX, Gao YY, et al. Ability of SPP1 to Alleviate Post-Intracerebral Hemorrhage Ferroptosis via Nrf2/HO1 Pathway. Brain Behav. 2025;15(5):e70493.
+[154] <Normal> 46. Pietsch EC, Chan JY, Torti FM, et al. Nrf2 mediates the induction of ferritin H in response to xenobiotics and cancer chemopreventive dithiolethiones. J Bio
+[155] <Normal> 47. Hong Y, An Q, Wang Z, et al. Multi-omics Analysis Reveals the Propagation Mechanism of Ferroptosis in Acute Kidney Injury. Inflammation. 2025;48(6):4062-407
+[156] <Normal> 48. Rudman-Melnick V, Adam M, Potter A, et al. Single-Cell Profiling of AKI in a Murine Model Reveals Novel Transcriptional Signatures, Profibrotic Phenotype, a
+[157] <Normal> 49. Dimitrov D, Turei D, Garrido-Rodriguez M, et al. Comparison of methods and resources for cell-cell communication inference from single-cell RNA-Seq data. Na
+[158] <Normal> 50. Browaeys R, Saelens W, Saeys Y. NicheNet: modeling intercellular communication by linking ligands to target genes. Nat Methods. 2020;17(2):159-162.
+[159] <Normal> 51. Heruye SH, Myslinski J, Zeng C, et al. Inflammation primes the murine kidney for recovery by activating AZIN1 adenosine-to-inosine editing. J Clin Invest. 2
+[160] <Normal> ____________________________________________________________

@@ -1,5 +1,5 @@
-import type { MailAttachment, PaperMatch, MatchResult } from './types.js'
-import { extractPaperInfo, calculateSimilarity } from './parser.js'
+import { calculateSimilarity, extractPaperInfo } from './parser.js'
+import type { MailAttachment, MatchResult, PaperMatch } from './types.js'
 
 interface PaperNote {
   id: string
@@ -67,16 +67,17 @@ export class KnowledgeBaseMatcher {
 
   findPaperByDoi(doi: string): PaperNote | undefined {
     const normalizedDoi = doi.toLowerCase().replace(/\s/g, '')
-    return this.index?.papers.find(
-      (p) => p.doi?.toLowerCase().replace(/\s/g, '') === normalizedDoi
-    )
+    return this.index?.papers.find((p) => p.doi?.toLowerCase().replace(/\s/g, '') === normalizedDoi)
   }
 
   findPaperByTitle(title: string): PaperNote | undefined {
     const normalized = title.toLowerCase().trim()
     return this.index?.papers.find((p) => {
       const pTitle = (p.title || '').toLowerCase().trim()
-      return pTitle === normalized || this.normalizeForMatch(pTitle) === this.normalizeForMatch(normalized)
+      return (
+        pTitle === normalized ||
+        this.normalizeForMatch(pTitle) === this.normalizeForMatch(normalized)
+      )
     })
   }
 
@@ -95,10 +96,7 @@ export class KnowledgeBaseMatcher {
       .map((r) => r.paper)
   }
 
-  matchAttachment(
-    attachment: MailAttachment,
-    subject?: string
-  ): PaperMatch | null {
+  matchAttachment(attachment: MailAttachment, subject?: string): PaperMatch | null {
     const paperInfo = extractPaperInfo(attachment, subject)
 
     // Try DOI exact match first
@@ -143,10 +141,7 @@ export class KnowledgeBaseMatcher {
     return null
   }
 
-  matchAttachments(
-    attachments: MailAttachment[],
-    subjects?: string[]
-  ): MatchResult {
+  matchAttachments(attachments: MailAttachment[], subjects?: string[]): MatchResult {
     const matched: PaperMatch[] = []
     const unmatched: MailAttachment[] = []
     const papers = this.getAllPapers()
@@ -189,9 +184,6 @@ export class KnowledgeBaseMatcher {
   }
 }
 
-export function createMatcher(
-  indexPath: string,
-  graphPath: string
-): KnowledgeBaseMatcher {
+export function createMatcher(indexPath: string, graphPath: string): KnowledgeBaseMatcher {
   return new KnowledgeBaseMatcher(indexPath, graphPath)
 }

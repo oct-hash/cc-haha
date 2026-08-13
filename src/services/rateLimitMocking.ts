@@ -16,9 +16,7 @@ import {
 /**
  * Process headers, applying mocks if /mock-limits command is active
  */
-export function processRateLimitHeaders(
-  headers: globalThis.Headers,
-): globalThis.Headers {
+export function processRateLimitHeaders(headers: globalThis.Headers): globalThis.Headers {
   // Only apply mocks for Ant employees using /mock-limits command
   if (shouldProcessMockLimits()) {
     return applyMockHeaders(headers)
@@ -69,10 +67,8 @@ export function checkMockRateLimitError(
   // 2. Either no overage headers OR overage is also rejected
   // 3. For Opus-specific limits, only throw if actually using an Opus model
   const status = mockHeaders['anthropic-ratelimit-unified-status']
-  const overageStatus =
-    mockHeaders['anthropic-ratelimit-unified-overage-status']
-  const rateLimitType =
-    mockHeaders['anthropic-ratelimit-unified-representative-claim']
+  const overageStatus = mockHeaders['anthropic-ratelimit-unified-overage-status']
+  const rateLimitType = mockHeaders['anthropic-ratelimit-unified-representative-claim']
 
   // Check if this is an Opus-specific rate limit
   const isOpusLimit = rateLimitType === 'seven_day_opus'
@@ -99,17 +95,13 @@ export function checkMockRateLimitError(
       'Rate limit exceeded',
       // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
       new globalThis.Headers(
-        Object.entries(fastModeHeaders).filter(([_, v]) => v !== undefined) as [
-          string,
-          string,
-        ][],
+        Object.entries(fastModeHeaders).filter(([_, v]) => v !== undefined) as [string, string][],
       ),
     )
     return error
   }
 
-  const shouldThrow429 =
-    status === 'rejected' && (!overageStatus || overageStatus === 'rejected')
+  const shouldThrow429 = status === 'rejected' && (!overageStatus || overageStatus === 'rejected')
 
   if (shouldThrow429) {
     // Create a mock 429 error with the appropriate headers
@@ -119,10 +111,7 @@ export function checkMockRateLimitError(
       'Rate limit exceeded',
       // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
       new globalThis.Headers(
-        Object.entries(mockHeaders).filter(([_, v]) => v !== undefined) as [
-          string,
-          string,
-        ][],
+        Object.entries(mockHeaders).filter(([_, v]) => v !== undefined) as [string, string][],
       ),
     )
     return error

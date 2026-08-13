@@ -6,7 +6,7 @@
 // imports are resolved here directly.
 
 import { feature } from 'bun:bundle'
-import * as React from 'react'
+import type * as React from 'react'
 import { useCallback, useEffect, useRef } from 'react'
 import { getOriginalCwd } from '../bootstrap/state.js'
 import type { Command } from '../commands.js'
@@ -20,8 +20,8 @@ import {
 } from '../services/PromptSuggestion/speculation.js'
 import type { AppStateStore } from '../state/AppState.js'
 import type { SetToolJSXFn } from '../Tool.js'
-import type { PromptInputMode, QueuedCommand } from '../types/textInputTypes.js'
 import type { Message as MessageType } from '../types/message.js'
+import type { PromptInputMode, QueuedCommand } from '../types/textInputTypes.js'
 import { createAbortController } from '../utils/abortController.js'
 import { incrementPromptCount } from '../utils/commitAttribution.js'
 import type { PastedContent } from '../utils/config.js'

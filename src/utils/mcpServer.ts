@@ -1,27 +1,23 @@
-import {
-  type ListToolsResult,
-  type CallToolResult,
-  type Tool,
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js'
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
-import { randomUUID } from 'crypto'
+import {
+  CallToolRequestSchema,
+  type CallToolResult,
+  ListToolsRequestSchema,
+  type ListToolsResult,
+  type Tool,
+} from '@modelcontextprotocol/sdk/types.js'
+import { randomUUID, timingSafeEqual } from 'crypto'
 import { createServer } from 'http'
+import { getDefaultAppState } from 'src/state/AppStateStore.js'
 import { shutdownDatadog } from '../services/analytics/datadog.js'
 import { shutdown1PEventLogging } from '../services/analytics/firstPartyEventLogger.js'
 import { initializeAnalyticsSink } from '../services/analytics/sink.js'
-import { enableConfigs } from './config.js'
-import { logForDebugging } from './debug.js'
-import { getDefaultAppState } from 'src/state/AppStateStore.js'
-import {
-  findToolByName,
-  getEmptyToolPermissionContext,
-  type ToolUseContext,
-} from '../Tool.js'
+import { findToolByName, getEmptyToolPermissionContext, type ToolUseContext } from '../Tool.js'
 import { getTools } from '../tools.js'
 import { createAbortController } from './abortController.js'
+import { enableConfigs } from './config.js'
+import { logForDebugging } from './debug.js'
 import { createFileStateCacheWithSizeLimit } from './fileStateCache.js'
 import { logError } from './log.js'
 import { createAssistantMessage } from './messages.js'
@@ -36,7 +32,15 @@ const DEFAULT_ALLOWED_TOOLS = 'Read,Write,Edit,Bash,Glob,Grep'
 
 function parseAllowedTools(): Set<string> {
   const envTools = process.env.MCP_SERVER_TOOLS ?? DEFAULT_ALLOWED_TOOLS
-  return new Set(envTools.split(',').map(t => t.trim()))
+  return new Set(envTools.split(',').map((t) => t.trim()))
+}
+
+// Constant-time string comparison for bearer token checks. Prevents timing
+// side-channel attacks that could leak token prefixes over the network.
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a)
+  const bb = Buffer.from(b)
+  return ab.length === bb.length && timingSafeEqual(ab, bb)
 }
 
 function createMcpServer(cwd: string, debug: boolean, verbose: boolean) {
@@ -50,44 +54,41 @@ function createMcpServer(cwd: string, debug: boolean, verbose: boolean) {
 
   const allowedTools = parseAllowedTools()
 
-  server.setRequestHandler(
-    ListToolsRequestSchema,
-    async (): Promise<ListToolsResult> => {
-      const toolPermissionContext = getEmptyToolPermissionContext()
-      const allTools = getTools(toolPermissionContext)
+  server.setRequestHandler(ListToolsRequestSchema, async (): Promise<ListToolsResult> => {
+    const toolPermissionContext = getEmptyToolPermissionContext()
+    const allTools = getTools(toolPermissionContext)
 
-      const filteredTools = allTools.filter(tool => allowedTools.has(tool.name))
+    const filteredTools = allTools.filter((tool) => allowedTools.has(tool.name))
 
-      return {
-        tools: await Promise.all(
-          filteredTools.map(async tool => {
-            let outputSchema: Tool['outputSchema'] | undefined
-            if (tool.outputSchema) {
-              const convertedSchema = zodToJsonSchema(tool.outputSchema)
-              if (
-                typeof convertedSchema === 'object' &&
-                convertedSchema !== null &&
-                'type' in convertedSchema &&
-                convertedSchema.type === 'object'
-              ) {
-                outputSchema = convertedSchema as Tool['outputSchema']
-              }
+    return {
+      tools: await Promise.all(
+        filteredTools.map(async (tool) => {
+          let outputSchema: Tool['outputSchema'] | undefined
+          if (tool.outputSchema) {
+            const convertedSchema = zodToJsonSchema(tool.outputSchema)
+            if (
+              typeof convertedSchema === 'object' &&
+              convertedSchema !== null &&
+              'type' in convertedSchema &&
+              convertedSchema.type === 'object'
+            ) {
+              outputSchema = convertedSchema as Tool['outputSchema']
             }
-            return {
-              name: tool.name,
-              description: await tool.prompt({
-                getToolPermissionContext: async () => toolPermissionContext,
-                tools: filteredTools,
-                agents: [],
-              }),
-              inputSchema: zodToJsonSchema(tool.inputSchema) as Tool['inputSchema'],
-              outputSchema,
-            }
-          }),
-        ),
-      }
-    },
-  )
+          }
+          return {
+            name: tool.name,
+            description: await tool.prompt({
+              getToolPermissionContext: async () => toolPermissionContext,
+              tools: filteredTools,
+              agents: [],
+            }),
+            inputSchema: zodToJsonSchema(tool.inputSchema) as Tool['inputSchema'],
+            outputSchema,
+          }
+        }),
+      ),
+    }
+  })
 
   server.setRequestHandler(
     CallToolRequestSchema,
@@ -142,10 +143,7 @@ function createMcpServer(cwd: string, debug: boolean, verbose: boolean) {
           }
         }
 
-        const validationResult = await tool.validateInput?.(
-          (args as never) ?? {},
-          toolUseContext,
-        )
+        const validationResult = await tool.validateInput?.((args as never) ?? {}, toolUseContext)
         if (validationResult && !validationResult.result) {
           return {
             isError: true,
@@ -196,6 +194,9 @@ export async function runMcpServer(): Promise<void> {
   }
 
   const port = Number(process.env.MCP_SERVER_PORT ?? 3000)
+  // Bind to loopback only by default. Listening on 0.0.0.0 would expose the
+  // Bash tool (and every other allowed tool) to the local network.
+  const host = process.env.MCP_SERVER_HOST ?? '127.0.0.1'
   const path = process.env.MCP_SERVER_PATH ?? '/mcp'
   const cwd = process.env.MCP_SERVER_CWD ?? process.cwd()
   const debug = process.env.DEBUG === '1'
@@ -218,7 +219,7 @@ export async function runMcpServer(): Promise<void> {
     }
 
     const auth = req.headers.authorization
-    if (auth !== `Bearer ${token}`) {
+    if (!auth || !safeEqual(auth, `Bearer ${token}`)) {
       res.writeHead(401)
       res.end('Unauthorized')
       return
@@ -227,8 +228,8 @@ export async function runMcpServer(): Promise<void> {
     transport.handleRequest(req, res)
   })
 
-  await new Promise<void>(resolve => {
-    httpServer.listen(port, () => {
+  await new Promise<void>((resolve) => {
+    httpServer.listen(port, host, () => {
       logForDebugging(`[MCP Server] Listening on http://localhost:${port}${path}`)
       resolve()
     })

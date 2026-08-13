@@ -1,6 +1,6 @@
 // Mode → lane mapping + lane registry
 
-import type { LaneDefinition, QualityGateMode } from './lanes/types';
+import type { LaneDefinition, QualityGateMode } from './lanes/types'
 
 // ── Lane Registry ──────────────────────────────────────────────
 
@@ -129,7 +129,7 @@ export const ALL_LANES: LaneDefinition[] = [
     category: 'integration',
     impactTrigger: 'dep-health',
   },
-];
+]
 
 // ── Mode → Lane Mapping ────────────────────────────────────────
 
@@ -170,16 +170,16 @@ const MODE_LANES: Record<QualityGateMode, string[]> = {
     'server-checks',
     'provider-smoke',
   ],
-};
+}
 
 /** Get lane IDs that should run for a given mode */
 export function getLanesForMode(mode: QualityGateMode): string[] {
-  return [...MODE_LANES[mode]];
+  return [...MODE_LANES[mode]]
 }
 
 /** Look up a lane definition by ID */
 export function getLaneById(id: string): LaneDefinition | undefined {
-  return ALL_LANES.find((l) => l.id === id);
+  return ALL_LANES.find((l) => l.id === id)
 }
 
 /** Filter lanes: onlyLanes takes priority; skipLanes removes */
@@ -188,15 +188,15 @@ export function filterLanes(
   onlyLanes?: string[],
   skipLanes?: string[],
 ): string[] {
-  let result = laneIds;
+  let result = laneIds
 
   if (onlyLanes && onlyLanes.length > 0) {
-    result = result.filter((id) => onlyLanes.includes(id));
+    result = result.filter((id) => onlyLanes.includes(id))
   }
 
   if (skipLanes && skipLanes.length > 0) {
-    result = result.filter((id) => !skipLanes.includes(id));
+    result = result.filter((id) => !skipLanes.includes(id))
   }
 
-  return result;
+  return result
 }

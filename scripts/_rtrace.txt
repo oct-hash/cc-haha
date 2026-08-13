@@ -1,0 +1,80 @@
+==== code/R_version scripts (newest first) ====
+2026-07-14 23:47       4400  generate_figS4b_moran_spdep_Rv1.py
+2026-07-14 23:35       5770  README.md
+2026-07-14 23:13       7179  06b_moran_spdep_crosscheck_R.R
+2026-07-14 22:45      14470  generate_figures_Rv1.py
+2026-07-14 22:45      16067  07_apply_R_pipeline_text_v1.py
+2026-07-14 22:45       5563  06_recompute_gse269622_spatial_R.R
+2026-07-14 22:45       3703  05_recompute_gse98622_bulk_R.R
+2026-07-14 22:45       5140  04_recompute_gse274819_scRNA_R.R
+2026-07-14 22:45       4748  03_recompute_coexpr_from_R.py
+2026-07-14 22:45       5720  02_recompute_phase2_from_R.py
+2026-07-14 22:45       6620  01_recompute_phase_from_qc.R
+2026-07-14 22:45      21254  00_seurat_qc_pipeline.R
+
+==== results/qc (exists=True) — R_v1 / moran / spdep outputs ====
+2026-07-14 23:31       4492  gse269622_moran_spdep_R_v1.json
+2026-07-14 23:31        793  gse269622_moran_spdep_R_v1.csv
+2026-07-14 21:38       6294  R_external_unified_pipeline_audit_v1.md
+2026-07-14 21:35        978  gse269622_spatial_R_v1.json
+2026-07-14 21:35        620  gse269622_spatial_corr_R_v1.csv
+2026-07-14 21:30       2228  gse98622_bulk_R_v1.json
+2026-07-14 21:30        452  gse98622_bulk_R_v1.csv
+2026-07-14 21:27       2357  gse274819_keygene_R_v1.json
+2026-07-14 21:27        495  gse274819_keygene_R_v1.csv
+2026-07-14 20:03       4589  R_authenticity_provenance_audit_v1.md
+2026-07-14 19:50       4215  R_recompute_audit_v1.md
+2026-07-14 18:54        948  recompute_20260714_172151.log
+2026-07-14 17:21         41  .latest_recompute_log
+2026-07-14 17:20        473  rds_validation_v1.txt
+2026-07-14 17:18         18  load_out.txt
+2026-07-14 17:17        366  load_err.txt
+2026-07-14 17:15          0  rds_validation_err.txt
+2026-07-14 17:13      47116  qc_pipeline_rerun_20260714_153603.log
+2026-07-14 17:00       6812  qc_celltype_composition.pdf
+2026-07-14 17:00   28058440  qc_postfilter_metrics.pdf
+2026-07-14 16:59     174261  qc_postfilter_umap.pdf
+2026-07-14 16:59       4935  qc_report_by_celltype.csv
+2026-07-14 15:43   13171663  qc_prefilter_scatter.pdf
+2026-07-14 15:42   29405953  qc_prefilter_violin.pdf
+2026-07-14 15:36         49  .latest_rerun_log
+2026-07-14 15:32      42387  qc_pipeline_rerun_20260714_143618.log
+2026-07-14 14:34      36434  qc_pipeline_rerun_20260714_141736.log
+2026-07-14 13:58       5729  qc_pipeline_rerun_20260714_131550.log
+2026-07-14 13:12       6164  qc_pipeline_rerun_20260714_130715.log
+2026-07-14 13:11       2861  downstream_recompute_map_v1.md
+2026-07-14 13:06       1950  _install_glmgampoi.log
+2026-07-14 09:33     180691  qc_pipeline.log
+2026-07-14 03:52       1285  mtx_conversion_v2.log
+2026-07-14 03:28          0  mtx_conversion.log
+
+==== figures/*Rv1* ====
+2026-07-14 22:43     260065  Figure3_coexpression_network_Rv1.png
+2026-07-14 22:43      29912  Figure3_coexpression_network_Rv1.pdf
+2026-07-14 22:42     482923  Figure3_metabolic_flux_Rv1.png
+2026-07-14 22:42      51480  Figure3_metabolic_flux_Rv1.pdf
+2026-07-14 22:42     388923  Figure2_temporal_coordination_Rv1.png
+2026-07-14 22:42      41715  Figure2_temporal_coordination_Rv1.pdf
+2026-07-14 22:42     207176  Figure1_cell_atlas_Rv1.png
+2026-07-14 22:42      75167  Figure1_cell_atlas_Rv1.pdf
+
+==== manuscript/ (R6 extracted + FigS4b) ====
+2026-07-14 23:47      34014  FigS4b_moran_spdep_crosscheck_v1.pdf
+2026-07-14 23:47     215196  FigS4b_moran_spdep_crosscheck_v1.png
+2026-07-14 22:39      57946  manuscript_R6_Rpipeline.docx
+2026-07-14 22:39      55220  _R6_Rpipeline_extracted.txt
+2026-07-14 19:15      53370  _R5_extracted.txt
+
+==== hard-coded output paths in key scripts ====
+-- 06b_moran_spdep_crosscheck_R.R --
+   OUTJ <- "D:/肾脏虚拟细胞文章设计/results/qc/gse269622_moran_spdep_R_v1.json"
+   OUTC <- "D:/肾脏虚拟细胞文章设计/results/qc/gse269622_moran_spdep_R_v1.csv"
+   source = "filtered_feature_bc_matrix.h5 + spatial/tissue_positions.csv, reprocessed in R this session",
+   cat(sprintf("[wrote] %s\n[wrote] %s\n", OUTC, OUTJ))
+
+-- generate_figS4b_moran_spdep_Rv1.py --
+   SRC = PROJ / "results" / "qc" / "gse269622_moran_spdep_R_v1.json"
+   OUT = PROJ / "manuscript" / "FigS4b_moran_spdep_crosscheck_v1"
+   d = json.loads(SRC.read_text(encoding="utf-8"))
+   fig.savefig(str(OUT) + ext, dpi=dpi, bbox_inches="tight", facecolor="white")
+   print(f"[wrote] {OUT}{ext}")

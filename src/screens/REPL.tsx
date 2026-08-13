@@ -1,25 +1,5 @@
-import { useREPLFoundation } from "./REPL.hooks.foundation.js"
-import { useREPLStreamState } from "./REPL.hooks.stream.js"
-import { useREPLScrollInput } from "./REPL.hooks.scroll.js"
-import { useREPLUiState } from "./REPL.hooks.ui.js"
-import { useREPLMessages } from "./REPL.hooks.messages.js"
-import { useREPLResume } from "./REPL.hooks.resume.js"
-import { useREPLIdleReset } from "./REPL.hooks.idle-reset.js"
-import { useREPLDialogs } from "./REPL.hooks.dialogs.js"
-import { useREPLToolContext } from "./REPL.hooks.tool-context.js"
-import { useREPLQueryCallbacks } from "./REPL.hooks.query-callbacks.js"
-import { useREPLAgentHandlers } from "./REPL.hooks.agent-handlers.js"
-import { useREPLEffects } from "./REPL.hooks.effects.js"
-import { useREPLInputQueue } from "./REPL.hooks.input-queue.js"
-import { useREPLRenderPrep } from "./REPL.hooks.render-prep.js"
-import { useREPLInteraction } from "./REPL.hooks.interaction.js"
-import {
-  useREPLInitialMessage,
-  useREPLSurveys,
-  useREPLTeammateHints,
-} from "./REPL.hooks.misc.js"
 import { feature } from 'bun:bundle'
-import * as React from 'react'
+import type * as React from 'react'
 import {
   type RefObject,
   useCallback,
@@ -103,6 +83,22 @@ import { sendSandboxPermissionResponseViaMailbox } from '../utils/swarm/permissi
 import { setMemberActive } from '../utils/swarm/teamHelpers.js'
 import { getAgentName, getTeamName } from '../utils/teammate.js'
 import { parseTokenBudget } from '../utils/tokenBudget.js'
+import { useREPLAgentHandlers } from './REPL.hooks.agent-handlers.js'
+import { useREPLDialogs } from './REPL.hooks.dialogs.js'
+import { useREPLEffects } from './REPL.hooks.effects.js'
+import { useREPLFoundation } from './REPL.hooks.foundation.js'
+import { useREPLIdleReset } from './REPL.hooks.idle-reset.js'
+import { useREPLInputQueue } from './REPL.hooks.input-queue.js'
+import { useREPLInteraction } from './REPL.hooks.interaction.js'
+import { useREPLMessages } from './REPL.hooks.messages.js'
+import { useREPLInitialMessage, useREPLSurveys, useREPLTeammateHints } from './REPL.hooks.misc.js'
+import { useREPLQueryCallbacks } from './REPL.hooks.query-callbacks.js'
+import { useREPLRenderPrep } from './REPL.hooks.render-prep.js'
+import { useREPLResume } from './REPL.hooks.resume.js'
+import { useREPLScrollInput } from './REPL.hooks.scroll.js'
+import { useREPLStreamState } from './REPL.hooks.stream.js'
+import { useREPLToolContext } from './REPL.hooks.tool-context.js'
+import { useREPLUiState } from './REPL.hooks.ui.js'
 
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
 // Dead code elimination: conditional import for coordinator mode
@@ -118,7 +114,7 @@ const getCoordinatorUserContext: (
   : () => ({})
 
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
-import { type UUID } from 'crypto'
+import type { UUID } from 'crypto'
 import { logEvent } from 'src/services/analytics/index.js'
 import { Messages } from '../components/Messages.js'
 import { buildPermissionUpdates } from '../components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.js'
@@ -152,10 +148,7 @@ import type {
 } from '../types/message.js'
 import type { AutoUpdaterResult } from '../utils/autoUpdater.js'
 import { hasConsoleBillingAccess } from '../utils/billing.js'
-import {
-  updateSessionActivity,
-  updateSessionName,
-} from '../utils/concurrentSessions.js'
+import { updateSessionActivity, updateSessionName } from '../utils/concurrentSessions.js'
 import type { PastedContent } from '../utils/config.js'
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js'
 import { deserializeMessages } from '../utils/conversationRecovery.js'
@@ -233,15 +226,15 @@ import { getCurrentWorktreeSession } from '../utils/worktree.js'
 
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
 const AntModelSwitchCallout =
-  'external' === 'ant'
+  process.env.USER_TYPE === 'ant'
     ? require('../components/AntModelSwitchCallout.js').AntModelSwitchCallout
     : null
 const shouldShowAntModelSwitch =
-  'external' === 'ant'
+  process.env.USER_TYPE === 'ant'
     ? require('../components/AntModelSwitchCallout.js').shouldShowModelSwitchCallout
     : (): boolean => false
 const UndercoverAutoCallout =
-  'external' === 'ant'
+  process.env.USER_TYPE === 'ant'
     ? require('../components/UndercoverAutoCallout.js').UndercoverAutoCallout
     : null
 
@@ -267,10 +260,7 @@ import { performStartupChecks } from 'src/utils/plugins/performStartupChecks.js'
 import { TungstenLiveMonitor } from '../tools/TungstenTool/TungstenLiveMonitor.js'
 import { createAbortController } from '../utils/abortController.js'
 /* eslint-enable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
-import {
-  type AutoRunIssueReason,
-  shouldAutoRunIssue,
-} from '../utils/autoRunIssue.js'
+import { type AutoRunIssueReason, shouldAutoRunIssue } from '../utils/autoRunIssue.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const WebBrowserPanelModule = feature('WEB_BROWSER_TOOL')
@@ -462,7 +452,6 @@ export function REPL({
     allowedAgentTypes,
     commands,
   } = foundation
-
 
   // Stream/query state, permission queues, terminal title, and tab status
   // extracted to REPL.hooks.stream.tsx (useREPLStreamState)

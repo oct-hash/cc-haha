@@ -67,7 +67,7 @@ async function detectMacosTerminal(): Promise<TerminalInfo> {
   // var check below never hits when we're launched from a browser link.
   const stored = getGlobalConfig().deepLinkTerminal
   if (stored) {
-    const match = MACOS_TERMINALS.find(t => t.app === stored)
+    const match = MACOS_TERMINALS.find((t) => t.app === stored)
     if (match) {
       return { name: match.name, command: match.app }
     }
@@ -79,9 +79,7 @@ async function detectMacosTerminal(): Promise<TerminalInfo> {
   if (termProgram) {
     const normalized = termProgram.replace(/\.app$/i, '').toLowerCase()
     const match = MACOS_TERMINALS.find(
-      t =>
-        t.app.toLowerCase() === normalized ||
-        t.name.toLowerCase() === normalized,
+      (t) => t.app.toLowerCase() === normalized || t.name.toLowerCase() === normalized,
     )
     if (match) {
       return { name: match.name, command: match.app }
@@ -106,11 +104,10 @@ async function detectMacosTerminal(): Promise<TerminalInfo> {
   // Fallback: check /Applications directly (mdfind may not work if
   // Spotlight indexing is disabled or incomplete)
   for (const terminal of MACOS_TERMINALS) {
-    const { code: lsCode } = await execFileNoThrow(
-      'ls',
-      [`/Applications/${terminal.app}.app`],
-      { timeout: 1000, useCwd: false },
-    )
+    const { code: lsCode } = await execFileNoThrow('ls', [`/Applications/${terminal.app}.app`], {
+      timeout: 1000,
+      useCwd: false,
+    })
     if (lsCode === 0) {
       return { name: terminal.name, command: terminal.app }
     }
@@ -226,9 +223,7 @@ export async function launchInTerminal(
     return false
   }
 
-  logForDebugging(
-    `Launching in terminal: ${terminal.name} (${terminal.command})`,
-  )
+  logForDebugging(`Launching in terminal: ${terminal.name} (${terminal.command})`)
   const claudeArgs = ['--deep-link-origin']
   if (action.repo) {
     claudeArgs.push('--deep-link-repo', action.repo)
@@ -304,12 +299,7 @@ end tell`
     // terminal's native --working-directory + -e exec the command directly.
 
     case 'Ghostty': {
-      const args = [
-        '-na',
-        terminal.command,
-        '--args',
-        '--window-save-state=never',
-      ]
+      const args = ['-na', terminal.command, '--args', '--window-save-state=never']
       if (cwd) args.push(`--working-directory=${cwd}`)
       args.push('-e', claudePath, ...claudeArgs)
       const { code } = await execFileNoThrow('open', args, { useCwd: false })
@@ -345,9 +335,7 @@ end tell`
     }
   }
 
-  logForDebugging(
-    `Failed to launch ${terminal.name}, falling back to Terminal.app`,
-  )
+  logForDebugging(`Failed to launch ${terminal.name}, falling back to Terminal.app`)
   return launchMacosTerminal(
     { name: 'Terminal.app', command: 'Terminal' },
     claudePath,
@@ -454,7 +442,7 @@ async function launchWindowsTerminal(
       const cdCmd = cwd ? `cd /d ${cmdQuote(cwd)} && ` : ''
       args.push(
         '/k',
-        `${cdCmd}${cmdQuote(claudePath)} ${claudeArgs.map(a => cmdQuote(a)).join(' ')}`,
+        `${cdCmd}${cmdQuote(claudePath)} ${claudeArgs.map((a) => cmdQuote(a)).join(' ')}`,
       )
       break
     }
@@ -478,14 +466,14 @@ function spawnDetached(
   args: string[],
   opts: { cwd?: string; windowsVerbatimArguments?: boolean } = {},
 ): Promise<boolean> {
-  return new Promise<boolean>(resolve => {
+  return new Promise<boolean>((resolve) => {
     const child = spawn(command, args, {
       detached: true,
       stdio: 'ignore',
       cwd: opts.cwd,
       windowsVerbatimArguments: opts.windowsVerbatimArguments,
     })
-    child.once('error', err => {
+    child.once('error', (err) => {
       logForDebugging(`Failed to spawn ${command}: ${err.message}`, {
         level: 'error',
       })
@@ -502,11 +490,7 @@ function spawnDetached(
  * Build a single-quoted POSIX shell command string. ONLY used by the
  * AppleScript paths (iTerm, Terminal.app) which have no argv interface.
  */
-function buildShellCommand(
-  claudePath: string,
-  claudeArgs: string[],
-  cwd?: string,
-): string {
+function buildShellCommand(claudePath: string, claudeArgs: string[], cwd?: string): string {
   const cdPrefix = cwd ? `cd ${shellQuote(cwd)} && ` : ''
   return `${cdPrefix}${[claudePath, ...claudeArgs].map(shellQuote).join(' ')}`
 }

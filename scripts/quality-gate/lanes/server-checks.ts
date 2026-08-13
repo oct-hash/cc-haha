@@ -1,31 +1,31 @@
 // Server checks: probe MCP server connectivity
 
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { readJSON } from '../utils/helpers';
-import type { DetailItem, LaneExecutionContext, LaneResult } from './types';
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+import { readJSON } from '../utils/helpers'
+import type { DetailItem, LaneExecutionContext, LaneResult } from './types'
 
 interface McpServerEntry {
-  command?: string;
-  args?: string[];
-  url?: string;
-  env?: Record<string, string>;
+  command?: string
+  args?: string[]
+  url?: string
+  env?: Record<string, string>
 }
 
 interface McpConfig {
-  mcpServers?: Record<string, McpServerEntry>;
+  mcpServers?: Record<string, McpServerEntry>
 }
 
 export async function runServerChecks(ctx: LaneExecutionContext): Promise<LaneResult> {
-  const started = Date.now();
-  const mcpPath = join(ctx.rootDir, '.claude', 'mcp.json');
-  const details: DetailItem[] = [];
-  let hasErrors = false;
+  const started = Date.now()
+  const mcpPath = join(ctx.rootDir, '.claude', 'mcp.json')
+  const details: DetailItem[] = []
+  let hasErrors = false
 
   // Agent-reach CLI tool checks (always run)
-  const reachDetails = checkAgentReachTools();
-  details.push(...reachDetails);
-  if (reachDetails.some((d) => d.status === 'error')) hasErrors = true;
+  const reachDetails = checkAgentReachTools()
+  details.push(...reachDetails)
+  if (reachDetails.some((d) => d.status === 'error')) hasErrors = true
 
   // MCP server connectivity checks
   if (!existsSync(mcpPath)) {
@@ -33,56 +33,56 @@ export async function runServerChecks(ctx: LaneExecutionContext): Promise<LaneRe
       label: 'MCP servers',
       status: 'warn',
       message: 'mcp.json not found',
-    });
+    })
   } else {
-    const config = readJSON<McpConfig>(mcpPath);
+    const config = readJSON<McpConfig>(mcpPath)
     if (!config?.mcpServers || Object.keys(config.mcpServers).length === 0) {
       details.push({
         label: 'MCP servers',
         status: 'warn',
         message: 'No MCP servers configured',
-      });
+      })
     } else {
-      const servers = config.mcpServers;
+      const servers = config.mcpServers
 
       for (const [name, entry] of Object.entries(servers)) {
         // HTTP/SSE transport
         if (entry.url) {
           try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 5000);
+            const controller = new AbortController()
+            const timeout = setTimeout(() => controller.abort(), 5000)
 
-            const start = Date.now();
+            const start = Date.now()
             const response = await fetch(entry.url, {
               method: 'HEAD',
               signal: controller.signal,
-            }).catch(() => null);
-            clearTimeout(timeout);
+            }).catch(() => null)
+            clearTimeout(timeout)
 
-            const latency = Date.now() - start;
+            const latency = Date.now() - start
 
             if (response) {
               details.push({
                 label: `${name} (HTTP)`,
                 status: 'ok',
                 message: `${response.status} ${response.statusText} — ${latency}ms`,
-              });
+              })
             } else {
               details.push({
                 label: `${name} (HTTP)`,
                 status: 'warn',
                 message: `No response from ${entry.url} (${latency}ms timeout)`,
-              });
+              })
             }
           } catch {
             details.push({
               label: `${name} (HTTP)`,
               status: 'warn',
               message: `Connection failed to ${entry.url}`,
-            });
-            hasErrors = true;
+            })
+            hasErrors = true
           }
-          continue;
+          continue
         }
 
         // stdio transport — check command binary exists
@@ -90,24 +90,24 @@ export async function runServerChecks(ctx: LaneExecutionContext): Promise<LaneRe
           const resolvedCommand =
             entry.command.includes('/') || entry.command.includes('\\')
               ? entry.command
-              : entry.command; // just check by name for PATH binaries
-          const exists = existsSync(resolvedCommand) || commandInPath(entry.command);
+              : entry.command // just check by name for PATH binaries
+          const exists = existsSync(resolvedCommand) || commandInPath(entry.command)
           details.push({
             label: `${name} (stdio)`,
             status: exists ? 'ok' : 'warn',
             message: exists
               ? `Command found: ${entry.command}`
               : `Command not found: ${entry.command}`,
-          });
-          if (!exists) hasErrors = true;
-          continue;
+          })
+          if (!exists) hasErrors = true
+          continue
         }
 
         details.push({
           label: `${name}`,
           status: 'warn',
           message: 'Unknown transport (no url or command)',
-        });
+        })
       }
     }
   }
@@ -120,7 +120,7 @@ export async function runServerChecks(ctx: LaneExecutionContext): Promise<LaneRe
     category: 'integration',
     description: 'Probed MCP servers + agent-reach CLI tools',
     details,
-  };
+  }
 }
 
 function commandInPath(cmd: string): boolean {
@@ -128,29 +128,29 @@ function commandInPath(cmd: string): boolean {
     const proc = Bun.spawnSync(['where', cmd], {
       stdout: 'pipe',
       stderr: 'pipe',
-    });
-    return proc.exitCode === 0;
+    })
+    return proc.exitCode === 0
   } catch {
-    return false;
+    return false
   }
 }
 
 /** Check agent-reach CLI tool availability (3 tiers) */
 function checkAgentReachTools(): DetailItem[] {
-  const results: DetailItem[] = [];
+  const results: DetailItem[] = []
 
   // Tier 1 — Core (missing = error)
   const coreTools = [
     { cmd: 'agent-reach', label: 'agent-reach (router)' },
     { cmd: 'mcporter', label: 'mcporter (MCP bridge)' },
-  ];
+  ]
   for (const { cmd, label } of coreTools) {
-    const found = commandInPath(cmd);
+    const found = commandInPath(cmd)
     results.push({
       label,
       status: found ? 'ok' : 'error',
       message: found ? `${cmd} found` : `${cmd} not in PATH`,
-    });
+    })
   }
 
   // Tier 2 — Zero-config (missing = warn)
@@ -159,14 +159,14 @@ function checkAgentReachTools(): DetailItem[] {
     { cmd: 'yt-dlp', label: 'yt-dlp (video)' },
     { cmd: 'bili', label: 'bili-cli (B站)' },
     { cmd: 'curl', label: 'curl (web/V2EX)' },
-  ];
+  ]
   for (const { cmd, label } of zeroConfigTools) {
-    const found = commandInPath(cmd);
+    const found = commandInPath(cmd)
     results.push({
       label,
       status: found ? 'ok' : 'warn',
       message: found ? `${cmd} found` : `${cmd} not in PATH`,
-    });
+    })
   }
 
   // Tier 3 — Login-required (info only, never fail)
@@ -175,15 +175,15 @@ function checkAgentReachTools(): DetailItem[] {
     { cmd: 'twitter', label: 'twitter-cli' },
     { cmd: 'rdt', label: 'rdt-cli (Reddit)' },
     { cmd: 'xhs', label: 'xhs-cli (xiaohongshu legacy)' },
-  ];
+  ]
   for (const { cmd, label } of loginTools) {
-    const found = commandInPath(cmd);
+    const found = commandInPath(cmd)
     results.push({
       label,
       status: 'ok',
       message: found ? `${cmd} found` : `${cmd} not installed (login-required, optional)`,
-    });
+    })
   }
 
-  return results;
+  return results
 }

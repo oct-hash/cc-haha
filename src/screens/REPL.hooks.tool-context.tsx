@@ -4,27 +4,29 @@
 // (useREPLToolContext).
 
 import { feature } from 'bun:bundle'
-import * as React from 'react'
-import { useCallback, useEffect } from 'react'
 import { randomUUID, type UUID } from 'crypto'
-import type { Command } from '../commands.js'
-import type { ResumeEntrypoint } from '../commands.js'
+import type * as React from 'react'
+import { useCallback, useEffect } from 'react'
+import { SANDBOX_NETWORK_ACCESS_TOOL_NAME } from 'src/cli/structuredIO.js'
+import type { NetworkHostPattern, SandboxAskCallback } from 'src/utils/sandbox/sandbox-adapter.js'
+import { SandboxManager } from 'src/utils/sandbox/sandbox-adapter.js'
+import type { Theme, ThemeName } from 'src/utils/theme.js'
+import type { Command, ResumeEntrypoint } from '../commands.js'
 import type { ToolUseConfirm } from '../components/permissions/PermissionRequest.js'
 import type { SpinnerMode } from '../components/Spinner.js'
 import type { Notification } from '../context/notifications.js'
-import { registerSandboxPermissionCallback } from '../hooks/useSwarmPermissionPoller.js'
-import { mergeClients } from '../hooks/useMergedClients.js'
 import useCanUseTool from '../hooks/useCanUseTool.js'
-import { Text } from '../ink.js'
+import { mergeClients } from '../hooks/useMergedClients.js'
+import { registerSandboxPermissionCallback } from '../hooks/useSwarmPermissionPoller.js'
 import type { TerminalNotification } from '../ink/useTerminalNotification.js'
-import { SANDBOX_NETWORK_ACCESS_TOOL_NAME } from 'src/cli/structuredIO.js'
-import { sendNotification } from '../services/notifier.js'
+import { Text } from '../ink.js'
 import type { MCPServerConnection, ScopedMcpServerConfig } from '../services/mcp/types.js'
+import { sendNotification } from '../services/notifier.js'
 import type { AppStateStore } from '../state/AppState.js'
 import type { Tool, ToolPermissionContext } from '../Tool.js'
-import { assembleToolPool } from '../tools.js'
-import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
 import { resolveAgentTools } from '../tools/AgentTool/agentToolUtils.js'
+import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
+import { assembleToolPool } from '../tools.js'
 import type { PromptRequest, PromptResponse } from '../types/hooks.js'
 import type { LogOption } from '../types/logs.js'
 import type { Message as MessageType } from '../types/message.js'
@@ -38,8 +40,6 @@ import { gracefulShutdownSync } from '../utils/gracefulShutdown.js'
 import type { IDEExtensionInstallationStatus, IdeType } from '../utils/ide.js'
 import type { SetAppState } from '../utils/messageQueueManager.js'
 import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js'
-import { SandboxManager } from 'src/utils/sandbox/sandbox-adapter.js'
-import type { NetworkHostPattern, SandboxAskCallback } from 'src/utils/sandbox/sandbox-adapter.js'
 import {
   registerLeaderSetToolPermissionContext,
   unregisterLeaderSetToolPermissionContext,
@@ -49,10 +49,9 @@ import {
   isSwarmWorker,
   sendSandboxPermissionRequestViaMailbox,
 } from '../utils/swarm/permissionSync.js'
-import type { Theme, ThemeName } from 'src/utils/theme.js'
 import type { ThinkingConfig } from '../utils/thinking.js'
-import type { ContentReplacementState } from '../utils/toolResultStorage.js'
 import { mergeAndFilterTools } from '../utils/toolPool.js'
+import type { ContentReplacementState } from '../utils/toolResultStorage.js'
 
 type SandboxPermissionRequestItem = {
   hostPattern: NetworkHostPattern
@@ -78,7 +77,9 @@ type ApiMetricsEntry = {
 export interface UseREPLToolContextParams {
   setAppState: SetAppState
   store: AppStateStore
-  setSandboxPermissionRequestQueue: React.Dispatch<React.SetStateAction<SandboxPermissionRequestItem[]>>
+  setSandboxPermissionRequestQueue: React.Dispatch<
+    React.SetStateAction<SandboxPermissionRequestItem[]>
+  >
   sandboxBridgeCleanupRef: React.MutableRefObject<Map<string, Array<() => void>>>
   setToolUseConfirmQueue: React.Dispatch<React.SetStateAction<ToolUseConfirm[]>>
   setPromptQueue: React.Dispatch<React.SetStateAction<PromptQueueItem[]>>
@@ -498,7 +499,7 @@ export function useREPLToolContext(params: UseREPLToolContextParams) {
         discoveredSkillNames: discoveredSkillNamesRef.current,
         setResponseLength,
         pushApiMetricsEntry:
-          'external' === 'ant'
+          process.env.USER_TYPE === 'ant'
             ? (ttftMs: number) => {
                 const now = Date.now()
                 const baseline = responseLengthRef.current

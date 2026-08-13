@@ -27,11 +27,7 @@ const BUG_REPORT_URL =
 
 // String metadata keys safe to forward to analytics. Keys like error_message
 // are excluded because they could contain page content or user data.
-const SAFE_BRIDGE_STRING_KEYS = new Set([
-  'bridge_status',
-  'error_type',
-  'tool_name',
-])
+const SAFE_BRIDGE_STRING_KEYS = new Set(['bridge_status', 'error_type', 'tool_name'])
 
 const PERMISSION_MODES: readonly PermissionMode[] = [
   'ask',
@@ -40,7 +36,7 @@ const PERMISSION_MODES: readonly PermissionMode[] = [
 ]
 
 function isPermissionMode(raw: string): raw is PermissionMode {
-  return PERMISSION_MODES.some(m => m === raw)
+  return PERMISSION_MODES.some((m) => m === raw)
 }
 
 /**
@@ -57,10 +53,7 @@ function getChromeBridgeUrl(): string | undefined {
     return undefined
   }
 
-  if (
-    isEnvTruthy(process.env.USE_LOCAL_OAUTH) ||
-    isEnvTruthy(process.env.LOCAL_BRIDGE)
-  ) {
+  if (isEnvTruthy(process.env.USE_LOCAL_OAUTH) || isEnvTruthy(process.env.LOCAL_BRIDGE)) {
     return 'ws://localhost:8765'
   }
 
@@ -72,25 +65,19 @@ function getChromeBridgeUrl(): string | undefined {
 }
 
 function isLocalBridge(): boolean {
-  return (
-    isEnvTruthy(process.env.USE_LOCAL_OAUTH) ||
-    isEnvTruthy(process.env.LOCAL_BRIDGE)
-  )
+  return isEnvTruthy(process.env.USE_LOCAL_OAUTH) || isEnvTruthy(process.env.LOCAL_BRIDGE)
 }
 
 /**
  * Build the ClaudeForChromeContext used by both the subprocess MCP server
  * and the in-process path in the MCP client.
  */
-export function createChromeContext(
-  env?: Record<string, string>,
-): ClaudeForChromeContext {
+export function createChromeContext(env?: Record<string, string>): ClaudeForChromeContext {
   const logger = new DebugLogger()
   const chromeBridgeUrl = getChromeBridgeUrl()
   logger.info(`Bridge URL: ${chromeBridgeUrl ?? 'none (using native socket)'}`)
   const rawPermissionMode =
-    env?.CLAUDE_CHROME_PERMISSION_MODE ??
-    process.env.CLAUDE_CHROME_PERMISSION_MODE
+    env?.CLAUDE_CHROME_PERMISSION_MODE ?? process.env.CLAUDE_CHROME_PERMISSION_MODE
   let initialPermissionMode: PermissionMode | undefined
   if (rawPermissionMode) {
     if (isPermissionMode(rawPermissionMode)) {
@@ -116,7 +103,7 @@ export function createChromeContext(
       return `Browser extension is not connected. Please ensure the Claude browser extension is installed and running (${EXTENSION_DOWNLOAD_URL}), and that you are logged into claude.ai with the same account as Claude Code. If this is your first time connecting to Chrome, you may need to restart Chrome for the installation to take effect. If you continue to experience issues, please report a bug: ${BUG_REPORT_URL}`
     },
     onExtensionPaired: (deviceId: string, name: string) => {
-      saveGlobalConfig(config => {
+      saveGlobalConfig((config) => {
         if (
           config.chromeExtension?.pairedDeviceId === deviceId &&
           config.chromeExtension?.pairedDeviceName === name
@@ -229,10 +216,7 @@ export function createChromeContext(
           const safeKey = key === 'status' ? 'bridge_status' : key
           if (typeof value === 'boolean' || typeof value === 'number') {
             safeMetadata[safeKey] = value
-          } else if (
-            typeof value === 'string' &&
-            SAFE_BRIDGE_STRING_KEYS.has(safeKey)
-          ) {
+          } else if (typeof value === 'string' && SAFE_BRIDGE_STRING_KEYS.has(safeKey)) {
             // Only forward allowlisted string keys — fields like error_message
             // could contain page content or user data
             safeMetadata[safeKey] =

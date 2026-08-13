@@ -101,9 +101,7 @@ export async function enrollTrustedDevice(): Promise<void> {
     // (triggered by refreshGrowthBookAfterAuthChange in login.tsx) before
     // reading the gate, so we get the post-refresh value.
     if (!(await checkGate_CACHED_OR_BLOCKING(TRUSTED_DEVICE_GATE))) {
-      logForDebugging(
-        `[trusted-device] Gate ${TRUSTED_DEVICE_GATE} is off, skipping enrollment`,
-      )
+      logForDebugging(`[trusted-device] Gate ${TRUSTED_DEVICE_GATE} is off, skipping enrollment`)
       return
     }
     // If CLAUDE_TRUSTED_DEVICE_TOKEN is set (e.g. by an enterprise wrapper),
@@ -133,9 +131,7 @@ export async function enrollTrustedDevice(): Promise<void> {
     const secureStorage = getSecureStorage()
 
     if (isEssentialTrafficOnly()) {
-      logForDebugging(
-        '[trusted-device] Essential traffic only, skipping enrollment',
-      )
+      logForDebugging('[trusted-device] Essential traffic only, skipping enrollment')
       return
     }
 
@@ -154,13 +150,11 @@ export async function enrollTrustedDevice(): Promise<void> {
             'Content-Type': 'application/json',
           },
           timeout: 10_000,
-          validateStatus: s => s < 500,
+          validateStatus: (s) => s < 500,
         },
       )
     } catch (err: unknown) {
-      logForDebugging(
-        `[trusted-device] Enrollment request failed: ${errorMessage(err)}`,
-      )
+      logForDebugging(`[trusted-device] Enrollment request failed: ${errorMessage(err)}`)
       return
     }
 
@@ -173,36 +167,26 @@ export async function enrollTrustedDevice(): Promise<void> {
 
     const token = response.data?.device_token
     if (!token || typeof token !== 'string') {
-      logForDebugging(
-        '[trusted-device] Enrollment response missing device_token field',
-      )
+      logForDebugging('[trusted-device] Enrollment response missing device_token field')
       return
     }
 
     try {
       const storageData = secureStorage.read()
       if (!storageData) {
-        logForDebugging(
-          '[trusted-device] Cannot read storage, skipping token persist',
-        )
+        logForDebugging('[trusted-device] Cannot read storage, skipping token persist')
         return
       }
       storageData.trustedDeviceToken = token
       const result = secureStorage.update(storageData)
       if (!result.success) {
-        logForDebugging(
-          `[trusted-device] Failed to persist token: ${result.warning ?? 'unknown'}`,
-        )
+        logForDebugging(`[trusted-device] Failed to persist token: ${result.warning ?? 'unknown'}`)
         return
       }
       readStoredToken.cache?.clear?.()
-      logForDebugging(
-        `[trusted-device] Enrolled device_id=${response.data.device_id ?? 'unknown'}`,
-      )
+      logForDebugging(`[trusted-device] Enrolled device_id=${response.data.device_id ?? 'unknown'}`)
     } catch (err: unknown) {
-      logForDebugging(
-        `[trusted-device] Storage write failed: ${errorMessage(err)}`,
-      )
+      logForDebugging(`[trusted-device] Storage write failed: ${errorMessage(err)}`)
     }
   } catch (err: unknown) {
     logForDebugging(`[trusted-device] Enrollment error: ${errorMessage(err)}`)

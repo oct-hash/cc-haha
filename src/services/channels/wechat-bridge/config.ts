@@ -25,14 +25,9 @@ export function getBridgeConfig(overrides?: Partial<BridgeConfig>): BridgeConfig
   return {
     weixinMcpUrl: DEFAULT_WEIXIN_MCP_URL,
     weixinAccountId: process.env.WEIXIN_ACCOUNT_ID || 'e87c180011fe-im-bot',
-    claudeApiKey:
-      process.env.ANTHROPIC_AUTH_TOKEN ||
-      process.env.ANTHROPIC_API_KEY ||
-      '',
-    claudeApiUrl:
-      process.env.ANTHROPIC_BASE_URL || DEFAULT_CLAUDE_API_URL,
-    claudeModel:
-      process.env.ANTHROPIC_MODEL || DEFAULT_CLAUDE_MODEL,
+    claudeApiKey: process.env.ANTHROPIC_AUTH_TOKEN || process.env.ANTHROPIC_API_KEY || '',
+    claudeApiUrl: process.env.ANTHROPIC_BASE_URL || DEFAULT_CLAUDE_API_URL,
+    claudeModel: process.env.ANTHROPIC_MODEL || DEFAULT_CLAUDE_MODEL,
     pollIntervalMs: DEFAULT_POLL_INTERVAL_MS,
     maxResponseTimeMs: DEFAULT_MAX_RESPONSE_TIME_MS,
     ...overrides,

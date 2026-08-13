@@ -5,13 +5,7 @@ import { getCwd } from './cwd.js'
 import { getCachedRepository } from './detectRepository.js'
 import { execFileNoThrow, execFileNoThrowWithCwd } from './execFileNoThrow.js'
 import { isFileWithinReadSizeLimit } from './file.js'
-import {
-  findGitRoot,
-  getDefaultBranch,
-  getGitDir,
-  getIsGit,
-  gitExe,
-} from './git.js'
+import { findGitRoot, getDefaultBranch, getGitDir, getIsGit, gitExe } from './git.js'
 
 export type GitDiffStats = {
   filesCount: number
@@ -111,9 +105,7 @@ export async function fetchGitDiff(): Promise<GitDiffResult | null> {
  * Fetch git diff hunks on-demand (for DiffDialog).
  * Separated from fetchGitDiff() to avoid expensive calls during polling.
  */
-export async function fetchGitDiffHunks(): Promise<
-  Map<string, StructuredPatchHunk[]>
-> {
+export async function fetchGitDiffHunks(): Promise<Map<string, StructuredPatchHunk[]>> {
   const isGit = await getIsGit()
   if (!isGit) return new Map()
 
@@ -197,9 +189,7 @@ export function parseGitNumstat(stdout: string): NumstatResult {
  * - Files >1MB: skipped entirely (not in result map)
  * - Files ≤1MB: parsed but limited to MAX_LINES_PER_FILE lines
  */
-export function parseGitDiff(
-  stdout: string,
-): Map<string, StructuredPatchHunk[]> {
+export function parseGitDiff(stdout: string): Map<string, StructuredPatchHunk[]> {
   const result = new Map<string, StructuredPatchHunk[]>()
   if (!stdout.trim()) return result
 
@@ -231,9 +221,7 @@ export function parseGitDiff(
       const line = lines[i] ?? ''
 
       // StructuredPatchHunk header: @@ -oldStart,oldLines +newStart,newLines @@
-      const hunkMatch = line.match(
-        /^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/,
-      )
+      const hunkMatch = line.match(/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/)
       if (hunkMatch) {
         if (currentHunk) {
           fileHunks.push(currentHunk)
@@ -265,10 +253,7 @@ export function parseGitDiff(
       // Add diff lines to current hunk (with line limit)
       if (
         currentHunk &&
-        (line.startsWith('+') ||
-          line.startsWith('-') ||
-          line.startsWith(' ') ||
-          line === '')
+        (line.startsWith('+') || line.startsWith('-') || line.startsWith(' ') || line === '')
       ) {
         // Stop adding lines once we hit the limit
         if (lineCount >= MAX_LINES_PER_FILE) {
@@ -308,15 +293,10 @@ async function isInTransientGitState(): Promise<boolean> {
   const gitDir = await getGitDir(getCwd())
   if (!gitDir) return false
 
-  const transientFiles = [
-    'MERGE_HEAD',
-    'REBASE_HEAD',
-    'CHERRY_PICK_HEAD',
-    'REVERT_HEAD',
-  ]
+  const transientFiles = ['MERGE_HEAD', 'REBASE_HEAD', 'CHERRY_PICK_HEAD', 'REVERT_HEAD']
 
   const results = await Promise.all(
-    transientFiles.map(file =>
+    transientFiles.map((file) =>
       access(join(gitDir, file))
         .then(() => true)
         .catch(() => false),
@@ -331,9 +311,7 @@ async function isInTransientGitState(): Promise<boolean> {
  *
  * @param maxFiles Maximum number of untracked files to include
  */
-async function fetchUntrackedFiles(
-  maxFiles: number,
-): Promise<Map<string, PerFileStats> | null> {
+async function fetchUntrackedFiles(maxFiles: number): Promise<Map<string, PerFileStats> | null> {
   // Get list of untracked files (excludes gitignored)
   const { stdout, code } = await execFileNoThrow(
     gitExe(),
@@ -488,8 +466,7 @@ function parseRawDiffToToolUseDiff(
  * 3. HEAD (fallback if merge-base fails)
  */
 async function getDiffRef(gitRoot: string): Promise<string> {
-  const baseBranch =
-    process.env.CLAUDE_CODE_BASE_REF || (await getDefaultBranch())
+  const baseBranch = process.env.CLAUDE_CODE_BASE_REF || (await getDefaultBranch())
   const { stdout, code } = await execFileNoThrowWithCwd(
     gitExe(),
     ['--no-optional-locks', 'merge-base', 'HEAD', baseBranch],
@@ -516,7 +493,7 @@ async function generateSyntheticDiff(
       lines.pop()
     }
     const lineCount = lines.length
-    const addedLines = lines.map(line => `+${line}`).join('\n')
+    const addedLines = lines.map((line) => `+${line}`).join('\n')
     const patch = `@@ -0,0 +1,${lineCount} @@\n${addedLines}`
     return {
       filename: gitPath,

@@ -40,16 +40,13 @@ function isFileEditResult(result: unknown): result is FileEditResult {
   // FileWriteTool (update): has structuredPatch with content
   // FileWriteTool (create): has type='create' and content (structuredPatch is empty)
   const hasFilePath = typeof r.filePath === 'string'
-  const hasStructuredPatch =
-    Array.isArray(r.structuredPatch) && r.structuredPatch.length > 0
+  const hasStructuredPatch = Array.isArray(r.structuredPatch) && r.structuredPatch.length > 0
   const isNewFile = r.type === 'create' && typeof r.content === 'string'
   return hasFilePath && (hasStructuredPatch || isNewFile)
 }
 
 function isFileWriteOutput(result: FileEditResult): result is FileWriteOutput {
-  return (
-    'type' in result && (result.type === 'create' || result.type === 'update')
-  )
+  return 'type' in result && (result.type === 'create' || result.type === 'update')
 }
 
 function countHunkLines(hunks: StructuredPatchHunk[]): {
@@ -163,11 +160,7 @@ export function useTurnDiffs(messages: Message[]): TurnDiff[] {
           }
 
           // For new files, generate synthetic hunk from content
-          if (
-            isNewFile &&
-            structuredPatch.length === 0 &&
-            isFileWriteOutput(result)
-          ) {
+          if (isNewFile && structuredPatch.length === 0 && isFileWriteOutput(result)) {
             const content = result.content
             const lines = content.split('\n')
             const syntheticHunk: StructuredPatchHunk = {
@@ -175,7 +168,7 @@ export function useTurnDiffs(messages: Message[]): TurnDiff[] {
               oldLines: 0,
               newStart: 1,
               newLines: lines.length,
-              lines: lines.map(l => '+' + l),
+              lines: lines.map((l) => '+' + l),
             }
             fileEntry.hunks.push(syntheticHunk)
             fileEntry.linesAdded += lines.length

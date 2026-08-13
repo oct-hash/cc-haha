@@ -8,9 +8,11 @@
 
 import { feature } from 'bun:bundle'
 import { spawnSync } from 'child_process'
-import * as React from 'react'
-import { useCallback, useRef } from 'react'
 import type { UUID } from 'crypto'
+import type * as React from 'react'
+import { useCallback, useRef } from 'react'
+import exit from '../commands/exit/index.js'
+import type { Command } from '../commands.js'
 import { ExitFlow } from '../components/ExitFlow.js'
 import {
   messagesAfterAreOnlySynthetic,
@@ -22,19 +24,18 @@ import {
   type MessageActionsState,
   useMessageActions,
 } from '../components/messageActions.js'
-import { Text } from '../ink.js'
-import { setClipboard } from '../ink/termio/osc.js'
-import { useReplBridge } from '../hooks/useReplBridge.js'
-import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
-import type { Command } from '../commands.js'
 import type { Notification } from '../context/notifications.js'
+import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
+import { useReplBridge } from '../hooks/useReplBridge.js'
+import { setClipboard } from '../ink/termio/osc.js'
+import { Text } from '../ink.js'
 import type { InProcessTeammateTaskState } from '../tasks/InProcessTeammateTask/types.js'
 import type { LocalAgentTaskState } from '../tasks/LocalAgentTask/LocalAgentTask.js'
 import type { Message as MessageType, UserMessage } from '../types/message.js'
 import type { PromptInputMode } from '../types/textInputTypes.js'
 import { type AutoRunIssueReason, getAutoRunCommand } from '../utils/autoRunIssue.js'
-import type { PastedContent } from '../utils/config.js'
 import { isBgSession } from '../utils/concurrentSessions.js'
+import type { PastedContent } from '../utils/config.js'
 import { logForDebugging } from '../utils/debug.js'
 import { errorMessage } from '../utils/errors.js'
 import { fileHistoryHasAnyChanges } from '../utils/fileHistory.js'
@@ -42,7 +43,6 @@ import type { PromptInputHelpers } from '../utils/handlePromptSubmit.js'
 import type { SetAppState } from '../utils/messageQueueManager.js'
 import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
-import exit from '../commands/exit/index.js'
 import {
   handleAgentSubmit,
   handleRestoreMessageInput,
@@ -175,7 +175,7 @@ export function useREPLAgentHandlers(params: UseREPLAgentHandlersParams) {
 
   // Handler for when user presses 1 on survey thanks screen to share details
   const handleSurveyRequestFeedback = useCallback(() => {
-    const command = 'external' === 'ant' ? '/issue' : '/feedback'
+    const command = process.env.USER_TYPE === 'ant' ? '/issue' : '/feedback'
     onSubmit(command, {
       setCursorOffset: () => {},
       clearBuffer: () => {},

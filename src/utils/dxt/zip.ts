@@ -110,9 +110,7 @@ export function validateZipFile(
  * Int32Array(32769), rev Uint16Array(32768), etc.) being allocated at startup
  * when this module is reached via the plugin loader chain.
  */
-export async function unzipFile(
-  zipData: Buffer,
-): Promise<Record<string, Uint8Array>> {
+export async function unzipFile(zipData: Buffer): Promise<Record<string, Uint8Array>> {
   const { unzipSync } = await import('fflate')
   const compressedSize = zipData.length
 
@@ -124,7 +122,7 @@ export async function unzipFile(
   }
 
   const result = unzipSync(new Uint8Array(zipData), {
-    filter: file => {
+    filter: (file) => {
       const validationResult = validateZipFile(file, state)
       if (!validationResult.isValid) {
         throw new Error(validationResult.error!)
@@ -206,9 +204,7 @@ export function parseZipModes(data: Uint8Array): Record<string, number> {
  * Reads a zip file from disk asynchronously and unzips it.
  * Returns its contents as a record of file paths to Uint8Array data.
  */
-export async function readAndUnzipFile(
-  filePath: string,
-): Promise<Record<string, Uint8Array>> {
+export async function readAndUnzipFile(filePath: string): Promise<Record<string, Uint8Array>> {
   const fs = getFsImplementation()
 
   try {

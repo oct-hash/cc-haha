@@ -10,4 +10,5 @@
 // defined`). The explicit import-then-export below produces a correct live
 // binding. See integration-tests-ant-native failure on PR #20957/#21178.
 import { randomUUID } from 'crypto'
+
 export { randomUUID }

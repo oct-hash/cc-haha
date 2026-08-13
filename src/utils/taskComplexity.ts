@@ -24,7 +24,7 @@ const DEFAULT_CONFIG: ComplexityConfig = {
   fileCountThreshold: 5,
   keywordWeights: {
     // High complexity keywords
-   重构: 3,
+    重构: 3,
     refactor: 3,
     redesign: 3,
     重新设计: 3,
@@ -47,11 +47,8 @@ const DEFAULT_CONFIG: ComplexityConfig = {
     performance: 2,
 
     // Task type keywords
-    重构: 3,
-    refactor: 3,
     修复: 1,
     bug_fix: 1,
-    修复: 1,
     fix: 1,
   },
   taskTypeWeights: {
@@ -69,7 +66,7 @@ const DEFAULT_CONFIG: ComplexityConfig = {
  */
 export function calculateComplexityScore(
   task: string,
-  config: ComplexityConfig = DEFAULT_CONFIG
+  config: ComplexityConfig = DEFAULT_CONFIG,
 ): number {
   let score = 0
 
@@ -194,7 +191,7 @@ export function detectComplexity(task: string, fileCount?: number): ComplexitySi
  */
 export function shouldSuggestAutoActivation(
   task: string,
-  fileCount?: number
+  fileCount?: number,
 ): { should: boolean; reason: string } {
   const signal = detectComplexity(task, fileCount)
 
@@ -218,9 +215,7 @@ export function shouldSuggestAutoActivation(
 /**
  * Get recommended roles for a task
  */
-export function getRecommendedRoles(
-  task: string
-): Array<{ id: string; priority: number }> {
+export function getRecommendedRoles(task: string): Array<{ id: string; priority: number }> {
   const roles: Array<{ id: string; priority: number }> = [
     { id: 'planner', priority: 1 },
     { id: 'executor', priority: 2 },

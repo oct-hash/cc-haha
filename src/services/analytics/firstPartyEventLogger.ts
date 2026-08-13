@@ -1,13 +1,7 @@
 import type { AnyValueMap, Logger, logs } from '@opentelemetry/api-logs'
 import { resourceFromAttributes } from '@opentelemetry/resources'
-import {
-  BatchLogRecordProcessor,
-  LoggerProvider,
-} from '@opentelemetry/sdk-logs'
-import {
-  ATTR_SERVICE_NAME,
-  ATTR_SERVICE_VERSION,
-} from '@opentelemetry/semantic-conventions'
+import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs'
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 import { randomUUID } from 'crypto'
 import { isEqual } from 'lodash-es'
 import { getOrCreateUserID } from '../../utils/config.js'
@@ -41,10 +35,7 @@ const EVENT_SAMPLING_CONFIG_NAME = 'tengu_event_sampling_config'
  * Uses cached value if available, updates cache in background.
  */
 export function getEventSamplingConfig(): EventSamplingConfig {
-  return getDynamicConfig_CACHED_MAY_BE_STALE<EventSamplingConfig>(
-    EVENT_SAMPLING_CONFIG_NAME,
-    {},
-  )
+  return getDynamicConfig_CACHED_MAY_BE_STALE<EventSamplingConfig>(EVENT_SAMPLING_CONFIG_NAME, {})
 }
 
 /**
@@ -95,10 +86,7 @@ type BatchConfig = {
   baseUrl?: string
 }
 function getBatchConfig(): BatchConfig {
-  return getDynamicConfig_CACHED_MAY_BE_STALE<BatchConfig>(
-    BATCH_CONFIG_NAME,
-    {},
-  )
+  return getDynamicConfig_CACHED_MAY_BE_STALE<BatchConfig>(BATCH_CONFIG_NAME, {})
 }
 
 // Module-local state for event logging (not exposed globally)
@@ -185,9 +173,7 @@ async function logEventTo1PAsync(
 
     // Debug logging when debug mode is enabled
     if (process.env.USER_TYPE === 'ant') {
-      logForDebugging(
-        `[ANT-ONLY] 1P event: ${eventName} ${jsonStringify(metadata, null, 0)}`,
-      )
+      logForDebugging(`[ANT-ONLY] 1P event: ${eventName} ${jsonStringify(metadata, null, 0)}`)
     }
 
     // Emit log record
@@ -252,9 +238,7 @@ function getEnvironmentForGrowthBook(): string {
  *
  * @param data - GrowthBook experiment assignment data
  */
-export function logGrowthBookExperimentTo1P(
-  data: GrowthBookExperimentData,
-): void {
+export function logGrowthBookExperimentTo1P(data: GrowthBookExperimentData): void {
   if (!is1PEventLoggingEnabled()) {
     return
   }
@@ -328,13 +312,9 @@ export function initialize1PEventLogging(): void {
 
   const scheduledDelayMillis =
     batchConfig.scheduledDelayMillis ||
-    parseInt(
-      process.env.OTEL_LOGS_EXPORT_INTERVAL ||
-        DEFAULT_LOGS_EXPORT_INTERVAL_MS.toString(),
-    )
+    parseInt(process.env.OTEL_LOGS_EXPORT_INTERVAL || DEFAULT_LOGS_EXPORT_INTERVAL_MS.toString())
 
-  const maxExportBatchSize =
-    batchConfig.maxExportBatchSize || DEFAULT_MAX_EXPORT_BATCH_SIZE
+  const maxExportBatchSize = batchConfig.maxExportBatchSize || DEFAULT_MAX_EXPORT_BATCH_SIZE
 
   const maxQueueSize = batchConfig.maxQueueSize || DEFAULT_MAX_QUEUE_SIZE
 
@@ -416,9 +396,7 @@ export async function reinitialize1PEventLoggingIfConfigChanged(): Promise<void>
   }
 
   if (process.env.USER_TYPE === 'ant') {
-    logForDebugging(
-      `1P event logging: ${BATCH_CONFIG_NAME} changed, reinitializing`,
-    )
+    logForDebugging(`1P event logging: ${BATCH_CONFIG_NAME} changed, reinitializing`)
   }
 
   const oldProvider = firstPartyEventLoggerProvider

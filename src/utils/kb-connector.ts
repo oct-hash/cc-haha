@@ -7,8 +7,8 @@
  * - Sync: Offline batch import/export
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
-import { join, dirname } from 'path'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
+import { dirname, join } from 'path'
 
 // ============================================================================
 // Types
@@ -77,7 +77,7 @@ export const DEFAULT_CONFIG: KBConfig = {
   graphPath: 'papers/wiki/graph.json',
   pushOnCollect: true,
   pullOnFramework: true,
-  exportPath: 'papers/wiki/export.json'
+  exportPath: 'papers/wiki/export.json',
 }
 
 // ============================================================================
@@ -95,7 +95,7 @@ export function loadGraph(graphPath: string = DEFAULT_CONFIG.graphPath): KBGraph
   return {
     nodes: [],
     edges: [],
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
   }
 }
 
@@ -125,7 +125,7 @@ export function getPaperId(paper: PaperMetadata): string {
  * Check if paper node exists
  */
 export function paperExists(graph: KBGraph, paperId: string): boolean {
-  return graph.nodes.some(n => n.id === paperId)
+  return graph.nodes.some((n) => n.id === paperId)
 }
 
 /**
@@ -136,7 +136,7 @@ export function upsertPaperNode(graph: KBGraph, paper: PaperMetadata): KBGraph {
   const paperId = getPaperId(paper)
 
   // Find existing node index
-  const existingIndex = graph.nodes.findIndex(n => n.id === paperId)
+  const existingIndex = graph.nodes.findIndex((n) => n.id === paperId)
 
   const node: KBNode = {
     id: paperId,
@@ -154,8 +154,8 @@ export function upsertPaperNode(graph: KBGraph, paper: PaperMetadata): KBGraph {
       ...(paper.research_question && { research_question: paper.research_question }),
       ...(paper.methodology && { methodology: paper.methodology }),
       ...(paper.findings && { findings: paper.findings }),
-      indexed_at: new Date().toISOString()
-    }
+      indexed_at: new Date().toISOString(),
+    },
   }
 
   if (existingIndex >= 0) {
@@ -163,7 +163,11 @@ export function upsertPaperNode(graph: KBGraph, paper: PaperMetadata): KBGraph {
     const originalIndexedAt = graph.nodes[existingIndex].metadata.indexed_at
     graph.nodes[existingIndex] = {
       ...node,
-      metadata: { ...node.metadata, indexed_at: originalIndexedAt, updated_at: new Date().toISOString() }
+      metadata: {
+        ...node.metadata,
+        indexed_at: originalIndexedAt,
+        updated_at: new Date().toISOString(),
+      },
     }
   } else {
     // Insert new node
@@ -181,17 +185,22 @@ export function addEntitiesAndRelations(
   paperId: string,
   entities: string[] = [],
   concepts: string[] = [],
-  customRelations: { subject: string; predicate: string; object: string; confidence?: number }[] = []
+  customRelations: {
+    subject: string
+    predicate: string
+    object: string
+    confidence?: number
+  }[] = [],
 ): KBGraph {
   // Add entity nodes
   for (const entity of entities) {
     const entityId = `entity:${entity}`
-    if (!graph.nodes.some(n => n.id === entityId)) {
+    if (!graph.nodes.some((n) => n.id === entityId)) {
       graph.nodes.push({
         id: entityId,
         type: 'entity',
         label: entity,
-        metadata: { created_from: paperId }
+        metadata: { created_from: paperId },
       })
     }
   }
@@ -199,12 +208,12 @@ export function addEntitiesAndRelations(
   // Add concept nodes
   for (const concept of concepts) {
     const conceptId = `concept:${concept}`
-    if (!graph.nodes.some(n => n.id === conceptId)) {
+    if (!graph.nodes.some((n) => n.id === conceptId)) {
       graph.nodes.push({
         id: conceptId,
         type: 'concept',
         label: concept,
-        metadata: { created_from: paperId }
+        metadata: { created_from: paperId },
       })
     }
   }
@@ -215,9 +224,9 @@ export function addEntitiesAndRelations(
       source: paperId,
       target: `entity:${entity}`,
       predicate: 'mentions',
-      confidence: 0.9
+      confidence: 0.9,
     }
-    if (!graph.edges.some(e => e.source === edge.source && e.target === edge.target)) {
+    if (!graph.edges.some((e) => e.source === edge.source && e.target === edge.target)) {
       graph.edges.push(edge)
     }
   }
@@ -228,9 +237,9 @@ export function addEntitiesAndRelations(
       source: paperId,
       target: `concept:${concept}`,
       predicate: 'addresses',
-      confidence: 0.85
+      confidence: 0.85,
     }
-    if (!graph.edges.some(e => e.source === edge.source && e.target === edge.target)) {
+    if (!graph.edges.some((e) => e.source === edge.source && e.target === edge.target)) {
       graph.edges.push(edge)
     }
   }
@@ -241,9 +250,14 @@ export function addEntitiesAndRelations(
       source: `entity:${rel.subject}` || rel.subject,
       target: `entity:${rel.object}` || rel.object,
       predicate: rel.predicate,
-      confidence: rel.confidence || 0.5
+      confidence: rel.confidence || 0.5,
     }
-    if (!graph.edges.some(e => e.source === edge.source && e.target === edge.target && e.predicate === edge.predicate)) {
+    if (
+      !graph.edges.some(
+        (e) =>
+          e.source === edge.source && e.target === edge.target && e.predicate === edge.predicate,
+      )
+    ) {
       graph.edges.push(edge)
     }
   }
@@ -261,12 +275,12 @@ export function addEntitiesAndRelations(
 export function queryEntities(
   keywords: string[],
   scope: QueryScope = 'archived_only',
-  graph?: KBGraph
+  graph?: KBGraph,
 ): KBContext {
   const g = graph || loadGraph()
 
   // Filter nodes based on scope
-  const filteredNodes = g.nodes.filter(node => {
+  const filteredNodes = g.nodes.filter((node) => {
     if (scope === 'archived_only') {
       // Only papers with indexed_at (formally archived)
       return node.type === 'paper' && node.metadata.indexed_at
@@ -280,13 +294,13 @@ export function queryEntities(
   })
 
   // Find matching papers
-  const keywordSet = new Set(keywords.map(k => k.toLowerCase()))
-  const matchingPapers = filteredNodes.filter(node => {
-    const title = (node.metadata.title as string || '').toLowerCase()
-    const abstract = (node.metadata.abstract as string || '').toLowerCase()
-    const authors = ((node.metadata.authors as string[]) || []).map(a => a.toLowerCase())
+  const keywordSet = new Set(keywords.map((k) => k.toLowerCase()))
+  const matchingPapers = filteredNodes.filter((node) => {
+    const title = ((node.metadata.title as string) || '').toLowerCase()
+    const abstract = ((node.metadata.abstract as string) || '').toLowerCase()
+    const authors = ((node.metadata.authors as string[]) || []).map((a) => a.toLowerCase())
     const searchText = `${title} ${abstract} ${authors.join(' ')}`
-    return keywords.some(k => searchText.includes(k.toLowerCase()))
+    return keywords.some((k) => searchText.includes(k.toLowerCase()))
   })
 
   // Extract entities and concepts from matching papers
@@ -301,7 +315,9 @@ export function queryEntities(
     // Find connected entities and concepts
     for (const edge of g.edges) {
       if (edge.source === paper.id || edge.target === paper.id) {
-        const otherNode = g.nodes.find(n => n.id === (edge.source === paper.id ? edge.target : edge.source))
+        const otherNode = g.nodes.find(
+          (n) => n.id === (edge.source === paper.id ? edge.target : edge.source),
+        )
         if (otherNode) {
           if (otherNode.type === 'entity') {
             entitySet.add(otherNode.label)
@@ -318,7 +334,7 @@ export function queryEntities(
     entities: Array.from(entitySet),
     concepts: Array.from(conceptSet),
     papers: Array.from(paperSet),
-    relationships: edgeSet
+    relationships: edgeSet,
   }
 }
 
@@ -327,7 +343,7 @@ export function queryEntities(
  */
 export function queryNeighbors(
   nodeId: string,
-  graph?: KBGraph
+  graph?: KBGraph,
 ): { nodes: KBNode[]; edges: KBEdge[] } {
   const g = graph || loadGraph()
 
@@ -344,7 +360,7 @@ export function queryNeighbors(
     }
   }
 
-  const nodes = g.nodes.filter(n => connectedIds.has(n.id))
+  const nodes = g.nodes.filter((n) => connectedIds.has(n.id))
 
   return { nodes, edges }
 }
@@ -378,11 +394,11 @@ export function importGraph(exportPath: string): KBGraph {
     edges: [...existing.edges],
     communities: imported.communities,
     hubs: imported.hubs,
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
   }
 
   for (const node of imported.nodes) {
-    const existingIndex = mergedGraph.nodes.findIndex(n => n.id === node.id)
+    const existingIndex = mergedGraph.nodes.findIndex((n) => n.id === node.id)
     if (existingIndex >= 0) {
       mergedGraph.nodes[existingIndex] = node
     } else {
@@ -391,9 +407,12 @@ export function importGraph(exportPath: string): KBGraph {
   }
 
   for (const edge of imported.edges) {
-    if (!mergedGraph.edges.some(e =>
-      e.source === edge.source && e.target === edge.target && e.predicate === edge.predicate
-    )) {
+    if (
+      !mergedGraph.edges.some(
+        (e) =>
+          e.source === edge.source && e.target === edge.target && e.predicate === edge.predicate,
+      )
+    ) {
       mergedGraph.edges.push(edge)
     }
   }
@@ -423,8 +442,13 @@ export function enrichPaper(
   paper: PaperMetadata,
   entities: string[] = [],
   concepts: string[] = [],
-  customRelations: { subject: string; predicate: string; object: string; confidence?: number }[] = [],
-  graphPath?: string
+  customRelations: {
+    subject: string
+    predicate: string
+    object: string
+    confidence?: number
+  }[] = [],
+  graphPath?: string,
 ): void {
   const graph = loadGraph(graphPath)
   const paperId = getPaperId(paper)
@@ -442,16 +466,11 @@ export function pushToKB(papers: PaperMetadata[], graphPath?: string): void {
   for (const paper of papers) {
     upsertPaperNode(graph, paper)
     const paperId = getPaperId(paper)
-    addEntitiesAndRelations(
-      graph,
-      paperId,
-      paper.entities || [],
-      paper.concepts || []
-    )
+    addEntitiesAndRelations(graph, paperId, paper.entities || [], paper.concepts || [])
   }
 
   saveGraph(graph, graphPath)
-  exportGraph()  // Always export for offline safety
+  exportGraph() // Always export for offline safety
   console.log(`Pushed ${papers.length} papers to KB`)
 }
 
@@ -460,6 +479,8 @@ export function pushToKB(papers: PaperMetadata[], graphPath?: string): void {
  */
 export function pullFromKB(keywords: string[], scope: QueryScope = 'archived_only'): KBContext {
   const context = queryEntities(keywords, scope)
-  console.log(`Pulled: ${context.papers.length} papers, ${context.entities.length} entities, ${context.concepts.length} concepts`)
+  console.log(
+    `Pulled: ${context.papers.length} papers, ${context.entities.length} entities, ${context.concepts.length} concepts`,
+  )
   return context
 }

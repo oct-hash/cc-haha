@@ -7,7 +7,13 @@ import { getSessionManager } from '../services/agents/session-manager.js'
 import type { AgentKind } from '../services/agents/types.js'
 import type { Message as MessageType } from '../types/message.js'
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js'
-import { getMessagesAfterCompactBoundary, handleMessageFromStream, isCompactBoundaryMessage, type StreamingThinking, type StreamingToolUse } from '../utils/messages.js'
+import {
+  getMessagesAfterCompactBoundary,
+  handleMessageFromStream,
+  isCompactBoundaryMessage,
+  type StreamingThinking,
+  type StreamingToolUse,
+} from '../utils/messages.js'
 import { isEphemeralToolProgress, removeTranscriptMessage } from '../utils/sessionStorage.js'
 
 // -- Agent adapter bridge: converts NormalizedEvent → stream_event for onQueryEvent ---

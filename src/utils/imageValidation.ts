@@ -24,9 +24,7 @@ export class ImageSizeError extends Error {
     } else {
       message =
         `${oversizedImages.length} images exceed the API limit (${formatFileSize(maxSize)}): ` +
-        oversizedImages
-          .map(img => `Image ${img.index}: ${formatFileSize(img.size)}`)
-          .join(', ') +
+        oversizedImages.map((img) => `Image ${img.index}: ${formatFileSize(img.size)}`).join(', ') +
         `. Please resize these images before sending.`
     }
     super(message)

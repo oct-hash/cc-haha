@@ -2,17 +2,9 @@ import { type StructuredPatchHunk, structuredPatch } from 'diff'
 import { logError } from 'src/utils/log.js'
 import { expandPath } from 'src/utils/path.js'
 import { countCharInString } from 'src/utils/stringUtils.js'
-import {
-  DIFF_TIMEOUT_MS,
-  getPatchForDisplay,
-  getPatchFromContents,
-} from '../../utils/diff.js'
+import { DIFF_TIMEOUT_MS, getPatchForDisplay, getPatchFromContents } from '../../utils/diff.js'
 import { errorMessage, isENOENT } from '../../utils/errors.js'
-import {
-  addLineNumbers,
-  convertLeadingTabsToSpaces,
-  readFileSyncCached,
-} from '../../utils/file.js'
+import { addLineNumbers, convertLeadingTabsToSpaces, readFileSyncCached } from '../../utils/file.js'
 import type { EditInput, FileEdit } from './types.js'
 
 // Claude can't output curly quotes, so we define them as constants here for Claude to use
@@ -70,10 +62,7 @@ export function stripTrailingWhitespace(str: string): string {
  * @param searchString The string to search for
  * @returns The actual string found in the file, or null if not found
  */
-export function findActualString(
-  fileContent: string,
-  searchString: string,
-): string | null {
+export function findActualString(fileContent: string, searchString: string): string | null {
   // First try exact match
   if (fileContent.includes(searchString)) {
     return searchString
@@ -158,11 +147,7 @@ function applyCurlyDoubleQuotes(str: string): string {
   const result: string[] = []
   for (let i = 0; i < chars.length; i++) {
     if (chars[i] === '"') {
-      result.push(
-        isOpeningContext(chars, i)
-          ? LEFT_DOUBLE_CURLY_QUOTE
-          : RIGHT_DOUBLE_CURLY_QUOTE,
-      )
+      result.push(isOpeningContext(chars, i) ? LEFT_DOUBLE_CURLY_QUOTE : RIGHT_DOUBLE_CURLY_QUOTE)
     } else {
       result.push(chars[i]!)
     }
@@ -185,11 +170,7 @@ function applyCurlySingleQuotes(str: string): string {
         // Apostrophe in a contraction — use right single curly quote
         result.push(RIGHT_SINGLE_CURLY_QUOTE)
       } else {
-        result.push(
-          isOpeningContext(chars, i)
-            ? LEFT_SINGLE_CURLY_QUOTE
-            : RIGHT_SINGLE_CURLY_QUOTE,
-        )
+        result.push(isOpeningContext(chars, i) ? LEFT_SINGLE_CURLY_QUOTE : RIGHT_SINGLE_CURLY_QUOTE)
       }
     } else {
       result.push(chars[i]!)
@@ -212,8 +193,7 @@ export function applyEditToFile(
   const f = replaceAll
     ? (content: string, search: string, replace: string) =>
         content.replaceAll(search, () => replace)
-    : (content: string, search: string, replace: string) =>
-        content.replace(search, () => replace)
+    : (content: string, search: string, replace: string) => content.replace(search, () => replace)
 
   if (newString !== '') {
     return f(originalContent, oldString, newString)
@@ -247,9 +227,7 @@ export function getPatchForEdit({
   return getPatchForEdits({
     filePath,
     fileContents,
-    edits: [
-      { old_string: oldString, new_string: newString, replace_all: replaceAll },
-    ],
+    edits: [{ old_string: oldString, new_string: newString, replace_all: replaceAll }],
   })
 }
 
@@ -300,10 +278,7 @@ export function getPatchForEdits({
 
     // Check if old_string is a substring of any previously applied new_string
     for (const previousNewString of appliedNewStrings) {
-      if (
-        oldStringToCheck !== '' &&
-        previousNewString.includes(oldStringToCheck)
-      ) {
+      if (oldStringToCheck !== '' && previousNewString.includes(oldStringToCheck)) {
         throw new Error(
           'Cannot edit file: old_string is a substring of a new_string from a previous edit.',
         )
@@ -314,12 +289,7 @@ export function getPatchForEdits({
     updatedFile =
       edit.old_string === ''
         ? edit.new_string
-        : applyEditToFile(
-            updatedFile,
-            edit.old_string,
-            edit.new_string,
-            edit.replace_all,
-          )
+        : applyEditToFile(updatedFile, edit.old_string, edit.new_string, edit.replace_all)
 
     // If this edit didn't change anything, throw an error
     if (updatedFile === previousContent) {
@@ -331,9 +301,7 @@ export function getPatchForEdits({
   }
 
   if (updatedFile === fileContents) {
-    throw new Error(
-      'Original and edited file match exactly. Failed to apply edit.',
-    )
+    throw new Error('Original and edited file match exactly. Failed to apply edit.')
   }
 
   // We already have before/after content, so call getPatchFromContents directly.
@@ -359,10 +327,7 @@ const DIFF_SNIPPET_MAX_BYTES = 8192
  *
  * TODO: Unify this with the other snippet logic.
  */
-export function getSnippetForTwoFileDiff(
-  fileAContents: string,
-  fileBContents: string,
-): string {
+export function getSnippetForTwoFileDiff(fileAContents: string, fileBContents: string): string {
   const patch = structuredPatch(
     'file.txt',
     'file.txt',
@@ -381,12 +346,12 @@ export function getSnippetForTwoFileDiff(
   }
 
   const full = patch.hunks
-    .map(_ => ({
+    .map((_) => ({
       startLine: _.oldStart,
       content: _.lines
         // Filter out deleted lines AND diff metadata lines
-        .filter(_ => !_.startsWith('-') && !_.startsWith('\\'))
-        .map(_ => _.slice(1))
+        .filter((_) => !_.startsWith('-') && !_.startsWith('\\'))
+        .map((_) => _.slice(1))
         .join('\n'),
     }))
     .map(addLineNumbers)
@@ -399,8 +364,7 @@ export function getSnippetForTwoFileDiff(
   // Truncate at the last line boundary that fits within the cap.
   // Marker format matches BashTool/utils.ts.
   const cutoff = full.lastIndexOf('\n', DIFF_SNIPPET_MAX_BYTES)
-  const kept =
-    cutoff > 0 ? full.slice(0, cutoff) : full.slice(0, DIFF_SNIPPET_MAX_BYTES)
+  const kept = cutoff > 0 ? full.slice(0, cutoff) : full.slice(0, DIFF_SNIPPET_MAX_BYTES)
   const remaining = countCharInString(full, '\n', kept.length) + 1
   return `${kept}\n\n... [${remaining} lines truncated] ...`
 }
@@ -474,16 +438,11 @@ export function getSnippet(
   // Use the original algorithm from FileEditTool.tsx
   const before = originalFile.split(oldString)[0] ?? ''
   const replacementLine = before.split(/\r?\n/).length - 1
-  const newFileLines = applyEditToFile(
-    originalFile,
-    oldString,
-    newString,
-  ).split(/\r?\n/)
+  const newFileLines = applyEditToFile(originalFile, oldString, newString).split(/\r?\n/)
 
   // Calculate the start and end line numbers for the snippet
   const startLine = Math.max(0, replacementLine - contextLines)
-  const endLine =
-    replacementLine + contextLines + newString.split(/\r?\n/).length
+  const endLine = replacementLine + contextLines + newString.split(/\r?\n/).length
 
   // Get snippet
   const snippetLines = newFileLines.slice(startLine, endLine)
@@ -493,7 +452,7 @@ export function getSnippet(
 }
 
 export function getEditsForPatch(patch: StructuredPatchHunk[]): FileEdit[] {
-  return patch.map(hunk => {
+  return patch.map((hunk) => {
     // Extract the changes from this hunk
     const contextLines: string[] = []
     const oldLines: string[] = []
@@ -607,9 +566,7 @@ export function normalizeFileEditInput({
     return {
       file_path,
       edits: edits.map(({ old_string, new_string, replace_all }) => {
-        const normalizedNewString = isMarkdown
-          ? new_string
-          : stripTrailingWhitespace(new_string)
+        const normalizedNewString = isMarkdown ? new_string : stripTrailingWhitespace(new_string)
 
         // If exact string match works, keep it as is
         if (fileContent.includes(old_string)) {
@@ -683,11 +640,9 @@ export function areFileEditsEquivalent(
   }
 
   // Try applying both sets of edits
-  let result1: { patch: StructuredPatchHunk[]; updatedFile: string } | null =
-    null
+  let result1: { patch: StructuredPatchHunk[]; updatedFile: string } | null = null
   let error1: string | null = null
-  let result2: { patch: StructuredPatchHunk[]; updatedFile: string } | null =
-    null
+  let result2: { patch: StructuredPatchHunk[]; updatedFile: string } | null = null
   let error2: string | null = null
 
   try {

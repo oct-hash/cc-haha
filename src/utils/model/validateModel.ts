@@ -3,12 +3,7 @@ import { MODEL_ALIASES } from './aliases.js'
 import { isModelAllowed } from './modelAllowlist.js'
 import { getAPIProvider } from './providers.js'
 import { sideQuery } from '../sideQuery.js'
-import {
-  NotFoundError,
-  APIError,
-  APIConnectionError,
-  AuthenticationError,
-} from '@anthropic-ai/sdk'
+import { NotFoundError, APIError, APIConnectionError, AuthenticationError } from '@anthropic-ai/sdk'
 import { getModelStrings } from './modelStrings.js'
 
 // Cache valid models to avoid repeated API calls
@@ -17,9 +12,7 @@ const validModelCache = new Map<string, boolean>()
 /**
  * Validates a model by attempting an actual API call.
  */
-export async function validateModel(
-  model: string,
-): Promise<{ valid: boolean; error?: string }> {
+export async function validateModel(model: string): Promise<{ valid: boolean; error?: string }> {
   const normalizedModel = model.trim()
 
   // Empty model is invalid
@@ -50,7 +43,6 @@ export async function validateModel(
   if (validModelCache.has(normalizedModel)) {
     return { valid: true }
   }
-
 
   // Try to make an actual API call with minimal parameters
   try {

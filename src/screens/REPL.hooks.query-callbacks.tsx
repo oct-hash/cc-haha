@@ -6,9 +6,9 @@
 // here directly.
 
 import { feature } from 'bun:bundle'
-import * as React from 'react'
-import { useCallback } from 'react'
 import type { UUID } from 'crypto'
+import type * as React from 'react'
+import { useCallback } from 'react'
 import type { SpinnerMode } from '../components/Spinner.js'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import { useSessionBackgrounding } from '../hooks/useSessionBackgrounding.js'
@@ -17,10 +17,10 @@ import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
 import type { Message as MessageType, UserMessage } from '../types/message.js'
 import type { EffortValue } from '../utils/effort.js'
 import type { SetAppState } from '../utils/messageQueueManager.js'
-import {
-  type handleMessageFromStream,
-  type StreamingThinking,
-  type StreamingToolUse,
+import type {
+  handleMessageFromStream,
+  StreamingThinking,
+  StreamingToolUse,
 } from '../utils/messages.js'
 import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js'
 import type { QueryGuard } from '../utils/QueryGuard.js'

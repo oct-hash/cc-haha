@@ -181,6 +181,7 @@ export type {
   Command,
   CommandBase,
   CommandResultDisplay,
+  LocalCommandModule,
   LocalCommandResult,
   LocalJSXCommandContext,
   PromptCommand,

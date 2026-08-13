@@ -1,8 +1,5 @@
 import type { QuerySource } from 'src/constants/querySource.js'
-import {
-  DEFAULT_OUTPUT_STYLE_NAME,
-  OUTPUT_STYLE_CONFIG,
-} from '../constants/outputStyles.js'
+import { DEFAULT_OUTPUT_STYLE_NAME, OUTPUT_STYLE_CONFIG } from '../constants/outputStyles.js'
 import { getSettings_DEPRECATED } from './settings/settings.js'
 
 /**
@@ -19,9 +16,7 @@ export function getQuerySourceForAgent(
 ): QuerySource {
   if (isBuiltInAgent) {
     // TODO: avoid this cast
-    return agentType
-      ? (`agent:builtin:${agentType}` as QuerySource)
-      : 'agent:default'
+    return agentType ? (`agent:builtin:${agentType}` as QuerySource) : 'agent:default'
   } else {
     return 'agent:custom'
   }

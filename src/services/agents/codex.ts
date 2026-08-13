@@ -22,11 +22,25 @@ export function createCodexAdapter(config?: AgentConfig): AgentAdapter {
   function buildArgs(userMessage: string): string[] {
     const args = ['exec', '--json', userMessage]
 
+    if (config?.model) {
+      args.push('--model', config.model)
+    }
+
     if (config?.systemPromptPath) {
       args.push('--system-prompt', config.systemPromptPath)
     }
 
     if (config?.extraArgs) {
+      const dangerous = config.extraArgs.filter((a) =>
+        /^--(permission-mode|dangerously-skip-permissions|dangerously-disable-sandbox)(?:[=\s]|$)/.test(
+          a,
+        ),
+      )
+      if (dangerous.length > 0) {
+        throw new Error(
+          `AgentConfig.extraArgs contains dangerous flags that would override security defaults: ${dangerous.join(', ')}`,
+        )
+      }
       args.push(...config.extraArgs)
     }
 

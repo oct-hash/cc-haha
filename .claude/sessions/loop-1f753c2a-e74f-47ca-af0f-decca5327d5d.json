@@ -1,0 +1,18 @@
+{
+  "sessionId": "1f753c2a-e74f-47ca-af0f-decca5327d5d",
+  "loopType": "debate",
+  "topic": "",
+  "phase": "init",
+  "config": {
+    "loopType": "debate",
+    "maxTicks": 5,
+    "preGateMode": "auto",
+    "postGateMode": "council",
+    "perAgentTimeoutMs": 120000
+  },
+  "completedTicks": 0,
+  "totalTicks": 5,
+  "gateResults": [],
+  "startedAt": 1786465381914,
+  "updatedAt": 1786465381914
+}

@@ -2,8 +2,8 @@
  * Stress test for SessionManager.save() serialization.
  * Verifies that concurrent save() calls do not cause session loss.
  */
-import { describe, expect, it, beforeEach, afterEach } from 'bun:test'
-import { getSessionManager, resetSessionManager, initSessionManager } from '../session-manager.js'
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { getSessionManager, initSessionManager, resetSessionManager } from '../session-manager.js'
 
 describe('SessionManager save() 并发压测', () => {
   beforeEach(() => {

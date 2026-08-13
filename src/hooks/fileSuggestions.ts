@@ -6,11 +6,7 @@ import {
   loadMarkdownFilesForSubdir,
 } from 'src/utils/markdownConfigLoader.js'
 import type { SuggestionItem } from '../components/PromptInput/PromptInputFooterSuggestions.js'
-import {
-  CHUNK_MS,
-  FileIndex,
-  yieldToEventLoop,
-} from '../native-ts/file-index/index.js'
+import { CHUNK_MS, FileIndex, yieldToEventLoop } from '../native-ts/file-index/index.js'
 import { logEvent } from '../services/analytics/index.js'
 import type { FileSuggestionCommandInput } from '../types/fileSuggestion.js'
 import { getGlobalConfig } from '../utils/config.js'
@@ -20,10 +16,7 @@ import { errorMessage } from '../utils/errors.js'
 import { execFileNoThrowWithCwd } from '../utils/execFileNoThrow.js'
 import { getFsImplementation } from '../utils/fsOperations.js'
 import { findGitRoot, gitExe } from '../utils/git.js'
-import {
-  createBaseHookInput,
-  executeFileSuggestionCommand,
-} from '../utils/hooks.js'
+import { createBaseHookInput, executeFileSuggestionCommand } from '../utils/hooks.js'
 import { logError } from '../utils/log.js'
 import { expandPath } from '../utils/path.js'
 import { ripGrep } from '../utils/ripgrep.js'
@@ -149,15 +142,11 @@ function getGitIndexMtime(): number | null {
 /**
  * Normalize git paths relative to originalCwd
  */
-function normalizeGitPaths(
-  files: string[],
-  repoRoot: string,
-  originalCwd: string,
-): string[] {
+function normalizeGitPaths(files: string[], repoRoot: string, originalCwd: string): string[] {
   if (originalCwd === repoRoot) {
     return files
   }
-  return files.map(f => {
+  return files.map((f) => {
     const absolutePath = path.join(repoRoot, f)
     return path.relative(originalCwd, absolutePath)
   })
@@ -166,9 +155,7 @@ function normalizeGitPaths(
 /**
  * Merge already-normalized untracked files into the cache
  */
-async function mergeUntrackedIntoNormalizedCache(
-  normalizedUntracked: string[],
-): Promise<void> {
+async function mergeUntrackedIntoNormalizedCache(normalizedUntracked: string[]): Promise<void> {
   if (normalizedUntracked.length === 0) return
   if (!fileIndex || cachedTrackedFiles.length === 0) return
 
@@ -182,9 +169,7 @@ async function mergeUntrackedIntoNormalizedCache(
   ]
   const sig = pathListSignature(allPaths)
   if (sig === loadedMergedSignature) {
-    logForDebugging(
-      `[FileIndex] skipped index rebuild — merged paths unchanged`,
-    )
+    logForDebugging(`[FileIndex] skipped index rebuild — merged paths unchanged`)
     return
   }
   await fileIndex.loadFromFileListAsync(allPaths).done
@@ -217,11 +202,9 @@ async function loadRipgrepIgnorePatterns(
   const ig = ignore()
   let hasPatterns = false
 
-  const paths = directories.flatMap(dir =>
-    ignoreFiles.map(f => path.join(dir, f)),
-  )
+  const paths = directories.flatMap((dir) => ignoreFiles.map((f) => path.join(dir, f)))
   const contents = await Promise.all(
-    paths.map(p => fs.readFile(p, { encoding: 'utf8' }).catch(() => null)),
+    paths.map((p) => fs.readFile(p, { encoding: 'utf8' }).catch(() => null)),
   )
   for (const [i, content] of contents.entries()) {
     if (content === null) continue
@@ -270,9 +253,7 @@ async function getFilesUsingGit(
       ['-c', 'core.quotepath=false', 'ls-files', '--recurse-submodules'],
       { timeout: 5000, abortSignal, cwd: repoRoot },
     )
-    logForDebugging(
-      `[FileIndex] git ls-files (tracked) took ${Date.now() - lsFilesStart}ms`,
-    )
+    logForDebugging(`[FileIndex] git ls-files (tracked) took ${Date.now() - lsFilesStart}ms`)
 
     if (trackedResult.code !== 0) {
       logForDebugging(
@@ -314,13 +295,7 @@ async function getFilesUsingGit(
     // Start background fetch for untracked files (don't await)
     if (!untrackedFetchPromise) {
       const untrackedArgs = respectGitignore
-        ? [
-            '-c',
-            'core.quotepath=false',
-            'ls-files',
-            '--others',
-            '--exclude-standard',
-          ]
+        ? ['-c', 'core.quotepath=false', 'ls-files', '--others', '--exclude-standard']
         : ['-c', 'core.quotepath=false', 'ls-files', '--others']
 
       const generation = cacheGeneration
@@ -328,28 +303,18 @@ async function getFilesUsingGit(
         timeout: 10000,
         cwd: repoRoot,
       })
-        .then(async untrackedResult => {
+        .then(async (untrackedResult) => {
           if (generation !== cacheGeneration) {
             return // Cache was cleared; don't merge stale untracked files
           }
           if (untrackedResult.code === 0) {
-            const rawUntrackedFiles = untrackedResult.stdout
-              .trim()
-              .split('\n')
-              .filter(Boolean)
+            const rawUntrackedFiles = untrackedResult.stdout.trim().split('\n').filter(Boolean)
 
             // Normalize paths BEFORE applying ignore patterns (consistent with tracked files)
-            let normalizedUntracked = normalizeGitPaths(
-              rawUntrackedFiles,
-              repoRoot,
-              cwd,
-            )
+            let normalizedUntracked = normalizeGitPaths(rawUntrackedFiles, repoRoot, cwd)
 
             // Apply .ignore/.rgignore patterns to normalized untracked files
-            const ignorePatterns = await loadRipgrepIgnorePatterns(
-              repoRoot,
-              cwd,
-            )
+            const ignorePatterns = await loadRipgrepIgnorePatterns(repoRoot, cwd)
             if (ignorePatterns && normalizedUntracked.length > 0) {
               const beforeCount = normalizedUntracked.length
               normalizedUntracked = ignorePatterns.filter(normalizedUntracked)
@@ -365,10 +330,8 @@ async function getFilesUsingGit(
             void mergeUntrackedIntoNormalizedCache(normalizedUntracked)
           }
         })
-        .catch(error => {
-          logForDebugging(
-            `[FileIndex] background untracked fetch failed: ${error}`,
-          )
+        .catch((error) => {
+          logForDebugging(`[FileIndex] background untracked fetch failed: ${error}`)
         })
         .finally(() => {
           untrackedFetchPromise = null
@@ -393,16 +356,14 @@ async function getFilesUsingGit(
 export function getDirectoryNames(files: string[]): string[] {
   const directoryNames = new Set<string>()
   collectDirectoryNames(files, 0, files.length, directoryNames)
-  return [...directoryNames].map(d => d + path.sep)
+  return [...directoryNames].map((d) => d + path.sep)
 }
 
 /**
  * Async variant: yields every ~10k files so 270k+ file lists don't block
  * the main thread for >10ms at a time.
  */
-export async function getDirectoryNamesAsync(
-  files: string[],
-): Promise<string[]> {
+export async function getDirectoryNamesAsync(files: string[]): Promise<string[]> {
   const directoryNames = new Set<string>()
   // Time-based chunking: yield after CHUNK_MS of work so slow machines get
   // smaller chunks and stay responsive.
@@ -414,7 +375,7 @@ export async function getDirectoryNamesAsync(
       chunkStart = performance.now()
     }
   }
-  return [...directoryNames].map(d => d + path.sep)
+  return [...directoryNames].map((d) => d + path.sep)
 }
 
 function collectDirectoryNames(
@@ -444,13 +405,9 @@ function collectDirectoryNames(
  */
 async function getClaudeConfigFiles(cwd: string): Promise<string[]> {
   const markdownFileArrays = await Promise.all(
-    CLAUDE_CONFIG_DIRECTORIES.map(subdir =>
-      loadMarkdownFilesForSubdir(subdir, cwd),
-    ),
+    CLAUDE_CONFIG_DIRECTORIES.map((subdir) => loadMarkdownFilesForSubdir(subdir, cwd)),
   )
-  return markdownFileArrays.flatMap(markdownFiles =>
-    markdownFiles.map(f => f.filePath),
-  )
+  return markdownFileArrays.flatMap((markdownFiles) => markdownFiles.map((f) => f.filePath))
 }
 
 /**
@@ -460,23 +417,17 @@ async function getProjectFiles(
   abortSignal: AbortSignal,
   respectGitignore: boolean,
 ): Promise<string[]> {
-  logForDebugging(
-    `[FileIndex] getProjectFiles called, respectGitignore=${respectGitignore}`,
-  )
+  logForDebugging(`[FileIndex] getProjectFiles called, respectGitignore=${respectGitignore}`)
 
   // Try git ls-files first (much faster for git repos)
   const gitFiles = await getFilesUsingGit(abortSignal, respectGitignore)
   if (gitFiles !== null) {
-    logForDebugging(
-      `[FileIndex] using git ls-files result (${gitFiles.length} files)`,
-    )
+    logForDebugging(`[FileIndex] using git ls-files result (${gitFiles.length} files)`)
     return gitFiles
   }
 
   // Fall back to ripgrep
-  logForDebugging(
-    `[FileIndex] git ls-files returned null, falling back to ripgrep`,
-  )
+  logForDebugging(`[FileIndex] git ls-files returned null, falling back to ripgrep`)
   const startTime = Date.now()
   const rgArgs = [
     '--files',
@@ -500,12 +451,10 @@ async function getProjectFiles(
   }
 
   const files = await ripGrep(rgArgs, '.', abortSignal)
-  const relativePaths = files.map(f => path.relative(getCwd(), f))
+  const relativePaths = files.map((f) => path.relative(getCwd(), f))
 
   const duration = Date.now() - startTime
-  logForDebugging(
-    `[FileIndex] ripgrep: ${relativePaths.length} files in ${duration}ms`,
-  )
+  logForDebugging(`[FileIndex] ripgrep: ${relativePaths.length} files in ${duration}ms`)
 
   logEvent('tengu_file_suggestions_ripgrep', {
     file_count: relativePaths.length,
@@ -558,9 +507,7 @@ export async function getPathsForSuggestions(): Promise<FileIndex> {
       // the next untracked merge to rebuild even if its own sig matches.
       loadedMergedSignature = null
     } else {
-      logForDebugging(
-        `[FileIndex] skipped index rebuild — tracked paths unchanged`,
-      )
+      logForDebugging(`[FileIndex] skipped index rebuild — tracked paths unchanged`)
     }
   } catch (error) {
     logError(error)
@@ -587,7 +534,7 @@ function findCommonPrefix(a: string, b: string): string {
 export function findLongestCommonPrefix(suggestions: SuggestionItem[]): string {
   if (suggestions.length === 0) return ''
 
-  const strings = suggestions.map(item => item.displayText)
+  const strings = suggestions.map((item) => item.displayText)
   let prefix = strings[0]!
   for (let i = 1; i < strings.length; i++) {
     const currentString = strings[i]!
@@ -600,10 +547,7 @@ export function findLongestCommonPrefix(suggestions: SuggestionItem[]): string {
 /**
  * Creates a file suggestion item
  */
-function createFileSuggestionItem(
-  filePath: string,
-  score?: number,
-): SuggestionItem {
+function createFileSuggestionItem(filePath: string, score?: number): SuggestionItem {
   return {
     id: `file-${filePath}`,
     displayText: filePath,
@@ -615,14 +559,9 @@ function createFileSuggestionItem(
  * Find matching files and folders for a given query using the TS file index
  */
 const MAX_SUGGESTIONS = 15
-function findMatchingFiles(
-  fileIndex: FileIndex,
-  partialPath: string,
-): SuggestionItem[] {
+function findMatchingFiles(fileIndex: FileIndex, partialPath: string): SuggestionItem[] {
   const results = fileIndex.search(partialPath, MAX_SUGGESTIONS)
-  return results.map(result =>
-    createFileSuggestionItem(result.path, result.score),
-  )
+  return results.map((result) => createFileSuggestionItem(result.path, result.score))
 }
 
 /**
@@ -643,8 +582,7 @@ export function startBackgroundCacheRefresh(): void {
   // the rebuild when the 5s refresh finds nothing actually changed.
   const indexMtime = getGitIndexMtime()
   if (fileIndex) {
-    const gitStateChanged =
-      indexMtime !== null && indexMtime !== lastGitIndexMtime
+    const gitStateChanged = indexMtime !== null && indexMtime !== lastGitIndexMtime
     if (!gitStateChanged && Date.now() - lastRefreshMs < REFRESH_THROTTLE_MS) {
       return
     }
@@ -657,7 +595,7 @@ export function startBackgroundCacheRefresh(): void {
   // results; indexBuildComplete fires after .done so they can re-search.
   getFileIndex()
   fileListRefreshPromise = getPathsForSuggestions()
-    .then(result => {
+    .then((result) => {
       if (generation !== cacheGeneration) {
         return result // Cache was cleared; don't overwrite with stale data
       }
@@ -668,15 +606,11 @@ export function startBackgroundCacheRefresh(): void {
       // correctly refresh again.
       lastGitIndexMtime = indexMtime
       lastRefreshMs = Date.now()
-      logForDebugging(
-        `[FileIndex] cache refresh completed in ${Date.now() - refreshStart}ms`,
-      )
+      logForDebugging(`[FileIndex] cache refresh completed in ${Date.now() - refreshStart}ms`)
       return result
     })
-    .catch(error => {
-      logForDebugging(
-        `[FileIndex] Cache refresh failed: ${errorMessage(error)}`,
-      )
+    .catch((error) => {
+      logForDebugging(`[FileIndex] Cache refresh failed: ${errorMessage(error)}`)
       logError(error)
       if (generation === cacheGeneration) {
         fileListRefreshPromise = null // Allow retry on next call
@@ -695,7 +629,7 @@ async function getTopLevelPaths(): Promise<string[]> {
 
   try {
     const entries = await fs.readdir(cwd)
-    return entries.map(entry => {
+    return entries.map((entry) => {
       const fullPath = path.join(cwd, entry.name)
       const relativePath = path.relative(cwd, fullPath)
       // Add trailing separator for directories
@@ -761,9 +695,7 @@ export async function generateFileSuggestions(
       normalizedPath = expandPath(normalizedPath)
     }
 
-    const matches = fileIndex
-      ? findMatchingFiles(fileIndex, normalizedPath)
-      : []
+    const matches = fileIndex ? findMatchingFiles(fileIndex, normalizedPath) : []
 
     const duration = Date.now() - startTime
     logForDebugging(
@@ -795,14 +727,11 @@ export function applyFileSuggestion(
   setCursorOffset: (offset: number) => void,
 ): void {
   // Extract suggestion text from string or SuggestionItem
-  const suggestionText =
-    typeof suggestion === 'string' ? suggestion : suggestion.displayText
+  const suggestionText = typeof suggestion === 'string' ? suggestion : suggestion.displayText
 
   // Replace the partial path with the selected file path
   const newInput =
-    input.substring(0, startPos) +
-    suggestionText +
-    input.substring(startPos + partialPath.length)
+    input.substring(0, startPos) + suggestionText + input.substring(startPos + partialPath.length)
   onInputChange(newInput)
 
   // Move cursor to end of the file path

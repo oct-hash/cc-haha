@@ -7,8 +7,8 @@
 // externally captured values are passed via UseREPLRenderPrepParams; only
 // module-scope handler/component imports are resolved here directly.
 
-import * as React from 'react'
-import { useEffect, type Dispatch, type MutableRefObject, type SetStateAction } from 'react'
+import type * as React from 'react'
+import { type Dispatch, type MutableRefObject, type SetStateAction, useEffect } from 'react'
 import { MIN_COLS_FOR_FULL_SPRITE } from '../buddy/CompanionSprite.js'
 import {
   PermissionRequest,
@@ -24,8 +24,8 @@ import type { Message as MessageType } from '../types/message.js'
 import { createAbortController } from '../utils/abortController.js'
 import { isFullscreenEnvEnabled, isMouseTrackingEnabled } from '../utils/fullscreen.js'
 import type { MainRenderProps, TranscriptViewProps } from './REPL.render.js'
-import type { Screen } from './REPL.types.js'
 import { MainRender, TranscriptView } from './REPL.render.js'
+import type { Screen } from './REPL.types.js'
 
 export type UseREPLRenderPrepParams = Omit<
   MainRenderProps,
@@ -659,7 +659,9 @@ export function useREPLRenderPrep(params: UseREPLRenderPrepParams): UseREPLRende
   const mainRender = <MainRender {...mainRenderProps} />
   const mainReturn = isFullscreenEnvEnabled() ? (
     <AlternateScreen mouseTracking={isMouseTrackingEnabled()}>{mainRender}</AlternateScreen>
-  ) : mainRender
+  ) : (
+    mainRender
+  )
 
   return {
     transcriptView,

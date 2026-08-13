@@ -4,16 +4,9 @@ import { readdir, readFile, stat } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { join } from 'path'
 import type { QuerySource } from 'src/constants/querySource.js'
-import {
-  setLastAPIRequest,
-  setLastAPIRequestMessages,
-} from '../bootstrap/state.js'
+import { setLastAPIRequest, setLastAPIRequestMessages } from '../bootstrap/state.js'
 import { TICK_TAG } from '../constants/xml.js'
-import {
-  type LogOption,
-  type SerializedMessage,
-  sortLogs,
-} from '../types/logs.js'
+import { type LogOption, type SerializedMessage, sortLogs } from '../types/logs.js'
 import { CACHE_PATHS } from './cachePaths.js'
 import { stripDisplayTags, stripDisplayTagsAllowEmpty } from './displayTags.js'
 import { isEnvTruthy } from './envUtils.js'
@@ -27,10 +20,7 @@ import { jsonParse } from './slowOperations.js'
  * Strips display-unfriendly tags (like <ide_opened_file>) from the result.
  * Falls back to a truncated session ID when no other title is available.
  */
-export function getLogDisplayTitle(
-  log: LogOption,
-  defaultTitle?: string,
-): string {
+export function getLogDisplayTitle(log: LogOption, defaultTitle?: string): string {
   // Skip firstPrompt if it's a tick/goal message (autonomous mode auto-prompt)
   const isAutonomousPrompt = log.firstPrompt?.startsWith(`<${TICK_TAG}>`)
   // Strip display-unfriendly tags (command-name, ide_opened_file, etc.) early
@@ -38,9 +28,7 @@ export function getLogDisplayTitle(
   // to the next fallback instead of showing raw XML tags.
   // Note: stripDisplayTags returns the original when stripping yields empty,
   // so we call stripDisplayTagsAllowEmpty to detect command-only prompts.
-  const strippedFirstPrompt = log.firstPrompt
-    ? stripDisplayTagsAllowEmpty(log.firstPrompt)
-    : ''
+  const strippedFirstPrompt = log.firstPrompt ? stripDisplayTagsAllowEmpty(log.firstPrompt) : ''
   const useFirstPrompt = strippedFirstPrompt && !isAutonomousPrompt
   const title =
     log.agentName ||
@@ -66,10 +54,7 @@ export function dateToFilename(date: Date): string {
 const MAX_IN_MEMORY_ERRORS = 100
 let inMemoryErrorLog: Array<{ error: string; timestamp: string }> = []
 
-function addToInMemoryErrorLog(errorInfo: {
-  error: string
-  timestamp: string
-}): void {
+function addToInMemoryErrorLog(errorInfo: { error: string; timestamp: string }): void {
   if (inMemoryErrorLog.length >= MAX_IN_MEMORY_ERRORS) {
     inMemoryErrorLog.shift() // Remove oldest error
   }
@@ -215,9 +200,7 @@ export function loadErrorLogs(): Promise<LogOption[]> {
  * @param index Index in the sorted list of logs (0-based)
  * @returns Log data or null if not found
  */
-export async function getErrorLogByIndex(
-  index: number,
-): Promise<LogOption | null> {
+export async function getErrorLogByIndex(index: number): Promise<LogOption | null> {
   const logs = await loadErrorLogs()
   return logs[index] || null
 }
@@ -244,8 +227,7 @@ async function loadLogList(path: string): Promise<LogOption[]> {
       const firstMessage = messages[0]
       const lastMessage = messages[messages.length - 1]
       const firstPrompt =
-        firstMessage?.type === 'user' &&
-        typeof firstMessage?.message?.content === 'string'
+        firstMessage?.type === 'user' && typeof firstMessage?.message?.content === 'string'
           ? firstMessage?.message?.content
           : 'No prompt'
 
@@ -268,15 +250,15 @@ async function loadLogList(path: string): Promise<LogOption[]> {
           ? parseISOString(lastMessage.timestamp)
           : parseISOString(date),
         firstPrompt:
-          firstPrompt.split('\n')[0]?.slice(0, 50) +
-            (firstPrompt.length > 50 ? '…' : '') || 'No prompt',
+          firstPrompt.split('\n')[0]?.slice(0, 50) + (firstPrompt.length > 50 ? '…' : '') ||
+          'No prompt',
         messageCount: messages.length,
         isSidechain,
       }
     }),
   )
 
-  return sortLogs(logData.filter(_ => _ !== null)).map((_, i) => ({
+  return sortLogs(logData.filter((_) => _ !== null)).map((_, i) => ({
     ..._,
     value: i,
   }))

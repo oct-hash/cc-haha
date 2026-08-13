@@ -1,0 +1,127 @@
+===== R11 BASIC INTEGRITY =====
+paragraphs: 161
+'multi-omics integration' count: 3
+'virtual cell' residual: 0 OK
+S1 cited: True OK
+control terminology note present: True OK
+
+===== CITATIONS =====
+refs=51 distinct_cited=51
+orphan=[]
+missing=[]
+duplicate refs: none
+
+===== KEY NUMBERS IN TEXT vs JSON =====
+[24] Sham 10,371 : FOUND  | JSON n_Sham=10371
+[24] early I/R 34,088 : FOUND  | JSON n_earlyIR=34088
+[49] Ogt 0.25 to 0.38 : FOUND  | JSON 0.2506->0.3844 (+53.4%)
+[49] Ogt +53% : FOUND  | JSON +53.4%
+[49] Gclc 0.47 to 0.68 : FOUND  | JSON 0.4686->0.6783 (+44.8%)
+[49] Gclc +45% : FOUND  | JSON +44.8%
+[49] Fth1 99.9% : FOUND  | JSON Sham detection 99.9%
+[45] Hmox1 0.28 to 0.45 : FOUND  | JSON 0.2829->0.4457
+[45] Hmox1 +58% : FOUND  | JSON +57.6%
+[19] IRI timecourse correct: FOUND
+[24] 49 samples IRI 2h-12mo: FOUND
+[49] Hmox1 baseline~29.6 : FOUND  | bulk_full NORM_3m=29.6
+[49] Hmox1 24h~198.2 : FOUND  | bulk_full IRI_24h=198.2 fold=6.7x
+[49] Hmox1 28d~31.3 : FOUND  | bulk_full IRI_28d=31.3
+[49] Fth1 baseline~6422 : **MISSING**  | bulk_full NORM_3m=6422.2
+[49] Fth1 24h~14048 : FOUND  | bulk_full IRI_24h=14048.4 fold=2.2x
+[49] Ogt baseline~21 : FOUND  | bulk_full NORM_3m=21.3
+[49] Ogt 24h~42 : FOUND  | bulk_full IRI_24h=42.3 fold=2.0x
+[49] Slc7a11 undetectable: FOUND
+[72] Moran 0.39 to 0.61 : FOUND/FOUND  | squidpy Spp1 Sham=0.3905 IR=0.6136
+[72] spatial spots 2,855/3,392 : FOUND/FOUND  | JSON Sham=2855 IR=3392
+[72] spot r -0.030 to +0.403 : **MISSING**/FOUND
+
+===== TEMPORAL COORDINATION =====
+  Hmox1 ρ=0.26 : FOUND
+  Ogt ρ=0.62 : FOUND
+  Gclc ρ=0.32 : FOUND
+  Fth1 ρ=0.84 : FOUND
+  Nfe2l2 ρ=0.26 : FOUND
+
+===== PATHWAY COORDINATION =====
+  GSH ρ=0.39 : **MISSING**
+  Iron ρ=0.40 : **MISSING**
+  Lipid ρ=0.18 : **MISSING**
+
+===== CO-EXPRESSION =====
+  4 edges Control : FOUND
+  13 edges 12h : FOUND
+  7 edges 2d : FOUND
+
+===== METABOLIC =====
+  PT GSH 5.1x 4h : FOUND
+  PT Iron 1.8x : FOUND
+
+===== GUARD: OLD WRONG STRINGS =====
+  OK present=False want=False  '+676%'
+  OK present=False want=False  'Disorganization Window'
+  OK present=False want=False  'SHAM_4h (mean=157)'
+  OK present=False want=False  'peak expression at SHAM_24h'
+  OK present=False want=False  '4.6-fold vs SHAM_4h'
+  OK present=False want=False  '49 samples across six reperfusion durations'
+  OK present=False want=False  'Sham (n=12), 2 h (n=5)'
+  OK present=False want=False  'virtual cell'
+  OK present=False want=False  'Virtual Cell'
+  OK present=False want=False  'Virtual cell'
+
+===== GUARD: NEW CORRECT STRINGS =====
+  OK present=True want=True  'multi-omics integration'
+  OK present=True want=True  'Multi-Omics Integration'
+  OK present=True want=True  'Multi-omics integration'
+  OK present=True want=True  'Co-Regulation Peak'
+  OK present=True want=True  'peaking at 24 h'
+  OK present=True want=True  '14,048 versus a baseline of 6,688'
+  OK present=True want=True  'IRI at 2 h, 4 h, 24 h, 48 h'
+  OK present=True want=True  'Supplementary Figure S1'
+  OK present=True want=True  'control-group terminology'
+  OK present=True want=True  'NORM'
+
+===== FIGURE FILES =====
+Total unique figure files: 13
+  Fig1 (figures, figures)
+  Fig2 (figures, figures)
+  Fig3 (figures, figures)
+  Fig4 (figures, figures)
+  Fig5 (figures, figures)
+  Fig6 (figures, figures)
+  Fig7 (figures, figures)
+  Fig8 (figures, figures)
+  FigS1_SPP1_validation_v1 (supplementary, supplementary, figures, figures, manuscript, manuscript)
+  FigS2_bulk_Spp1_timecourse_v1 (supplementary, supplementary, figures, figures, manuscript, manuscript)
+  FigS3_scRNA_replication_v1 (supplementary, supplementary, figures, figures, manuscript, manuscript)
+  FigS4_spatial_coloc_v1 (supplementary, supplementary, figures, figures, manuscript, manuscript)
+  FigS4b_moran_spdep_crosscheck_v1 (supplementary, supplementary, manuscript, manuscript)
+
+Figure mentions in body: ['Figure 1', 'Figure 2', 'Figure 3', 'Figure 4', 'Figure 5', 'Figure 6', 'Figure 7', 'Figure 8', 'Figure 8a', 'Figure 8d', 'Figure S1', 'Figure S2', 'Figure S3', 'Figure S4', 'Figure S4b']
+  Figure S1: cited=True has_file=True OK
+  Figure S2: cited=True has_file=True OK
+  Figure S3: cited=True has_file=True OK
+  Figure S4: cited=True has_file=True OK
+  Figure S4b: cited=True has_file=True OK
+
+===== STORY LOGIC =====
+  OK §4.4 title correct
+  OK 12h peak NOT disorganization
+  OK O-GlcNAc NOT gatekeeper
+  OK Fth1-dominant kidney
+  OK Cross-organ comparison present
+  OK SPP1 repair pulse described
+  OK Drug connectivity present
+  OK 7-step framework described
+  OK Limitations section
+  OK Future directions section
+  OK Three datasets listed
+
+===== NUMBER FORMAT =====
+  10,371 with comma: True
+  34,088 with comma: True
+  2,855 with comma: True
+  3,392 with comma: True
+  5,721 with comma: True
+  6,862 with comma: True
+  126,578 with comma: True
+  44,459 with comma: True

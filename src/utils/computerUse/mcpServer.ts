@@ -1,7 +1,4 @@
-import {
-  buildComputerUseTools,
-  createComputerUseMcpServer,
-} from '@ant/computer-use-mcp'
+import { buildComputerUseTools, createComputerUseMcpServer } from '@ant/computer-use-mcp'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import { homedir } from 'os'
@@ -26,7 +23,7 @@ async function tryGetInstalledAppNames(): Promise<string[] | undefined> {
   const adapter = getComputerUseHostAdapter()
   const enumP = adapter.executor.listInstalledApps()
   let timer: ReturnType<typeof setTimeout> | undefined
-  const timeoutP = new Promise<undefined>(resolve => {
+  const timeoutP = new Promise<undefined>((resolve) => {
     timer = setTimeout(resolve, APP_ENUM_TIMEOUT_MS, undefined)
   })
   const installed = await Promise.race([enumP, timeoutP])

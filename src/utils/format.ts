@@ -97,9 +97,7 @@ export function formatDuration(
 // `new Intl.NumberFormat` is expensive, so cache formatters for reuse
 let numberFormatterForConsistentDecimals: Intl.NumberFormat | null = null
 let numberFormatterForInconsistentDecimals: Intl.NumberFormat | null = null
-const getNumberFormatter = (
-  useConsistentDecimals: boolean,
-): Intl.NumberFormat => {
+const getNumberFormatter = (useConsistentDecimals: boolean): Intl.NumberFormat => {
   if (useConsistentDecimals) {
     if (!numberFormatterForConsistentDecimals) {
       numberFormatterForConsistentDecimals = new Intl.NumberFormat('en-US', {
@@ -167,9 +165,7 @@ export function formatRelativeTime(
       const value = Math.trunc(diffInSeconds / intervalSeconds)
       // For short style, use custom format
       if (style === 'narrow') {
-        return diffInSeconds < 0
-          ? `${Math.abs(value)}${shortUnit} ago`
-          : `in ${value}${shortUnit}`
+        return diffInSeconds < 0 ? `${Math.abs(value)}${shortUnit} ago` : `in ${value}${shortUnit}`
       }
       // For days and longer, use long style regardless of the style parameter
       return getRelativeTimeFormat('long', numeric).format(value, unit)
@@ -211,9 +207,7 @@ export function formatLogMetadata(log: {
   prRepository?: string
 }): string {
   const sizeOrCount =
-    log.fileSize !== undefined
-      ? formatFileSize(log.fileSize)
-      : `${log.messageCount} messages`
+    log.fileSize !== undefined ? formatFileSize(log.fileSize) : `${log.messageCount} messages`
   const parts = [
     formatRelativeTimeAgo(log.modified, { style: 'short' }),
     ...(log.gitBranch ? [log.gitBranch] : []),
@@ -226,11 +220,7 @@ export function formatLogMetadata(log: {
     parts.push(`@${log.agentSetting}`)
   }
   if (log.prNumber) {
-    parts.push(
-      log.prRepository
-        ? `${log.prRepository}#${log.prNumber}`
-        : `#${log.prNumber}`,
-    )
+    parts.push(log.prRepository ? `${log.prRepository}#${log.prNumber}` : `#${log.prNumber}`)
   }
   return parts.join(' · ')
 }

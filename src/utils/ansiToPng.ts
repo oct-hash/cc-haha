@@ -20,12 +20,7 @@
 
 import { deflateSync } from 'zlib'
 import { stringWidth } from '../ink/stringWidth.js'
-import {
-  type AnsiColor,
-  DEFAULT_BG,
-  type ParsedLine,
-  parseAnsi,
-} from './ansiToSvg.js'
+import { type AnsiColor, DEFAULT_BG, type ParsedLine, parseAnsi } from './ansiToSvg.js'
 
 // Glyph cell size — rasterized at output resolution so the default scale=1
 // is crisp (no nearest-neighbor upscaling artifacts).
@@ -47,8 +42,7 @@ function makeFallbackGlyph(): Uint8Array {
   const g = new Uint8Array(GLYPH_BYTES)
   for (let y = 2; y < GLYPH_H - 4; y++) {
     for (let x = 1; x < GLYPH_W - 1; x++) {
-      const onBorder =
-        y === 2 || y === GLYPH_H - 5 || x === 1 || x === GLYPH_W - 2
+      const onBorder = y === 2 || y === GLYPH_H - 5 || x === 1 || x === GLYPH_W - 2
       if (onBorder && (x + y) % 2 === 0) g[y * GLYPH_W + x] = 255
     }
   }
@@ -88,10 +82,7 @@ export type AnsiToPngOptions = {
  * Render ANSI-escaped text directly to a PNG buffer.
  * Returns a Buffer containing a valid PNG (RGBA, 8-bit).
  */
-export function ansiToPng(
-  ansiText: string,
-  options: AnsiToPngOptions = {},
-): Buffer {
+export function ansiToPng(ansiText: string, options: AnsiToPngOptions = {}): Buffer {
   const {
     scale = 1,
     paddingX = 48,
@@ -102,10 +93,7 @@ export function ansiToPng(
 
   const lines = parseAnsi(ansiText)
   // Trim trailing blank lines (same behavior as ansiToSvg).
-  while (
-    lines.length > 0 &&
-    lines[lines.length - 1]!.every(span => span.text.trim() === '')
-  ) {
+  while (lines.length > 0 && lines[lines.length - 1]!.every((span) => span.text.trim() === '')) {
     lines.pop()
   }
   if (lines.length === 0) {
@@ -172,10 +160,10 @@ function fillBackground(px: Uint8Array, bg: AnsiColor): void {
 // not the classic VGA dither pattern. Alpha-blend toward background for the
 // same look.
 const SHADE_ALPHA: Record<number, number> = {
-  0x2591: 0.25, // ░
-  0x2592: 0.5, // ▒
-  0x2593: 0.75, // ▓
-  0x2588: 1.0, // █
+  9617: 0.25, // ░
+  9618: 0.5, // ▒
+  9619: 0.75, // ▓
+  9608: 1.0, // █
 }
 
 function blitShade(
@@ -243,12 +231,7 @@ function blitGlyph(
  * Zero out the alpha channel in the four corner regions outside a
  * quarter-circle of radius `r`. Produces rounded-rect corners.
  */
-function roundCorners(
-  px: Uint8Array,
-  width: number,
-  height: number,
-  r: number,
-): void {
+function roundCorners(px: Uint8Array, width: number, height: number, r: number): void {
   const r2 = r * r
   for (let dy = 0; dy < r; dy++) {
     for (let dx = 0; dx < r; dx++) {

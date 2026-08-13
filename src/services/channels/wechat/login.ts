@@ -5,10 +5,33 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { fetchQRCode, pollQRCodeStatus, DEFAULT_BASE_URL } from './api.js'
-import type { WechatAccount, QRCodeStatus } from './types.js'
+import { logForDebugging } from '../../../utils/debug.js'
+import { DEFAULT_BASE_URL, fetchQRCode, pollQRCodeStatus } from './api.js'
+import type { QRCodeStatus, WechatAccount } from './types.js'
 
-const ACCOUNTS_DIR = path.join(process.env.HOME || process.env.USERPROFILE || '~', '.weixin-mcp', 'accounts')
+const ACCOUNTS_DIR = path.join(
+  process.env.HOME || process.env.USERPROFILE || '~',
+  '.weixin-mcp',
+  'accounts',
+)
+
+/**
+ * Parse a single account file. A corrupt file (invalid JSON) logs a warning
+ * and returns null instead of throwing — so one bad file cannot abort the
+ * whole account scan and drop every other valid session.
+ */
+function safeParseAccountFile(filePath: string): WechatAccount | null {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as WechatAccount
+  } catch (err) {
+    logForDebugging(
+      `[wechat] skipping corrupt account file ${filePath}: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    )
+    return null
+  }
+}
 
 export interface LoginResult {
   account: WechatAccount
@@ -100,21 +123,21 @@ export function loadAccount(accountId?: string): WechatAccount | null {
       return null
     }
 
-    const files = fs.readdirSync(dir).filter(f => f.endsWith('.json'))
+    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json'))
 
     if (accountId) {
       const filePath = path.join(dir, `${accountId}.json`)
       if (fs.existsSync(filePath)) {
-        const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-        if (data.token) return data
+        const data = safeParseAccountFile(filePath)
+        if (data?.token) return data
       }
     }
 
     // Return first account with valid token
     for (const file of files) {
       const filePath = path.join(dir, file)
-      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-      if (data.token) return data
+      const data = safeParseAccountFile(filePath)
+      if (data?.token) return data
     }
 
     return null
@@ -162,13 +185,13 @@ export function listAccounts(): WechatAccount[] {
       return []
     }
 
-    const files = fs.readdirSync(ACCOUNTS_DIR).filter(f => f.endsWith('.json'))
+    const files = fs.readdirSync(ACCOUNTS_DIR).filter((f) => f.endsWith('.json'))
     const accounts: WechatAccount[] = []
 
     for (const file of files) {
       const filePath = path.join(ACCOUNTS_DIR, file)
-      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-      if (data.token) {
+      const data = safeParseAccountFile(filePath)
+      if (data?.token) {
         accounts.push(data)
       }
     }
@@ -180,5 +203,5 @@ export function listAccounts(): WechatAccount[] {
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }

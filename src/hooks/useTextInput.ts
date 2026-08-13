@@ -4,10 +4,7 @@ import stripAnsi from 'strip-ansi'
 import { markBackslashReturnUsed } from '../commands/terminalSetup/terminalSetup.js'
 import { addToHistory } from '../history.js'
 import type { Key } from '../ink.js'
-import type {
-  InlineGhostText,
-  TextInputState,
-} from '../types/textInputTypes.js'
+import type { InlineGhostText, TextInputState } from '../types/textInputTypes.js'
 import {
   Cursor,
   getLastKill,
@@ -30,9 +27,7 @@ type InputMapper = (input: string) => MaybeCursor
 const NOOP_HANDLER: InputHandler = () => {}
 function mapInput(input_map: Array<[string, InputHandler]>): InputMapper {
   const map = new Map(input_map)
-  return function (input: string): MaybeCursor {
-    return (map.get(input) ?? NOOP_HANDLER)(input)
-  }
+  return (input: string): MaybeCursor => (map.get(input) ?? NOOP_HANDLER)(input)
 }
 
 export type UseTextInputProps = {
@@ -106,7 +101,7 @@ export function useTextInput({
   const { addNotification, removeNotification } = useNotifications()
 
   const handleCtrlC = useDoublePress(
-    show => {
+    (show) => {
       onExitMessage?.(show, 'Ctrl-C')
     },
     () => onExit?.(),
@@ -153,7 +148,7 @@ export function useTextInput({
   )
 
   const handleEmptyCtrlD = useDoublePress(
-    show => {
+    (show) => {
       if (originalValue !== '') {
         return
       }
@@ -245,11 +240,7 @@ export function useTextInput({
   ])
 
   function handleEnter(key: Key) {
-    if (
-      multiline &&
-      cursor.offset > 0 &&
-      cursor.text[cursor.offset - 1] === '\\'
-    ) {
+    if (multiline && cursor.offset > 0 && cursor.text[cursor.offset - 1] === '\\') {
       // Track that the user has used backslash+return
       markBackslashReturnUsed()
       return cursor.backspace().insert('\n')
@@ -379,7 +370,7 @@ export function useTextInput({
       case key.rightArrow:
         return () => cursor.right()
       default: {
-        return function (input: string) {
+        return (input: string) => {
           switch (true) {
             // Home key
             case input === '\x1b[H' || input === '\x1b[1~':
@@ -448,8 +439,7 @@ export function useTextInput({
       // Try to delete tokens first, fall back to character backspace
       let currentCursor = cursor
       for (let i = 0; i < delCount; i++) {
-        currentCursor =
-          currentCursor.deleteTokenBefore() ?? currentCursor.backspace()
+        currentCursor = currentCursor.deleteTokenBefore() ?? currentCursor.backspace()
       }
 
       // Update state once with the final result
@@ -512,13 +502,7 @@ export function useTextInput({
 
   return {
     onInput,
-    renderedValue: cursor.render(
-      cursorChar,
-      mask,
-      invert,
-      ghostTextForRender,
-      maxVisibleLines,
-    ),
+    renderedValue: cursor.render(cursorChar, mask, invert, ghostTextForRender, maxVisibleLines),
     offset,
     setOffset,
     cursorLine: cursorPos.line - cursor.getViewportStartLine(maxVisibleLines),

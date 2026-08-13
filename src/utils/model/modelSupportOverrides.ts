@@ -41,7 +41,7 @@ export const get3PModelCapabilityOverride = memoize(
       return capabilities
         .toLowerCase()
         .split(',')
-        .map(s => s.trim())
+        .map((s) => s.trim())
         .includes(capability)
     }
     return undefined

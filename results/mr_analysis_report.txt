@@ -1,0 +1,48 @@
+==============================================================
+  Mendelian Randomization Analysis Report
+  OGT (O-GlcNAc Transferase) ←→ Heart Failure
+==============================================================
+Date: 2026-06-30 01:09:05.398822
+R version: 4.6.0
+
+--- Analysis Summary ---
+
+## HF_FinnGen_HF_to_OGT (1 SNPs)
+  Wald ratio               : OR=0.867 (95%CI 0.665-1.130), P=2.91e-01
+
+## OGT_to_HF_HERMES (1 SNPs)
+  Wald ratio               : OR=2.253 (95%CI 0.502-10.110), P=2.89e-01
+
+## OGT_to_HF_FinnGen (1 SNPs)
+  Wald ratio               : OR=1.564 (95%CI 0.410-5.963), P=5.12e-01
+
+## OGTlit_to_HF_HERMES (1 SNPs)
+  Wald ratio               : OR=0.717 (95%CI 0.469-1.095), P=1.23e-01
+
+## OGTlit_to_HF_FinnGen (1 SNPs)
+  Wald ratio               : OR=0.986 (95%CI 0.688-1.414), P=9.40e-01
+
+--- Colocalization Results ---
+  No colocalization results (insufficient shared SNPs).
+
+--- Methods ---
+MR Methods (pure R implementation, no MendelianRandomization package):
+  1. Inverse-Variance Weighted (IVW) - primary analysis
+  2. MR-Egger regression - pleiotropy assessment
+  3. Weighted median - robust to outliers
+  4. Weighted mode-based estimation (Hartwig 2017)
+All implemented in pure R due to R 4.6.0 package incompatibility.
+
+--- Data Limitations ---
+1. OGT cis-eQTL data from eQTLGen (blood) is sparse on chrX.
+   GTEx v8 Heart LV tissue-specific eQTLs recommended for definitive analysis.
+2. Forward MR (OGT → HF) uses literature-based GTEx Heart LV cis-eQTL instruments.
+3. Bidirectional MR (HF → OGT) uses HF GWAS instruments.
+4. Colocalization requires shared SNPs between eQTL and GWAS datasets.
+
+--- Data Sources ---
+Exposure (eQTL): eQTLGen consortium (eqtl-a-ENSG00000147162)
+Outcome (HF GWAS):
+  - HERMES: ieu-b-18 (47,309 cases / 930,014 controls)
+  - FinnGen R9: finn-b-I9_HEARTFAIL
+GTEx v8 Heart LV eQTL: literature-based instruments

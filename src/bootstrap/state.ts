@@ -432,9 +432,7 @@ export function getSessionId(): SessionId {
   return STATE.sessionId
 }
 
-export function regenerateSessionId(
-  options: { setCurrentAsParent?: boolean } = {},
-): SessionId {
+export function regenerateSessionId(options: { setCurrentAsParent?: boolean } = {}): SessionId {
   if (options.setCurrentAsParent) {
     STATE.parentSessionId = STATE.sessionId
   }
@@ -465,10 +463,7 @@ export function getParentSessionId(): SessionId | undefined {
  *   cross-project resume). Every call resets the project dir; it never
  *   carries over from the previous session.
  */
-export function switchSession(
-  sessionId: SessionId,
-  projectDir: string | null = null,
-): void {
+export function switchSession(sessionId: SessionId, projectDir: string | null = null): void {
   // Drop the outgoing session's plan-slug entry so the Map stays bounded
   // across repeated /resume. Only the current session's slug is ever read
   // (plans.ts getPlanSlug defaults to getSessionId()).
@@ -540,10 +535,7 @@ export function setDirectConnectServerUrl(url: string): void {
   STATE.directConnectServerUrl = url
 }
 
-export function addToTotalDurationState(
-  duration: number,
-  durationWithoutRetries: number,
-): void {
+export function addToTotalDurationState(duration: number, durationWithoutRetries: number): void {
   STATE.totalAPIDuration += duration
   STATE.totalAPIDurationWithoutRetries += durationWithoutRetries
 }
@@ -554,11 +546,7 @@ export function resetTotalDurationStateAndCost_FOR_TESTS_ONLY(): void {
   STATE.totalCostUSD = 0
 }
 
-export function addToTotalCostState(
-  cost: number,
-  modelUsage: ModelUsage,
-  model: string,
-): void {
+export function addToTotalCostState(cost: number, modelUsage: ModelUsage, model: string): void {
   STATE.modelUsage[model] = modelUsage
   STATE.totalCostUSD += cost
 }
@@ -644,9 +632,7 @@ export function getStatsStore(): {
   return STATE.statsStore
 }
 
-export function setStatsStore(
-  store: { observe(name: string, value: number): void } | null,
-): void {
+export function setStatsStore(store: { observe(name: string, value: number): void } | null): void {
   STATE.statsStore = store
 }
 
@@ -819,7 +805,7 @@ export async function waitForScrollIdle(): Promise<void> {
   while (scrollDraining) {
     // bootstrap-isolation forbids importing sleep() from src/utils/
     // eslint-disable-next-line no-restricted-syntax
-    await new Promise(r => setTimeout(r, SCROLL_DRAIN_IDLE_MS).unref?.())
+    await new Promise((r) => setTimeout(r, SCROLL_DRAIN_IDLE_MS).unref?.())
   }
 }
 
@@ -843,9 +829,7 @@ export function getInitialMainLoopModel(): ModelSetting {
   return STATE.initialMainLoopModel
 }
 
-export function setMainLoopModelOverride(
-  model: ModelSetting | undefined,
-): void {
+export function setMainLoopModelOverride(model: ModelSetting | undefined): void {
   STATE.mainLoopModelOverride = model
 }
 
@@ -973,13 +957,10 @@ export function setMeter(
     description: 'Number of tokens used',
     unit: 'tokens',
   })
-  STATE.codeEditToolDecisionCounter = createCounter(
-    'claude_code.code_edit_tool.decision',
-    {
-      description:
-        'Count of code editing tool permission decisions (accept/reject) for Edit, Write, and NotebookEdit tools',
-    },
-  )
+  STATE.codeEditToolDecisionCounter = createCounter('claude_code.code_edit_tool.decision', {
+    description:
+      'Count of code editing tool permission decisions (accept/reject) for Edit, Write, and NotebookEdit tools',
+  })
   STATE.activeTimeCounter = createCounter('claude_code.active_time.total', {
     description: 'Total active time in seconds',
     unit: 's',
@@ -1034,9 +1015,7 @@ export function getEventLogger(): ReturnType<typeof logs.getLogger> | null {
   return STATE.eventLogger
 }
 
-export function setEventLogger(
-  logger: ReturnType<typeof logs.getLogger> | null,
-): void {
+export function setEventLogger(logger: ReturnType<typeof logs.getLogger> | null): void {
   STATE.eventLogger = logger
 }
 
@@ -1141,9 +1120,7 @@ export function getFlagSettingsInline(): Record<string, unknown> | null {
   return STATE.flagSettingsInline
 }
 
-export function setFlagSettingsInline(
-  settings: Record<string, unknown> | null,
-): void {
+export function setFlagSettingsInline(settings: Record<string, unknown> | null): void {
   STATE.flagSettingsInline = settings
 }
 
@@ -1171,16 +1148,11 @@ export function setApiKeyFromFd(key: string | null): void {
   STATE.apiKeyFromFd = key
 }
 
-export function setLastAPIRequest(
-  params: Omit<BetaMessageStreamParams, 'messages'> | null,
-): void {
+export function setLastAPIRequest(params: Omit<BetaMessageStreamParams, 'messages'> | null): void {
   STATE.lastAPIRequest = params
 }
 
-export function getLastAPIRequest(): Omit<
-  BetaMessageStreamParams,
-  'messages'
-> | null {
+export function getLastAPIRequest(): Omit<BetaMessageStreamParams, 'messages'> | null {
   return STATE.lastAPIRequest
 }
 
@@ -1190,9 +1162,7 @@ export function setLastAPIRequestMessages(
   STATE.lastAPIRequestMessages = messages
 }
 
-export function getLastAPIRequestMessages():
-  | BetaMessageStreamParams['messages']
-  | null {
+export function getLastAPIRequestMessages(): BetaMessageStreamParams['messages'] | null {
   return STATE.lastAPIRequestMessages
 }
 
@@ -1212,10 +1182,7 @@ export function getCachedClaudeMdContent(): string | null {
   return STATE.cachedClaudeMdContent
 }
 
-export function addToInMemoryErrorLog(errorInfo: {
-  error: string
-  timestamp: string
-}): void {
+export function addToInMemoryErrorLog(errorInfo: { error: string; timestamp: string }): void {
   const MAX_IN_MEMORY_ERRORS = 100
   if (STATE.inMemoryErrorLog.length >= MAX_IN_MEMORY_ERRORS) {
     STATE.inMemoryErrorLog.shift() // Remove oldest error
@@ -1307,7 +1274,7 @@ export function addSessionCronTask(task: SessionCronTask): void {
 export function removeSessionCronTasks(ids: readonly string[]): number {
   if (ids.length === 0) return 0
   const idSet = new Set(ids)
-  const remaining = STATE.sessionCronTasks.filter(t => !idSet.has(t.id))
+  const remaining = STATE.sessionCronTasks.filter((t) => !idSet.has(t.id))
   const removed = STATE.sessionCronTasks.length - remaining.length
   if (removed === 0) return 0
   STATE.sessionCronTasks = remaining
@@ -1346,10 +1313,7 @@ export function setNeedsPlanModeExitAttachment(value: boolean): void {
   STATE.needsPlanModeExitAttachment = value
 }
 
-export function handlePlanModeTransition(
-  fromMode: string,
-  toMode: string,
-): void {
+export function handlePlanModeTransition(fromMode: string, toMode: string): void {
   // If switching TO plan mode, clear any pending exit attachment
   // This prevents sending both plan_mode and plan_mode_exit when user toggles quickly
   if (toMode === 'plan' && fromMode !== 'plan') {
@@ -1370,17 +1334,11 @@ export function setNeedsAutoModeExitAttachment(value: boolean): void {
   STATE.needsAutoModeExitAttachment = value
 }
 
-export function handleAutoModeTransition(
-  fromMode: string,
-  toMode: string,
-): void {
+export function handleAutoModeTransition(fromMode: string, toMode: string): void {
   // Auto↔plan transitions are handled by prepareContextForPlanMode (auto may
   // stay active through plan if opted in) and ExitPlanMode (restores mode).
   // Skip both directions so this function only handles direct auto transitions.
-  if (
-    (fromMode === 'auto' && toMode === 'plan') ||
-    (fromMode === 'plan' && toMode === 'auto')
-  ) {
+  if ((fromMode === 'auto' && toMode === 'plan') || (fromMode === 'plan' && toMode === 'auto')) {
     return
   }
   const fromIsAuto = fromMode === 'auto'
@@ -1433,9 +1391,7 @@ export function registerHookCallbacks(
   }
 }
 
-export function getRegisteredHooks(): Partial<
-  Record<HookEvent, RegisteredHookMatcher[]>
-> | null {
+export function getRegisteredHooks(): Partial<Record<HookEvent, RegisteredHookMatcher[]>> | null {
   return STATE.registeredHooks
 }
 
@@ -1451,7 +1407,7 @@ export function clearRegisteredPluginHooks(): void {
   const filtered: Partial<Record<HookEvent, RegisteredHookMatcher[]>> = {}
   for (const [event, matchers] of Object.entries(STATE.registeredHooks)) {
     // Keep only callback hooks (those without pluginRoot)
-    const callbackHooks = matchers.filter(m => !('pluginRoot' in m))
+    const callbackHooks = matchers.filter((m) => !('pluginRoot' in m))
     if (callbackHooks.length > 0) {
       filtered[event as HookEvent] = callbackHooks
     }
@@ -1474,9 +1430,7 @@ export function getSessionCreatedTeams(): Set<string> {
 }
 
 // Teleported session tracking for reliability logging
-export function setTeleportedSessionInfo(info: {
-  sessionId: string | null
-}): void {
+export function setTeleportedSessionInfo(info: { sessionId: string | null }): void {
   STATE.teleportedSessionInfo = {
     isTeleported: true,
     hasLoggedFirstMessage: false,
@@ -1540,9 +1494,7 @@ export function getInvokedSkillsForAgent(
   return filtered
 }
 
-export function clearInvokedSkills(
-  preservedAgentIds?: ReadonlySet<string>,
-): void {
+export function clearInvokedSkills(preservedAgentIds?: ReadonlySet<string>): void {
   if (!preservedAgentIds || preservedAgentIds.size === 0) {
     STATE.invokedSkills.clear()
     return
@@ -1576,7 +1528,7 @@ export function addSlowOperation(operation: string, durationMs: number): void {
   const now = Date.now()
   // Remove stale operations
   STATE.slowOperations = STATE.slowOperations.filter(
-    op => now - op.timestamp < SLOW_OPERATION_TTL_MS,
+    (op) => now - op.timestamp < SLOW_OPERATION_TTL_MS,
   )
   // Add new operation
   STATE.slowOperations.push({ operation, durationMs, timestamp: now })
@@ -1605,11 +1557,9 @@ export function getSlowOperations(): ReadonlyArray<{
   const now = Date.now()
   // Only allocate a new array when something actually expired; otherwise keep
   // the reference stable across polls while ops are still fresh.
-  if (
-    STATE.slowOperations.some(op => now - op.timestamp >= SLOW_OPERATION_TTL_MS)
-  ) {
+  if (STATE.slowOperations.some((op) => now - op.timestamp >= SLOW_OPERATION_TTL_MS)) {
     STATE.slowOperations = STATE.slowOperations.filter(
-      op => now - op.timestamp < SLOW_OPERATION_TTL_MS,
+      (op) => now - op.timestamp < SLOW_OPERATION_TTL_MS,
     )
     if (STATE.slowOperations.length === 0) {
       return EMPTY_SLOW_OPERATIONS
@@ -1642,10 +1592,7 @@ export function getSystemPromptSectionCache(): Map<string, string | null> {
   return STATE.systemPromptSectionCache
 }
 
-export function setSystemPromptSectionCacheEntry(
-  name: string,
-  value: string | null,
-): void {
+export function setSystemPromptSectionCacheEntry(name: string, value: string | null): void {
   STATE.systemPromptSectionCache.set(name, value)
 }
 
@@ -1667,9 +1614,7 @@ export function getAdditionalDirectoriesForClaudeMd(): string[] {
   return STATE.additionalDirectoriesForClaudeMd
 }
 
-export function setAdditionalDirectoriesForClaudeMd(
-  directories: string[],
-): void {
+export function setAdditionalDirectoriesForClaudeMd(directories: string[]): void {
   STATE.additionalDirectoriesForClaudeMd = directories
 }
 
@@ -1755,4 +1700,3 @@ export function getPromptId(): string | null {
 export function setPromptId(id: string | null): void {
   STATE.promptId = id
 }
-

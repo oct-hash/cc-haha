@@ -406,7 +406,7 @@ describe('E — Metadata 精度', () => {
     const sm = getSessionManager()
     const h = sm.createSession(
       'claude-haha',
-      cfg(async function* (_msg, _ctrl) {
+      cfg(async function* (_msg: string, _ctrl: AbortController) {
         yield rawStream('thinking...')
         yield rawAssistantToolUse('t1', 'Read', { path: '/a' })
         yield rawToolResult('t1', 'content')
@@ -424,7 +424,7 @@ describe('E — Metadata 精度', () => {
     const sm = getSessionManager()
     const h = sm.createSession(
       'claude-haha',
-      cfg(async function* (_msg, _ctrl) {
+      cfg(async function* (_msg: string, _ctrl: AbortController) {
         yield rawStream('try...')
         yield rawAssistantToolUse('bad', 'Bash', { cmd: 'rm -rf /' })
         yield rawToolResult('bad', 'Permission denied', true)

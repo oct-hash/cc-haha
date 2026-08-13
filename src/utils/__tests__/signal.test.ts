@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { createSignal } from '../signal'
 
 describe('createSignal', () => {
@@ -21,7 +21,9 @@ describe('createSignal', () => {
   it('emit with multiple args passes them through', () => {
     const signal = createSignal<[string, number]>()
     let result: [string, number] | null = null
-    signal.subscribe((a, b) => { result = [a, b] })
+    signal.subscribe((a, b) => {
+      result = [a, b]
+    })
     signal.emit('count', 42)
     expect(result).toEqual(['count', 42])
   })
@@ -63,7 +65,9 @@ describe('createSignal', () => {
   it('handles empty emit (no args)', () => {
     const signal = createSignal()
     let called = false
-    signal.subscribe(() => { called = true })
+    signal.subscribe(() => {
+      called = true
+    })
     signal.emit()
     expect(called).toBe(true)
   })
@@ -71,8 +75,12 @@ describe('createSignal', () => {
   it('handles subscriber that throws', () => {
     const signal = createSignal()
     let secondCalled = false
-    signal.subscribe(() => { throw new Error('boom') })
-    signal.subscribe(() => { secondCalled = true })
+    signal.subscribe(() => {
+      throw new Error('boom')
+    })
+    signal.subscribe(() => {
+      secondCalled = true
+    })
     expect(() => signal.emit()).toThrow('boom')
     expect(secondCalled).toBe(false) // first throws before second runs
   })

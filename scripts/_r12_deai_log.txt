@@ -1,0 +1,103 @@
+[copied] R11 -> manuscript_R12_deAI_v1.docx
+[edit] para 0 done
+[edit] para 2 done
+[edit] para 4 done
+[edit] para 4 done
+[edit] para 5 done
+[edit] para 5 done
+[edit] para 5 done
+[edit] para 5 done
+[edit] para 5 done
+[edit] para 10 done
+[edit] para 10 done
+[edit] para 12 done
+[edit] para 12 done
+[edit] para 13 done
+[edit] para 13 done
+[edit] para 15 done
+[edit] para 19 done
+[edit] para 28 done
+[edit] para 39 done
+[edit] para 40 done
+[edit] para 41 done
+[edit] para 41 done
+[edit] para 44 done
+[edit] para 44 done
+[edit] para 45 done
+[edit] para 45 done
+[edit] para 46 done
+[edit] para 47 done
+[edit] para 48 done
+[WARN] para 49: old string NOT FOUND. Checking near-match...
+[edit] para 49 done
+[edit] para 49 done
+[edit] para 52 done
+[edit] para 52 done
+[edit] para 52 done
+[edit] para 55 done
+[edit] para 55 done
+[edit] para 55 done
+[edit] para 56 done
+[edit] para 56 done
+[edit] para 60 done
+[edit] para 60 done
+[edit] para 60 done
+[edit] para 60 done
+[edit] para 63 done
+[edit] para 63 done
+[edit] para 63 done
+[edit] para 66 done
+[edit] para 66 done
+[edit] para 69 done
+[edit] para 69 done
+[edit] para 69 done
+[edit] para 70 done
+[edit] para 71 done
+[WARN] para 72 has 2 runs, attempting merge
+[edit] para 72 done
+[WARN] para 72 has 2 runs, attempting merge
+[edit] para 72 done
+[WARN] para 72 has 2 runs, attempting merge
+[edit] para 72 done
+[WARN] para 72 has 2 runs, attempting merge
+[WARN] para 72: old string NOT FOUND. Checking near-match...
+[edit] para 73 done
+[edit] para 78 done
+[edit] para 78 done
+[edit] para 78 done
+[edit] para 79 done
+[edit] para 79 done
+[edit] para 79 done
+[edit] para 79 done
+[edit] para 79 done
+[edit] para 80 done
+[edit] para 80 done
+[edit] para 82 done
+[WARN] para 82: old string NOT FOUND. Checking near-match...
+[edit] para 84 done
+[edit] para 84 done
+[edit] para 84 done
+[edit] para 84 done
+[edit] para 86 done
+[edit] para 86 done
+[edit] para 86 done
+[edit] para 86 done
+[edit] para 90 done
+[edit] para 90 done
+[edit] para 92 done
+[edit] para 92 done
+[edit] para 94 done
+[edit] para 94 done
+[edit] para 94 done
+[edit] para 97 done
+[edit] para 98 done
+[edit] para 98 done
+[edit] para 101 done
+[saved] 42 paragraphs edited
+
+==== AUDIT ====
+R11 paras 161  R12 paras 161  equal=True
+changed paras (40): [2, 4, 5, 10, 12, 13, 15, 19, 28, 40, 41, 44, 45, 46, 47, 48, 49, 52, 55, 56, 60, 63, 66, 69, 70, 71, 72, 73, 78, 79, 80, 82, 84, 86, 90, 92, 94, 97, 98, 101]
+citations: refs=51 cited=51 orphan=[] missing=[]
+
+[match counts] old text: 90 replacements attempted, 42 paras changed

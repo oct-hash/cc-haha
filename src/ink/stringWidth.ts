@@ -211,12 +211,10 @@ function isZeroWidth(codePoint: number): boolean {
 // Bun.stringWidth is resolved once at module scope rather than checked on every
 // call — typeof guards deopt property access and this is a hot path (~100k calls/frame).
 const bunStringWidth =
-  typeof Bun !== 'undefined' && typeof Bun.stringWidth === 'function'
-    ? Bun.stringWidth
-    : null
+  typeof Bun !== 'undefined' && typeof Bun.stringWidth === 'function' ? Bun.stringWidth : null
 
 const BUN_STRING_WIDTH_OPTS = { ambiguousIsNarrow: true } as const
 
 export const stringWidth: (str: string) => number = bunStringWidth
-  ? str => bunStringWidth(str, BUN_STRING_WIDTH_OPTS)
+  ? (str) => bunStringWidth(str, BUN_STRING_WIDTH_OPTS)
   : stringWidthJavaScript

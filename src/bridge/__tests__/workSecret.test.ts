@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'bun:test'
-import { buildSdkUrl, sameSessionId, buildCCRv2SdkUrl, decodeWorkSecret } from '../workSecret'
+import { describe, expect, it } from 'bun:test'
+import { buildCCRv2SdkUrl, buildSdkUrl, decodeWorkSecret, sameSessionId } from '../workSecret'
 
 describe('buildSdkUrl', () => {
   it('uses ws:// for localhost', () => {

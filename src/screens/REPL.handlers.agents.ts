@@ -12,7 +12,12 @@ import type { AgentKind } from '../services/agents/types.js'
 import { resetMicrocompactState } from '../services/compact/microCompact.js'
 import { injectUserMessageToTeammate } from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
 import type { InProcessTeammateTaskState } from '../tasks/InProcessTeammateTask/types.js'
-import { appendMessageToLocalAgent, isLocalAgentTask, type LocalAgentTaskState, queuePendingMessage } from '../tasks/LocalAgentTask/LocalAgentTask.js'
+import {
+  appendMessageToLocalAgent,
+  isLocalAgentTask,
+  type LocalAgentTaskState,
+  queuePendingMessage,
+} from '../tasks/LocalAgentTask/LocalAgentTask.js'
 import { startBackgroundSession } from '../tasks/LocalMainSessionTask.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
 import { resumeAgentBackground } from '../tools/AgentTool/resumeAgent.js'
@@ -23,7 +28,11 @@ import type { PastedContent } from '../utils/config.js'
 import { logForDebugging } from '../utils/debug.js'
 import { errorMessage } from '../utils/errors.js'
 import type { PromptInputHelpers } from '../utils/handlePromptSubmit.js'
-import { enqueuePendingNotification, removeByFilter, type SetAppState } from '../utils/messageQueueManager.js'
+import {
+  enqueuePendingNotification,
+  removeByFilter,
+  type SetAppState,
+} from '../utils/messageQueueManager.js'
 import { createUserMessage, textForResubmit } from '../utils/messages.js'
 import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js'
 import { getQuerySourceForREPL } from '../utils/promptCategory.js'
@@ -258,7 +267,10 @@ export async function handleBackgroundQuery(params: HandleBackgroundQueryParams)
   })
   toolUseContext.renderedSystemPrompt = systemPrompt
   const notificationAttachments = await getQueuedCommandAttachments(removedNotifications).catch(
-    () => [],
+    (err) => {
+      logForDebugging(`[agents] getQueuedCommandAttachments failed: ${errorMessage(err)}`)
+      return []
+    },
   )
   const notificationMessages = notificationAttachments.map(createAttachmentMessage)
 
@@ -293,7 +305,6 @@ export async function handleBackgroundQuery(params: HandleBackgroundQueryParams)
     agentDefinition: mainThreadAgentDefinition,
   })
 }
-
 
 // -- Background bridge for Ctrl+B with non-haha agents -----------------------
 
@@ -355,7 +366,11 @@ async function startBackgroundBridgeStream({
       })
     } finally {
       handle.destroy()
-      sm.save().catch(() => {})
+      sm.save().catch((err) => {
+        logForDebugging(
+          `[agents] SessionManager save() failed: ${err instanceof Error ? err.message : String(err)}`,
+        )
+      })
     }
   })()
 }

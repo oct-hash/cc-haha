@@ -56,9 +56,7 @@ const DATA_URI_RE = /^data:([^;]+);base64,(.+)$/
  * Parse a data-URI string into its media type and base64 payload.
  * Input is trimmed before matching.
  */
-export function parseDataUri(
-  s: string,
-): { mediaType: string; data: string } | null {
+export function parseDataUri(s: string): { mediaType: string; data: string } | null {
   const match = s.trim().match(DATA_URI_RE)
   if (!match || !match[1] || !match[2]) return null
   return { mediaType: match[1], data: match[2] }
@@ -122,11 +120,7 @@ export async function resizeShellImageOutput(
   if (!parsed) return null
   const buf = Buffer.from(parsed.data, 'base64')
   const ext = parsed.mediaType.split('/')[1] || 'png'
-  const resized = await maybeResizeAndDownsampleImageBuffer(
-    buf,
-    buf.length,
-    ext,
-  )
+  const resized = await maybeResizeAndDownsampleImageBuffer(buf, buf.length, ext)
   return `data:image/${resized.mediaType};base64,${resized.buffer.toString('base64')}`
 }
 
@@ -167,9 +161,7 @@ export function formatOutput(content: string): {
 export const stdErrAppendShellResetMessage = (stderr: string): string =>
   `${stderr.trim()}\nShell cwd was reset to ${getOriginalCwd()}`
 
-export function resetCwdIfOutsideProject(
-  toolPermissionContext: ToolPermissionContext,
-): boolean {
+export function resetCwdIfOutsideProject(toolPermissionContext: ToolPermissionContext): boolean {
   const cwd = getCwd()
   const originalCwd = getOriginalCwd()
   const shouldMaintain = shouldMaintainProjectWorkingDir()
@@ -178,8 +170,7 @@ export function resetCwdIfOutsideProject(
     // Fast path: originalCwd is unconditionally in allWorkingDirectories
     // (filesystem.ts), so when cwd hasn't moved, pathInAllowedWorkingPath is
     // trivially true — skip its syscalls for the no-cd common case.
-    (cwd !== originalCwd &&
-      !pathInAllowedWorkingPath(cwd, toolPermissionContext))
+    (cwd !== originalCwd && !pathInAllowedWorkingPath(cwd, toolPermissionContext))
   ) {
     // Reset to original directory if maintaining project dir OR outside allowed working directory
     setCwd(originalCwd)

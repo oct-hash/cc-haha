@@ -6,15 +6,7 @@ import { registerBundledSkill } from '../bundledSkills.js'
 // getPromptForCommand so they only enter memory when /claude-api is invoked.
 type SkillContent = typeof import('./claudeApiContent.js')
 
-type DetectedLanguage =
-  | 'python'
-  | 'typescript'
-  | 'java'
-  | 'go'
-  | 'ruby'
-  | 'csharp'
-  | 'php'
-  | 'curl'
+type DetectedLanguage = 'python' | 'typescript' | 'java' | 'go' | 'ruby' | 'csharp' | 'php' | 'curl'
 
 const LANGUAGE_INDICATORS: Record<DetectedLanguage, string[]> = {
   python: ['.py', 'requirements.txt', 'pyproject.toml', 'setup.py', 'Pipfile'],
@@ -43,7 +35,7 @@ async function detectLanguage(): Promise<DetectedLanguage | null> {
     if (indicators.length === 0) continue
     for (const indicator of indicators) {
       if (indicator.startsWith('.')) {
-        if (entries.some(e => e.endsWith(indicator))) return lang
+        if (entries.some((e) => e.endsWith(indicator))) return lang
       } else {
         if (entries.includes(indicator)) return lang
       }
@@ -52,12 +44,9 @@ async function detectLanguage(): Promise<DetectedLanguage | null> {
   return null
 }
 
-function getFilesForLanguage(
-  lang: DetectedLanguage,
-  content: SkillContent,
-): string[] {
+function getFilesForLanguage(lang: DetectedLanguage, content: SkillContent): string[] {
   return Object.keys(content.SKILL_FILES).filter(
-    path => path.startsWith(`${lang}/`) || path.startsWith('shared/'),
+    (path) => path.startsWith(`${lang}/`) || path.startsWith('shared/'),
   )
 }
 
@@ -72,23 +61,17 @@ function processContent(md: string, content: SkillContent): string {
 
   out = out.replace(
     /\{\{(\w+)\}\}/g,
-    (match, key: string) =>
-      (content.SKILL_MODEL_VARS as Record<string, string>)[key] ?? match,
+    (match, key: string) => (content.SKILL_MODEL_VARS as Record<string, string>)[key] ?? match,
   )
   return out
 }
 
-function buildInlineReference(
-  filePaths: string[],
-  content: SkillContent,
-): string {
+function buildInlineReference(filePaths: string[], content: SkillContent): string {
   const sections: string[] = []
   for (const filePath of filePaths.sort()) {
     const md = content.SKILL_FILES[filePath]
     if (!md) continue
-    sections.push(
-      `<doc path="${filePath}">\n${processContent(md, content).trim()}\n</doc>`,
-    )
+    sections.push(`<doc path="${filePath}">\n${processContent(md, content).trim()}\n</doc>`)
   }
   return sections.join('\n\n')
 }
@@ -129,18 +112,12 @@ The relevant documentation for your detected language is included below in \`<do
 **Latest docs via WebFetch:**
 → Refer to \`shared/live-sources.md\` for URLs`
 
-function buildPrompt(
-  lang: DetectedLanguage | null,
-  args: string,
-  content: SkillContent,
-): string {
+function buildPrompt(lang: DetectedLanguage | null, args: string, content: SkillContent): string {
   // Take the SKILL.md content up to the "Reading Guide" section
   const cleanPrompt = processContent(content.SKILL_PROMPT, content)
   const readingGuideIdx = cleanPrompt.indexOf('## Reading Guide')
   const basePrompt =
-    readingGuideIdx !== -1
-      ? cleanPrompt.slice(0, readingGuideIdx).trimEnd()
-      : cleanPrompt
+    readingGuideIdx !== -1 ? cleanPrompt.slice(0, readingGuideIdx).trimEnd() : cleanPrompt
 
   const parts: string[] = [basePrompt]
 
@@ -148,10 +125,7 @@ function buildPrompt(
     const filePaths = getFilesForLanguage(lang, content)
     const readingGuide = INLINE_READING_GUIDE.replace(/\{lang\}/g, lang)
     parts.push(readingGuide)
-    parts.push(
-      '---\n\n## Included Documentation\n\n' +
-        buildInlineReference(filePaths, content),
-    )
+    parts.push('---\n\n## Included Documentation\n\n' + buildInlineReference(filePaths, content))
   } else {
     // No language detected — include all docs and let the model ask
     parts.push(INLINE_READING_GUIDE.replace(/\{lang\}/g, 'unknown'))

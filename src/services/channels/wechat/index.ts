@@ -13,13 +13,10 @@
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js'
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import { loadOrLogin, login, waitForQRCodeConfirm } from './login.js'
-import { WechatMessageHandler, formatWechatMessage } from './messaging.js'
-import type { WechatMessage, WechatContact } from './types.js'
+import { formatWechatMessage, WechatMessageHandler } from './messaging.js'
+import type { WechatContact, WechatMessage } from './types.js'
 
 // Capability declarations
 const SERVER_NAME = 'wechat-channel'
@@ -156,7 +153,7 @@ function createServer(): Server {
     }
   })
 
-  server.setRequestHandler(CallToolRequestSchema, async request => {
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params
 
     if (!messageHandler) {
@@ -165,9 +162,7 @@ function createServer(): Server {
       if (!loginResult.qrcode && loginResult.account.token) {
         initMessageHandler(loginResult.account)
       } else {
-        throw new Error(
-          'Not logged in. Run wechat_login first to get a QR code for scanning.',
-        )
+        throw new Error('Not logged in. Run wechat_login first to get a QR code for scanning.')
       }
     }
 
@@ -217,9 +212,7 @@ function createServer(): Server {
 
       case 'wechat_contacts': {
         const contacts = messageHandler!.getContactsList()
-        const list = contacts
-          .map(c => `${c.user_id}: ${c.nickname}`)
-          .join('\n')
+        const list = contacts.map((c) => `${c.user_id}: ${c.nickname}`).join('\n')
         return {
           content: [
             {
@@ -270,7 +263,7 @@ function createServer(): Server {
 
       case 'wechat_get_messages': {
         // Return any pending messages
-        const messages = Array.from(pendingMessages.values()).map(msg =>
+        const messages = Array.from(pendingMessages.values()).map((msg) =>
           formatWechatMessage(msg, null),
         )
         pendingMessages.clear()
@@ -278,10 +271,7 @@ function createServer(): Server {
           content: [
             {
               type: 'text',
-              text:
-                messages.length > 0
-                  ? messages.join('\n---\n')
-                  : 'No pending messages',
+              text: messages.length > 0 ? messages.join('\n---\n') : 'No pending messages',
             },
           ],
         }
@@ -305,11 +295,9 @@ function initMessageHandler(account: import('./types.js').WechatAccount): void {
 
   messageHandler = new WechatMessageHandler(account, {
     onMessage: (msg, sender) => {
-      console.error(
-        `[WeChat Channel] Received message: ${formatWechatMessage(msg, sender)}`,
-      )
+      console.error(`[WeChat Channel] Received message: ${formatWechatMessage(msg, sender)}`)
     },
-    onError: err => {
+    onError: (err) => {
       console.error('[WeChat Channel] Error:', err.message)
     },
   })
@@ -340,7 +328,7 @@ async function main(): Promise<void> {
   console.error('[WeChat Channel] Server started')
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error('Fatal error:', err)
   process.exit(1)
 })

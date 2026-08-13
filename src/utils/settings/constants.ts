@@ -43,9 +43,7 @@ export function getSettingSourceName(source: SettingSource): string {
  * @param source The setting source or 'plugin'/'built-in'
  * @returns Short capitalized display name like 'User', 'Project', 'Plugin'
  */
-export function getSourceDisplayName(
-  source: SettingSource | 'plugin' | 'built-in',
-): string {
+export function getSourceDisplayName(source: SettingSource | 'plugin' | 'built-in'): string {
   switch (source) {
     case 'userSettings':
       return 'User'
@@ -128,7 +126,7 @@ export function getSettingSourceDisplayNameCapitalized(
 export function parseSettingSourcesFlag(flag: string): SettingSource[] {
   if (flag === '') return []
 
-  const names = flag.split(',').map(s => s.trim())
+  const names = flag.split(',').map((s) => s.trim())
   const result: SettingSource[] = []
 
   for (const name of names) {
@@ -143,9 +141,7 @@ export function parseSettingSourcesFlag(flag: string): SettingSource[] {
         result.push('localSettings')
         break
       default:
-        throw new Error(
-          `Invalid setting source: ${name}. Valid options are: user, project, local`,
-        )
+        throw new Error(`Invalid setting source: ${name}. Valid options are: user, project, local`)
     }
   }
 
@@ -179,10 +175,7 @@ export function isSettingSourceEnabled(source: SettingSource): boolean {
 /**
  * Editable setting sources (excludes policySettings and flagSettings which are read-only)
  */
-export type EditableSettingSource = Exclude<
-  SettingSource,
-  'policySettings' | 'flagSettings'
->
+export type EditableSettingSource = Exclude<SettingSource, 'policySettings' | 'flagSettings'>
 
 /**
  * List of sources where permission rules can be saved, in display order.

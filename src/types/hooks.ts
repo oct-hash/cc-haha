@@ -53,20 +53,11 @@ export const syncHookResponseSchema = lazySchema(() =>
       .boolean()
       .describe('Whether Claude should continue after hook (default: true)')
       .optional(),
-    suppressOutput: z
-      .boolean()
-      .describe('Hide stdout from transcript (default: false)')
-      .optional(),
-    stopReason: z
-      .string()
-      .describe('Message shown when continue is false')
-      .optional(),
+    suppressOutput: z.boolean().describe('Hide stdout from transcript (default: false)').optional(),
+    stopReason: z.string().describe('Message shown when continue is false').optional(),
     decision: z.enum(['approve', 'block']).optional(),
     reason: z.string().describe('Explanation for the decision').optional(),
-    systemMessage: z
-      .string()
-      .describe('Warning message shown to the user')
-      .optional(),
+    systemMessage: z.string().describe('Warning message shown to the user').optional(),
     hookSpecificOutput: z
       .union([
         z.object({
@@ -100,10 +91,7 @@ export const syncHookResponseSchema = lazySchema(() =>
         z.object({
           hookEventName: z.literal('PostToolUse'),
           additionalContext: z.string().optional(),
-          updatedMCPToolOutput: z
-            .unknown()
-            .describe('Updates the output for MCP tools')
-            .optional(),
+          updatedMCPToolOutput: z.unknown().describe('Updates the output for MCP tools').optional(),
         }),
         z.object({
           hookEventName: z.literal('PostToolUseFailure'),
@@ -179,32 +167,24 @@ export const hookJSONOutputSchema = lazySchema(() => {
 type SchemaHookJSONOutput = z.infer<ReturnType<typeof hookJSONOutputSchema>>
 
 // Type guard function to check if response is sync
-export function isSyncHookJSONOutput(
-  json: HookJSONOutput,
-): json is SyncHookJSONOutput {
+export function isSyncHookJSONOutput(json: HookJSONOutput): json is SyncHookJSONOutput {
   return !('async' in json && json.async === true)
 }
 
 // Type guard function to check if response is async
-export function isAsyncHookJSONOutput(
-  json: HookJSONOutput,
-): json is AsyncHookJSONOutput {
+export function isAsyncHookJSONOutput(json: HookJSONOutput): json is AsyncHookJSONOutput {
   return 'async' in json && json.async === true
 }
 
 // Compile-time assertion that SDK and Zod types match
 import type { IsEqual } from 'type-fest'
 type Assert<T extends true> = T
-type _assertSDKTypesMatch = Assert<
-  IsEqual<SchemaHookJSONOutput, HookJSONOutput>
->
+type _assertSDKTypesMatch = Assert<IsEqual<SchemaHookJSONOutput, HookJSONOutput>>
 
 /** Context passed to callback hooks for state access */
 export type HookCallbackContext = {
   getAppState: () => AppState
-  updateAttributionState: (
-    updater: (prev: AttributionState) => AttributionState,
-  ) => void
+  updateAttributionState: (updater: (prev: AttributionState) => AttributionState) => void
 }
 
 /** Hook that is a callback. */

@@ -13,11 +13,7 @@ import {
   isProSubscriber,
   isTeamPremiumSubscriber,
 } from '../auth.js'
-import {
-  has1mContext,
-  is1mContextDisabled,
-  modelSupports1M,
-} from '../context.js'
+import { has1mContext, is1mContextDisabled, modelSupports1M } from '../context.js'
 import { isEnvTruthy } from '../envUtils.js'
 import { getModelStrings, resolveOverriddenModel } from './modelStrings.js'
 import { formatModelPricing, getOpus46CostTier } from '../modelCost.js'
@@ -28,6 +24,7 @@ import { LIGHTNING_BOLT } from '../../constants/figures.js'
 import { isModelAllowed } from './modelAllowlist.js'
 import { type ModelAlias, isModelAlias } from './aliases.js'
 import { capitalize } from '../stringUtils.js'
+import { getAntModelOverrideConfig, resolveAntModel } from './antModels.js'
 
 export type ModelShortName = string
 export type ModelName = string
@@ -178,10 +175,7 @@ export function getRuntimeMainLoopModel(params: {
 export function getDefaultMainLoopModelSetting(): ModelName | ModelAlias {
   // Ants default to defaultModel from flag config, or Opus 1M if not configured
   if (process.env.USER_TYPE === 'ant') {
-    return (
-      getAntModelOverrideConfig()?.defaultModel ??
-      getDefaultOpusModel() + '[1m]'
-    )
+    return getAntModelOverrideConfig()?.defaultModel ?? getDefaultOpusModel() + '[1m]'
   }
 
   // Max users get Opus as default
@@ -283,9 +277,7 @@ export function getCanonicalName(fullModelName: ModelName): ModelShortName {
 }
 
 // @[MODEL LAUNCH]: Update the default model description strings shown to users.
-export function getClaudeAiUserDefaultModelDescription(
-  fastMode = false,
-): string {
+export function getClaudeAiUserDefaultModelDescription(fastMode = false): string {
   if (isMaxSubscriber() || isTeamPremiumSubscriber()) {
     if (isOpus1mMergeEnabled()) {
       return `Opus 4.6 with 1M context · Most capable for complex work${fastMode ? getOpus46PricingSuffix(true) : ''}`
@@ -295,9 +287,7 @@ export function getClaudeAiUserDefaultModelDescription(
   return 'Sonnet 4.6 · Best for everyday tasks'
 }
 
-export function renderDefaultModelSetting(
-  setting: ModelName | ModelAlias,
-): string {
+export function renderDefaultModelSetting(setting: ModelName | ModelAlias): string {
   if (setting === 'opusplan') {
     return 'Opus 4.6 in plan mode, else Sonnet 4.6'
   }
@@ -312,11 +302,7 @@ export function getOpus46PricingSuffix(fastMode: boolean): string {
 }
 
 export function isOpus1mMergeEnabled(): boolean {
-  if (
-    is1mContextDisabled() ||
-    isProSubscriber() ||
-    getAPIProvider() !== 'firstParty'
-  ) {
+  if (is1mContextDisabled() || isProSubscriber() || getAPIProvider() !== 'firstParty') {
     return false
   }
   // Fail closed when a subscriber's subscription type is unknown. The VS Code
@@ -391,8 +377,7 @@ function maskModelCodename(baseName: string): string {
   // Mask only the first dash-separated segment (the codename), preserve the rest
   // e.g. capybara-v2-fast → cap*****-v2-fast
   const [codename = '', ...rest] = baseName.split('-')
-  const masked =
-    codename.slice(0, 3) + '*'.repeat(Math.max(0, codename.length - 3))
+  const masked = codename.slice(0, 3) + '*'.repeat(Math.max(0, codename.length - 3))
   return [masked, ...rest].join('-')
 }
 
@@ -446,16 +431,12 @@ export function getPublicModelName(model: ModelName): string {
  *
  * @param modelInput The model alias or name provided by the user.
  */
-export function parseUserSpecifiedModel(
-  modelInput: ModelName | ModelAlias,
-): ModelName {
+export function parseUserSpecifiedModel(modelInput: ModelName | ModelAlias): ModelName {
   const modelInputTrimmed = modelInput.trim()
   const normalizedModel = modelInputTrimmed.toLowerCase()
 
   const has1mTag = has1mContext(normalizedModel)
-  const modelString = has1mTag
-    ? normalizedModel.replace(/\[1m]$/i, '').trim()
-    : normalizedModel
+  const modelString = has1mTag ? normalizedModel.replace(/\[1m]$/i, '').trim() : normalizedModel
 
   if (isModelAlias(modelString)) {
     switch (modelString) {
@@ -480,7 +461,11 @@ export function parseUserSpecifiedModel(
         return process.env.DEEPSEEK_V4_FLASH_MODEL || 'deepseek-v4-flash'
       case 'ultra':
         // DeepSeek V3 mode - use env var or fallback
-        return process.env.DEEPSEEK_ULTRA_MODEL || process.env.ANTHROPIC_DEFAULT_OPUS_MODEL || 'deepseek-chat'
+        return (
+          process.env.DEEPSEEK_ULTRA_MODEL ||
+          process.env.ANTHROPIC_DEFAULT_OPUS_MODEL ||
+          'deepseek-chat'
+        )
       default:
     }
   }
@@ -536,10 +521,7 @@ export function parseUserSpecifiedModel(
  * so the autocompact that follows is correct. Skills that already specify [1m]
  * are left untouched.
  */
-export function resolveSkillModelOverride(
-  skillModel: string,
-  currentModel: string,
-): string {
+export function resolveSkillModelOverride(skillModel: string, currentModel: string): string {
   if (has1mContext(skillModel) || !has1mContext(currentModel)) {
     return skillModel
   }

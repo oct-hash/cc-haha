@@ -110,7 +110,9 @@ export class WeixinMcpClient {
    */
   async pollMessages(resetCursor = false): Promise<PollResult> {
     try {
-      const result = await this.callTool('weixin_poll', { reset_cursor: resetCursor }) as { result?: { content?: Array<{ type: string; text?: string }> } }
+      const result = (await this.callTool('weixin_poll', { reset_cursor: resetCursor })) as {
+        result?: { content?: Array<{ type: string; text?: string }> }
+      }
 
       if (!result?.result?.content) {
         return { messages: [] }
@@ -166,7 +168,9 @@ export class WeixinMcpClient {
    */
   async getContacts(): Promise<string[]> {
     try {
-      const result = await this.callTool('weixin_contacts', {}) as { result?: { content?: Array<{ type: string; text?: string }> } }
+      const result = (await this.callTool('weixin_contacts', {})) as {
+        result?: { content?: Array<{ type: string; text?: string }> }
+      }
       if (!result?.result?.content) return []
 
       const contacts: string[] = []

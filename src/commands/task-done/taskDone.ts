@@ -2,8 +2,9 @@
  * Task Done Review Implementation
  * Analyzes task execution and generates comprehensive review report.
  */
-import { getSessionManager } from '../../utils/sessionContext.js'
+
 import type { Message } from '../../types/message.js'
+import { getSessionManager } from '../../utils/sessionContext.js'
 
 interface ToolCall {
   name: string
@@ -39,37 +40,49 @@ interface ReviewResult {
 }
 
 const TASK_TYPE_PATTERNS = {
-  '功能开发': [/实现/, /添加.*功能/, /新增/, /feature/i],
-  'Bug修复': [/修复/, /fix/i, /bug/i, /错误/i],
-  '重构': [/重构/, /refactor/i, /重写/],
-  '文档': [/文档/, /doc/i, /注释/],
-  '代码审查': [/review/i, /审查/, /检查代码/],
-  '性能优化': [/优化/, /performance/i, /性能/],
+  功能开发: [/实现/, /添加.*功能/, /新增/, /feature/i],
+  Bug修复: [/修复/, /fix/i, /bug/i, /错误/i],
+  重构: [/重构/, /refactor/i, /重写/],
+  文档: [/文档/, /doc/i, /注释/],
+  代码审查: [/review/i, /审查/, /检查代码/],
+  性能优化: [/优化/, /performance/i, /性能/],
 }
 
 const TRIGGER_PATTERNS = [
-  '任务完成', '完成', 'done', 'task done', 'finished',
-  '做完了', '搞定了', '好', '可以', '行', '复盘'
+  '任务完成',
+  '完成',
+  'done',
+  'task done',
+  'finished',
+  '做完了',
+  '搞定了',
+  '好',
+  '可以',
+  '行',
+  '复盘',
 ]
 
 // 工具推荐规则
-const TOOL_RECOMMENDATIONS: Record<string, { shouldFollow: string[]; betterAlternative: Record<string, string> }> = {
+const TOOL_RECOMMENDATIONS: Record<
+  string,
+  { shouldFollow: string[]; betterAlternative: Record<string, string> }
+> = {
   Read: {
     shouldFollow: ['在 Edit/Writ/Write 之前应先 Read 了解现状'],
-    betterAlternative: {}
+    betterAlternative: {},
   },
   Edit: {
     shouldFollow: ['小幅度修改优先使用 Edit，而非 Write 全量覆盖'],
     betterAlternative: {
       'Bash(cat)': '直接用 Read 读取文件内容',
       'Bash(echo >)': '用 Write 创建新文件',
-    }
+    },
   },
   Write: {
     shouldFollow: ['创建新文件或完全重写时使用 Write'],
     betterAlternative: {
-      'Bash(echo)': '用 Write 替代 Bash echo 重定向'
-    }
+      'Bash(echo)': '用 Write 替代 Bash echo 重定向',
+    },
   },
   Bash: {
     shouldFollow: ['执行命令、运行脚本、git 操作、系统操作时使用 Bash'],
@@ -79,18 +92,18 @@ const TOOL_RECOMMENDATIONS: Record<string, { shouldFollow: string[]; betterAlter
       'Bash(grep)': '用 Grep 搜索内容',
       'Bash(find)': '用 Glob 搜索文件',
       'Bash(ps aux)': '用 Bash 但要明确目的',
-    }
+    },
   },
   Grep: {
     shouldFollow: ['搜索代码内容、查找函数/变量使用'],
-    betterAlternative: {}
+    betterAlternative: {},
   },
   Glob: {
     shouldFollow: ['搜索文件、查找特定模式文件'],
     betterAlternative: {
-      'Bash(find)': '用 Glob 更高效'
-    }
-  }
+      'Bash(find)': '用 Glob 更高效',
+    },
+  },
 }
 
 // 工具使用顺序规则
@@ -98,41 +111,49 @@ const TOOL_SEQUENCE_RULES = [
   {
     name: 'Edit前应Read',
     check: (sequence: string[]) => {
-      const editIndices = sequence.map((t, i) => t === 'Edit' || t === 'Write' ? i : -1).filter(i => i !== -1)
-      const readIndices = sequence.map((t, i) => t === 'Read' ? i : -1).filter(i => i !== -1)
+      const editIndices = sequence
+        .map((t, i) => (t === 'Edit' || t === 'Write' ? i : -1))
+        .filter((i) => i !== -1)
+      const readIndices = sequence.map((t, i) => (t === 'Read' ? i : -1)).filter((i) => i !== -1)
       for (const editIdx of editIndices) {
-        const readBefore = readIndices.some(ri => ri < editIdx)
+        const readBefore = readIndices.some((ri) => ri < editIdx)
         if (!readBefore) return { violated: true, message: '在 Edit 之前没有先 Read 了解现状' }
       }
       return { violated: false }
-    }
+    },
   },
   {
     name: '验证后执行',
     check: (sequence: string[]) => {
-      const modifyCount = sequence.filter(t => ['Edit', 'Write', 'Delete'].includes(t)).length
-      const verifyCount = sequence.filter(t => ['Bash'].some(b => b.includes('test') || b.includes('verify'))).length
+      const modifyCount = sequence.filter((t) => ['Edit', 'Write', 'Delete'].includes(t)).length
+      const verifyCount = sequence.filter((t) =>
+        ['Bash'].some((b) => b.includes('test') || b.includes('verify')),
+      ).length
       if (modifyCount > 2 && verifyCount === 0) {
         return { violated: true, message: '多次修改但没有执行验证，建议添加测试/构建验证' }
       }
       return { violated: false }
-    }
+    },
   },
   {
     name: '避免重复Read',
     check: (sequence: string[]) => {
-      const readIndices = sequence.map((t, i) => t === 'Read' ? i : -1).filter(i => i !== -1)
+      const readIndices = sequence.map((t, i) => (t === 'Read' ? i : -1)).filter((i) => i !== -1)
       for (let i = 0; i < readIndices.length - 1; i++) {
         const diff = readIndices[i + 1] - readIndices[i]
         if (diff <= 2) {
           const toolsBetween = sequence.slice(readIndices[i] + 1, readIndices[i + 1])
-          const hasModify = toolsBetween.some(t => ['Edit', 'Write'].includes(t))
-          if (!hasModify) return { violated: true, message: `连续的 Read 调用，中间无修改，可能重复读取了相同文件` }
+          const hasModify = toolsBetween.some((t) => ['Edit', 'Write'].includes(t))
+          if (!hasModify)
+            return {
+              violated: true,
+              message: `连续的 Read 调用，中间无修改，可能重复读取了相同文件`,
+            }
         }
       }
       return { violated: false }
-    }
-  }
+    },
+  },
 ]
 
 /**
@@ -140,8 +161,8 @@ const TOOL_SEQUENCE_RULES = [
  */
 export function isTaskDoneTrigger(input: string): boolean {
   const lower = input.toLowerCase().trim()
-  return TRIGGER_PATTERNS.some(pattern =>
-    lower === pattern || lower === `${pattern}。` || lower === `${pattern}!`
+  return TRIGGER_PATTERNS.some(
+    (pattern) => lower === pattern || lower === `${pattern}。` || lower === `${pattern}!`,
   )
 }
 
@@ -161,7 +182,7 @@ function identifyTaskType(description: string): string {
  * Get task description from session
  */
 function getTaskDescription(messages: Message[]): string {
-  const firstUserMsg = messages.find(m => m.type === 'user')
+  const firstUserMsg = messages.find((m) => m.type === 'user')
   if (firstUserMsg && 'content' in firstUserMsg) {
     const content = firstUserMsg.content
     if (typeof content === 'string') {
@@ -174,7 +195,7 @@ function getTaskDescription(messages: Message[]): string {
 /**
  * Extract tool usage with counts and sequence
  */
-function extractToolUsage(messages: Message[]): { stats: ToolCall[], sequence: string[] } {
+function extractToolUsage(messages: Message[]): { stats: ToolCall[]; sequence: string[] } {
   const toolCounts = new Map<string, number>()
   const sequence: string[] = []
 
@@ -196,7 +217,7 @@ function extractToolUsage(messages: Message[]): { stats: ToolCall[], sequence: s
   const stats: ToolCall[] = Array.from(toolCounts.entries()).map(([name, count]) => ({
     name,
     count,
-    purpose: getToolPurpose(name)
+    purpose: getToolPurpose(name),
   }))
 
   return { stats, sequence }
@@ -207,16 +228,16 @@ function extractToolUsage(messages: Message[]): { stats: ToolCall[], sequence: s
  */
 function getToolPurpose(tool: string): string {
   const purposes: Record<string, string> = {
-    'Read': '读取文件内容',
-    'Edit': '修改代码',
-    'Write': '创建/重写文件',
-    'Bash': '执行命令',
-    'Grep': '搜索代码内容',
-    'Glob': '搜索文件',
-    'WebFetch': '获取网页内容',
-    'WebSearch': '网络搜索',
-    'WriteCreate': '创建新文件',
-    'NotebookEdit': '编辑notebook',
+    Read: '读取文件内容',
+    Edit: '修改代码',
+    Write: '创建/重写文件',
+    Bash: '执行命令',
+    Grep: '搜索代码内容',
+    Glob: '搜索文件',
+    WebFetch: '获取网页内容',
+    WebSearch: '网络搜索',
+    WriteCreate: '创建新文件',
+    NotebookEdit: '编辑notebook',
   }
   return purposes[tool] || '其他'
 }
@@ -224,16 +245,19 @@ function getToolPurpose(tool: string): string {
 /**
  * Get conversation summary
  */
-function getConversationSummary(messages: Message[]): { rounds: number, userMsgs: number } {
-  const userMsgs = messages.filter(m => m.type === 'user')
-  const assistantMsgs = messages.filter(m => m.type === 'assistant')
+function getConversationSummary(messages: Message[]): { rounds: number; userMsgs: number } {
+  const userMsgs = messages.filter((m) => m.type === 'user')
+  const assistantMsgs = messages.filter((m) => m.type === 'assistant')
   return { rounds: assistantMsgs.length, userMsgs: userMsgs.length }
 }
 
 /**
  * Analyze tool usage comprehensively
  */
-function analyzeToolUsage(stats: ToolCall[], sequence: string[]): {
+function analyzeToolUsage(
+  stats: ToolCall[],
+  sequence: string[],
+): {
   shouldHaveUsed: ReviewResult['toolUsage']['shouldHaveUsed']
   misused: ReviewResult['toolUsage']['misused']
   redundant: ReviewResult['toolUsage']['redundant']
@@ -242,48 +266,48 @@ function analyzeToolUsage(stats: ToolCall[], sequence: string[]): {
   const misused: ReviewResult['toolUsage']['misused'] = []
   const redundant: ReviewResult['toolUsage']['redundant'] = []
 
-  const toolNames = stats.map(s => s.name)
+  const toolNames = stats.map((s) => s.name)
 
   // 检查漏用
   if (!toolNames.includes('Read') && stats.length > 0) {
     shouldHaveUsed.push({
       tool: 'Read',
       reason: '任务涉及代码修改但未先阅读现有代码',
-      suggestion: '先 Read 了解文件结构和现状，再进行修改'
+      suggestion: '先 Read 了解文件结构和现状，再进行修改',
     })
   }
 
   // 检查错用 Bash 命令
-  const bashStat = stats.find(s => s.name === 'Bash')
+  const bashStat = stats.find((s) => s.name === 'Bash')
   if (bashStat) {
     // 这里简化处理，实际应该解析 Bash 命令内容
     if (bashStat.count > 5) {
       shouldHaveUsed.push({
         tool: '批量操作建议',
         reason: 'Bash 调用次数过多，可能存在替代工具',
-        suggestion: '考虑使用 Glob + 循环处理替代多次 Bash'
+        suggestion: '考虑使用 Glob + 循环处理替代多次 Bash',
       })
     }
   }
 
   // 检查 Edit vs Write 的选择
-  const editStat = stats.find(s => s.name === 'Edit')
-  const writeStat = stats.find(s => s.name === 'Write')
+  const editStat = stats.find((s) => s.name === 'Edit')
+  const writeStat = stats.find((s) => s.name === 'Write')
 
   if (writeStat && (editStat ? writeStat.count > editStat.count : true)) {
     misused.push({
       tool: 'Write',
       reason: 'Write 使用多于 Edit，可能存在过度覆盖',
-      betterAlternative: '小幅度修改优先使用 Edit'
+      betterAlternative: '小幅度修改优先使用 Edit',
     })
   }
 
   // 检查重复 Read
-  const readStat = stats.find(s => s.name === 'Read')
+  const readStat = stats.find((s) => s.name === 'Read')
   if (readStat && readStat.count > 10) {
     redundant.push({
       tool: 'Read',
-      reason: `Read 调用 ${readStat.count} 次，可能存在重复读取`
+      reason: `Read 调用 ${readStat.count} 次，可能存在重复读取`,
     })
   }
 
@@ -307,12 +331,12 @@ function analyzeToolSequence(sequence: string[]): {
       optimizable.push({
         pattern: rule.name,
         issue: result.message || '',
-        suggestion: '调整工具使用顺序'
+        suggestion: '调整工具使用顺序',
       })
     } else {
       reasonable.push({
         pattern: rule.name,
-        description: '符合最佳实践'
+        description: '符合最佳实践',
       })
     }
   }
@@ -327,14 +351,16 @@ function detectErrors(stats: ToolCall[], sequence: string[]): ReviewResult['erro
   const errors: ReviewResult['errors'] = []
 
   // 检查是否缺少验证
-  const modifyCount = stats.filter(s => ['Edit', 'Write', 'Delete'].some(t => t === s.name)).reduce((sum, s) => sum + s.count, 0)
-  const hasBuild = stats.some(s => s.name === 'Bash') && sequence.join('').includes('build')
+  const modifyCount = stats
+    .filter((s) => ['Edit', 'Write', 'Delete'].some((t) => t === s.name))
+    .reduce((sum, s) => sum + s.count, 0)
+  const hasBuild = stats.some((s) => s.name === 'Bash') && sequence.join('').includes('build')
 
   if (modifyCount >= 3 && !hasBuild) {
     errors.push({
       severity: 'medium',
       description: '多次修改后未执行构建验证',
-      fix: '建议运行 build 命令验证修改正确性'
+      fix: '建议运行 build 命令验证修改正确性',
     })
   }
 
@@ -344,16 +370,19 @@ function detectErrors(stats: ToolCall[], sequence: string[]): ReviewResult['erro
 /**
  * Identify good practices
  */
-function identifyGoodPractices(stats: ToolCall[], sequence: string[]): ReviewResult['goodPractices'] {
+function identifyGoodPractices(
+  stats: ToolCall[],
+  sequence: string[],
+): ReviewResult['goodPractices'] {
   const goodPractices: ReviewResult['goodPractices'] = []
 
-  const toolNames = stats.map(s => s.name)
+  const toolNames = stats.map((s) => s.name)
 
   // 有工具使用
   if (stats.length > 0) {
     goodPractices.push({
       pattern: '使用工具完成任务',
-      example: `使用了 ${stats.length} 种工具：${toolNames.join(', ')}`
+      example: `使用了 ${stats.length} 种工具：${toolNames.join(', ')}`,
     })
   }
 
@@ -363,23 +392,23 @@ function identifyGoodPractices(stats: ToolCall[], sequence: string[]): ReviewRes
   if (readIdx !== -1 && editIdx !== -1 && readIdx < editIdx) {
     goodPractices.push({
       pattern: '先读后改',
-      example: '先 Read 了解现状，再 Edit 进行修改'
+      example: '先 Read 了解现状，再 Edit 进行修改',
     })
   }
 
   // 有验证步骤
-  if (sequence.some(t => t.includes('test') || t.includes('build'))) {
+  if (sequence.some((t) => t.includes('test') || t.includes('build'))) {
     goodPractices.push({
       pattern: '包含验证',
-      example: '包含测试或构建验证步骤'
+      example: '包含测试或构建验证步骤',
     })
   }
 
   // 无错误
-  if (stats.length > 0 && stats.every(s => s.count < 20)) {
+  if (stats.length > 0 && stats.every((s) => s.count < 20)) {
     goodPractices.push({
       pattern: '工具使用适度',
-      example: '工具调用次数合理，无异常重复'
+      example: '工具调用次数合理，无异常重复',
     })
   }
 
@@ -389,7 +418,11 @@ function identifyGoodPractices(stats: ToolCall[], sequence: string[]): ReviewRes
 /**
  * Generate iteration suggestions
  */
-function generateIteration(stats: ToolCall[], errors: ReviewResult['errors'], optimizable: ReviewResult['flow']['optimizable']): {
+function generateIteration(
+  stats: ToolCall[],
+  errors: ReviewResult['errors'],
+  optimizable: ReviewResult['flow']['optimizable'],
+): {
   immediate: string[]
   longTerm: string[]
 } {
@@ -452,9 +485,10 @@ function calculateRating(review: Omit<ReviewResult, 'rating' | 'summary'>): Revi
  * Generate summary
  */
 function generateSummary(review: Omit<ReviewResult, 'summary' | 'rating'>): string {
-  const issues = review.toolUsage.shouldHaveUsed.length +
-                 review.toolUsage.misused.length +
-                 review.errors.filter(e => e.severity !== 'medium').length
+  const issues =
+    review.toolUsage.shouldHaveUsed.length +
+    review.toolUsage.misused.length +
+    review.errors.filter((e) => e.severity !== 'medium').length
 
   if (issues === 0 && review.goodPractices.length >= 2) {
     return `本次任务工具使用合理，流程规范，发现 ${review.goodPractices.length} 项良好实践。建议继续保持。`
@@ -470,7 +504,7 @@ function generateSummary(review: Omit<ReviewResult, 'summary' | 'rating'>): stri
  */
 export async function generateTaskReview(
   messages: Message[],
-  taskDescription?: string
+  taskDescription?: string,
 ): Promise<ReviewResult> {
   const desc = taskDescription || getTaskDescription(messages)
   const { stats, sequence } = extractToolUsage(messages)
@@ -491,24 +525,24 @@ export async function generateTaskReview(
       reviewTime: new Date().toLocaleString('zh-CN'),
       taskType,
       totalToolCalls: stats.reduce((sum, s) => sum + s.count, 0),
-      conversationRounds: rounds
+      conversationRounds: rounds,
     },
     toolUsage: {
       stats,
       shouldHaveUsed,
       misused,
-      redundant
+      redundant,
     },
     flow: {
       reasonable,
-      optimizable
+      optimizable,
     },
     errors,
     goodPractices,
     iteration: {
       immediate,
-      longTerm
-    }
+      longTerm,
+    },
   }
 
   const rating = calculateRating(review)
@@ -517,7 +551,7 @@ export async function generateTaskReview(
   return {
     ...review,
     summary,
-    rating
+    rating,
   }
 }
 
@@ -540,17 +574,17 @@ export function saveReviewToSession(review: ReviewResult, taskDescription?: stri
  */
 export function formatReviewForDisplay(review: ReviewResult): string {
   const ratingEmoji: Record<string, string> = {
-    'excellent': '🟢',
-    'good': '🟡',
+    excellent: '🟢',
+    good: '🟡',
     'needs-improvement': '🟠',
-    'poor': '🔴'
+    poor: '🔴',
   }
 
   const ratingText: Record<string, string> = {
-    'excellent': '优秀',
-    'good': '良好',
+    excellent: '优秀',
+    good: '良好',
     'needs-improvement': '需改进',
-    'poor': '较差'
+    poor: '较差',
   }
 
   const lines: string[] = [
@@ -563,54 +597,54 @@ export function formatReviewForDisplay(review: ReviewResult): string {
     `## 工具使用统计`,
     '| 工具类型 | 调用次数 | 主要用途 |',
     '|---------|---------|---------|',
-    ...review.toolUsage.stats.map(s =>
-      `| ${s.name} | ${s.count} | ${s.purpose} |`
-    ),
+    ...review.toolUsage.stats.map((s) => `| ${s.name} | ${s.count} | ${s.purpose} |`),
     '\n',
     `## 合理性评估\n`,
     `### ✅ 做得好的地方`,
-    ...review.goodPractices.length > 0
-      ? review.goodPractices.map(g => `- **${g.pattern}**：${g.example}`)
-      : ['（无）'],
+    ...(review.goodPractices.length > 0
+      ? review.goodPractices.map((g) => `- **${g.pattern}**：${g.example}`)
+      : ['（无）']),
     '\n',
     `### ⚠️ 需要改进的地方`,
-    ...review.flow.optimizable.length > 0
-      ? review.flow.optimizable.map(o => `- **${o.pattern}**：${o.issue} → ${o.suggestion}`)
-      : ['（无）'],
+    ...(review.flow.optimizable.length > 0
+      ? review.flow.optimizable.map((o) => `- **${o.pattern}**：${o.issue} → ${o.suggestion}`)
+      : ['（无）']),
     '\n',
     `### ❌ 漏用/错用工具`,
   ]
 
   if (review.toolUsage.shouldHaveUsed.length > 0) {
     lines.push('**漏用：**')
-    review.toolUsage.shouldHaveUsed.forEach(m => {
+    review.toolUsage.shouldHaveUsed.forEach((m) => {
       lines.push(`- ${m.tool}：${m.reason} → ${m.suggestion}`)
     })
   }
 
   if (review.toolUsage.misused.length > 0) {
     lines.push('**错用：**')
-    review.toolUsage.misused.forEach(m => {
+    review.toolUsage.misused.forEach((m) => {
       lines.push(`- ${m.tool}：${m.reason} → 建议使用 ${m.betterAlternative}`)
     })
   }
 
   if (review.toolUsage.redundant.length > 0) {
     lines.push('**冗余：**')
-    review.toolUsage.redundant.forEach(r => {
+    review.toolUsage.redundant.forEach((r) => {
       lines.push(`- ${r.tool}：${r.reason}`)
     })
   }
 
-  if (review.toolUsage.shouldHaveUsed.length === 0 &&
-      review.toolUsage.misused.length === 0 &&
-      review.toolUsage.redundant.length === 0) {
+  if (
+    review.toolUsage.shouldHaveUsed.length === 0 &&
+    review.toolUsage.misused.length === 0 &&
+    review.toolUsage.redundant.length === 0
+  ) {
     lines.push('（无）')
   }
 
   lines.push('\n', `### 🔴 错误检测`)
   if (review.errors.length > 0) {
-    review.errors.forEach(e => {
+    review.errors.forEach((e) => {
       lines.push(`- **[${e.severity.toUpperCase()}]** ${e.description}`)
       lines.push(`  → 修复：${e.fix}`)
     })
@@ -653,7 +687,7 @@ export async function taskDoneCommand(
   args: string,
   context: {
     messages: Message[]
-  }
+  },
 ): Promise<string> {
   const { messages } = context
   const taskDescription = args || undefined

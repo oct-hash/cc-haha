@@ -1,7 +1,6 @@
 import fs from 'fs/promises'
 import path from 'path'
-import type { MailAttachment, DownloadResult, SyncResult } from './types.js'
-import type { PaperMatch } from './types.js'
+import type { DownloadResult, MailAttachment, PaperMatch, SyncResult } from './types.js'
 
 export interface DownloadConfig {
   papersPdfDir: string // For papers already in knowledge base
@@ -20,10 +19,7 @@ export class PDFDownloader {
     await fs.mkdir(this.config.pendingDir, { recursive: true })
   }
 
-  async downloadToPapersDir(
-    attachment: MailAttachment,
-    paperId: string
-  ): Promise<DownloadResult> {
+  async downloadToPapersDir(attachment: MailAttachment, paperId: string): Promise<DownloadResult> {
     try {
       await this.ensureDirs()
 
@@ -45,10 +41,7 @@ export class PDFDownloader {
     }
   }
 
-  async downloadToPending(
-    attachment: MailAttachment,
-    date: Date
-  ): Promise<DownloadResult> {
+  async downloadToPending(attachment: MailAttachment, date: Date): Promise<DownloadResult> {
     try {
       await this.ensureDirs()
 
@@ -72,10 +65,7 @@ export class PDFDownloader {
     }
   }
 
-  async downloadMatched(
-    matches: PaperMatch[],
-    date: Date
-  ): Promise<SyncResult> {
+  async downloadMatched(matches: PaperMatch[], date: Date): Promise<SyncResult> {
     const results: SyncResult = {
       downloaded: 0,
       pending: 0,
@@ -84,10 +74,7 @@ export class PDFDownloader {
 
     for (const match of matches) {
       // Paper exists in knowledge base - download to papers dir
-      const result = await this.downloadToPapersDir(
-        match.attachment,
-        match.paper.id
-      )
+      const result = await this.downloadToPapersDir(match.attachment, match.paper.id)
 
       if (result.success) {
         results.downloaded++
@@ -99,10 +86,7 @@ export class PDFDownloader {
     return results
   }
 
-  async downloadUnmatched(
-    attachments: MailAttachment[],
-    date: Date
-  ): Promise<SyncResult> {
+  async downloadUnmatched(attachments: MailAttachment[], date: Date): Promise<SyncResult> {
     const results: SyncResult = {
       downloaded: 0,
       pending: 0,

@@ -62,7 +62,7 @@ export function isSessionContainerCompatible(messages: Message[]): boolean {
       if (toolName === BASH_TOOL_NAME) {
         const input = (block as { input?: Record<string, unknown> }).input
         const command = (input?.command as string) || ''
-        if (EXTERNAL_COMMAND_PATTERNS.some(p => p.test(command))) {
+        if (EXTERNAL_COMMAND_PATTERNS.some((p) => p.test(command))) {
           return false
         }
       }
@@ -81,7 +81,7 @@ export function hasFrictionSignal(messages: Message[]): boolean {
     if (!text) {
       continue
     }
-    return FRICTION_PATTERNS.some(p => p.test(text))
+    return FRICTION_PATTERNS.some((p) => p.test(text))
   }
   return false
 }
@@ -89,10 +89,7 @@ export function hasFrictionSignal(messages: Message[]): boolean {
 const MIN_SUBMIT_COUNT = 3
 const COOLDOWN_MS = 30 * 60 * 1000
 
-export function useIssueFlagBanner(
-  messages: Message[],
-  submitCount: number,
-): boolean {
+export function useIssueFlagBanner(messages: Message[], submitCount: number): boolean {
   if (process.env.USER_TYPE !== 'ant') {
     return false
   }

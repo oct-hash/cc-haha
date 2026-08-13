@@ -1,14 +1,13 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import {
-  ListToolsRequestSchema,
-  CallToolRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js'
 import type { Tool } from '@modelcontextprotocol/sdk/types.js'
-import { createQQMailIMAP, QQMailIMAP } from './imap.js'
-import { createMatcher, KnowledgeBaseMatcher } from './matcher.js'
-import { createDownloader, PDFDownloader } from './downloader.js'
-import type { QQMail, MatchResult } from './types.js'
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
+import { logForDebugging } from '../../../utils/debug.js'
+import { errorMessage } from '../../../utils/errors.js'
+import { createDownloader, type PDFDownloader } from './downloader.js'
+import { createQQMailIMAP, type QQMailIMAP } from './imap.js'
+import { createMatcher, type KnowledgeBaseMatcher } from './matcher.js'
+import type { MatchResult, QQMail } from './types.js'
 
 const SERVER_NAME = 'qqmail'
 const SERVER_VERSION = '1.0.0'
@@ -25,7 +24,9 @@ try {
       if (!process.env[k]) process.env[k] = t.slice(i + 1).trim()
     }
   }
-} catch (_) {}
+} catch (err) {
+  logForDebugging(`[qqmail] .env load failed: ${errorMessage(err)}`, { level: 'warn' })
+}
 
 // Get config from environment
 const QQ_USER = process.env.QQ_USER || ''
@@ -37,8 +38,14 @@ const KB_GRAPH_PATH = process.env.KB_GRAPH_PATH || 'D:/hermes-kb/wiki/papertree/
 
 // Debug: log env vars at startup
 const fs = require('fs')
-fs.writeFileSync('D:/qqmail-debug.log', `[qqmail] QQ_USER=${QQ_USER ? 'OK' : 'MISSING'} AUTH_CODE=${QQ_AUTH_CODE ? 'OK' : 'MISSING'} KB_INDEX=${KB_INDEX_PATH} CWD=${process.cwd()}\n`, { flag: 'a' })
-console.error(`[qqmail] QQ_USER=${QQ_USER ? 'OK' : 'MISSING'} AUTH_CODE=${QQ_AUTH_CODE ? 'OK' : 'MISSING'} KB_INDEX=${KB_INDEX_PATH} KB_GRAPH=${KB_GRAPH_PATH}`)
+fs.writeFileSync(
+  'D:/qqmail-debug.log',
+  `[qqmail] QQ_USER=${QQ_USER ? 'OK' : 'MISSING'} AUTH_CODE=${QQ_AUTH_CODE ? 'OK' : 'MISSING'} KB_INDEX=${KB_INDEX_PATH} CWD=${process.cwd()}\n`,
+  { flag: 'a' },
+)
+console.error(
+  `[qqmail] QQ_USER=${QQ_USER ? 'OK' : 'MISSING'} AUTH_CODE=${QQ_AUTH_CODE ? 'OK' : 'MISSING'} KB_INDEX=${KB_INDEX_PATH} KB_GRAPH=${KB_GRAPH_PATH}`,
+)
 
 class QQMailServer {
   private server: Server
@@ -54,7 +61,7 @@ class QQMailServer {
         capabilities: {
           tools: {},
         },
-      }
+      },
     )
 
     this.matcher = createMatcher(KB_INDEX_PATH, KB_GRAPH_PATH)
@@ -132,8 +139,7 @@ class QQMailServer {
           },
           since: {
             type: 'string',
-            description:
-              'Filter emails since this date (ISO format, e.g., 2024-01-01)',
+            description: 'Filter emails since this date (ISO format, e.g., 2024-01-01)',
           },
           box: {
             type: 'string',
@@ -166,8 +172,7 @@ class QQMailServer {
   private buildDownloadTool() {
     return {
       name: 'qqmail_download',
-      description:
-        'Download a specific PDF attachment by email UID and attachment index.',
+      description: 'Download a specific PDF attachment by email UID and attachment index.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -211,9 +216,7 @@ class QQMailServer {
   private async ensureConnected(): Promise<void> {
     if (!this.connected) {
       if (!QQ_USER || !QQ_AUTH_CODE) {
-        throw new Error(
-          'QQ_USER and QQ_AUTH_CODE environment variables are required'
-        )
+        throw new Error('QQ_USER and QQ_AUTH_CODE environment variables are required')
       }
       this.imap = createQQMailIMAP({
         user: QQ_USER,
@@ -269,7 +272,7 @@ class QQMailServer {
               emails: result,
             },
             null,
-            2
+            2,
           ),
         },
       ],
@@ -283,7 +286,8 @@ class QQMailServer {
     const emails = await this.imap!.listEmails({ limit })
 
     // Collect all PDF attachments with their subjects
-    const pdfAttachments: { attachment: QQMail['attachments'][0]; subject: string; date: Date }[] = []
+    const pdfAttachments: { attachment: QQMail['attachments'][0]; subject: string; date: Date }[] =
+      []
 
     for (const mail of emails) {
       for (const att of mail.attachments) {
@@ -373,7 +377,8 @@ class QQMailServer {
     const emails = await this.imap!.listEmails({ limit })
 
     // Collect PDF attachments
-    const pdfAttachments: { attachment: QQMail['attachments'][0]; subject: string; date: Date }[] = []
+    const pdfAttachments: { attachment: QQMail['attachments'][0]; subject: string; date: Date }[] =
+      []
 
     for (const mail of emails) {
       for (const att of mail.attachments) {
@@ -391,15 +396,12 @@ class QQMailServer {
     const matchResult = this.matcher.matchAttachments(attachments, subjects)
 
     // Download matched to papers dir
-    const matchedResults = await this.downloader.downloadMatched(
-      matchResult.matched,
-      new Date()
-    )
+    const matchedResults = await this.downloader.downloadMatched(matchResult.matched, new Date())
 
     // Download unmatched to pending
     const pendingResults = await this.downloader.downloadUnmatched(
       matchResult.unmatched,
-      new Date()
+      new Date(),
     )
 
     return {
@@ -419,7 +421,7 @@ class QQMailServer {
               summary: `Processed ${attachments.length} PDFs: ${matchedResults.downloaded} saved to papers, ${pendingResults.downloaded} saved to pending`,
             },
             null,
-            2
+            2,
           ),
         },
       ],

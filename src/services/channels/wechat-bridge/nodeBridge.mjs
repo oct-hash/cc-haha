@@ -3,13 +3,16 @@
  * Poll messages and forward to Claude, then reply
  */
 
-import { execSync } from 'child_process'
 import axios from 'axios'
+import { execSync } from 'child_process'
 
 const CONFIG = {
   weixinAccountId: 'e87c180011fe-im-bot',
   claudeApiKey: process.env.ANTHROPIC_AUTH_TOKEN || '',
-  claudeApiUrl: (process.env.ANTHROPIC_BASE_URL?.endsWith('/v1') ? process.env.ANTHROPIC_BASE_URL : process.env.ANTHROPIC_BASE_URL + '/v1') + '/messages',
+  claudeApiUrl:
+    (process.env.ANTHROPIC_BASE_URL?.endsWith('/v1')
+      ? process.env.ANTHROPIC_BASE_URL
+      : process.env.ANTHROPIC_BASE_URL + '/v1') + '/messages',
   claudeModel: process.env.ANTHROPIC_MODEL || 'MiniMax-M2.7',
   pollIntervalMs: 5000,
   maxResponseTimeMs: 90000,
@@ -18,8 +21,8 @@ const CONFIG = {
 async function pollMessages() {
   try {
     // Direct path to avoid npx issues
-    const weixinMcpBin = 'D:/npm-cache/_npx/7e052a239a18d57c/node_modules/weixin-mcp/dist/cli.js';
-    console.error('[Bridge] [DEBUG] exec with WEIXIN_ACCOUNT_ID:', CONFIG.weixinAccountId);
+    const weixinMcpBin = 'D:/npm-cache/_npx/7e052a239a18d57c/node_modules/weixin-mcp/dist/cli.js'
+    console.error('[Bridge] [DEBUG] exec with WEIXIN_ACCOUNT_ID:', CONFIG.weixinAccountId)
     const output = execSync(`node "${weixinMcpBin}" poll`, {
       env: { ...process.env, WEIXIN_ACCOUNT_ID: CONFIG.weixinAccountId },
       timeout: 35000,
@@ -55,7 +58,7 @@ async function pollMessages() {
 
 async function sendMessage(to, text) {
   try {
-    const weixinMcpBin = 'D:/npm-cache/_npx/7e052a239a18d57c/node_modules/weixin-mcp/dist/cli.js';
+    const weixinMcpBin = 'D:/npm-cache/_npx/7e052a239a18d57c/node_modules/weixin-mcp/dist/cli.js'
     execSync(`node "${weixinMcpBin}" send ${to} "${text.replace(/"/g, '\\"')}"`, {
       env: { ...process.env, WEIXIN_ACCOUNT_ID: CONFIG.weixinAccountId },
       timeout: 10000,
@@ -79,7 +82,7 @@ async function callClaude(userId, message) {
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${CONFIG.claudeApiKey}`,
+          Authorization: `Bearer ${CONFIG.claudeApiKey}`,
           'anthropic-version': '2023-06-01',
         },
         timeout: CONFIG.maxResponseTimeMs,

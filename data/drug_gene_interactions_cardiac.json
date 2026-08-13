@@ -1,0 +1,90 @@
+{
+  "metadata": {
+    "query_date": "2026-06-29",
+    "genes_queried": ["OGT", "RELA", "NFE2L2", "SPP1", "CD44"],
+    "disease_context": "Cardiac hypertrophy / Heart failure drug repurposing",
+    "data_sources": [
+      "Exa web search (DGIdb proxy)",
+      "PubMed / PMC",
+      "Frontiers journals",
+      "Springer Nature Link",
+      "DGIdb direct (dgidb.org)",
+      "DrugBank (go.drugbank.com)",
+      "ClinicalTrials.gov",
+      "Synapse Patsnap (drug pipeline)",
+      "MedChemExpress (tool compounds)"
+    ],
+    "dgidb_api_note": "DGIdb API blocked in China; data gathered via literature mining of DGIdb-derived publications + direct web scraping of DGIdb drug pages"
+  },
+  "summary_by_gene": {
+    "OGT": {
+      "gene_name": "O-GlcNAc Transferase",
+      "role_in_cardiac_disease": "O-GlcNAcylation is a double-edged sword: loss causes HF via ISR activation; excess causes dilated cardiomyopathy. Moderate O-GlcNAcylation is cardioprotective. OGT inhibition in endothelial cells proposed for HFpEF.",
+      "drug_count": 7,
+      "key_finding": "OGT is primarily a research target; no approved drugs directly target OGT. OSMI-1/OSMI-4 are the best-characterized tool inhibitors. Paradoxically, both OGT activators (Thiamet-G) and inhibitors (OSMI-1) show context-dependent cardiac effects. An OGT inhibitor patent exists specifically for HFpEF (5S-GlcNHex).",
+      "top_candidates": [
+        {"drug": "Thiamet-G", "type": "OGA inhibitor (raises O-GlcNAc)", "status": "Research tool", "cardiac_evidence": "Cardioprotective in I/R via MG53 O-GlcNAcylation"},
+        {"drug": "OSMI-1", "type": "OGT inhibitor", "status": "Research tool", "cardiac_evidence": "Blunts hypertrophy; systemic administration possible (Rett syndrome mouse model)"},
+        {"drug": "ISRIB", "type": "ISR inhibitor (downstream)", "status": "Research tool", "cardiac_evidence": "Delayed HF progression in OGT-KO mice - most promising downstream target"}
+      ]
+    },
+    "RELA": {
+      "gene_name": "NF-kB p65 subunit",
+      "role_in_cardiac_disease": "Chronic NF-kB activation drives inflammation, fibrosis, pyroptosis, and adverse remodeling in HF. Inhibition is broadly cardioprotective in preclinical models.",
+      "drug_count": 10,
+      "key_finding": "NF-kB is the most druggable target among the 5 genes. Multiple approved drugs (empagliflozin, statins, pimobendan) already show NF-kB inhibitory activity. Proteasome inhibitors (bortezomib/carfilzomib) inhibit NF-kB but are CARDIOTOXIC - not suitable for cardiac repurposing.",
+      "top_candidates": [
+        {"drug": "Empagliflozin", "type": "SGLT2 inhibitor", "status": "FDA-approved for HF", "cardiac_evidence": "Class I HF recommendation; suppresses NF-kB/NLRP3 pathway; activates Nrf2"},
+        {"drug": "Pimobendan", "type": "Inodilator + NF-kB inhibitor", "status": "Approved (dogs FDA; humans Japan)", "cardiac_evidence": "Direct NF-kB inhibition; reduces HF hospitalization in dogs by ~15 months (EPIC trial)"},
+        {"drug": "Atorvastatin", "type": "Statin", "status": "FDA-approved", "cardiac_evidence": "Inhibits TLR4/NF-kB; pleiotropic anti-inflammatory; extensive CV outcomes data"},
+        {"drug": "Semaglutide", "type": "GLP-1 RA", "status": "FDA-approved", "cardiac_evidence": "Reduced MACE in HFpEF (STEP-HFpEF); inhibits NF-kB"}
+      ]
+    },
+    "NFE2L2": {
+      "gene_name": "Nrf2 (Nuclear factor erythroid 2-related factor 2)",
+      "role_in_cardiac_disease": "Master regulator of antioxidant defense. Nrf2 deficiency aggravates cardiac hypertrophy, fibrosis, and HF. Activation is broadly cardioprotective via HO-1, NQO1, and other antioxidant genes.",
+      "drug_count": 10,
+      "key_finding": "Nrf2 is a highly druggable target with multiple natural and synthetic activators. Bardoxolone methyl (Phase 3) showed efficacy but caused fluid retention/HF in susceptible patients. Sulforaphane (Phase 2 for HFpEF) has the best safety profile. SGLT2 inhibitors activate Nrf2 as part of their cardioprotective mechanism.",
+      "top_candidates": [
+        {"drug": "Sulforaphane", "type": "Natural Nrf2 activator", "status": "Phase 2 (HFpEF NCT05408559)", "cardiac_evidence": "Active trial for HFpEF; extensive preclinical CV protection data; excellent safety"},
+        {"drug": "Bardoxolone methyl", "type": "Synthetic Nrf2 activator", "status": "Phase 3 (Japan AYAME for DKD)", "cardiac_evidence": "BEACON terminated for HF signal; ongoing trials exclude at-risk patients; SAKIGAKE designation"},
+        {"drug": "Empagliflozin", "type": "SGLT2 inhibitor + Nrf2 activator", "status": "FDA-approved for HF", "cardiac_evidence": "Activates Nrf2/ARE signaling; reduces oxidative stress in diabetic cardiomyopathy"},
+        {"drug": "Baicalin", "type": "Natural flavonoid, Nrf2/HO-1 activator", "status": "TCM compound", "cardiac_evidence": "Cardioprotective in ISO-induced cardiac injury; regulates ferroptosis via Nrf2"}
+      ]
+    },
+    "SPP1": {
+      "gene_name": "Osteopontin (Secreted Phosphoprotein 1)",
+      "role_in_cardiac_disease": "Pro-fibrotic matricellular protein. Elevated in cardiac hypertrophy, fibrosis, and HF. Binds CD44 and integrins. SPP1 knockout reduces fibrosis; silencing attenuates atrial fibrillation and adverse remodeling.",
+      "drug_count": 10,
+      "key_finding": "DGIdb identifies 6 approved drugs interacting with SPP1 (tacrolimus, ponatinib, bosutinib, dasatinib, doxorubicin, zanubrutinib), but most are repurposed from oncology. The anti-TREM2-siSPP1 antibody-siRNA conjugate is the most cardiac-specific approach. OPN aptamers show promise in preclinical cardiac models.",
+      "top_candidates": [
+        {"drug": "Anti-TREM2-siSPP1 (ARC)", "type": "Antibody-siRNA conjugate", "status": "Preclinical", "cardiac_evidence": "70-90% Spp1 silencing in TREM2+ macrophages; suppressed AF in mice"},
+        {"drug": "OPN RNA aptamer", "type": "Osteopontin neutralizing aptamer", "status": "Preclinical", "cardiac_evidence": "Attenuated remodeling and fibrosis post-TAC at both early (4wk) and late (12wk) stages"},
+        {"drug": "Tacrolimus", "type": "Calcineurin inhibitor", "status": "FDA-approved", "cardiac_evidence": "Top molecular docking hit for OPN binding; network proximity-based repurposing for HCM+PH"},
+        {"drug": "Zanubrutinib", "type": "BTK inhibitor", "status": "FDA-approved", "cardiac_evidence": "DGIdb drug for SPP1; more favorable CV safety profile vs older BTK inhibitors"}
+      ]
+    },
+    "CD44": {
+      "gene_name": "CD44 antigen (hyaluronic acid receptor)",
+      "role_in_cardiac_disease": "Receptor for osteopontin (SPP1). CD44-OPN interaction drives cardiac fibrosis, inflammation, and arrhythmias. CD44-/- mice show reduced ventricular arrhythmias in HF. CD44 regulates Epac1-mediated Ca2+ handling abnormalities.",
+      "drug_count": 6,
+      "key_finding": "CD44 is less drugged than other targets. Anti-CD44 antibodies (RG7356, bivatuzumab) showed limited efficacy as monotherapy. Downregulation by statins (simvastatin) is an indirect approach. SPP1-CD44 axis interruption is more promising than CD44 blockade alone. First direct cardiac evidence: CD44 inhibition reduces ventricular arrhythmias in HF (J Biomed Sci 2023).",
+      "top_candidates": [
+        {"drug": "RG7356 (RO5429083)", "type": "Anti-CD44 humanized mAb", "status": "Phase 1 completed", "cardiac_evidence": "CD44 inhibition reduces VAs in HF mouse models; anti-arrhythmic potential"},
+        {"drug": "Simvastatin", "type": "Statin; CD44 downregulator", "status": "FDA-approved", "cardiac_evidence": "Downregulates CD44; pleiotropic benefits in CV disease via combined NF-kB + CD44 pathways"},
+        {"drug": "SPL-108", "type": "CD44 inhibitor", "status": "Phase 1/2", "cardiac_evidence": "Proof of concept for CD44 druggability; primarily oncology indication currently"}
+      ]
+    }
+  },
+  "cross_target_patterns": {
+    "SPP1-CD44_axis": "SPP1 (osteopontin) is the primary ligand for CD44. Interrupting this interaction is a convergent therapeutic strategy that affects both targets simultaneously. Anti-TREM2-siSPP1 and OPN aptamers are the most specific approaches.",
+    "NF-kB_Nrf2_crosstalk": "NF-kB (RELA) and Nrf2 (NFE2L2) have antagonistic pathways. NF-kB activation suppresses Nrf2, while Nrf2 activation inhibits NF-kB. Bardoxolone methyl and empagliflozin simultaneously activate Nrf2 and suppress NF-kB.",
+    "SGLT2_inhibitors_multi-target": "Empagliflozin and dapagliflozin simultaneously: (a) suppress NF-kB/NLRP3 (RELA pathway), (b) activate Nrf2/ARE (NFE2L2 pathway), (c) inhibit NHE1 in cardiomyocytes. This multi-target mechanism may explain their class-leading HF efficacy.",
+    "repurposable_approved_drugs": "Empagliflozin, dapagliflozin, atorvastatin, simvastatin, semaglutide, pimobendan (veterinary), and sulforaphane (supplement) are the most clinically viable options for cardiac hypertrophy/HF drug repurposing among the 5 genes studied."
+  },
+  "risk_notes": {
+    "cardiotoxic_drugs_to_avoid": "Bortezomib and carfilzomib inhibit NF-kB but are CARDIOTOXIC (4-17% HF incidence). Doxorubicin has SPP1 interaction but is CARDIOTOXIC. Ponatinib has vascular occlusion and HF risk. These should NOT be considered for cardiac repurposing.",
+    "bardoxolone_fluid_retention": "Bardoxolone methyl caused increased HF hospitalizations in BEACON trial (HR 1.83). Fluid retention mechanism involves endothelial Nrf2 activation affecting sodium/water handling. Careful patient selection (excluding BNP>200 or prior HF) reduces risk to ~2%.",
+    "ogt_inhibition_context_dependent": "OGT inhibition may be beneficial in HFpEF (endothelial mechanism) but harmful in I/R injury (loss of cardioprotective O-GlcNAcylation). Context and cell-type specificity are critical."
+  }
+}

@@ -1,6 +1,6 @@
+import { logForDebugging } from 'src/utils/debug.js'
 import { getClaudeConfigHomeDir } from 'src/utils/envUtils.js'
 import { getFsImplementation } from 'src/utils/fsOperations.js'
-import { logForDebugging } from 'src/utils/debug.js'
 import { logError } from 'src/utils/log.js'
 import type { SkillMetadata } from './skillRegistry.js'
 
@@ -132,10 +132,10 @@ export class SkillMarketplace {
     const lower = query.toLowerCase()
 
     return all.filter(
-      s =>
+      (s) =>
         s.name.toLowerCase().includes(lower) ||
         s.description.toLowerCase().includes(lower) ||
-        s.tags.some(t => t.toLowerCase().includes(lower)) ||
+        s.tags.some((t) => t.toLowerCase().includes(lower)) ||
         s.author.toLowerCase().includes(lower),
     )
   }
@@ -145,7 +145,7 @@ export class SkillMarketplace {
    */
   async filterByTag(tag: string): Promise<MarketplaceEntry[]> {
     const all = await this.browse()
-    return all.filter(s => s.tags.includes(tag))
+    return all.filter((s) => s.tags.includes(tag))
   }
 
   /**
@@ -167,7 +167,7 @@ export class SkillMarketplace {
    */
   async getByName(name: string): Promise<MarketplaceEntry | undefined> {
     const all = await this.browse()
-    return all.find(s => s.name === name)
+    return all.find((s) => s.name === name)
   }
 
   /**
@@ -205,12 +205,14 @@ export class SkillMarketplace {
   /**
    * Check for updates for installed skills.
    */
-  async checkForUpdates(): Promise<Array<{
-    name: string
-    currentVersion: string
-    latestVersion: string
-    updateAvailable: boolean
-  }>> {
+  async checkForUpdates(): Promise<
+    Array<{
+      name: string
+      currentVersion: string
+      latestVersion: string
+      updateAvailable: boolean
+    }>
+  > {
     const all = await this.browse()
     const updates: Array<{
       name: string
@@ -239,8 +241,7 @@ export class SkillMarketplace {
    * Compare two semantic versions.
    */
   private compareVersions(a: string, b: string): number {
-    const parse = (v: string) =>
-      v.split('.').map(n => parseInt(n, 10) || 0)
+    const parse = (v: string) => v.split('.').map((n) => parseInt(n, 10) || 0)
     const [aMaj, aMin, aPat] = parse(a)
     const [bMaj, bMin, bPat] = parse(b)
 
@@ -263,4 +264,4 @@ export function getMarketplace(): SkillMarketplace {
   return globalMarketplace
 }
 
-import { join, dirname } from 'path'
+import { dirname, join } from 'path'

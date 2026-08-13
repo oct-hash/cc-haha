@@ -173,9 +173,7 @@ export function logStartupPerf(): void {
   // Compute phase durations
   const metadata: Record<string, number | undefined> = {}
 
-  for (const [phaseName, [startCheckpoint, endCheckpoint]] of Object.entries(
-    PHASE_DEFINITIONS,
-  )) {
+  for (const [phaseName, [startCheckpoint, endCheckpoint]] of Object.entries(PHASE_DEFINITIONS)) {
     const startTime = checkpointTimes.get(startCheckpoint)
     const endTime = checkpointTimes.get(endCheckpoint)
 

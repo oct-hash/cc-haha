@@ -1,14 +1,14 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import {
-  ClaudeError,
   AbortError,
+  ClaudeError,
   ConfigParseError,
-  ShellError,
-  isAbortError,
-  hasExactErrorMessage,
-  toError,
   errorMessage,
+  hasExactErrorMessage,
+  isAbortError,
   isENOENT,
+  ShellError,
+  toError,
 } from '../errors'
 
 describe('ClaudeError', () => {

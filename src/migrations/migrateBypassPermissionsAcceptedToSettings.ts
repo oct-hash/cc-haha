@@ -27,14 +27,12 @@ export function migrateBypassPermissionsAcceptedToSettings(): void {
 
     logEvent('tengu_migrate_bypass_permissions_accepted', {})
 
-    saveGlobalConfig(current => {
+    saveGlobalConfig((current) => {
       if (!('bypassPermissionsModeAccepted' in current)) return current
       const { bypassPermissionsModeAccepted: _, ...updatedConfig } = current
       return updatedConfig
     })
   } catch (error) {
-    logError(
-      new Error(`Failed to migrate bypass permissions accepted: ${error}`),
-    )
+    logError(new Error(`Failed to migrate bypass permissions accepted: ${error}`))
   }
 }

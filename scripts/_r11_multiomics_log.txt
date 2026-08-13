@@ -1,0 +1,34 @@
+[copied] R10 -> manuscript_R11_multiomics_v1.docx
+[edit] para 0 done
+[edit] para 5 done
+[edit] para 20 done
+[edit] para 39 done
+[edit] para 42 done
+[edit] para 94 done
+[edit] para 102 done
+[edit] para 19 done
+[edit] para 73 done
+[saved]
+
+==== AUDIT ====
+R10 paras 161  R11 paras 161  equal=True
+changed paras: [0, 5, 19, 20, 39, 42, 73, 94, 102]  (expected [0,5,19,20,39,42,73,94,102])
+
+AC1: 'virtual cell' residual count = 0 (want 0) OK
+AC2: 'GSE139107' in text = True OK
+AC2: 'GSE274819' in text = True OK
+AC2: 'GSE98622' in text = True OK
+AC2: 'Control' in text = True OK
+AC2: 'Sham' in text = True OK
+AC2: 'NORM' in text = True OK
+AC3: S1 cited=True files_exist=True OK
+citations: refs=51 cited=51 orphan=[] missing=[]
+  [0] Coordinated Multi-Cellular Stress Response in Kidney Ischemia-Reperfusion Injury: Nrf2-Driven Ferroptosis Defense Revealed by Multi-Omics Integration
+  [5] Conclusions: This multi-omics integration framework demonstrates that renal I/R ferroptosis defense is a coordinated multi-cellular program orchestrated by Nrf2, not a cell-autonomous event. The kidney employs an Fth1/Gclc-dominant defense strategy distinct fr
+  [19] Three publicly available mouse kidney ischemia-reperfusion transcriptomic datasets were obtained from the NCBI Gene Expression Omnibus (GEO). GSE139107 provides droplet-based single-nucleus RNA-seq of 126,578 nuclei from 26 renal cell types across six I/R time
+  [20] 2.2 Multi-Omics Integration Atlas (Figure 1)
+  [39] 3.1 Multi-Omics Integration Atlas: O-GlcNAc and Ferroptosis Pathways Are Broadly Distributed Across Renal Cell Types (Figure 1)
+  [42] Figure 1. Multi-omics integration atlas of O-GlcNAc, Nrf2, and ferroptosis pathway genes across 26 renal cell types (GSE139107, 26,653 control nuclei). Heatmap of per-cell-type mean expression and percent-detected for 17 key genes. Ogt is broadly expressed (9–
+  [73] As further external validation beyond the discovery dataset, we examined an independent wild-type mouse kidney I/R bulk RNA-seq time course (GSE267650 [51], 41 samples). Spp1 expression increased 5.4-fold at 12 h versus Sham (p < 0.001), corroborating the sing
+  [94] Building on the Visium spatial evidence presented here (Supplementary Figure S4), future studies at single-cell spatial resolution (e.g., MERFISH, Xenium) could map the coordinated temporal patterns onto precise tubular and vascular micro-anatomical zones. Exp
+  [102] 6. The seven-step multi-omics integration framework developed here — atlas → temporal coordination → co-expression network → metabolic flux → Boolean perturbation → drug connectivity → cross-organ comparison — is transferable to any organ I/R study and provide

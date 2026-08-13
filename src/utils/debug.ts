@@ -5,11 +5,7 @@ import { getSessionId } from 'src/bootstrap/state.js'
 
 import { type BufferedWriter, createBufferedWriter } from './bufferedWriter.js'
 import { registerCleanup } from './cleanupRegistry.js'
-import {
-  type DebugFilter,
-  parseDebugFilter,
-  shouldShowDebugMessage,
-} from './debugFilter.js'
+import { type DebugFilter, parseDebugFilter, shouldShowDebugMessage } from './debugFilter.js'
 import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
 import { getFsImplementation } from './fsOperations.js'
 import { writeToStderr } from './process.js'
@@ -50,7 +46,7 @@ export const isDebugMode = memoize((): boolean => {
     process.argv.includes('-d') ||
     isDebugToStdErr() ||
     // Also check for --debug=pattern syntax
-    process.argv.some(arg => arg.startsWith('--debug=')) ||
+    process.argv.some((arg) => arg.startsWith('--debug=')) ||
     // --debug-file implicitly enables debug mode
     getDebugFilePath() !== null
   )
@@ -72,7 +68,7 @@ export function enableDebugLogging(): boolean {
 // Exported for testing purposes
 export const getDebugFilter = memoize((): DebugFilter | null => {
   // Look for --debug=pattern in argv
-  const debugArg = process.argv.find(arg => arg.startsWith('--debug='))
+  const debugArg = process.argv.find((arg) => arg.startsWith('--debug='))
   if (!debugArg) {
     return null
   }
@@ -83,9 +79,7 @@ export const getDebugFilter = memoize((): DebugFilter | null => {
 })
 
 export const isDebugToStdErr = memoize((): boolean => {
-  return (
-    process.argv.includes('--debug-to-stderr') || process.argv.includes('-d2e')
-  )
+  return process.argv.includes('--debug-to-stderr') || process.argv.includes('-d2e')
 })
 
 export const getDebugFilePath = memoize((): string | null => {
@@ -156,7 +150,7 @@ function getDebugWriter(): BufferedWriter {
   if (!debugWriter) {
     let ensuredDir: string | null = null
     debugWriter = createBufferedWriter({
-      writeFn: content => {
+      writeFn: (content) => {
         const path = getDebugLogPath()
         const dir = dirname(path)
         const needMkdir = ensuredDir !== dir

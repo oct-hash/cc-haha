@@ -6,9 +6,9 @@ export const MODEL_ALIASES = [
   'sonnet[1m]',
   'opus[1m]',
   'opusplan',
-  'pro',           // MiniMax M2.7 高性能模式
-  'ultrav4',       // DeepSeek V4 Flash 模式
-  'ultra',         // DeepSeek V3 模式
+  'pro', // MiniMax M2.7 高性能模式
+  'ultrav4', // DeepSeek V4 Flash 模式
+  'ultra', // DeepSeek V3 模式
   'deepseek-v4-pro', // DeepSeek V4 Pro 模式
 ] as const
 export type ModelAlias = (typeof MODEL_ALIASES)[number]

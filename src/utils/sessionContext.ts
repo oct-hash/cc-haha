@@ -7,6 +7,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
+import { logForDebugging } from './debug.js'
+import { errorMessage } from './errors.js'
+
 export interface SessionMetadata {
   id: string
   createdAt: number
@@ -142,9 +145,10 @@ export class SessionManager {
 
     if (!fs.existsSync(dir)) return null
 
-    const files = fs.readdirSync(dir)
-      .filter(f => f.endsWith('.json'))
-      .map(f => ({
+    const files = fs
+      .readdirSync(dir)
+      .filter((f) => f.endsWith('.json'))
+      .map((f) => ({
         name: f,
         time: fs.statSync(path.join(dir, f)).mtimeMs,
       }))
@@ -161,8 +165,12 @@ export class SessionManager {
         this.currentSession = session
         this.startAutoSave()
         return session
-      } catch {
-        continue
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+          logForDebugging(`[sessions] corrupt session file ${file.name}: ${errorMessage(err)}`, {
+            level: 'warn',
+          })
+        }
       }
     }
 
@@ -232,7 +240,7 @@ export class SessionManager {
   updateTaskStatus(taskId: string, status: 'pending' | 'in_progress' | 'blocked'): void {
     if (!this.currentSession) return
 
-    const task = this.currentSession.context.pendingTasks.find(t => t.id === taskId)
+    const task = this.currentSession.context.pendingTasks.find((t) => t.id === taskId)
     if (task) {
       task.status = status
       this.dirty = true
@@ -242,7 +250,12 @@ export class SessionManager {
   /**
    * Add an artifact
    */
-  addArtifact(type: SessionContext['artifacts'][0]['type'], content: string, description: string, filePath?: string): void {
+  addArtifact(
+    type: SessionContext['artifacts'][0]['type'],
+    content: string,
+    description: string,
+    filePath?: string,
+  ): void {
     if (!this.currentSession) return
 
     this.currentSession.context.artifacts.unshift({
@@ -338,9 +351,10 @@ export class SessionManager {
    */
   private cleanupOldSessions(): void {
     const dir = path.join(this.projectPath, SESSIONS_DIR)
-    const files = fs.readdirSync(dir)
-      .filter(f => f.endsWith('.json'))
-      .map(f => ({
+    const files = fs
+      .readdirSync(dir)
+      .filter((f) => f.endsWith('.json'))
+      .map((f) => ({
         name: f,
         path: path.join(dir, f),
         time: fs.statSync(path.join(dir, f)).mtimeMs,

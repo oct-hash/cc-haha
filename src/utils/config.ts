@@ -8,10 +8,7 @@ import { getOriginalCwd, getSessionTrustAccepted } from '../bootstrap/state.js'
 import { getAutoMemEntrypoint } from '../memdir/paths.js'
 import { logEvent } from '../services/analytics/index.js'
 import type { McpServerConfig } from '../services/mcp/types.js'
-import type {
-  BillingType,
-  ReferralEligibilityResponse,
-} from '../services/oauth/types.js'
+import type { BillingType, ReferralEligibilityResponse } from '../services/oauth/types.js'
 import { getCwd } from '../utils/cwd.js'
 import { registerCleanup } from './cleanupRegistry.js'
 import { logForDebugging } from './debug.js'
@@ -299,16 +296,10 @@ export type GlobalConfig = {
   >
 
   // Guest passes eligibility cache per org - key is org ID
-  passesEligibilityCache?: Record<
-    string,
-    ReferralEligibilityResponse & { timestamp: number }
-  >
+  passesEligibilityCache?: Record<string, ReferralEligibilityResponse & { timestamp: number }>
 
   // Grove config cache per account - key is account UUID
-  groveConfigCache?: Record<
-    string,
-    { grove_enabled: boolean; timestamp: number }
-  >
+  groveConfigCache?: Record<string, { grove_enabled: boolean; timestamp: number }>
 
   // Guest passes upsell tracking
   passesUpsellSeenCount?: number // Number of times the guest passes upsell has been shown
@@ -556,7 +547,6 @@ export type GlobalConfig = {
   // Speculation configuration (ant-only)
   speculationEnabled?: boolean // Whether speculation is enabled (default: true)
 
-
   // Client data for server-side experiments (fetched during bootstrap).
   clientDataCache?: Record<string, unknown> | null
 
@@ -786,17 +776,13 @@ function wouldLoseAuthState(fresh: {
 }): boolean {
   const cached = globalConfigCache.config
   if (!cached) return false
-  const lostOauth =
-    cached.oauthAccount !== undefined && fresh.oauthAccount === undefined
+  const lostOauth = cached.oauthAccount !== undefined && fresh.oauthAccount === undefined
   const lostOnboarding =
-    cached.hasCompletedOnboarding === true &&
-    fresh.hasCompletedOnboarding !== true
+    cached.hasCompletedOnboarding === true && fresh.hasCompletedOnboarding !== true
   return lostOauth || lostOnboarding
 }
 
-export function saveGlobalConfig(
-  updater: (currentConfig: GlobalConfig) => GlobalConfig,
-): void {
+export function saveGlobalConfig(updater: (currentConfig: GlobalConfig) => GlobalConfig): void {
   if (process.env.NODE_ENV === 'test') {
     const config = updater(TEST_GLOBAL_CONFIG_FOR_TESTING)
     // Skip if no changes (same reference returned)
@@ -812,7 +798,7 @@ export function saveGlobalConfig(
     const didWrite = saveConfigWithLock(
       getGlobalClaudeFile(),
       createDefaultGlobalConfig,
-      current => {
+      (current) => {
         const config = updater(current)
         // Skip if no changes (same reference returned)
         if (config === current) {
@@ -839,10 +825,7 @@ export function saveGlobalConfig(
     // window: if another process is mid-write (or the file got truncated),
     // getConfig returns defaults. Refuse to write those over a good cached
     // config to avoid wiping auth. See GH #3117.
-    const currentConfig = getConfig(
-      getGlobalClaudeFile(),
-      createDefaultGlobalConfig,
-    )
+    const currentConfig = getConfig(getGlobalClaudeFile(), createDefaultGlobalConfig)
     if (wouldLoseAuthState(currentConfig)) {
       logForDebugging(
         'saveGlobalConfig fallback: re-read config is missing auth that cache has; refusing to write. See GH #3117.',
@@ -998,35 +981,33 @@ function startGlobalConfigFreshnessWatcher(): void {
   if (freshnessWatcherStarted || process.env.NODE_ENV === 'test') return
   freshnessWatcherStarted = true
   const file = getGlobalClaudeFile()
-  watchFile(
-    file,
-    { interval: CONFIG_FRESHNESS_POLL_MS, persistent: false },
-    curr => {
-      // Our own writes fire this too — the write-through's Date.now()
-      // overshoot makes cache.mtime > file mtime, so we skip the re-read.
-      // Bun/Node also fire with curr.mtimeMs=0 when the file doesn't exist
-      // (initial callback or deletion) — the <= handles that too.
-      if (curr.mtimeMs <= globalConfigCache.mtime) return
-      void getFsImplementation()
-        .readFile(file, { encoding: 'utf-8' })
-        .then(content => {
-          // A write-through may have advanced the cache while we were reading;
-          // don't regress to the stale snapshot watchFile stat'd.
-          if (curr.mtimeMs <= globalConfigCache.mtime) return
-          const parsed = safeParseJSON(stripBOM(content))
-          if (parsed === null || typeof parsed !== 'object') return
-          globalConfigCache = {
-            config: migrateConfigFields({
-              ...createDefaultGlobalConfig(),
-              ...(parsed as Partial<GlobalConfig>),
-            }),
-            mtime: curr.mtimeMs,
-          }
-          lastReadFileStats = { mtime: curr.mtimeMs, size: curr.size }
-        })
-        .catch(() => {})
-    },
-  )
+  watchFile(file, { interval: CONFIG_FRESHNESS_POLL_MS, persistent: false }, (curr) => {
+    // Our own writes fire this too — the write-through's Date.now()
+    // overshoot makes cache.mtime > file mtime, so we skip the re-read.
+    // Bun/Node also fire with curr.mtimeMs=0 when the file doesn't exist
+    // (initial callback or deletion) — the <= handles that too.
+    if (curr.mtimeMs <= globalConfigCache.mtime) return
+    void getFsImplementation()
+      .readFile(file, { encoding: 'utf-8' })
+      .then((content) => {
+        // A write-through may have advanced the cache while we were reading;
+        // don't regress to the stale snapshot watchFile stat'd.
+        if (curr.mtimeMs <= globalConfigCache.mtime) return
+        const parsed = safeParseJSON(stripBOM(content))
+        if (parsed === null || typeof parsed !== 'object') return
+        globalConfigCache = {
+          config: migrateConfigFields({
+            ...createDefaultGlobalConfig(),
+            ...(parsed as Partial<GlobalConfig>),
+          }),
+          mtime: curr.mtimeMs,
+        }
+        lastReadFileStats = { mtime: curr.mtimeMs, size: curr.size }
+      })
+      .catch((error) => {
+        logForDebugging(`[config] global config watcher read failed: ${String(error)}`)
+      })
+  })
   registerCleanup(async () => {
     unwatchFile(file)
     freshnessWatcherStarted = false
@@ -1065,23 +1046,17 @@ export function getGlobalConfig(): GlobalConfig {
     } catch {
       // File doesn't exist
     }
-    const config = migrateConfigFields(
-      getConfig(getGlobalClaudeFile(), createDefaultGlobalConfig),
-    )
+    const config = migrateConfigFields(getConfig(getGlobalClaudeFile(), createDefaultGlobalConfig))
     globalConfigCache = {
       config,
       mtime: stats?.mtimeMs ?? Date.now(),
     }
-    lastReadFileStats = stats
-      ? { mtime: stats.mtimeMs, size: stats.size }
-      : null
+    lastReadFileStats = stats ? { mtime: stats.mtimeMs, size: stats.size } : null
     startGlobalConfigFreshnessWatcher()
     return config
   } catch {
     // If anything goes wrong, fall back to uncached behavior
-    return migrateConfigFields(
-      getConfig(getGlobalClaudeFile(), createDefaultGlobalConfig),
-    )
+    return migrateConfigFields(getConfig(getGlobalClaudeFile(), createDefaultGlobalConfig))
   }
 }
 
@@ -1100,9 +1075,7 @@ export function getRemoteControlAtStartup(): boolean {
   return false
 }
 
-export function getCustomApiKeyStatus(
-  truncatedApiKey: string,
-): 'approved' | 'rejected' | 'new' {
+export function getCustomApiKeyStatus(truncatedApiKey: string): 'approved' | 'rejected' | 'new' {
   const config = getGlobalConfig()
   if (config.customApiKeyResponses?.approved?.includes(truncatedApiKey)) {
     return 'approved'
@@ -1113,11 +1086,7 @@ export function getCustomApiKeyStatus(
   return 'new'
 }
 
-function saveConfig<A extends object>(
-  file: string,
-  config: A,
-  defaultConfig: A,
-): void {
+function saveConfig<A extends object>(file: string, config: A, defaultConfig: A): void {
   // Ensure the directory exists before writing the config file
   const dir = dirname(file)
   const fs = getFsImplementation()
@@ -1127,18 +1096,13 @@ function saveConfig<A extends object>(
   // Filter out any values that match the defaults
   const filteredConfig = pickBy(
     config,
-    (value, key) =>
-      jsonStringify(value) !== jsonStringify(defaultConfig[key as keyof A]),
+    (value, key) => jsonStringify(value) !== jsonStringify(defaultConfig[key as keyof A]),
   )
   // Write config file with secure permissions - mode only applies to new files
-  writeFileSyncAndFlush_DEPRECATED(
-    file,
-    jsonStringify(filteredConfig, null, 2),
-    {
-      encoding: 'utf-8',
-      mode: 0o600,
-    },
-  )
+  writeFileSyncAndFlush_DEPRECATED(file, jsonStringify(filteredConfig, null, 2), {
+    encoding: 'utf-8',
+    mode: 0o600,
+  })
   if (file === getGlobalClaudeFile()) {
     globalConfigWriteCount++
   }
@@ -1168,7 +1132,7 @@ function saveConfigWithLock<A extends object>(
     const startTime = Date.now()
     release = lockfile.lockSync(file, {
       lockfilePath: lockFilePath,
-      onCompromised: err => {
+      onCompromised: (err) => {
         // Default onCompromised throws from a setTimeout callback, which
         // becomes an unhandled exception. Log instead -- the lock being
         // stolen (e.g. after a 10s event-loop stall) is recoverable.
@@ -1234,8 +1198,7 @@ function saveConfigWithLock<A extends object>(
     // Filter out any values that match the defaults
     const filteredConfig = pickBy(
       mergedConfig,
-      (value, key) =>
-        jsonStringify(value) !== jsonStringify(defaultConfig[key as keyof A]),
+      (value, key) => jsonStringify(value) !== jsonStringify(defaultConfig[key as keyof A]),
     )
 
     // Create timestamped backup of existing config before writing
@@ -1263,7 +1226,7 @@ function saveConfigWithLock<A extends object>(
       const MIN_BACKUP_INTERVAL_MS = 60_000
       const existingBackups = fs
         .readdirStringSync(backupDir)
-        .filter(f => f.startsWith(`${fileBase}.backup.`))
+        .filter((f) => f.startsWith(`${fileBase}.backup.`))
         .sort()
         .reverse() // Most recent first (timestamps sort lexicographically)
 
@@ -1286,7 +1249,7 @@ function saveConfigWithLock<A extends object>(
       const backupsForCleanup = shouldCreateBackup
         ? fs
             .readdirStringSync(backupDir)
-            .filter(f => f.startsWith(`${fileBase}.backup.`))
+            .filter((f) => f.startsWith(`${fileBase}.backup.`))
             .sort()
             .reverse()
         : existingBackups
@@ -1309,14 +1272,10 @@ function saveConfigWithLock<A extends object>(
     }
 
     // Write config file with secure permissions - mode only applies to new files
-    writeFileSyncAndFlush_DEPRECATED(
-      file,
-      jsonStringify(filteredConfig, null, 2),
-      {
-        encoding: 'utf-8',
-        mode: 0o600,
-      },
-    )
+    writeFileSyncAndFlush_DEPRECATED(file, jsonStringify(filteredConfig, null, 2), {
+      encoding: 'utf-8',
+      mode: 0o600,
+    })
     if (file === getGlobalClaudeFile()) {
       globalConfigWriteCount++
     }
@@ -1344,11 +1303,7 @@ export function enableConfigs(): void {
   // to prevent us from adding config reading during module initialization
   configReadingAllowed = true
   // We only check the global config because currently all the configs share a file
-  getConfig(
-    getGlobalClaudeFile(),
-    createDefaultGlobalConfig,
-    true /* throw on invalid */,
-  )
+  getConfig(getGlobalClaudeFile(), createDefaultGlobalConfig, true /* throw on invalid */)
 
   logForDiagnosticsNoPII('info', 'enable_configs_completed', {
     duration_ms: Date.now() - startTime,
@@ -1378,7 +1333,7 @@ function findMostRecentBackup(file: string): string | null {
   try {
     const backups = fs
       .readdirStringSync(backupDir)
-      .filter(f => f.startsWith(`${fileBase}.backup.`))
+      .filter((f) => f.startsWith(`${fileBase}.backup.`))
       .sort()
 
     const mostRecent = backups.at(-1) // Timestamps sort lexicographically
@@ -1395,7 +1350,7 @@ function findMostRecentBackup(file: string): string | null {
   try {
     const backups = fs
       .readdirStringSync(fileDir)
-      .filter(f => f.startsWith(`${fileBase}.backup.`))
+      .filter((f) => f.startsWith(`${fileBase}.backup.`))
       .sort()
 
     const mostRecent = backups.at(-1) // Timestamps sort lexicographically
@@ -1418,11 +1373,7 @@ function findMostRecentBackup(file: string): string | null {
   return null
 }
 
-function getConfig<A>(
-  file: string,
-  createDefault: () => A,
-  throwOnInvalid?: boolean,
-): A {
+function getConfig<A>(file: string, createDefault: () => A, throwOnInvalid?: boolean): A {
   // Log a warning if config is accessed before it's allowed
   if (!configReadingAllowed && process.env.NODE_ENV !== 'test') {
     throw new Error('Config accessed before allowed.')
@@ -1443,8 +1394,7 @@ function getConfig<A>(
       }
     } catch (error) {
       // Throw a ConfigParseError with the file path and default config
-      const errorMessage =
-        error instanceof Error ? error.message : String(error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
       throw new ConfigParseError(errorMessage, file, createDefault())
     }
   } catch (error) {
@@ -1469,10 +1419,9 @@ function getConfig<A>(
 
     // Log config parse errors so users know what happened
     if (error instanceof ConfigParseError) {
-      logForDebugging(
-        `Config file corrupted, resetting to defaults: ${error.message}`,
-        { level: 'error' },
-      )
+      logForDebugging(`Config file corrupted, resetting to defaults: ${error.message}`, {
+        level: 'error',
+      })
 
       // Guard: logEvent → shouldSampleEvent → getGlobalConfig → getConfig
       // causes infinite recursion when the config file is corrupted, because
@@ -1520,7 +1469,7 @@ function getConfig<A>(
 
       const existingCorruptedBackups = fs
         .readdirStringSync(corruptedBackupDir)
-        .filter(f => f.startsWith(`${fileBase}.corrupted.`))
+        .filter((f) => f.startsWith(`${fileBase}.corrupted.`))
 
       let corruptedBackupPath: string | undefined
       let alreadyBackedUp = false
@@ -1529,10 +1478,9 @@ function getConfig<A>(
       const currentContent = fs.readFileSync(file, { encoding: 'utf-8' })
       for (const backup of existingCorruptedBackups) {
         try {
-          const backupContent = fs.readFileSync(
-            join(corruptedBackupDir, backup),
-            { encoding: 'utf-8' },
-          )
+          const backupContent = fs.readFileSync(join(corruptedBackupDir, backup), {
+            encoding: 'utf-8',
+          })
           if (currentContent === backupContent) {
             alreadyBackedUp = true
             break
@@ -1543,18 +1491,12 @@ function getConfig<A>(
       }
 
       if (!alreadyBackedUp) {
-        corruptedBackupPath = join(
-          corruptedBackupDir,
-          `${fileBase}.corrupted.${Date.now()}`,
-        )
+        corruptedBackupPath = join(corruptedBackupDir, `${fileBase}.corrupted.${Date.now()}`)
         try {
           fs.copyFileSync(file, corruptedBackupPath)
-          logForDebugging(
-            `Corrupted config backed up to: ${corruptedBackupPath}`,
-            {
-              level: 'error',
-            },
-          )
+          logForDebugging(`Corrupted config backed up to: ${corruptedBackupPath}`, {
+            level: 'error',
+          })
         } catch {
           // Ignore backup errors
         }
@@ -1563,9 +1505,7 @@ function getConfig<A>(
       // Notify user about corrupted config and available backup
       const backupPath = findMostRecentBackup(file)
       if (corruptedBackupPath) {
-        process.stderr.write(
-          `The corrupted file has been backed up to: ${corruptedBackupPath}\n`,
-        )
+        process.stderr.write(`The corrupted file has been backed up to: ${corruptedBackupPath}\n`)
       } else if (alreadyBackedUp) {
         process.stderr.write(`The corrupted file has already been backed up.\n`)
       }
@@ -1615,8 +1555,7 @@ export function getCurrentProjectConfig(): ProjectConfig {
   // Not sure how this became a string
   // TODO: Fix upstream
   if (typeof projectConfig.allowedTools === 'string') {
-    projectConfig.allowedTools =
-      (safeParseJSON(projectConfig.allowedTools) as string[]) ?? []
+    projectConfig.allowedTools = (safeParseJSON(projectConfig.allowedTools) as string[]) ?? []
   }
 
   return projectConfig
@@ -1641,9 +1580,8 @@ export function saveCurrentProjectConfig(
     const didWrite = saveConfigWithLock(
       getGlobalClaudeFile(),
       createDefaultGlobalConfig,
-      current => {
-        const currentProjectConfig =
-          current.projects?.[absolutePath] ?? DEFAULT_PROJECT_CONFIG
+      (current) => {
+        const currentProjectConfig = current.projects?.[absolutePath] ?? DEFAULT_PROJECT_CONFIG
         const newProjectConfig = updater(currentProjectConfig)
         // Skip if no changes (same reference returned)
         if (newProjectConfig === currentProjectConfig) {
@@ -1678,8 +1616,7 @@ export function saveCurrentProjectConfig(
       logEvent('tengu_config_auth_loss_prevented', {})
       return
     }
-    const currentProjectConfig =
-      config.projects?.[absolutePath] ?? DEFAULT_PROJECT_CONFIG
+    const currentProjectConfig = config.projects?.[absolutePath] ?? DEFAULT_PROJECT_CONFIG
     const newProjectConfig = updater(currentProjectConfig)
     // Skip if no changes (same reference returned)
     if (newProjectConfig === currentProjectConfig) {
@@ -1708,10 +1645,7 @@ export function isAutoUpdaterDisabled(): boolean {
  * even when the auto-updater is otherwise disabled.
  */
 export function shouldSkipPluginAutoupdate(): boolean {
-  return (
-    isAutoUpdaterDisabled() &&
-    !isEnvTruthy(process.env.FORCE_AUTOUPDATE_PLUGINS)
-  )
+  return isAutoUpdaterDisabled() && !isEnvTruthy(process.env.FORCE_AUTOUPDATE_PLUGINS)
 }
 
 export type AutoUpdaterDisabledReason =
@@ -1719,9 +1653,7 @@ export type AutoUpdaterDisabledReason =
   | { type: 'env'; envVar: string }
   | { type: 'config' }
 
-export function formatAutoUpdaterDisabledReason(
-  reason: AutoUpdaterDisabledReason,
-): string {
+export function formatAutoUpdaterDisabledReason(reason: AutoUpdaterDisabledReason): string {
   switch (reason.type) {
     case 'development':
       return 'development build'
@@ -1746,8 +1678,7 @@ export function getAutoUpdaterDisabledReason(): AutoUpdaterDisabledReason | null
   const config = getGlobalConfig()
   if (
     config.autoUpdates === false &&
-    (config.installMethod !== 'native' ||
-      config.autoUpdatesProtectedForNative !== true)
+    (config.installMethod !== 'native' || config.autoUpdatesProtectedForNative !== true)
   ) {
     return { type: 'config' }
   }
@@ -1761,7 +1692,7 @@ export function getOrCreateUserID(): string {
   }
 
   const userID = randomBytes(32).toString('hex')
-  saveGlobalConfig(current => ({ ...current, userID }))
+  saveGlobalConfig((current) => ({ ...current, userID }))
   return userID
 }
 
@@ -1769,7 +1700,7 @@ export function recordFirstStartTime(): void {
   const config = getGlobalConfig()
   if (!config.firstStartTime) {
     const firstStartTime = new Date().toISOString()
-    saveGlobalConfig(current => ({
+    saveGlobalConfig((current) => ({
       ...current,
       firstStartTime: current.firstStartTime ?? firstStartTime,
     }))
@@ -1809,9 +1740,7 @@ export function getUserClaudeRulesDir(): string {
 // Exported for testing only
 export const _getConfigForTesting = getConfig
 export const _wouldLoseAuthStateForTesting = wouldLoseAuthState
-export function _setGlobalConfigCacheForTesting(
-  config: GlobalConfig | null,
-): void {
+export function _setGlobalConfigCacheForTesting(config: GlobalConfig | null): void {
   globalConfigCache.config = config
   globalConfigCache.mtime = config ? Date.now() : 0
 }

@@ -4,6 +4,7 @@ import { getInitialSettings } from './settings/settings.js'
 import { isProSubscriber, isMaxSubscriber, isTeamSubscriber } from './auth.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js'
 import { getAPIProvider } from './model/providers.js'
+import { getAntModelOverrideConfig, resolveAntModel } from './model/antModels.js'
 import { get3PModelCapabilityOverride } from './model/modelSupportOverrides.js'
 import { isEnvTruthy } from './envUtils.js'
 import type { EffortLevel } from 'src/entrypoints/sdk/runtimeTypes.js'
@@ -92,9 +93,7 @@ export function parseEffortValue(value: unknown): EffortValue | undefined {
  * Write sites call this before saving to settings so the Zod schema
  * (which only accepts string levels) never rejects a write.
  */
-export function toPersistableEffort(
-  value: EffortValue | undefined,
-): EffortLevel | undefined {
+export function toPersistableEffort(value: EffortValue | undefined): EffortLevel | undefined {
   if (value === 'low' || value === 'medium' || value === 'high') {
     return value
   }
@@ -135,8 +134,7 @@ export function resolvePickerEffortPersistence(
 
 export function getEffortEnvOverride(): EffortValue | null | undefined {
   const envOverride = process.env.CLAUDE_CODE_EFFORT_LEVEL
-  return envOverride?.toLowerCase() === 'unset' ||
-    envOverride?.toLowerCase() === 'auto'
+  return envOverride?.toLowerCase() === 'unset' || envOverride?.toLowerCase() === 'auto'
     ? null
     : parseEffortValue(envOverride)
 }
@@ -157,8 +155,7 @@ export function resolveAppliedEffort(
   if (envOverride === null) {
     return undefined
   }
-  const resolved =
-    envOverride ?? appStateEffortValue ?? getDefaultEffortForModel(model)
+  const resolved = envOverride ?? appStateEffortValue ?? getDefaultEffortForModel(model)
   // API rejects 'max' on non-Opus-4.6 models — downgrade to 'high'.
   if (resolved === 'max' && !modelSupportsMaxEffort(model)) {
     return 'high'
@@ -185,10 +182,7 @@ export function getDisplayedEffortLevel(
  * Delegates to resolveAppliedEffort() so the displayed level matches what
  * the API actually receives (including max→high clamp for non-Opus models).
  */
-export function getEffortSuffix(
-  model: string,
-  effortValue: EffortValue | undefined,
-): string {
+export function getEffortSuffix(model: string, effortValue: EffortValue | undefined): string {
   if (effortValue === undefined) return ''
   const resolved = resolveAppliedEffort(model, effortValue)
   if (resolved === undefined) return ''
@@ -276,9 +270,7 @@ export function getOpusDefaultEffortConfig(): OpusDefaultEffortConfig {
 }
 
 // @[MODEL LAUNCH]: Update the default effort levels for new models
-export function getDefaultEffortForModel(
-  model: string,
-): EffortValue | undefined {
+export function getDefaultEffortForModel(model: string): EffortValue | undefined {
   if (process.env.USER_TYPE === 'ant') {
     const config = getAntModelOverrideConfig()
     const isDefaultModel =
@@ -310,10 +302,7 @@ export function getDefaultEffortForModel(
     if (isProSubscriber()) {
       return 'medium'
     }
-    if (
-      getOpusDefaultEffortConfig().enabled &&
-      (isMaxSubscriber() || isTeamSubscriber())
-    ) {
+    if (getOpusDefaultEffortConfig().enabled && (isMaxSubscriber() || isTeamSubscriber())) {
       return 'medium'
     }
   }

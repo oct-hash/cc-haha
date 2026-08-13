@@ -7,10 +7,7 @@ import {
   setHasExitedPlanMode,
   setNeedsAutoModeExitAttachment,
 } from '../../bootstrap/state.js'
-import type {
-  ToolPermissionContext,
-  ToolPermissionRulesBySource,
-} from '../../Tool.js'
+import type { ToolPermissionContext, ToolPermissionRulesBySource } from '../../Tool.js'
 import { getCwd } from '../cwd.js'
 import { isEnvTruthy } from '../envUtils.js'
 import type { SettingSource } from '../settings/constants.js'
@@ -21,10 +18,7 @@ import {
   getUseAutoModeDuringPlan,
   hasAutoModeOptIn,
 } from '../settings/settings.js'
-import {
-  type PermissionMode,
-  permissionModeFromString,
-} from './PermissionMode.js'
+import { type PermissionMode, permissionModeFromString } from './PermissionMode.js'
 import { applyPermissionRulesToPermissionContext } from './permissions.js'
 import { loadAllPermissionRulesFromDisk } from './permissionsLoader.js'
 
@@ -53,27 +47,14 @@ import { BASH_TOOL_NAME } from '../../tools/BashTool/toolName.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { POWERSHELL_TOOL_NAME } from '../../tools/PowerShellTool/toolName.js'
 import { getToolsForDefaultPreset, parseToolPreset } from '../../tools.js'
-import {
-  getFsImplementation,
-  safeResolvePath,
-} from '../../utils/fsOperations.js'
+import { getFsImplementation, safeResolvePath } from '../../utils/fsOperations.js'
 import { modelSupportsAutoMode } from '../betas.js'
 import { logForDebugging } from '../debug.js'
 import { gracefulShutdown } from '../gracefulShutdown.js'
 import { getMainLoopModel } from '../model/model.js'
-import {
-  CROSS_PLATFORM_CODE_EXEC,
-  DANGEROUS_BASH_PATTERNS,
-} from './dangerousPatterns.js'
-import type {
-  PermissionRule,
-  PermissionRuleSource,
-  PermissionRuleValue,
-} from './PermissionRule.js'
-import {
-  type AdditionalWorkingDirectory,
-  applyPermissionUpdate,
-} from './PermissionUpdate.js'
+import { CROSS_PLATFORM_CODE_EXEC, DANGEROUS_BASH_PATTERNS } from './dangerousPatterns.js'
+import type { PermissionRule, PermissionRuleSource, PermissionRuleValue } from './PermissionRule.js'
+import { type AdditionalWorkingDirectory, applyPermissionUpdate } from './PermissionUpdate.js'
 import type { PermissionUpdateDestination } from './PermissionUpdateSchema.js'
 import {
   normalizeLegacyToolName,
@@ -219,10 +200,7 @@ export function isDangerousPowerShellPermission(
     // `npm run` → `npm.exe run` (npm.exe is the real Windows binary name).
     // A rule like `PowerShell(npm.exe run:*)` needs to match `npm run`.
     const sp = pattern.indexOf(' ')
-    const exe =
-      sp === -1
-        ? `${pattern}.exe`
-        : `${pattern.slice(0, sp)}.exe${pattern.slice(sp)}`
+    const exe = sp === -1 ? `${pattern}.exe` : `${pattern.slice(0, sp)}.exe${pattern.slice(sp)}`
     if (content === exe) return true
     if (content === `${exe}:*`) return true
     if (content === `${exe}*`) return true
@@ -302,10 +280,7 @@ export function findDangerousClassifierPermissions(
   for (const rule of rules) {
     if (
       rule.ruleBehavior === 'allow' &&
-      isDangerousClassifierPermission(
-        rule.ruleValue.toolName,
-        rule.ruleValue.ruleContent,
-      )
+      isDangerousClassifierPermission(rule.ruleValue.toolName, rule.ruleValue.ruleContent)
     ) {
       const ruleString = rule.ruleValue.ruleContent
         ? `${rule.ruleValue.toolName}(${rule.ruleValue.ruleContent})`
@@ -348,12 +323,8 @@ export function findDangerousClassifierPermissions(
  *
  * Matches: Bash, Bash(*), Bash() — all parse to { toolName: 'Bash' } with no ruleContent.
  */
-export function isOverlyBroadBashAllowRule(
-  ruleValue: PermissionRuleValue,
-): boolean {
-  return (
-    ruleValue.toolName === BASH_TOOL_NAME && ruleValue.ruleContent === undefined
-  )
+export function isOverlyBroadBashAllowRule(ruleValue: PermissionRuleValue): boolean {
+  return ruleValue.toolName === BASH_TOOL_NAME && ruleValue.ruleContent === undefined
 }
 
 /**
@@ -362,13 +333,8 @@ export function isOverlyBroadBashAllowRule(
  * Matches: PowerShell, PowerShell(*), PowerShell() — all parse to
  * { toolName: 'PowerShell' } with no ruleContent.
  */
-export function isOverlyBroadPowerShellAllowRule(
-  ruleValue: PermissionRuleValue,
-): boolean {
-  return (
-    ruleValue.toolName === POWERSHELL_TOOL_NAME &&
-    ruleValue.ruleContent === undefined
-  )
+export function isOverlyBroadPowerShellAllowRule(ruleValue: PermissionRuleValue): boolean {
+  return ruleValue.toolName === POWERSHELL_TOOL_NAME && ruleValue.ruleContent === undefined
 }
 
 /**
@@ -383,10 +349,7 @@ export function findOverlyBroadBashPermissions(
   const overlyBroad: DangerousPermissionInfo[] = []
 
   for (const rule of rules) {
-    if (
-      rule.ruleBehavior === 'allow' &&
-      isOverlyBroadBashAllowRule(rule.ruleValue)
-    ) {
+    if (rule.ruleBehavior === 'allow' && isOverlyBroadBashAllowRule(rule.ruleValue)) {
       overlyBroad.push({
         ruleValue: rule.ruleValue,
         source: rule.source,
@@ -421,10 +384,7 @@ export function findOverlyBroadPowerShellPermissions(
   const overlyBroad: DangerousPermissionInfo[] = []
 
   for (const rule of rules) {
-    if (
-      rule.ruleBehavior === 'allow' &&
-      isOverlyBroadPowerShellAllowRule(rule.ruleValue)
-    ) {
+    if (rule.ruleBehavior === 'allow' && isOverlyBroadPowerShellAllowRule(rule.ruleValue)) {
       overlyBroad.push({
         ruleValue: rule.ruleValue,
         source: rule.source,
@@ -456,13 +416,7 @@ export function findOverlyBroadPowerShellPermissions(
 function isPermissionUpdateDestination(
   source: PermissionRuleSource,
 ): source is PermissionUpdateDestination {
-  return [
-    'userSettings',
-    'projectSettings',
-    'localSettings',
-    'session',
-    'cliArg',
-  ].includes(source)
+  return ['userSettings', 'projectSettings', 'localSettings', 'session', 'cliArg'].includes(source)
 }
 
 /**
@@ -474,10 +428,7 @@ export function removeDangerousPermissions(
   dangerousPermissions: DangerousPermissionInfo[],
 ): ToolPermissionContext {
   // Group dangerous rules by their source (destination for updates)
-  const rulesBySource = new Map<
-    PermissionUpdateDestination,
-    PermissionRuleValue[]
-  >()
+  const rulesBySource = new Map<PermissionUpdateDestination, PermissionRuleValue[]>()
   for (const perm of dangerousPermissions) {
     // Skip sources that can't be persisted (flagSettings, policySettings, command)
     if (!isPermissionUpdateDestination(perm.source)) {
@@ -511,9 +462,7 @@ export function stripDangerousPermissionsForAutoMode(
   context: ToolPermissionContext,
 ): ToolPermissionContext {
   const rules: PermissionRule[] = []
-  for (const [source, ruleStrings] of Object.entries(
-    context.alwaysAllowRules,
-  )) {
+  for (const [source, ruleStrings] of Object.entries(context.alwaysAllowRules)) {
     if (!ruleStrings) {
       continue
     }
@@ -542,9 +491,7 @@ export function stripDangerousPermissionsForAutoMode(
   const stripped: ToolPermissionRulesBySource = {}
   for (const perm of dangerousPermissions) {
     if (!isPermissionUpdateDestination(perm.source)) continue
-    ;(stripped[perm.source] ??= []).push(
-      permissionRuleValueToString(perm.ruleValue),
-    )
+    ;(stripped[perm.source] ??= []).push(permissionRuleValueToString(perm.ruleValue))
   }
   return {
     ...removeDangerousPermissions(context, dangerousPermissions),
@@ -558,9 +505,7 @@ export function stripDangerousPermissionsForAutoMode(
  * the user's Bash(python:*), Agent(*), etc. rules work again in default mode.
  * Clears the stash so a second exit is a no-op.
  */
-export function restoreDangerousPermissions(
-  context: ToolPermissionContext,
-): ToolPermissionContext {
+export function restoreDangerousPermissions(context: ToolPermissionContext): ToolPermissionContext {
   const stash = context.strippedDangerousRules
   if (!stash) {
     return context
@@ -620,8 +565,7 @@ export function transitionPermissionMode(
     // entry, transitionPlanAutoMode) while those fields remain set/unset.
     const fromUsesClassifier =
       fromMode === 'auto' ||
-      (fromMode === 'plan' &&
-        (autoModeStateModule?.isAutoModeActive() ?? false))
+      (fromMode === 'plan' && (autoModeStateModule?.isAutoModeActive() ?? false))
     const toUsesClassifier = toMode === 'auto' // plan entry handled above
 
     if (toUsesClassifier && !fromUsesClassifier) {
@@ -675,12 +619,12 @@ function isSymlinkTo({
   originalCwd: string
 }): boolean {
   // Use safeResolvePath to check if processPwd is a symlink and get its resolved path
-  const { resolvedPath: resolvedProcessPwd, isSymlink: isProcessPwdSymlink } =
-    safeResolvePath(getFsImplementation(), processPwd)
+  const { resolvedPath: resolvedProcessPwd, isSymlink: isProcessPwdSymlink } = safeResolvePath(
+    getFsImplementation(),
+    processPwd,
+  )
 
-  return isProcessPwdSymlink
-    ? resolvedProcessPwd === resolve(originalCwd)
-    : false
+  return isProcessPwdSymlink ? resolvedProcessPwd === resolve(originalCwd) : false
 }
 
 /**
@@ -696,10 +640,9 @@ export function initialPermissionModeFromCLI({
   const settings = getSettings_DEPRECATED() || {}
 
   // Check GrowthBook gate first - highest precedence
-  const growthBookDisableBypassPermissionsMode =
-    checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
-      'tengu_disable_bypass_permissions_mode',
-    )
+  const growthBookDisableBypassPermissionsMode = checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
+    'tengu_disable_bypass_permissions_mode',
+  )
 
   // Then check settings - lower precedence
   const settingsDisableBypassPermissionsMode =
@@ -707,8 +650,7 @@ export function initialPermissionModeFromCLI({
 
   // Statsig gate takes precedence over settings
   const disableBypassPermissionsMode =
-    growthBookDisableBypassPermissionsMode ||
-    settingsDisableBypassPermissionsMode
+    growthBookDisableBypassPermissionsMode || settingsDisableBypassPermissionsMode
 
   // Sync circuit-breaker check (cached GB read). Prevents the
   // AutoModeOptInDialog from showing in showSetupScreens() when auto can't
@@ -729,10 +671,9 @@ export function initialPermissionModeFromCLI({
     const parsedMode = permissionModeFromString(permissionModeCli)
     if (feature('TRANSCRIPT_CLASSIFIER') && parsedMode === 'auto') {
       if (autoModeCircuitBrokenSync) {
-        logForDebugging(
-          'auto mode circuit breaker active (cached) — falling back to default',
-          { level: 'warn' },
-        )
+        logForDebugging('auto mode circuit breaker active (cached) — falling back to default', {
+          level: 'warn',
+        })
       } else {
         orderedModes.push('auto')
       }
@@ -760,10 +701,9 @@ export function initialPermissionModeFromCLI({
     // auto from settings requires the same gate check as from CLI
     else if (feature('TRANSCRIPT_CLASSIFIER') && settingsMode === 'auto') {
       if (autoModeCircuitBrokenSync) {
-        logForDebugging(
-          'auto mode circuit breaker active (cached) — falling back to default',
-          { level: 'warn' },
-        )
+        logForDebugging('auto mode circuit breaker active (cached) — falling back to default', {
+          level: 'warn',
+        })
       } else {
         orderedModes.push('auto')
       }
@@ -780,8 +720,7 @@ export function initialPermissionModeFromCLI({
         logForDebugging('bypassPermissions mode is disabled by Statsig gate', {
           level: 'warn',
         })
-        notification =
-          'Bypass permissions mode was disabled by your organization policy'
+        notification = 'Bypass permissions mode was disabled by your organization policy'
       } else {
         logForDebugging('bypassPermissions mode is disabled by settings', {
           level: 'warn',
@@ -892,8 +831,8 @@ export async function initializeToolPermissionContext({
   // Parse comma-separated allowed and disallowed tools if provided
   // Normalize legacy tool names (e.g., 'Task' → 'Agent') so that in-memory
   // rule removal in stripDangerousPermissionsForAutoMode matches correctly.
-  const parsedAllowedToolsCli = parseToolListFromCLI(allowedToolsCli).map(
-    rule => permissionRuleValueToString(permissionRuleValueFromString(rule)),
+  const parsedAllowedToolsCli = parseToolListFromCLI(allowedToolsCli).map((rule) =>
+    permissionRuleValueToString(permissionRuleValueFromString(rule)),
   )
   let parsedDisallowedToolsCli = parseToolListFromCLI(disallowedToolsCli)
 
@@ -905,15 +844,12 @@ export async function initializeToolPermissionContext({
     // base tool lists using old names still match canonical names.
     const baseToolsSet = new Set(baseToolsResult.map(normalizeLegacyToolName))
     const allToolNames = getToolsForDefaultPreset()
-    const toolsToDisallow = allToolNames.filter(tool => !baseToolsSet.has(tool))
+    const toolsToDisallow = allToolNames.filter((tool) => !baseToolsSet.has(tool))
     parsedDisallowedToolsCli = [...parsedDisallowedToolsCli, ...toolsToDisallow]
   }
 
   const warnings: string[] = []
-  const additionalWorkingDirectories = new Map<
-    string,
-    AdditionalWorkingDirectory
-  >()
+  const additionalWorkingDirectories = new Map<string, AdditionalWorkingDirectory>()
   // process.env.PWD may be a symlink, while getOriginalCwd() uses the real path
   const processPwd = process.env.PWD
   if (
@@ -929,16 +865,14 @@ export async function initializeToolPermissionContext({
 
   // Check if bypassPermissions mode is available (not disabled by Statsig gate or settings)
   // Use cached values to avoid blocking on startup
-  const growthBookDisableBypassPermissionsMode =
-    checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
-      'tengu_disable_bypass_permissions_mode',
-    )
+  const growthBookDisableBypassPermissionsMode = checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
+    'tengu_disable_bypass_permissions_mode',
+  )
   const settings = getSettings_DEPRECATED() || {}
   const settingsDisableBypassPermissionsMode =
     settings.permissions?.disableBypassPermissionsMode === 'disable'
   const isBypassPermissionsModeAvailable =
-    (permissionMode === 'bypassPermissions' ||
-      allowDangerouslySkipPermissions) &&
+    (permissionMode === 'bypassPermissions' || allowDangerouslySkipPermissions) &&
     !growthBookDisableBypassPermissionsMode &&
     !settingsDisableBypassPermissionsMode
 
@@ -957,10 +891,7 @@ export async function initializeToolPermissionContext({
   ) {
     overlyBroadBashPermissions = [
       ...findOverlyBroadBashPermissions(rulesFromDisk, parsedAllowedToolsCli),
-      ...findOverlyBroadPowerShellPermissions(
-        rulesFromDisk,
-        parsedAllowedToolsCli,
-      ),
+      ...findOverlyBroadPowerShellPermissions(rulesFromDisk, parsedAllowedToolsCli),
     ]
   }
 
@@ -969,10 +900,7 @@ export async function initializeToolPermissionContext({
   // before the classifier can evaluate them, defeating the purpose of safer YOLO mode
   let dangerousPermissions: DangerousPermissionInfo[] = []
   if (feature('TRANSCRIPT_CLASSIFIER') && permissionMode === 'auto') {
-    dangerousPermissions = findDangerousClassifierPermissions(
-      rulesFromDisk,
-      parsedAllowedToolsCli,
-    )
+    dangerousPermissions = findDangerousClassifierPermissions(rulesFromDisk, parsedAllowedToolsCli)
   }
 
   let toolPermissionContext = applyPermissionRulesToPermissionContext(
@@ -983,9 +911,7 @@ export async function initializeToolPermissionContext({
       alwaysDenyRules: { cliArg: parsedDisallowedToolsCli },
       alwaysAskRules: {},
       isBypassPermissionsModeAvailable,
-      ...(feature('TRANSCRIPT_CLASSIFIER')
-        ? { isAutoModeAvailable: isAutoModeGateEnabled() }
-        : {}),
+      ...(feature('TRANSCRIPT_CLASSIFIER') ? { isAutoModeAvailable: isAutoModeGateEnabled() } : {}),
     },
     rulesFromDisk,
   )
@@ -1001,7 +927,7 @@ export async function initializeToolPermissionContext({
   // (two overlapping --add-dirs both succeed instead of one being flagged
   // alreadyInWorkingDirectory, which was silently skipped anyway).
   const validationResults = await Promise.all(
-    allAdditionalDirectories.map(dir =>
+    allAdditionalDirectories.map((dir) =>
       validateDirectoryForWorkspace(dir, toolPermissionContext),
     ),
   )
@@ -1044,9 +970,7 @@ export type AutoModeGateCheckResult = {
 
 export type AutoModeUnavailableReason = 'settings' | 'circuit-breaker' | 'model'
 
-export function getAutoModeUnavailableNotification(
-  reason: AutoModeUnavailableReason,
-): string {
+export function getAutoModeUnavailableNotification(reason: AutoModeUnavailableReason): string {
   let base: string
   switch (reason) {
     case 'settings':
@@ -1059,9 +983,7 @@ export function getAutoModeUnavailableNotification(
       base = 'auto mode unavailable for this model'
       break
   }
-  return process.env.USER_TYPE === 'ant'
-    ? `${base} · #claude-code-feedback`
-    : base
+  return process.env.USER_TYPE === 'ant' ? `${base} · #claude-code-feedback` : base
 }
 
 /**
@@ -1096,9 +1018,7 @@ export async function verifyAutoModeGateAccess(
   const disabledBySettings = isAutoModeDisabledBySettings()
   // Treat settings-disable the same as GrowthBook 'disabled' for circuit-breaker
   // semantics — blocks SDK/explicit re-entry via isAutoModeGateEnabled().
-  autoModeStateModule?.setAutoModeCircuitBroken(
-    enabledState === 'disabled' || disabledBySettings,
-  )
+  autoModeStateModule?.setAutoModeCircuitBroken(enabledState === 'disabled' || disabledBySettings)
 
   // Carousel availability: not circuit-broken, not disabled-by-settings,
   // model supports it, disableFastMode breaker not firing, and (enabled or opted-in)
@@ -1110,20 +1030,15 @@ export async function verifyAutoModeGateAccess(
   // Remove once auto+fast mode interaction is validated.
   const disableFastModeBreakerFires =
     !!autoModeConfig?.disableFastMode &&
-    (!!fastMode ||
-      (process.env.USER_TYPE === 'ant' &&
-        mainModel.toLowerCase().includes('-fast')))
-  const modelSupported =
-    modelSupportsAutoMode(mainModel) && !disableFastModeBreakerFires
+    (!!fastMode || (process.env.USER_TYPE === 'ant' && mainModel.toLowerCase().includes('-fast')))
+  const modelSupported = modelSupportsAutoMode(mainModel) && !disableFastModeBreakerFires
   let carouselAvailable = false
   if (enabledState !== 'disabled' && !disabledBySettings && modelSupported) {
-    carouselAvailable =
-      enabledState === 'enabled' || hasAutoModeOptInAnySource()
+    carouselAvailable = enabledState === 'enabled' || hasAutoModeOptInAnySource()
   }
   // canEnterAuto gates explicit entry (--permission-mode auto, defaultMode: auto)
   // — explicit entry IS an opt-in, so we only block on circuit breaker + settings + model
-  const canEnterAuto =
-    enabledState !== 'disabled' && !disabledBySettings && modelSupported
+  const canEnterAuto = enabledState !== 'disabled' && !disabledBySettings && modelSupported
   logForDebugging(
     `[auto-mode] verifyAutoModeGateAccess: enabledState=${enabledState} disabledBySettings=${disabledBySettings} model=${mainModel} modelSupported=${modelSupported} disableFastModeBreakerFires=${disableFastModeBreakerFires} carouselAvailable=${carouselAvailable} canEnterAuto=${canEnterAuto}`,
   )
@@ -1139,22 +1054,17 @@ export async function verifyAutoModeGateAccess(
   // shift-tab gets reverted (or worse, the user stays in auto despite the
   // circuit breaker if they entered auto DURING the await — which is possible
   // because setAutoModeCircuitBroken above runs AFTER the await).
-  const setAvailable = (
-    ctx: ToolPermissionContext,
-    available: boolean,
-  ): ToolPermissionContext => {
+  const setAvailable = (ctx: ToolPermissionContext, available: boolean): ToolPermissionContext => {
     if (ctx.isAutoModeAvailable !== available) {
       logForDebugging(
         `[auto-mode] verifyAutoModeGateAccess setAvailable: ${ctx.isAutoModeAvailable} -> ${available}`,
       )
     }
-    return ctx.isAutoModeAvailable === available
-      ? ctx
-      : { ...ctx, isAutoModeAvailable: available }
+    return ctx.isAutoModeAvailable === available ? ctx : { ...ctx, isAutoModeAvailable: available }
   }
 
   if (canEnterAuto) {
-    return { updateContext: ctx => setAvailable(ctx, carouselAvailable) }
+    return { updateContext: (ctx) => setAvailable(ctx, carouselAvailable) }
   }
 
   // Gate is off or circuit-broken — determine reason (context-independent).
@@ -1172,10 +1082,9 @@ export async function verifyAutoModeGateAccess(
     )
   } else {
     reason = 'model'
-    logForDebugging(
-      `auto mode disabled: model ${getMainLoopModel()} does not support auto mode`,
-      { level: 'warn' },
-    )
+    logForDebugging(`auto mode disabled: model ${getMainLoopModel()} does not support auto mode`, {
+      level: 'warn',
+    })
   }
   const notification = getAutoModeUnavailableNotification(reason)
 
@@ -1187,9 +1096,7 @@ export async function verifyAutoModeGateAccess(
   // already deactivated the classifier and we don't fire again; if they
   // ENTERED auto during the await (possible before setAutoModeCircuitBroken
   // landed), we kick them out here.
-  const kickOutOfAutoIfNeeded = (
-    ctx: ToolPermissionContext,
-  ): ToolPermissionContext => {
+  const kickOutOfAutoIfNeeded = (ctx: ToolPermissionContext): ToolPermissionContext => {
     const inAuto = ctx.mode === 'auto'
     logForDebugging(
       `[auto-mode] kickOutOfAutoIfNeeded applying: ctx.mode=${ctx.mode} ctx.prePlanMode=${ctx.prePlanMode} reason=${reason}`,
@@ -1197,8 +1104,7 @@ export async function verifyAutoModeGateAccess(
     // Plan mode with auto active: either from prePlanMode='auto' (entered
     // from auto) or from opt-in (strippedDangerousRules present).
     const inPlanWithAutoActive =
-      ctx.mode === 'plan' &&
-      (ctx.prePlanMode === 'auto' || !!ctx.strippedDangerousRules)
+      ctx.mode === 'plan' && (ctx.prePlanMode === 'auto' || !!ctx.strippedDangerousRules)
     if (!inAuto && !inPlanWithAutoActive) {
       return setAvailable(ctx, false)
     }
@@ -1233,8 +1139,7 @@ export async function verifyAutoModeGateAccess(
   // Auto was used during plan: entered from auto or opt-in auto active
   const autoActiveDuringPlan =
     currentContext.mode === 'plan' &&
-    (currentContext.prePlanMode === 'auto' ||
-      !!currentContext.strippedDangerousRules)
+    (currentContext.prePlanMode === 'auto' || !!currentContext.strippedDangerousRules)
   const wantedAuto = wasInAuto || autoActiveDuringPlan || autoModeFlagCli
 
   if (!wantedAuto) {
@@ -1269,10 +1174,9 @@ export function shouldDisableBypassPermissions(): Promise<boolean> {
 function isAutoModeDisabledBySettings(): boolean {
   const settings = getSettings_DEPRECATED() || {}
   return (
-    (settings as { disableAutoMode?: 'disable' }).disableAutoMode ===
-      'disable' ||
-    (settings.permissions as { disableAutoMode?: 'disable' } | undefined)
-      ?.disableAutoMode === 'disable'
+    (settings as { disableAutoMode?: 'disable' }).disableAutoMode === 'disable' ||
+    (settings.permissions as { disableAutoMode?: 'disable' } | undefined)?.disableAutoMode ===
+      'disable'
   )
 }
 
@@ -1341,9 +1245,7 @@ const NO_CACHED_AUTO_MODE_CONFIG = Symbol('no-cached-auto-mode-config')
  * conflate "not yet fetched" with "fetched and disabled" — the former
  * defers to verifyAutoModeGateAccess, the latter blocks immediately.
  */
-export function getAutoModeEnabledStateIfCached():
-  | AutoModeEnabledState
-  | undefined {
+export function getAutoModeEnabledStateIfCached(): AutoModeEnabledState | undefined {
   const config = getFeatureValue_CACHED_MAY_BE_STALE<
     { enabled?: AutoModeEnabledState } | typeof NO_CACHED_AUTO_MODE_CONFIG
   >('tengu_auto_mode_config', NO_CACHED_AUTO_MODE_CONFIG)
@@ -1369,18 +1271,14 @@ export function hasAutoModeOptInAnySource(): boolean {
  * This is a synchronous version that uses cached Statsig values.
  */
 export function isBypassPermissionsModeDisabled(): boolean {
-  const growthBookDisableBypassPermissionsMode =
-    checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
-      'tengu_disable_bypass_permissions_mode',
-    )
+  const growthBookDisableBypassPermissionsMode = checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
+    'tengu_disable_bypass_permissions_mode',
+  )
   const settings = getSettings_DEPRECATED() || {}
   const settingsDisableBypassPermissionsMode =
     settings.permissions?.disableBypassPermissionsMode === 'disable'
 
-  return (
-    growthBookDisableBypassPermissionsMode ||
-    settingsDisableBypassPermissionsMode
-  )
+  return growthBookDisableBypassPermissionsMode || settingsDisableBypassPermissionsMode
 }
 
 /**
@@ -1422,10 +1320,9 @@ export async function checkAndDisableBypassPermissions(
   }
 
   // Gate is enabled, need to disable bypassPermissions mode
-  logForDebugging(
-    'bypassPermissions mode is being disabled by Statsig gate (async check)',
-    { level: 'warn' },
-  )
+  logForDebugging('bypassPermissions mode is being disabled by Statsig gate (async check)', {
+    level: 'warn',
+  })
 
   void gracefulShutdown(1, 'bypass_permissions_disabled')
 }
@@ -1445,11 +1342,7 @@ export function isDefaultPermissionModeAuto(): boolean {
  */
 export function shouldPlanUseAutoMode(): boolean {
   if (feature('TRANSCRIPT_CLASSIFIER')) {
-    return (
-      hasAutoModeOptIn() &&
-      isAutoModeGateEnabled() &&
-      getUseAutoModeDuringPlan()
-    )
+    return hasAutoModeOptIn() && isAutoModeGateEnabled() && getUseAutoModeDuringPlan()
   }
   return false
 }
@@ -1459,9 +1352,7 @@ export function shouldPlanUseAutoMode(): boolean {
  * ExitPlanMode can restore it. When the user has opted in to auto mode,
  * auto semantics stay active during plan mode.
  */
-export function prepareContextForPlanMode(
-  context: ToolPermissionContext,
-): ToolPermissionContext {
+export function prepareContextForPlanMode(context: ToolPermissionContext): ToolPermissionContext {
   const currentMode = context.mode
   if (currentMode === 'plan') return context
   if (feature('TRANSCRIPT_CLASSIFIER')) {
@@ -1485,10 +1376,9 @@ export function prepareContextForPlanMode(
       }
     }
   }
-  logForDebugging(
-    `[prepareContextForPlanMode] plain plan entry, prePlanMode=${currentMode}`,
-    { level: 'info' },
-  )
+  logForDebugging(`[prepareContextForPlanMode] plain plan entry, prePlanMode=${currentMode}`, {
+    level: 'info',
+  })
   return { ...context, prePlanMode: currentMode }
 }
 
@@ -1499,9 +1389,7 @@ export function prepareContextForPlanMode(
  * not in plan mode. Called from applySettingsChange so that toggling
  * useAutoModeDuringPlan mid-plan takes effect immediately.
  */
-export function transitionPlanAutoMode(
-  context: ToolPermissionContext,
-): ToolPermissionContext {
+export function transitionPlanAutoMode(context: ToolPermissionContext): ToolPermissionContext {
   if (!feature('TRANSCRIPT_CLASSIFIER')) return context
   if (context.mode !== 'plan') return context
   // Mirror prepareContextForPlanMode's entry-time exclusion — never activate

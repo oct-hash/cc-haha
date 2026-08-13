@@ -3,9 +3,17 @@
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 import type { RefObject } from 'react'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js'
-import { type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS, logEvent } from 'src/services/analytics/index.js'
+import {
+  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+  logEvent,
+} from 'src/services/analytics/index.js'
 import { getTotalInputTokens } from '../bootstrap/state.js'
-import { type Command, type CommandResultDisplay, getCommandName, isCommandEnabled } from '../commands.js'
+import {
+  type Command,
+  type CommandResultDisplay,
+  getCommandName,
+  isCommandEnabled,
+} from '../commands.js'
 import { LOCAL_COMMAND_STDOUT_TAG } from '../constants/xml.js'
 import { expandPastedTextRefs, parseReferences } from '../history.js'
 import type { SetToolJSXFn } from '../Tool.js'
@@ -15,7 +23,11 @@ import type { PastedContent } from '../utils/config.js'
 import { getGlobalConfig } from '../utils/config.js'
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js'
 import type { PromptInputHelpers } from '../utils/handlePromptSubmit.js'
-import { createCommandInputMessage, createUserMessage, formatCommandInputTags } from '../utils/messages.js'
+import {
+  createCommandInputMessage,
+  createUserMessage,
+  formatCommandInputTags,
+} from '../utils/messages.js'
 import type { ProcessUserInputContext } from '../utils/processUserInput/processUserInput.js'
 import type { QueryGuard } from '../utils/QueryGuard.js'
 import type { RemoteMessageContent } from '../utils/teleport/api.js'

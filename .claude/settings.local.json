@@ -3,23 +3,163 @@
     "allow": [
       "WebFetch(domain:juejin.cn)",
       "WebFetch(domain:waytoagi.feishu.cn)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_file_upload",
+      "WebFetch(domain:www.ncbi.nlm.nih.gov)",
+      "mcp__exa__web_search_exa",
+      "WebFetch(domain:alphafold.ebi.ac.uk)",
+      "WebFetch(domain:www.zhounan.org)",
+      "WebFetch(domain:www.sciencedirect.com)",
+      "WebFetch(domain:hdock.phys.hust.edu.cn)",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_run_code_unsafe",
+      "mcp__exa__web_fetch_exa",
+      "WebFetch(domain:pmc.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:www.jmcc-online.com)",
+      "WebFetch(domain:academic.oup.com)",
+      "WebFetch(domain:www.nature.com)",
+      "WebFetch(domain:www.cell.com)",
+      "WebFetch(domain:www.x-mol.com)",
+      "WebFetch(domain:www.mdpi.com)",
+      "WebFetch(domain:pubmed.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:www.ijbs.com)",
+      "WebFetch(domain:onlinelibrary.wiley.com)",
+      "WebFetch(domain:www.jbc.org)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "WebFetch(domain:download.baderlab.org)",
+      "WebFetch(domain:gtexportal.org)",
+      "WebFetch(domain:api.opengwas.io)",
+      "WebFetch(domain:eutils.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:ftp.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:www.ebi.ac.uk)",
+      "WebFetch(domain:www.omicsdi.org)",
+      "WebFetch(domain:archiv.ub.uni-heidelberg.de)",
+      "WebFetch(domain:journals.plos.org)",
+      "mcp__mem-lite__mem_recent",
+      "mcp__mem-lite__mem_save",
+      "mcp__mem-lite__mem_search",
+      "mcp__mem-lite__mem_get",
+      "mcp__mem-lite__mem_timeline",
+      "mcp__context7__resolve-library-id",
+      "WebFetch(domain:www.npmjs.com)",
+      "mcp__gbrain__get_stats",
+      "mcp__gbrain__list_pages",
+      "mcp__mem-lite__mem_defer",
+      "WebFetch(domain:api.semanticscholar.org)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__mem-lite__mem_defer_drop",
+      "WebFetch(domain:arxiv.org)",
+      "mcp__gbrain__query",
+      "mcp__gbrain__search",
+      "mcp__gbrain__put_page",
+      "mcp__gbrain__get_links",
+      "mcp__gbrain__add_link",
+      "mcp__gbrain__get_page",
+      "mcp__gbrain__get_backlinks",
+      "mcp__mem-lite__mem_defer_list",
+      "mcp__mem-lite__mem_recall",
+      "WebFetch(domain:storage.googleapis.com)",
+      "WebFetch(domain:www.eqtlgen.org)",
+      "WebFetch(domain:www.gtexportal.org)",
+      "mcp__token-optimizer__get_session_stats",
+      "WebFetch(domain:ofox.ai)",
+      "WebFetch(domain:zenodo.org)",
+      "WebFetch(domain:pypi.org)",
+      "mcp__test-mcp__test_ping",
+      "mcp__mcp-vision__analyze_image",
+      "mcp__token-optimizer__get_cache_stats",
+      "mcp__evalview__list_tests",
+      "mcp__latex__list_projects",
+      "mcp__qqmail__qqmail_list_emails",
+      "mcp__drissionpage__page_get_url",
+      "mcp__token-optimizer__count_tokens",
+      "mcp__drissionpage__page_navigate",
+      "mcp__token-optimizer__compress_text",
+      "mcp__gbrain__get_health",
+      "WebFetch(domain:openaccess.sgul.ac.uk)",
+      "WebFetch(domain:aha.abstractarchives.com)",
+      "WebFetch(domain:link.springer.com)",
+      "WebFetch(domain:www.thepaper.cn)",
+      "WebFetch(domain:paperity.org)",
+      "WebFetch(domain:www.semanticscholar.org)",
+      "mcp__drissionpage__page_screenshot",
+      "mcp__drissionpage__element_find",
+      "mcp__mcp-vision__ocr_extract",
+      "mcp__debate__debate_review",
+      "mcp__debate__debate_approach",
+      "mcp__token-optimizer__smart_read",
+      "WebFetch(domain:futureagi.com)",
+      "mcp__context7__query-docs"
     ]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "gbrain"
+    "sequential-thinking"
+  ],
+  "disabledMcpjsonServers": [
+    "windows-mcp",
+    "semantic-scholar",
+    "chrome-cdp",
+    "graphify"
   ],
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "TaskUpdate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /d/claude-code-haha/.claude/hooks/workflow-enforcement/task-delete-enforce.sh",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(git commit *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /d/claude-code-haha/.claude/hooks/workflow-enforcement/pre-commit-gate.sh",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "bun -e \"const d=process.stdin.read();if(!d)process.exit(0);const m=d.match(/(?:['\\\"\\u201c\\u201d])([^'\\\"\\u201c\\u201d]{100,})(?:['\\\"\\u201c\\u201d])/g);if(m&&m.length){console.error('[Hook] ⚠ 检测到长引用: '+m.length+' 处超过100字符的直接引用');console.error('[Hook] 请遵守版权合规: 每个来源≤15词, 每来源1次')}\"",
-            "timeout": 5000,
-            "async": true
+            "command": "bash /d/claude-code-haha/.claude/hooks/workflow-enforcement/post-edit-remind.sh",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /d/claude-code-haha/.claude/hooks/workflow-enforcement/session-start-inject.sh",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /d/claude-code-haha/.claude/hooks/workflow-enforcement/stop-gate.sh",
+            "timeout": 5000
           }
         ]
       }

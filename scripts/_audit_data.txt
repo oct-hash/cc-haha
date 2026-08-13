@@ -1,0 +1,373 @@
+============================================================
+gse269622_moran_spdep_R_v1.json  exists=True
+{
+ "dataset": "GSE269622",
+ "statistic": "Moran's I spatial autocorrelation — POINT ESTIMATE (deterministic)",
+ "method": "spdep::moran.test, randomisation=TRUE (analytical p, no permutation/seed); weights = symmetric k=6 nearest-neighbour on pixel coords, style='B' binary; expression = Seurat LogNormalize CP10k, QC min_counts>=500 & gene min_cells>=3",
+ "comparison_note": "Independent R (spdep) cross-check of the squidpy Moran's I. Point estimate is deterministic; expected close-but-not-identical because the spatial graph is built independently (spdep knn-6 vs squidpy grid-6). squidpy permutation z/p is RNG-based and is retained as the primary reported spatial-autocorrelation value with disclosure.",
+ "sign_agreement_pct": 100,
+ "spp1_rise": {
+  "spdep": {
+   "Sham": 0.3719,
+   "IR_12h": 0.5873
+  },
+  "squidpy": {
+   "Sham": 0.3905,
+   "IR_12h": 0.6136
+  }
+ },
+ "source": "filtered_feature_bc_matrix.h5 + spatial/tissue_positions.csv, reprocessed in R this session",
+ "generated_by": "Claude Code 06b_moran_spdep_crosscheck_R.R",
+ "date": "2026-07-14",
+ "table": [
+  {
+   "condition": "Sham",
+   "gene": "Spp1",
+   "moran_I_spdep": 0.3719,
+   "p_analytical": 3.63e-271,
+   "moran_I_squidpy": 0.3905,
+   "abs_diff": 0.0186,
+   "n_spots": 2855,
+   "_row": "Spp1"
+  },
+  {
+   "condition": "Sham",
+   "gene": "Itgav",
+   "moran_I_spdep": 0.0243,
+   "p_analytical": 0.00993,
+   "moran_I_squidpy": 0.0282,
+   "abs_diff": 0.0039,
+   "n_spots": 2855,
+   "_row": "Itgav"
+  },
+  {
+   "condition": "Sham",
+   "gene": "Itgb1",
+   "moran_I_spdep": 0.0467,
+   "p_analytical": 4.49e-06,
+   "moran_I_squidpy": 0.0433,
+   "abs_diff": 0.0034,
+   "n_spots": 2855,
+   "_row": "Itgb1"
+  },
+  {
+   "condition": "Sham",
+   "gene": "Itgb6",
+   "moran_I_spdep": 0.0963,
+   "p_analytical": 3.57e-20,
+   "moran_I_squidpy": 0.1013,
+   "abs_diff": 0.005,
+   "n_spots": 2855,
+   "_row": "Itgb6"
+  },
+  {
+   "condition": "Sham",
+   "gene": "Cd44",
+   "moran_I_spdep": -0.0128,
+   "p_analytical": 0.881,
+   "moran_I_squidpy": -0.0113,
+   "abs_diff": 0.0015,
+   "n_spots": 2855,
+   "_row": "Cd44"
+  },
+  {
+   "condition": "Sham",
+   "gene": "Havcr1",
+   "moran_I_spdep": 0.0065,
+   "p_analytical": 0.258,
+   "moran_I_squidpy": 0.0024,
+   "abs_diff": 0.0041,
+   "n_spots": 2855,
+   "_row": "Havcr1"
+  },
+  {
+   "condition": "Sham",
+   "gene": "Vcam1",
+   "moran_I_spdep": 0.0039,
+   "p_analytical": 0.343,
+   "moran_I_squidpy": 0.0054,
+   "abs_diff": 0.0015,
+   "n_spots": 2855,
+   "_row": "Vcam1"
+  },
+  {
+   "condition": "IR_12h",
+   "gene": "Spp1",
+   "moran_I_spdep": 0.5873,
+   "p_analytical": 0,
+   "moran_I_squidpy": 0.6136,
+   "abs_diff": 0.0263,
+   "n_spots": 3392,
+   "_row": "Spp11"
+  },
+  {
+   "condition": "IR_12h",
+   "gene": "Itgav",
+   "moran_I_spdep": 0.3185,
+   "p_analytical": 2.42e-235,
+   "moran_I_squidpy": 0.3349,
+   "abs_diff": 0.0164,
+   "n_spots": 3392,
+   "_row": "Itgav1"
+  },
+  {
+   "condition": "IR_12h",
+   "gene": "Itgb1",
+   "moran_I_spdep": 0.0779,
+   "p_analytical": 4.72e-16,
+   "moran_I_squidpy": 0.0839,
+   "abs_diff": 0.006,
+   "n_spots": 3392,
+   "_row": "Itgb11"
+  },
+  {
+   "condition": "IR_12h",
+   "gene": "Itgb6",
+   "moran_I_spdep": 0.3539,
+   "p_analytical": 5.21e-290,
+   "moran_I_squidpy": 0.3586,
+   "abs_diff": 0.0047,
+   "n_spots": 3392,
+   "_row": "Itgb61"
+  },
+  {
+   "condition": "IR_12h",
+   "gene": "Cd44",
+   "moran_I_spdep": 0.2724,
+   "p_analytical": 7.11e-173,
+   "moran_I_squidpy": 0.27,
+   "abs_diff": 0.0024,
+   "n_spots": 3392,
+   "_row": "Cd441"
+  },
+  {
+   "condition": "IR_12h",
+   "gene": "Havcr1",
+   "moran_I_spdep": 0.7792,
+   "p_analytical": 0,
+   "moran_I_squidpy": 0.805,
+   "abs_diff": 0.0258,
+   "n_spots": 3392,
+   "_row": "Havcr11"
+  },
+  {
+   "condition": "IR_12h",
+   "gene": "Vcam1",
+   "moran_I_spdep": 0.1084,
+   "p_analytical": 2.96e-29,
+   "moran_I_squidpy": 0.1102,
+   "abs_diff": 0.0018,
+   "n_spots": 3392,
+   "_row": "Vcam11"
+  }
+ ]
+}
+
+============================================================
+gse269622_spatial_R_v1.json  exists=True
+{
+ "dataset": "GSE269622",
+ "method": "Seurat v5 LogNormalize CP10k; QC min_counts>=500, gene min_cells=3; AddModuleScore (Tirosh)",
+ "scope_note": "Spot-level Spp1~receptor/injury Pearson r reproduced in R. squidpy adjacency-z and Moran's I are Python-spatial-stats, NOT reproduced here (need spdep; permutation z non-comparable). Disclosed.",
+ "source": "filtered_feature_bc_matrix.h5 per sample, reprocessed in R this session",
+ "generated_by": "Claude Code 06_recompute_gse269622_spatial_R.R",
+ "date": "2026-07-14",
+ "per_condition": {
+  "Sham": {
+   "n_spots": 2855,
+   "spp1_mean": 1.7451,
+   "spp1_pct": 97.373,
+   "corr_receptor": -0.0164,
+   "corr_injury": -0.066,
+   "corr_receptor_meanlognorm": -0.0281
+  },
+  "IR_12h": {
+   "n_spots": 3392,
+   "spp1_mean": 5.044,
+   "spp1_pct": 100,
+   "corr_receptor": 0.3861,
+   "corr_injury": -0.5103,
+   "corr_receptor_meanlognorm": 0.3034
+  }
+ }
+}
+
+============================================================
+gse98622_bulk_R_v1.json  exists=True
+{
+ "dataset": "GSE98622",
+ "method": "per-group mean of PRE-NORMALIZED expression (FPKM-like); no raw counts available",
+ "provenance_note": "R re-derivation is bit-identical to Python np.nanmean; source Excel is already normalized so R introduces no methodological change. DESeq2/edgeR not applicable (require raw counts).",
+ "source": "D:/肾脏虚拟细胞文章设计/data/geo/GSE98622_mouse-iri-master.xlsx",
+ "generated_by": "Claude Code 05_recompute_gse98622_bulk_R.R",
+ "date": "2026-07-14",
+ "per_gene": {
+  "Ogt": {
+   "SHAM_4h": 12.4,
+   "SHAM_24h": 56.7,
+   "NORM_3m": 21.3,
+   "NORM_9m": 22.7,
+   "SHAM_12m": 31.4,
+   "NORM_15m": 17.9
+  },
+  "Nfe2l2": {
+   "SHAM_4h": 45.2,
+   "SHAM_24h": 42.1,
+   "NORM_3m": 47.5,
+   "NORM_9m": 42.7,
+   "SHAM_12m": 44.5,
+   "NORM_15m": 56.4
+  },
+  "Hmox1": {
+   "SHAM_4h": 156.7,
+   "SHAM_24h": 19.7,
+   "NORM_3m": 29.6,
+   "NORM_9m": 46.5,
+   "SHAM_12m": 19.9,
+   "NORM_15m": 50.6
+  },
+  "Slc7a11": {
+   "SHAM_4h": 0,
+   "SHAM_24h": 0,
+   "NORM_3m": 0,
+   "NORM_9m": 0,
+   "SHAM_12m": 0,
+   "NORM_15m": 0
+  },
+  "Gpx4": {
+   "SHAM_4h": 772,
+   "SHAM_24h": 721,
+   "NORM_3m": 600.1,
+   "NORM_9m": 787.1,
+   "SHAM_12m": 545.8,
+   "NORM_15m": 783.7
+  },
+  "Gclc": {
+   "SHAM_4h": 106.9,
+   "SHAM_24h": 108.8,
+   "NORM_3m": 138.3,
+   "NORM_9m": 175.1,
+   "SHAM_12m": 97,
+   "NORM_15m": 211.1
+  },
+  "Fth1": {
+   "SHAM_4h": 5721.4,
+   "SHAM_24h": 6347.6,
+   "NORM_3m": 6422.2,
+   "NORM_9m": 6861.5,
+   "SHAM_12m": 4724.4,
+   "NORM_15m": 6780
+  },
+  "Keap1": {
+   "SHAM_4h": 11.6,
+   "SHAM_24h": 12.9,
+   "NORM_3m": 11,
+   "NORM_9m": 13,
+   "SHAM_12m": 11.8,
+   "NORM_15m": 11.7
+  },
+  "Nqo1": {
+   "SHAM_4h": 68.6,
+   "SHAM_24h": 44.7,
+   "NORM_3m": 66.9,
+   "NORM_9m": 60,
+   "SHAM_12m": 50,
+   "NORM_15m": 69.2
+  },
+  "Gclm": {
+   "SHAM_4h": 98.2,
+   "SHAM_24h": 107.2,
+   "NORM_3m": 113.3,
+   "NORM_9m": 113.5,
+   "SHAM_12m": 114.5,
+   "NORM_15m": 121.9
+  }
+ }
+}
+
+============================================================
+gse274819_keygene_R_v1.json  exists=True
+{
+ "dataset": "GSE274819",
+ "method": "Seurat v5 LogNormalize CP10k; QC n_genes 200-6000, pct_mt<50, gene min_cells=3",
+ "source": "raw 10x counts (matrix.mtx.gz), reprocessed in R this session",
+ "generated_by": "Claude Code 04_recompute_gse274819_scRNA_R.R",
+ "date": "2026-07-14",
+ "n_cells_total": 44459,
+ "n_Sham": 10371,
+ "n_IR12h": 12128,
+ "keygene": {
+  "Hmox1": {
+   "Sham_mean_lognorm": 0.2829,
+   "IR12h_mean_lognorm": 0.4457,
+   "fold_change": 1.58,
+   "pct_change": 57.6,
+   "Sham_pct_detected": 31.7,
+   "IR12h_pct_detected": 38.5
+  },
+  "Ogt": {
+   "Sham_mean_lognorm": 0.2506,
+   "IR12h_mean_lognorm": 0.4073,
+   "fold_change": 1.63,
+   "pct_change": 62.5,
+   "Sham_pct_detected": 28.6,
+   "IR12h_pct_detected": 36.7
+  },
+  "Gclc": {
+   "Sham_mean_lognorm": 0.4686,
+   "IR12h_mean_lognorm": 0.6327,
+   "fold_change": 1.35,
+   "pct_change": 35,
+   "Sham_pct_detected": 44.2,
+   "IR12h_pct_detected": 51
+  },
+  "Fth1": {
+   "Sham_mean_lognorm": 4.9103,
+   "IR12h_mean_lognorm": 4.9987,
+   "fold_change": 1.02,
+   "pct_change": 1.8,
+   "Sham_pct_detected": 99.9,
+   "IR12h_pct_detected": 99.8
+  },
+  "Gpx4": {
+   "Sham_mean_lognorm": 2.6434,
+   "IR12h_mean_lognorm": 2.3405,
+   "fold_change": 0.89,
+   "pct_change": -11.5,
+   "Sham_pct_detected": 95.4,
+   "IR12h_pct_detected": 92.2
+  },
+  "Nfe2l2": {
+   "Sham_mean_lognorm": 0.4614,
+   "IR12h_mean_lognorm": 0.6489,
+   "fold_change": 1.41,
+   "pct_change": 40.6,
+   "Sham_pct_detected": 44.2,
+   "IR12h_pct_detected": 54.6
+  },
+  "Nqo1": {
+   "Sham_mean_lognorm": 0.1621,
+   "IR12h_mean_lognorm": 0.2879,
+   "fold_change": 1.78,
+   "pct_change": 77.6,
+   "Sham_pct_detected": 20.1,
+   "IR12h_pct_detected": 30.3
+  },
+  "Slc7a11": {
+   "Sham_mean_lognorm": 0.005,
+   "IR12h_mean_lognorm": 0.0493,
+   "fold_change": 9.83,
+   "pct_change": 882.5,
+   "Sham_pct_detected": 0.2,
+   "IR12h_pct_detected": 2.8
+  },
+  "Spp1": {
+   "Sham_mean_lognorm": 1.1617,
+   "IR12h_mean_lognorm": 2.9298,
+   "fold_change": 2.52,
+   "pct_change": 152.2,
+   "Sham_pct_detected": 51.7,
+   "IR12h_pct_detected": 90.1
+  }
+ }
+}
