@@ -215,6 +215,7 @@ function Box(t0) {
       <ink-box
         ref={ref}
         tabIndex={tabIndex}
+        // biome-ignore lint/a11y/noAutofocus: `autoFocus` is an Ink custom prop, not a DOM attribute
         autoFocus={autoFocus}
         onClick={onClick}
         onFocus={onFocus}
