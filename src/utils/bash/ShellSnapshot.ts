@@ -395,8 +395,7 @@ export const createAndSaveSnapshot = async (binShell: string): Promise<string | 
 
   logForDebugging(`Creating shell snapshot for ${shellType} (${binShell})`)
 
-  return new Promise(async (resolve) => {
-    try {
+  try {
       const configFile = getConfigFile(binShell)
       logForDebugging(`Looking for shell config file: ${configFile}`)
       const configFileExists = await pathExists(configFile)
@@ -423,6 +422,7 @@ export const createAndSaveSnapshot = async (binShell: string): Promise<string | 
       const snapshotScript = await getSnapshotScript(binShell, shellSnapshotPath, configFileExists)
       logForDebugging(`Creating snapshot at: ${shellSnapshotPath}`)
       logForDebugging(`Execution timeout: ${SNAPSHOT_CREATION_TIMEOUT}ms`)
+      return await new Promise<string | undefined>((resolve) => {
       execFile(
         binShell,
         ['-c', '-l', snapshotScript],
@@ -518,6 +518,7 @@ export const createAndSaveSnapshot = async (binShell: string): Promise<string | 
           }
         },
       )
+      })
     } catch (error) {
       logForDebugging(`Unexpected error during snapshot creation: ${error}`)
       if (error instanceof Error) {
@@ -525,7 +526,6 @@ export const createAndSaveSnapshot = async (binShell: string): Promise<string | 
       }
       logError(error)
       logEvent('tengu_shell_snapshot_error', {})
-      resolve(undefined)
+      return undefined
     }
-  })
 }

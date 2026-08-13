@@ -1343,7 +1343,7 @@ export const connectToServer = memoize(
               }
 
               // Wait for graceful shutdown with rapid escalation (total 500ms to keep CLI responsive)
-              await new Promise<void>(async (resolve) => {
+              await new Promise<void>((resolve) => {
                 let resolved = false
 
                 // Set up a timer to check if process still exists
@@ -1373,6 +1373,7 @@ export const connectToServer = memoize(
                   }
                 }, 600)
 
+                void (async () => {
                 try {
                   // Wait 100ms for SIGINT to work (usually much faster)
                   await sleep(100)
@@ -1442,6 +1443,7 @@ export const connectToServer = memoize(
                     resolve()
                   }
                 }
+                })()
               })
             }
           } catch (processError) {
