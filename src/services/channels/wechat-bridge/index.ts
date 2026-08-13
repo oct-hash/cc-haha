@@ -48,11 +48,6 @@ interface McpResponse {
 
 class WechatBridge {
   private weixinProcess: ChildProcess | null = null
-  private pendingRequests: Map<
-    number,
-    { resolve: (v: unknown) => void; reject: (e: Error) => void }
-  > = new Map()
-  private messageCursor: string = ''
   private running = false
   private currentRequestId = 1
 

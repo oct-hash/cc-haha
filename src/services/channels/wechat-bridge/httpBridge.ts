@@ -26,7 +26,6 @@ interface WechatMessage {
 }
 
 class WechatBridge {
-  private sessionId: string = ''
   private running = false
 
   async start(): Promise<void> {

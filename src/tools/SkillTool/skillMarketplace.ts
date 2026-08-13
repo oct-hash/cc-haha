@@ -38,7 +38,6 @@ interface MarketplaceConfig {
  */
 export class SkillMarketplace {
   private marketplaceConfig: MarketplaceConfig | null = null
-  private cacheTimeout = 1000 * 60 * 15 // 15 minutes
 
   constructor() {
     this.loadMarketplaceConfig()

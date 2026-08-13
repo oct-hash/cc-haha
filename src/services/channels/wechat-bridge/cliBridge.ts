@@ -20,7 +20,6 @@ interface WechatMessage {
 
 class WechatBridge {
   private running = false
-  private lastMessageTime = 0
 
   async start(): Promise<void> {
     console.error('[Bridge] Starting WeChat Bridge (CLI mode)...')
