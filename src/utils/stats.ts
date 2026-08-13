@@ -234,7 +234,7 @@ async function processSessionFiles(
       // have entries missing the timestamp field (e.g. partial/remote writes).
       // new Date(undefined) produces an Invalid Date, and toDateString() would
       // throw RangeError: Invalid Date on .toISOString().
-      if (isNaN(firstTimestamp.getTime()) || isNaN(lastTimestamp.getTime())) {
+      if (Number.isNaN(firstTimestamp.getTime()) || Number.isNaN(lastTimestamp.getTime())) {
         logForDebugging(`Skipping session with invalid timestamp: ${sessionFile}`)
         continue
       }

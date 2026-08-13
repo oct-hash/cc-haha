@@ -206,7 +206,7 @@ function getParseTimeoutMs(): number {
   const env = process.env.CLAUDE_CODE_PWSH_PARSE_TIMEOUT_MS
   if (env) {
     const parsed = parseInt(env, 10)
-    if (!isNaN(parsed) && parsed > 0) return parsed
+    if (!Number.isNaN(parsed) && parsed > 0) return parsed
   }
   return DEFAULT_PARSE_TIMEOUT_MS
 }

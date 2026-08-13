@@ -1334,7 +1334,7 @@ async function run(): Promise<CommanderCommand> {
         'Maximum dollar amount to spend on API calls (only works with --print)',
       ).argParser((value) => {
         const amount = Number(value)
-        if (isNaN(amount) || amount <= 0) {
+        if (Number.isNaN(amount) || amount <= 0) {
           throw new Error('--max-budget-usd must be a positive number greater than 0')
         }
         return amount
@@ -1347,7 +1347,7 @@ async function run(): Promise<CommanderCommand> {
       )
         .argParser((value) => {
           const tokens = Number(value)
-          if (isNaN(tokens) || tokens <= 0 || !Number.isInteger(tokens)) {
+          if (Number.isNaN(tokens) || tokens <= 0 || !Number.isInteger(tokens)) {
             throw new Error('--task-budget must be a positive integer')
           }
           return tokens

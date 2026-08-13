@@ -176,7 +176,7 @@ function extractConfidence(text: string): number {
   const anchored = tail.match(/^\s*CONFIDENCE:\s*(0\.\d+|1\.0|1|0)(?:\s*$|\s*\n)/im)
   if (anchored) {
     const n = parseFloat(anchored[1])
-    if (!isNaN(n)) return Math.max(0, Math.min(1, n))
+    if (!Number.isNaN(n)) return Math.max(0, Math.min(1, n))
   }
   return DEFAULT_CONFIDENCE
 }

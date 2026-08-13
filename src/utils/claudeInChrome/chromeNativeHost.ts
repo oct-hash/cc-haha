@@ -135,7 +135,7 @@ class ChromeNativeHost {
             continue
           }
           const pid = parseInt(file.replace('.sock', ''), 10)
-          if (isNaN(pid)) {
+          if (Number.isNaN(pid)) {
             continue
           }
           try {

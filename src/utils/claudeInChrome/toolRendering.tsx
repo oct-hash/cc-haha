@@ -161,7 +161,7 @@ function renderChromeViewTabLink(input: unknown): React.ReactNode {
       : typeof input.tabId === 'string'
         ? parseInt(input.tabId, 10)
         : NaN
-  if (isNaN(tabId)) {
+  if (Number.isNaN(tabId)) {
     return null
   }
   const linkUrl = `${CHROME_EXTENSION_FOCUS_TAB_URL_BASE}${tabId}`

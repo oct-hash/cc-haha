@@ -48,7 +48,7 @@ function parseAutoPercentage(value: string): number | null {
   const percentStr = value.slice(5)
   const percent = parseInt(percentStr, 10)
 
-  if (isNaN(percent)) {
+  if (Number.isNaN(percent)) {
     logForDebugging(
       `Invalid ENABLE_TOOL_SEARCH value "${value}": expected auto:N where N is a number.`,
     )

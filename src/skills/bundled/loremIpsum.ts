@@ -244,7 +244,7 @@ export function registerLoremIpsumSkill(): void {
     async getPromptForCommand(args) {
       const parsed = parseInt(args, 10)
 
-      if (args && (isNaN(parsed) || parsed <= 0)) {
+      if (args && (Number.isNaN(parsed) || parsed <= 0)) {
         return [
           {
             type: 'text',

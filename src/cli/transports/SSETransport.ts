@@ -344,7 +344,7 @@ export class SSETransport implements Transport {
 
           if (frame.id) {
             const seqNum = parseInt(frame.id, 10)
-            if (!isNaN(seqNum)) {
+            if (!Number.isNaN(seqNum)) {
               if (this.seenSequenceNums.has(seqNum)) {
                 logForDebugging(
                   `SSETransport: DUPLICATE frame seq=${seqNum} (lastSequenceNum=${this.lastSequenceNum}, seenCount=${this.seenSequenceNums.size})`,

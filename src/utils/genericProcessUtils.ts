@@ -58,7 +58,7 @@ export async function getAncestorPidsAsync(pid: string | number, maxDepth = 10):
       .split(',')
       .filter(Boolean)
       .map((p) => parseInt(p, 10))
-      .filter((p) => !isNaN(p))
+      .filter((p) => !Number.isNaN(p))
   }
 
   // For Unix, use a shell command that walks up the process tree
@@ -76,7 +76,7 @@ export async function getAncestorPidsAsync(pid: string | number, maxDepth = 10):
     .split('\n')
     .filter(Boolean)
     .map((p) => parseInt(p, 10))
-    .filter((p) => !isNaN(p))
+    .filter((p) => !Number.isNaN(p))
 }
 
 /**
@@ -171,7 +171,7 @@ export function getChildPids(pid: string | number): number[] {
       .split('\n')
       .filter(Boolean)
       .map((p) => parseInt(p, 10))
-      .filter((p) => !isNaN(p))
+      .filter((p) => !Number.isNaN(p))
   } catch {
     return []
   }
