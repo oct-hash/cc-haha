@@ -1,7 +1,7 @@
 // Git, filesystem, and frontmatter utilities
 
 import { existsSync, mkdirSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { dirname, } from 'node:path'
 
 const { spawn } = Bun
 

@@ -1,4 +1,4 @@
-import * as React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { Text } from 'src/ink.js'
 import type { BackgroundTaskState } from 'src/tasks/types.js'

@@ -51,7 +51,6 @@ import {
 } from '../constants/xml.js'
 import { count } from '../utils/array.js'
 import { formatRelativeTimeAgo, truncate } from '../utils/format.js'
-import type { Theme } from '../utils/theme.js'
 import { Divider } from './design-system/Divider.js'
 
 type RestoreOption =

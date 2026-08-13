@@ -3,7 +3,7 @@
 // and the resetLoadingState callback that clears streaming/spinner UI state.
 
 import * as React from 'react'
-import { useCallback, useRef } from 'react'
+import { useCallback, } from 'react'
 import { getTipToShowOnSpinner, recordShownTip } from 'src/services/tips/tipScheduler.js'
 import type { Theme, ThemeName } from 'src/utils/theme.js'
 import { clearSpeculativeChecks } from '../tools/BashTool/bashPermissions.js'

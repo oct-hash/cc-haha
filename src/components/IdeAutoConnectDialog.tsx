@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { Text } from '../ink.js'
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js'

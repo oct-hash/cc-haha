@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { handlePlanModeTransition } from '../../../bootstrap/state.js'
 import { Box, Text } from '../../../ink.js'
@@ -10,7 +10,6 @@ import { useAppState } from '../../../state/AppState.js'
 import { isPlanModeInterviewPhaseEnabled } from '../../../utils/planModeV2.js'
 import { Select } from '../../CustomSelect/index.js'
 import { PermissionDialog } from '../PermissionDialog.js'
-import type { PermissionRequestProps } from '../PermissionRequest.js'
 export function EnterPlanModePermissionRequest(t0) {
   const $ = _c(18)
   const { toolUseConfirm, onDone, onReject, workerBadge } = t0

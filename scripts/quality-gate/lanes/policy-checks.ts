@@ -1,6 +1,6 @@
 // Policy checks: validate hookify rules, agents, skills, hooks, settings
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { parseFrontmatter, readJSON, readText } from '../utils/helpers'

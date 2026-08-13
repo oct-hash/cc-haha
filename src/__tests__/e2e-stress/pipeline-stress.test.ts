@@ -16,21 +16,17 @@
  *   E2E_LIVE_API=1 env var enables real API for L1 recovery CLI test
  */
 
-import { afterAll, afterEach, describe, expect, test } from 'bun:test'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { afterEach, describe, expect, test } from 'bun:test'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   assertAllSucceed,
   assertSurvivalRate,
   cleanupTemp,
-  countFailures,
   createTempConfigDir,
   createTempHome,
   type ExitCodeResult,
-  runBurst,
   runConcurrently,
-  runECCHook,
   spawnHeadlessCLI,
   writeSimpleSkill,
 } from './test-helpers.js'

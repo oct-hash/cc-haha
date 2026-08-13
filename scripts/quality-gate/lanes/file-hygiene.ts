@@ -2,7 +2,7 @@
 // Uses a ratcheted baseline so existing issues are grandfathered.
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { join, } from 'node:path'
 import { readJSON, writeJSON } from '../utils/helpers'
 import type { DetailItem, LaneExecutionContext, LaneResult, TypeCheckBaseline } from './types'
 

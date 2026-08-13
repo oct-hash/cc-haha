@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { removeSandboxViolationTags } from 'src/utils/sandbox/sandbox-ui-utils.js'
 import { KeyboardShortcutHint } from '../../components/design-system/KeyboardShortcutHint.js'

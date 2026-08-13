@@ -1,6 +1,5 @@
 import { diffWordsWithSpace, type StructuredPatchHunk } from 'diff'
 import type * as React from 'react'
-import { useMemo } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import type { ThemeName } from 'src/utils/theme.js'
 import { stringWidth } from '../../ink/stringWidth.js'

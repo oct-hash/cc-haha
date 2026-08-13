@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { Box } from '../ink.js'
 import { BashTool } from '../tools/BashTool/BashTool.js'

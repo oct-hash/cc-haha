@@ -1,4 +1,4 @@
-import React, { type ReactNode, useCallback, useMemo, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Box, Text } from '../../ink.js'
 import type { KeybindingAction } from '../../keybindings/types.js'
@@ -8,7 +8,7 @@ import {
   logEvent,
 } from '../../services/analytics/index.js'
 import { useSetAppState } from '../../state/AppState.js'
-import { type OptionWithDescription, Select } from '../CustomSelect/select.js'
+import { Select } from '../CustomSelect/select.js'
 export type FeedbackType = 'accept' | 'reject'
 export type PermissionPromptOption<T extends string> = {
   value: T

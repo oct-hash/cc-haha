@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'bun:test'
+import { beforeEach, describe, expect, it, } from 'bun:test'
 
 // Test pure, self-contained auth functions that don't have heavy external dependencies
 // These are the utility functions in auth.ts that can be tested in isolation

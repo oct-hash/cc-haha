@@ -1,5 +1,4 @@
 import type { TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
-import * as React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { BLACK_CIRCLE } from '../../constants/figures.js'
 import { Box, Text, type TextProps } from '../../ink.js'

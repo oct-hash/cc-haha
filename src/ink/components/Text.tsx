@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
-import React from 'react'
 import { c as _c } from 'react/compiler-runtime'
-import type { Color, Styles, TextStyles } from '../styles.js'
+import type { Color, Styles, } from '../styles.js'
 
 type BaseProps = {
   /**

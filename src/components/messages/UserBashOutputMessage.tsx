@@ -1,4 +1,4 @@
-import * as React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import BashToolResultMessage from '../../tools/BashTool/BashToolResultMessage.js'
 import { extractTag } from '../../utils/messages.js'

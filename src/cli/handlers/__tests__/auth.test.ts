@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'bun:test'
-import { vi as vitest } from 'vitest'
+import { describe, expect, it, } from 'bun:test'
 
 // Test CLI auth handler functions
 // The authLogin, authStatus, and authLogout functions have side effects

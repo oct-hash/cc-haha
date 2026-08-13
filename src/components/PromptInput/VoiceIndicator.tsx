@@ -1,5 +1,4 @@
 import { feature } from 'bun:bundle'
-import * as React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { useSettings } from '../../hooks/useSettings.js'
 import { Box, Text, useAnimationFrame } from '../../ink.js'

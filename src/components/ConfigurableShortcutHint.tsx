@@ -1,4 +1,4 @@
-import * as React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import type { KeybindingAction, KeybindingContextName } from '../keybindings/types.js'
 import { useShortcutDisplay } from '../keybindings/useShortcutDisplay.js'

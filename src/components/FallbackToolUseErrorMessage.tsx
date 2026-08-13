@@ -1,5 +1,4 @@
 import type { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/messages/messages.mjs'
-import * as React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { stripUnderlineAnsi } from 'src/components/shell/OutputLine.js'
 import { extractTag } from 'src/utils/messages.js'

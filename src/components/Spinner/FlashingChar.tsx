@@ -1,4 +1,4 @@
-import * as React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { Text, useTheme } from '../../ink.js'
 import { getTheme, type Theme } from '../../utils/theme.js'

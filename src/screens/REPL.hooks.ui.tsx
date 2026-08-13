@@ -3,7 +3,6 @@
 // component body.
 
 import { randomUUID } from 'crypto'
-import * as React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Theme } from 'src/utils/theme.js'
 import { hasCursorUpViewportYankBug } from '../ink/terminal.js'

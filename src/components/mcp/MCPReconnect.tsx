@@ -1,5 +1,5 @@
 import figures from 'figures'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import type { CommandResultDisplay } from '../../commands.js'
 import { Box, color, Text, useTheme } from '../../ink.js'

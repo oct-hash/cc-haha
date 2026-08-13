@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { Select } from 'src/components/CustomSelect/index.js'
 import { Box, Text } from '../../ink.js'

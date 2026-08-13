@@ -2,7 +2,6 @@
 // Cached microcompact types and functions (ant-only, gated by feature flags)
 // ============================================================================
 
-import type { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
 
 // ============================================================================
 // Types

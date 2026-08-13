@@ -1,10 +1,10 @@
-import React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { Box, Text, useTheme } from '../../../ink.js'
 import { FallbackPermissionRequest } from '../FallbackPermissionRequest.js'
 import { FilePermissionDialog } from '../FilePermissionDialog/FilePermissionDialog.js'
 import type { ToolInput } from '../FilePermissionDialog/useFilePermissionDialog.js'
-import type { PermissionRequestProps, ToolUseConfirm } from '../PermissionRequest.js'
+import type { ToolUseConfirm } from '../PermissionRequest.js'
 
 function pathFromToolUse(toolUseConfirm: ToolUseConfirm): string | null {
   const tool = toolUseConfirm.tool

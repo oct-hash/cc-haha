@@ -33,13 +33,11 @@ import {
 import type { PaneBackendType } from '../../utils/swarm/backends/types.js'
 import { getSwarmSocketName, TMUX_COMMAND } from '../../utils/swarm/constants.js'
 import {
-  addHiddenPaneId,
-  removeHiddenPaneId,
   removeMemberFromTeam,
   setMemberMode,
   setMultipleMemberModes,
 } from '../../utils/swarm/teamHelpers.js'
-import { listTasks, type Task, unassignTeammateTasks } from '../../utils/tasks.js'
+import { listTasks, unassignTeammateTasks } from '../../utils/tasks.js'
 import {
   getTeammateStatuses,
   type TeammateStatus,

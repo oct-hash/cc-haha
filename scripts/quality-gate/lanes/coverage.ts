@@ -2,10 +2,9 @@
 
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { fileExists, readJSON, writeJSON } from '../utils/helpers'
+import { readJSON, writeJSON } from '../utils/helpers'
 import type {
   CoverageBaseline,
-  CoverageSuiteSummary,
   DetailItem,
   LaneExecutionContext,
   LaneResult,

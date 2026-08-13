@@ -4,7 +4,6 @@
  */
 
 import { AGENT_SOURCE_GROUPS } from '../src/tools/AgentTool/agentDisplay.js'
-import type { AgentDefinition } from '../src/tools/AgentTool/loadAgentsDir.js'
 import {
   getActiveAgentsFromList,
   getAgentDefinitionsWithOverrides,

@@ -1,5 +1,4 @@
 import { basename, relative } from 'path'
-import React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { FileEditToolDiff } from 'src/components/FileEditToolDiff.js'
 import { getCwd } from 'src/utils/cwd.js'
@@ -12,7 +11,6 @@ import {
   type FileEdit,
   type IDEDiffSupport,
 } from '../FilePermissionDialog/ideDiffConfig.js'
-import type { PermissionRequestProps } from '../PermissionRequest.js'
 
 type FileEditInput = z.infer<typeof FileEditTool.inputSchema>
 const ideDiffSupport: IDEDiffSupport<FileEditInput> = {

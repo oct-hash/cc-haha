@@ -16,7 +16,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import { loadOrLogin, login, waitForQRCodeConfirm } from './login.js'
 import { formatWechatMessage, WechatMessageHandler } from './messaging.js'
-import type { WechatContact, WechatMessage } from './types.js'
+import type { WechatMessage } from './types.js'
 
 // Capability declarations
 const SERVER_NAME = 'wechat-channel'

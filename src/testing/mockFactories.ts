@@ -1,6 +1,5 @@
 // Shared mock factories for test files
 
-import { vi } from 'bun:test'
 
 /** Create a mock environment with given variables, returning a cleanup function */
 export function mockEnv(envVars: Record<string, string>): () => void {

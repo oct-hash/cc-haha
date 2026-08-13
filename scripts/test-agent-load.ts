@@ -1,6 +1,5 @@
 import type { AgentDefinition } from '../src/tools/AgentTool/loadAgentsDir.js'
 import {
-  getActiveAgentsFromList,
   getAgentDefinitionsWithOverrides,
 } from '../src/tools/AgentTool/loadAgentsDir.js'
 

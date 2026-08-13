@@ -13,16 +13,12 @@
  *   - Edge cases (empty topics, missing queryExecutor, disposed state)
  */
 
-import { beforeEach, describe, expect, it, vi } from 'bun:test'
+import { describe, expect, it, vi } from 'bun:test'
 import type { AgentAdapter } from '../adapter.js'
-import type { DebateEvent } from '../debate.js'
-import { DebateOrchestrator } from '../debate.js'
-import { createAgentAdapter } from '../factory.js'
 import {
   type LoopEvent,
   LoopManager,
   type LoopManagerConfig,
-  type SerializedLoopState,
 } from '../loop-manager.js'
 import type { AgentKind, AgentStatus, NormalizedEvent } from '../types.js'
 

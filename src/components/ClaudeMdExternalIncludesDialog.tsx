@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { logEvent } from 'src/services/analytics/index.js'
 import { Box, Link, Text } from '../ink.js'

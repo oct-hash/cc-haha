@@ -4,7 +4,7 @@ import type {
   BetaMessage,
   BetaUsage as Usage,
 } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
-import type { ContentBlockParam, ToolUseBlock } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { ContentBlockParam, } from '@anthropic-ai/sdk/resources/index.mjs'
 import type { UUID } from 'crypto'
 import type { SDKAssistantMessageError } from '../entrypoints/agentSdkTypes.js'
 import type { PermissionMode } from '../utils/permissions/PermissionMode.js'

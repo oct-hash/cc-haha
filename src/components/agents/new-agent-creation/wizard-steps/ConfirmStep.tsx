@@ -1,6 +1,5 @@
-import React, { type ReactNode } from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
-import type { KeyboardEvent } from '../../../../ink/events/keyboard-event.js'
 import { Box, Text } from '../../../../ink.js'
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js'
 import { isAutoMemoryEnabled } from '../../../../memdir/paths.js'
@@ -16,7 +15,6 @@ import { useWizard } from '../../../wizard/index.js'
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js'
 import { getNewRelativeAgentFilePath } from '../../agentFileUtils.js'
 import { validateAgent } from '../../validateAgent.js'
-import type { AgentWizardData } from '../types.js'
 
 type Props = {
   tools: Tools

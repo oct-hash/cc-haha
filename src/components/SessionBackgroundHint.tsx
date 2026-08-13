@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { useCallback, useState } from 'react'
+
+import { useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { useDoublePress } from '../hooks/useDoublePress.js'
 import { Box, Text } from '../ink.js'

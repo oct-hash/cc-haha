@@ -1,4 +1,4 @@
-import * as React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import type { CommandResultDisplay } from '../../commands.js'
 import { Pane } from '../../components/design-system/Pane.js'

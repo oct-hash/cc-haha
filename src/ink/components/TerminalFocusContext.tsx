@@ -1,4 +1,4 @@
-import React, { createContext, useMemo, useSyncExternalStore } from 'react'
+import { createContext, useSyncExternalStore } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import {
   getTerminalFocused,

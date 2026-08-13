@@ -14,10 +14,7 @@
  *   - Full lifecycle: skill→MCP→hook interleaved operations
  */
 
-import { afterAll, afterEach, beforeAll, describe, expect, test } from 'bun:test'
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
 import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js'
 import { createLinkedTransportPair } from '../../services/mcp/InProcessTransport.js'
@@ -26,18 +23,13 @@ import type { FrontmatterData } from '../../utils/frontmatterParser.js'
 import {
   assertAllSucceed,
   assertSurvivalRate,
-  cleanupTemp,
   countFailures,
   createMockMCPServer,
-  createTempConfigDir,
-  createTempHome,
   type ExitCodeResult,
   type MockMCPTool,
   mcpRequest,
-  runBurst,
   runConcurrently,
   tick,
-  writeSimpleSkill,
 } from './test-helpers.js'
 
 // ═══════════════════════════════════════════════════════════════════════════════

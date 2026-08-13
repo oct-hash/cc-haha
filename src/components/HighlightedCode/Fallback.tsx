@@ -1,5 +1,5 @@
 import { extname } from 'path'
-import React, { Suspense, use, useMemo } from 'react'
+import { Suspense, use, } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Ansi, Text } from '../../ink.js'
 import { getCliHighlightPromise } from '../../utils/cliHighlight.js'

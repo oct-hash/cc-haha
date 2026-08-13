@@ -2,7 +2,6 @@
  * 直接测试 QQ Mail 同步（绕过 MCP）
  */
 
-import { createDownloader } from '../src/services/channels/qqmail/downloader.js'
 import { createQQMailIMAP } from '../src/services/channels/qqmail/imap.js'
 import { createMatcher } from '../src/services/channels/qqmail/matcher.js'
 

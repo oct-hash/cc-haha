@@ -1,5 +1,4 @@
 import type { StructuredPatchHunk } from 'diff'
-import * as React from 'react'
 import { memo } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { useSettings } from '../hooks/useSettings.js'

@@ -1,6 +1,5 @@
 import figures from 'figures'
-import * as React from 'react'
-import { useCallback, useEffect } from 'react'
+import { useEffect } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { getOriginalCwd } from '../../../bootstrap/state.js'
 import type { CommandResultDisplay } from '../../../commands.js'

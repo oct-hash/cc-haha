@@ -1,6 +1,6 @@
 import { feature } from 'bun:bundle'
 import type * as React from 'react'
-import { type ReactNode, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { type Notification, useNotifications } from 'src/context/notifications.js'
 import { logEvent } from 'src/services/analytics/index.js'

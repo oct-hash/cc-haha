@@ -1,5 +1,4 @@
-// biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
-import * as React from 'react'
+
 import { Suspense, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import type { CommandResultDisplay, LocalJSXCommandContext } from '../../commands.js'

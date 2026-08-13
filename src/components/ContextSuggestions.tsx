@@ -1,5 +1,4 @@
 import figures from 'figures'
-import * as React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Box, Text } from '../ink.js'
 import type { ContextSuggestion } from '../utils/contextSuggestions.js'

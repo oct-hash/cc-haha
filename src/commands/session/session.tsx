@@ -1,5 +1,4 @@
 import { toString as qrToString } from 'qrcode'
-import * as React from 'react'
 import { useEffect, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Pane } from '../../components/design-system/Pane.js'

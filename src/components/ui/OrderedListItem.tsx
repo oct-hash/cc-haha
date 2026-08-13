@@ -1,4 +1,4 @@
-import React, { createContext, type ReactNode, useContext } from 'react'
+import { createContext, type ReactNode, useContext } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Box, Text } from '../../ink.js'
 export const OrderedListItemContext = createContext({

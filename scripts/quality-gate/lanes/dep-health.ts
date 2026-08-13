@@ -1,6 +1,6 @@
 // Dependency health lane: check outdated packages, license compliance, duplicate deps
 
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, } from 'node:fs'
 import { join } from 'node:path'
 import { readJSON } from '../utils/helpers'
 import type { DetailItem, LaneExecutionContext, LaneResult } from './types'

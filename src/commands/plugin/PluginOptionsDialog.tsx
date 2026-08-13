@@ -1,5 +1,5 @@
 import figures from 'figures'
-import React, { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Dialog } from '../../components/design-system/Dialog.js'
 import { stringWidth } from '../../ink/stringWidth.js'

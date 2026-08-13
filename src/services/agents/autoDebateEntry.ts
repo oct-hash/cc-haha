@@ -13,7 +13,7 @@
  */
 
 import type { AgentAdapter } from './adapter.js'
-import type { DebateEvent, DebateSummary } from './debate.js'
+import type { DebateEvent, } from './debate.js'
 import { DebateOrchestrator } from './debate.js'
 import { createAgentAdapter } from './factory.js'
 import type { AgentKind } from './types.js'

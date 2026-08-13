@@ -1,4 +1,4 @@
-import React, { createContext, type RefObject, useContext, useLayoutEffect, useMemo } from 'react'
+import React, { createContext, type RefObject, useContext, useLayoutEffect, } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import type { Key } from '../ink.js'
 import {

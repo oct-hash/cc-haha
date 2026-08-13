@@ -1,4 +1,4 @@
-import * as React from 'react'
+
 import { useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { useExitOnCtrlCDWithKeybindings } from 'src/hooks/useExitOnCtrlCDWithKeybindings.js'

@@ -1,4 +1,4 @@
-import * as React from 'react'
+
 import { useEffect, useRef } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { KeyboardShortcutHint } from '../components/design-system/KeyboardShortcutHint.js'

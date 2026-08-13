@@ -1,6 +1,4 @@
 import capitalize from 'lodash-es/capitalize.js'
-import * as React from 'react'
-import { useMemo } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import {
   type Command,

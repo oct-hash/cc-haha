@@ -4,7 +4,7 @@
  * 用法: bun scripts/enrich-papers.ts
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { setTimeout } from 'timers/promises'
 
 const INDEX_PATH = 'D:/hermes-kb/wiki/papertree/index.json'

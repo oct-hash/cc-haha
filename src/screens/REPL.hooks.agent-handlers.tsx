@@ -8,7 +8,6 @@
 
 import { feature } from 'bun:bundle'
 import { spawnSync } from 'child_process'
-import type { UUID } from 'crypto'
 import type * as React from 'react'
 import { useCallback, useRef } from 'react'
 import exit from '../commands/exit/index.js'

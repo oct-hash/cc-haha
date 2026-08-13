@@ -1,10 +1,4 @@
-/**
- * SelectMatcherMode shows the configured matchers for a selected hook event.
- *
- * The /hooks menu is read-only: this view no longer offers "add new matcher"
- * and simply lets the user drill into each matcher to see its hooks.
- */
-import * as React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import type { HookEvent } from 'src/entrypoints/agentSdkTypes.js'
 import { Box, Text } from '../../ink.js'

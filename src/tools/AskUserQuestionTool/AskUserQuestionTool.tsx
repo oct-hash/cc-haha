@@ -1,5 +1,4 @@
 import { feature } from 'bun:bundle'
-import * as React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { getAllowedChannels, getQuestionPreviewFormat } from 'src/bootstrap/state.js'
 import { MessageResponse } from 'src/components/MessageResponse.js'

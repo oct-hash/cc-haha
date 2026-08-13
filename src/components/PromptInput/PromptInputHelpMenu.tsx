@@ -1,5 +1,4 @@
 import { feature } from 'bun:bundle'
-import * as React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Box, Text } from 'src/ink.js'
 import { getPlatform } from 'src/utils/platform.js'

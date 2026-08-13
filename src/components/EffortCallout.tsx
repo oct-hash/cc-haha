@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Box, Text } from '../ink.js'
 import { isMaxSubscriber, isProSubscriber, isTeamSubscriber } from '../utils/auth.js'
@@ -12,7 +12,6 @@ import {
 } from '../utils/effort.js'
 import { parseUserSpecifiedModel } from '../utils/model/model.js'
 import { updateSettingsForSource } from '../utils/settings/settings.js'
-import type { OptionWithDescription } from './CustomSelect/select.js'
 import { Select } from './CustomSelect/select.js'
 import { effortLevelToSymbol } from './EffortIndicator.js'
 import { PermissionDialog } from './permissions/PermissionDialog.js'

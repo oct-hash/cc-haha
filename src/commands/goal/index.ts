@@ -1,5 +1,5 @@
 import { VERIFICATION_AGENT_TYPE } from '../../tools/AgentTool/constants.js'
-import type { Command, PromptCommand } from '../../types/command.js'
+import type { Command, } from '../../types/command.js'
 
 // Goal state machine
 type GoalState = 'NEEDS_SPEC' | 'EXECUTION_READY' | 'BLOCKED' | 'DONE' | 'FAILED'

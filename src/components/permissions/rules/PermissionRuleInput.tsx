@@ -1,5 +1,4 @@
 import figures from 'figures'
-import * as React from 'react'
 import { useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import TextInput from '../../../components/TextInput.js'

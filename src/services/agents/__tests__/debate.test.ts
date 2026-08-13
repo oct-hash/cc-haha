@@ -11,7 +11,7 @@
  *   - Edge cases (empty responses, max rounds, early convergence)
  */
 
-import { beforeEach, describe, expect, it, vi } from 'bun:test'
+import { beforeEach, describe, expect, it, } from 'bun:test'
 import type { AgentAdapter } from '../adapter.js'
 import { computeReasoningQuality, DebateOrchestrator, sanitizeDebateInput } from '../debate.js'
 import type { AgentKind, AgentStatus, NormalizedEvent } from '../types.js'

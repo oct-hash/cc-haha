@@ -14,7 +14,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { getSessionManager, initSessionManager, resetSessionManager } from '../session-manager.js'
-import type { AgentConfig, AgentKind } from '../types.js'
+import type { AgentConfig, } from '../types.js'
 
 // ── Raw-event helpers ────────────────────────────────────────────────────
 

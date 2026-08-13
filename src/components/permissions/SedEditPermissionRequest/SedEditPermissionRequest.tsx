@@ -1,5 +1,5 @@
 import { basename, relative } from 'path'
-import React, { Suspense, use, useMemo } from 'react'
+import { Suspense, use, } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { FileEditToolDiff } from 'src/components/FileEditToolDiff.js'
 import { getCwd } from 'src/utils/cwd.js'

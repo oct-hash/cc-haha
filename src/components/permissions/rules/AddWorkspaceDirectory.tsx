@@ -1,6 +1,5 @@
 import figures from 'figures'
-import * as React from 'react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { useDebounceCallback } from 'usehooks-ts'
 import {
@@ -8,7 +7,6 @@ import {
   validateDirectoryForWorkspace,
 } from '../../../commands/add-dir/validation.js'
 import TextInput from '../../../components/TextInput.js'
-import type { KeyboardEvent } from '../../../ink/events/keyboard-event.js'
 import { Box, Text } from '../../../ink.js'
 import { useKeybinding } from '../../../keybindings/useKeybinding.js'
 import type { ToolPermissionContext } from '../../../Tool.js'
@@ -20,7 +18,6 @@ import { Dialog } from '../../design-system/Dialog.js'
 import { KeyboardShortcutHint } from '../../design-system/KeyboardShortcutHint.js'
 import {
   PromptInputFooterSuggestions,
-  type SuggestionItem,
 } from '../../PromptInput/PromptInputFooterSuggestions.js'
 
 type Props = {

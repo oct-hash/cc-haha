@@ -1,5 +1,5 @@
 import type { TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { ERROR_MESSAGE_USER_ABORT } from 'src/services/compact/compact.js'
 import { isRateLimitErrorMessage } from 'src/services/rateLimitMessages.js'

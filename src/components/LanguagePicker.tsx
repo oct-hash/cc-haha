@@ -1,5 +1,5 @@
 import figures from 'figures'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Box, Text } from '../ink.js'
 import { useKeybinding } from '../keybindings/useKeybinding.js'

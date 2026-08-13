@@ -7,7 +7,7 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { logForDebugging } from '../../../utils/debug.js'
 import { DEFAULT_BASE_URL, fetchQRCode, pollQRCodeStatus } from './api.js'
-import type { QRCodeStatus, WechatAccount } from './types.js'
+import type { WechatAccount } from './types.js'
 
 const ACCOUNTS_DIR = path.join(
   process.env.HOME || process.env.USERPROFILE || '~',

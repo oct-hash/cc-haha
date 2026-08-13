@@ -5,7 +5,7 @@
  * This is a thin bridging layer - actual persistence flows through existing mechanisms.
  */
 
-import type { SessionContext, SessionMetadata, SessionState } from './sessionContext.js'
+import type { SessionState } from './sessionContext.js'
 import { createSessionManager, getSessionManager } from './sessionContext.js'
 
 // Re-export types for convenience

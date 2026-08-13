@@ -11,8 +11,8 @@
  *   - Event forwarding (debate events pass through)
  */
 
-import { describe, expect, it, vi } from 'bun:test'
-import type { DebateEvent, DebateSummary } from '../debate.js'
+import { describe, expect, it, } from 'bun:test'
+import type { DebateEvent, } from '../debate.js'
 
 // ── Mock helpers ────────────────────────────────────────────────────────────
 

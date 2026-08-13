@@ -11,10 +11,10 @@
  *   7. Edge cases (empty content, truncation, Unicode, rapid abort)
  */
 
-import { beforeEach, describe, expect, it, vi } from 'bun:test'
-import type { AgentAdapter, AgentAdapterFactory } from '../adapter.js'
+import { describe, expect, it, } from 'bun:test'
+import type { AgentAdapter, } from '../adapter.js'
 import { createAgentAdapter, listAgentKinds } from '../factory.js'
-import type { AgentConfig, AgentKind, AgentStatus, NormalizedEvent } from '../types.js'
+import type { AgentConfig, AgentKind, NormalizedEvent } from '../types.js'
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 

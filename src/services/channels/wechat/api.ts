@@ -7,12 +7,9 @@ import axios, { type AxiosInstance } from 'axios'
 import type {
   QRCodePollResponse,
   QRCodeResponse,
-  QRCodeStatus,
   WechatAccount,
   WechatConfig,
   WechatContact,
-  WechatMessage,
-  WechatSendMessage,
   WechatUpdate,
 } from './types.js'
 

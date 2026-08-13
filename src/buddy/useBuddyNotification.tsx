@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { useNotifications } from '../context/notifications.js'
 import { Text } from '../ink.js'

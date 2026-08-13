@@ -1,4 +1,4 @@
-import * as React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { Ansi, Box, Text, useAnimationFrame } from '../../ink.js'
 import { segmentTextByHighlights, type TextHighlight } from '../../utils/textHighlighting.js'

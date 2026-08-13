@@ -3,7 +3,7 @@
  * Poll messages and forward to Claude, then reply
  */
 
-import { execSync, spawn, spawnSync } from 'node:child_process'
+import { execSync, spawnSync } from 'node:child_process'
 import axios from 'axios'
 import { getBridgeConfig } from './config.js'
 

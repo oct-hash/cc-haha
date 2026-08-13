@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import Text from '../../ink/components/Text.js'
 

@@ -2,7 +2,7 @@ import { z } from 'zod/v4'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import { execFileNoThrow } from '../../utils/execFileNoThrow.js'
 import type { PermissionResult } from '../../utils/permissions/PermissionResult.js'
-import { BROWSER_CLI_COMMANDS, type BrowserCLITool } from '../../utils/tool-aliases.js'
+import { BROWSER_CLI_COMMANDS, } from '../../utils/tool-aliases.js'
 
 const DESCRIPTION =
   'Browser automation tool for screenshots, PDF generation, DOM scraping, and JavaScript evaluation using Puppeteer'

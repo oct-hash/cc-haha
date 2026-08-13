@@ -1,5 +1,4 @@
-import * as React from 'react'
-import { useMemo } from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { type Command, formatDescriptionWithSource } from '../../commands.js'
 import { Box, Text } from '../../ink.js'

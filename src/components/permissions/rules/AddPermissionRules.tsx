@@ -1,5 +1,4 @@
-import * as React from 'react'
-import { useCallback } from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { Select } from '../../../components/CustomSelect/select.js'
 import { Box, Text } from '../../../ink.js'

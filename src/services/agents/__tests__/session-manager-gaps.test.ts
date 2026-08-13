@@ -20,9 +20,8 @@ import {
   getSessionManager,
   initSessionManager,
   resetSessionManager,
-  type SessionHandle,
 } from '../session-manager.js'
-import type { AgentConfig, AgentKind } from '../types.js'
+import type { AgentConfig, } from '../types.js'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 

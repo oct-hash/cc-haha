@@ -1,6 +1,5 @@
 import { basename } from 'path'
 import { toString as qrToString } from 'qrcode'
-import * as React from 'react'
 import { useEffect, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { getOriginalCwd } from '../bootstrap/state.js'

@@ -16,7 +16,7 @@
  */
 
 import type { QueryExecutor } from '../src/services/agents/claude-haha.js'
-import { createAgentAdapter, listAgentKinds } from '../src/services/agents/factory.js'
+import { listAgentKinds } from '../src/services/agents/factory.js'
 import {
   getSessionManager,
   resetSessionManager,

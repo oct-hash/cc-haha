@@ -8,7 +8,6 @@ import { Box, Link, Text, useInput } from '../../ink.js'
 import {
   type AccountSettings,
   calculateShouldShowGrove,
-  type GroveConfig,
   getGroveNoticeConfig,
   getGroveSettings,
   markGroveNoticeViewed,

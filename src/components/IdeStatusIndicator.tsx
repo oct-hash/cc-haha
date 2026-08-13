@@ -1,5 +1,4 @@
 import { basename } from 'path'
-import * as React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { useIdeConnectionStatus } from '../hooks/useIdeConnectionStatus.js'
 import type { IDESelection } from '../hooks/useIdeSelection.js'

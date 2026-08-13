@@ -1,5 +1,4 @@
 import figures from 'figures'
-import React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Box, Text } from '../../../ink.js'
 import type { Question } from '../../../tools/AskUserQuestionTool/AskUserQuestionTool.js'

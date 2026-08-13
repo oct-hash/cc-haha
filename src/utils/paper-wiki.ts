@@ -18,7 +18,6 @@ import {
   addEntitiesAndRelations,
   getPaperId,
   type KBEdge,
-  KBGraph,
   loadGraph,
   type PaperMetadata,
   queryEntities,

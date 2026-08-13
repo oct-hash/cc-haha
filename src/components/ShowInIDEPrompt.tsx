@@ -1,5 +1,4 @@
 import { basename, relative } from 'path'
-import React from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Box, Text } from '../ink.js'
 import { getCwd } from '../utils/cwd.js'

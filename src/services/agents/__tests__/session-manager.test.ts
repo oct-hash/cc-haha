@@ -13,9 +13,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
-import type { AgentAdapterFactory } from '../adapter.js'
-import { getSessionManager, resetSessionManager, type SessionHandle } from '../session-manager.js'
-import type { AgentConfig, AgentKind, AgentStatus } from '../types.js'
+import { getSessionManager, resetSessionManager, } from '../session-manager.js'
+import type { AgentConfig, } from '../types.js'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 

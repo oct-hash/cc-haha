@@ -1,4 +1,4 @@
-import * as React from 'react'
+
 import { useEffect, useRef, useState } from 'react'
 import { c as _c } from 'react/compiler-runtime'
 import { Box } from '../../ink.js'

@@ -1,8 +1,6 @@
 import { logForDebugging } from 'src/utils/debug.js'
 import { getClaudeConfigHomeDir } from 'src/utils/envUtils.js'
 import { getFsImplementation } from 'src/utils/fsOperations.js'
-import { logError } from 'src/utils/log.js'
-import type { SkillMetadata } from './skillRegistry.js'
 
 /**
  * Marketplace entry for a skill.
@@ -264,4 +262,4 @@ export function getMarketplace(): SkillMarketplace {
   return globalMarketplace
 }
 
-import { dirname, join } from 'path'
+import { join } from 'path'

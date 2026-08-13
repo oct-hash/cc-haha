@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react'
+
 import { c as _c } from 'react/compiler-runtime'
 import { Box } from '../../../../ink.js'
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js'
@@ -9,7 +9,6 @@ import { KeyboardShortcutHint } from '../../../design-system/KeyboardShortcutHin
 import { useWizard } from '../../../wizard/index.js'
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js'
 import { ColorPicker } from '../../ColorPicker.js'
-import type { AgentWizardData } from '../types.js'
 export function ColorStep() {
   const $ = _c(14)
   const { goNext, goBack, updateWizardData, wizardData } = useWizard()

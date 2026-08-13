@@ -13,7 +13,7 @@
  */
 
 import type { AgentAdapter } from './adapter.js'
-import type { AgentKind, NormalizedEvent } from './types.js'
+import type { AgentKind, } from './types.js'
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
