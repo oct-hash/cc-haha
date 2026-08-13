@@ -449,7 +449,7 @@ function detectLanguage(filePath: string, firstLine: string | null): string | nu
 function scopeColor(scope: string | undefined, text: string, theme: Theme): Color {
   if (!scope) return theme.foreground
   if (scope === 'keyword' && STORAGE_KEYWORDS.has(text.trim())) {
-    return theme.scopes['_storage'] ?? theme.foreground
+    return theme.scopes._storage ?? theme.foreground
   }
   return theme.scopes[scope] ?? theme.scopes[scope.split('.')[0]!] ?? theme.foreground
 }

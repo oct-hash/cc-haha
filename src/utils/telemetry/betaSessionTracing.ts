@@ -455,9 +455,9 @@ export function addBetaToolResultAttributes(
   const { content: truncatedResult, truncated } = truncateContent(
     `[TOOL RESULT: ${toolName}]\n${toolResult}`,
   )
-  endAttributes['new_context'] = truncatedResult
+  endAttributes.new_context = truncatedResult
   if (truncated) {
-    endAttributes['new_context_truncated'] = true
-    endAttributes['new_context_original_length'] = toolResult.length
+    endAttributes.new_context_truncated = true
+    endAttributes.new_context_original_length = toolResult.length
   }
 }

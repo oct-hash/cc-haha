@@ -12,11 +12,11 @@ export function migrateReplBridgeEnabledToRemoteControlAtStartup(): void {
     // The old key is no longer in the GlobalConfig type, so access it via
     // an untyped cast. Only migrate if the old key exists and the new key
     // hasn't been set yet.
-    const oldValue = (prev as Record<string, unknown>)['replBridgeEnabled']
+    const oldValue = (prev as Record<string, unknown>).replBridgeEnabled
     if (oldValue === undefined) return prev
     if (prev.remoteControlAtStartup !== undefined) return prev
     const next = { ...prev, remoteControlAtStartup: Boolean(oldValue) }
-    delete (next as Record<string, unknown>)['replBridgeEnabled']
+    delete (next as Record<string, unknown>).replBridgeEnabled
     return next
   })
 }

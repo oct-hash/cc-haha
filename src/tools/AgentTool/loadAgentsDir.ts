@@ -282,7 +282,7 @@ export const getAgentDefinitionsWithOverrides = memoize(
             // Skip non-agent markdown files silently (e.g., reference docs
             // co-located with agent definitions). Only report errors for files
             // that look like agent attempts (have a 'name' field in frontmatter).
-            if (!frontmatter['name']) {
+            if (!frontmatter.name) {
               return null
             }
             const errorMsg = getParseError(frontmatter)
@@ -364,8 +364,8 @@ export function clearAgentDefinitionsCache(): void {
  * Helper to determine the specific parsing error for an agent file
  */
 function getParseError(frontmatter: Record<string, unknown>): string {
-  const agentType = frontmatter['name']
-  const description = frontmatter['description']
+  const agentType = frontmatter.name
+  const description = frontmatter.description
 
   if (!agentType || typeof agentType !== 'string') {
     return 'Missing required "name" field in frontmatter'
@@ -497,8 +497,8 @@ export function parseAgentFromMarkdown(
   source: SettingSource,
 ): CustomAgentDefinition | null {
   try {
-    const agentType = frontmatter['name']
-    let whenToUse = frontmatter['description'] as string
+    const agentType = frontmatter.name
+    let whenToUse = frontmatter.description as string
 
     // Validate required fields — silently skip files without any agent
     // frontmatter (they're likely co-located reference documentation)
@@ -513,8 +513,8 @@ export function parseAgentFromMarkdown(
     // Unescape newlines in whenToUse that were escaped for YAML parsing
     whenToUse = whenToUse.replace(/\\n/g, '\n')
 
-    const color = frontmatter['color'] as AgentColorName | undefined
-    const modelRaw = frontmatter['model']
+    const color = frontmatter.color as AgentColorName | undefined
+    const modelRaw = frontmatter.model
     let model: string | undefined
     if (typeof modelRaw === 'string' && modelRaw.trim().length > 0) {
       const trimmed = modelRaw.trim()
@@ -522,7 +522,7 @@ export function parseAgentFromMarkdown(
     }
 
     // Parse background flag
-    const backgroundRaw = frontmatter['background']
+    const backgroundRaw = frontmatter.background
 
     if (
       backgroundRaw !== undefined &&
@@ -540,7 +540,7 @@ export function parseAgentFromMarkdown(
 
     // Parse memory scope
     const VALID_MEMORY_SCOPES: AgentMemoryScope[] = ['user', 'project', 'local']
-    const memoryRaw = frontmatter['memory'] as string | undefined
+    const memoryRaw = frontmatter.memory as string | undefined
     let memory: AgentMemoryScope | undefined
     if (memoryRaw !== undefined) {
       if (VALID_MEMORY_SCOPES.includes(memoryRaw as AgentMemoryScope)) {
@@ -556,7 +556,7 @@ export function parseAgentFromMarkdown(
     type IsolationMode = 'worktree' | 'remote'
     const VALID_ISOLATION_MODES: readonly IsolationMode[] =
       process.env.USER_TYPE === 'ant' ? ['worktree', 'remote'] : ['worktree']
-    const isolationRaw = frontmatter['isolation'] as string | undefined
+    const isolationRaw = frontmatter.isolation as string | undefined
     let isolation: IsolationMode | undefined
     if (isolationRaw !== undefined) {
       if (VALID_ISOLATION_MODES.includes(isolationRaw as IsolationMode)) {
@@ -569,7 +569,7 @@ export function parseAgentFromMarkdown(
     }
 
     // Parse effort from frontmatter (supports string levels and integers)
-    const effortRaw = frontmatter['effort']
+    const effortRaw = frontmatter.effort
     const parsedEffort = effortRaw !== undefined ? parseEffortValue(effortRaw) : undefined
 
     if (effortRaw !== undefined && parsedEffort === undefined) {
@@ -579,7 +579,7 @@ export function parseAgentFromMarkdown(
     }
 
     // Parse permissionMode from frontmatter
-    const permissionModeRaw = frontmatter['permissionMode'] as string | undefined
+    const permissionModeRaw = frontmatter.permissionMode as string | undefined
     const isValidPermissionMode =
       permissionModeRaw && (PERMISSION_MODES as readonly string[]).includes(permissionModeRaw)
 
@@ -589,7 +589,7 @@ export function parseAgentFromMarkdown(
     }
 
     // Parse maxTurns from frontmatter
-    const maxTurnsRaw = frontmatter['maxTurns']
+    const maxTurnsRaw = frontmatter.maxTurns
     const maxTurns = parsePositiveIntFromFrontmatter(maxTurnsRaw)
     if (maxTurnsRaw !== undefined && maxTurns === undefined) {
       logForDebugging(
@@ -601,7 +601,7 @@ export function parseAgentFromMarkdown(
     const filename = basename(filePath, '.md')
 
     // Parse tools from frontmatter
-    let tools = parseAgentToolsFromFrontmatter(frontmatter['tools'])
+    let tools = parseAgentToolsFromFrontmatter(frontmatter.tools)
 
     // If memory is enabled, inject Write/Edit/Read tools for memory access
     if (isAutoMemoryEnabled() && memory && tools !== undefined) {
@@ -614,21 +614,21 @@ export function parseAgentFromMarkdown(
     }
 
     // Parse disallowedTools from frontmatter
-    const disallowedToolsRaw = frontmatter['disallowedTools']
+    const disallowedToolsRaw = frontmatter.disallowedTools
     const disallowedTools =
       disallowedToolsRaw !== undefined
         ? parseAgentToolsFromFrontmatter(disallowedToolsRaw)
         : undefined
 
     // Parse skills from frontmatter
-    const skills = parseSlashCommandToolsFromFrontmatter(frontmatter['skills'])
+    const skills = parseSlashCommandToolsFromFrontmatter(frontmatter.skills)
 
-    const initialPromptRaw = frontmatter['initialPrompt']
+    const initialPromptRaw = frontmatter.initialPrompt
     const initialPrompt =
       typeof initialPromptRaw === 'string' && initialPromptRaw.trim() ? initialPromptRaw : undefined
 
     // Parse mcpServers from frontmatter using same Zod validation as JSON agents
-    const mcpServersRaw = frontmatter['mcpServers']
+    const mcpServersRaw = frontmatter.mcpServers
     let mcpServers: AgentMcpServerSpec[] | undefined
     if (Array.isArray(mcpServersRaw)) {
       mcpServers = mcpServersRaw

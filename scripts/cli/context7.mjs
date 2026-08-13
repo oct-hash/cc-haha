@@ -48,7 +48,7 @@ Authentication:
     'User-Agent': 'context7-cli/1.0',
     Accept: 'application/json',
   }
-  if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`
+  if (apiKey) headers.Authorization = `Bearer ${apiKey}`
 
   try {
     switch (cmd) {

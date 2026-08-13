@@ -377,7 +377,7 @@ const reconciler = createReconciler<
   appendChild: appendChildNode,
   insertBefore: insertBeforeNode,
   finalizeInitialChildren(_node: DOMElement, _type: ElementNames, props: Props): boolean {
-    return props['autoFocus'] === true
+    return props.autoFocus === true
   },
   commitMount(node: DOMElement): void {
     getFocusManager(node).handleAutoFocus(node)
@@ -406,7 +406,7 @@ const reconciler = createReconciler<
   // React 19 commitUpdate receives old and new props directly instead of an updatePayload
   commitUpdate(node: DOMElement, _type: ElementNames, oldProps: Props, newProps: Props): void {
     const props = diff(oldProps, newProps)
-    const style = diff(oldProps['style'] as Styles, newProps['style'] as Styles)
+    const style = diff(oldProps.style as Styles, newProps.style as Styles)
 
     if (props) {
       for (const [key, value] of Object.entries(props)) {
@@ -430,7 +430,7 @@ const reconciler = createReconciler<
     }
 
     if (style && node.yogaNode) {
-      applyStyles(node.yogaNode, style, newProps['style'] as Styles)
+      applyStyles(node.yogaNode, style, newProps.style as Styles)
     }
   },
   commitTextUpdate(node: TextNode, _oldText: string, newText: string): void {

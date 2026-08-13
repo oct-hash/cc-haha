@@ -33,11 +33,11 @@ export function osc(...parts: (string | number)[]): string {
  * wrapped \x07 is opaque DCS payload and tmux never sees the bell.
  */
 export function wrapForMultiplexer(sequence: string): string {
-  if (process.env['TMUX']) {
+  if (process.env.TMUX) {
     const escaped = sequence.replaceAll('\x1b', '\x1b\x1b')
     return `\x1bPtmux;${escaped}\x1b\\`
   }
-  if (process.env['STY']) {
+  if (process.env.STY) {
     return `\x1bP${sequence}\x1b\\`
   }
   return sequence
@@ -62,9 +62,9 @@ export function wrapForMultiplexer(sequence: string): string {
 export type ClipboardPath = 'native' | 'tmux-buffer' | 'osc52'
 
 export function getClipboardPath(): ClipboardPath {
-  const nativeAvailable = process.platform === 'darwin' && !process.env['SSH_CONNECTION']
+  const nativeAvailable = process.platform === 'darwin' && !process.env.SSH_CONNECTION
   if (nativeAvailable) return 'native'
-  if (process.env['TMUX']) return 'tmux-buffer'
+  if (process.env.TMUX) return 'tmux-buffer'
   return 'osc52'
 }
 
@@ -87,9 +87,9 @@ function tmuxPassthrough(payload: string): string {
  * Returns true if the buffer was loaded successfully.
  */
 export async function tmuxLoadBuffer(text: string): Promise<boolean> {
-  if (!process.env['TMUX']) return false
+  if (!process.env.TMUX) return false
   const args =
-    process.env['LC_TERMINAL'] === 'iTerm2' ? ['load-buffer', '-'] : ['load-buffer', '-w', '-']
+    process.env.LC_TERMINAL === 'iTerm2' ? ['load-buffer', '-'] : ['load-buffer', '-w', '-']
   const { code } = await execFileNoThrow('tmux', args, {
     input: text,
     useCwd: false,
@@ -144,7 +144,7 @@ export async function setClipboard(text: string): Promise<string> {
   // Gated on SSH_CONNECTION (not SSH_TTY) since tmux panes inherit SSH_TTY
   // forever but SSH_CONNECTION is in tmux's default update-environment and
   // clears on local attach. Fire-and-forget.
-  if (!process.env['SSH_CONNECTION']) copyNative(text)
+  if (!process.env.SSH_CONNECTION) copyNative(text)
 
   const tmuxBufferLoaded = await tmuxLoadBuffer(text)
 

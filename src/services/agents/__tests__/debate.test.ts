@@ -346,7 +346,7 @@ describe('DebateOrchestrator — Relay Mode', () => {
         return relayResponse('Second')(msg)
       }),
       codex: createMockAdapter('codex', (msg: string) => {
-        prompts['codex'] = msg
+        prompts.codex = msg
         return relayResponse('Final')(msg)
       }),
     }

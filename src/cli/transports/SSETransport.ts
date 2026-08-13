@@ -249,8 +249,8 @@ export class SSETransport implements Transport {
       'anthropic-version': '2023-06-01',
       'User-Agent': getClaudeCodeUserAgent(),
     }
-    if (authHeaders['Cookie']) {
-      delete headers['Authorization']
+    if (authHeaders.Cookie) {
+      delete headers.Authorization
     }
     if (this.lastSequenceNum > 0) {
       headers['Last-Event-ID'] = String(this.lastSequenceNum)

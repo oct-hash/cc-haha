@@ -4101,9 +4101,9 @@ export type InstructionsMemoryType = 'User' | 'Project' | 'Local' | 'Managed'
  * derived hooks (structured output enforcement etc.) are internal and not checked.
  */
 export function hasInstructionsLoadedHook(): boolean {
-  const snapshotHooks = getHooksConfigFromSnapshot()?.['InstructionsLoaded']
+  const snapshotHooks = getHooksConfigFromSnapshot()?.InstructionsLoaded
   if (snapshotHooks && snapshotHooks.length > 0) return true
-  const registeredHooks = getRegisteredHooks()?.['InstructionsLoaded']
+  const registeredHooks = getRegisteredHooks()?.InstructionsLoaded
   if (registeredHooks && registeredHooks.length > 0) return true
   return false
 }
@@ -4682,9 +4682,9 @@ async function executeHookCallback({
  * blocking the git-worktree fallback.
  */
 export function hasWorktreeCreateHook(): boolean {
-  const snapshotHooks = getHooksConfigFromSnapshot()?.['WorktreeCreate']
+  const snapshotHooks = getHooksConfigFromSnapshot()?.WorktreeCreate
   if (snapshotHooks && snapshotHooks.length > 0) return true
-  const registeredHooks = getRegisteredHooks()?.['WorktreeCreate']
+  const registeredHooks = getRegisteredHooks()?.WorktreeCreate
   if (!registeredHooks || registeredHooks.length === 0) return false
   // Mirror getHooksConfig(): skip plugin hooks in managed-only mode
   const managedOnly = shouldAllowManagedHooksOnly()
@@ -4733,8 +4733,8 @@ export async function executeWorktreeCreateHook(name: string): Promise<{ worktre
  * hooks (plugin hooks + SDK callback hooks via registerHookCallbacks).
  */
 export async function executeWorktreeRemoveHook(worktreePath: string): Promise<boolean> {
-  const snapshotHooks = getHooksConfigFromSnapshot()?.['WorktreeRemove']
-  const registeredHooks = getRegisteredHooks()?.['WorktreeRemove']
+  const snapshotHooks = getHooksConfigFromSnapshot()?.WorktreeRemove
+  const registeredHooks = getRegisteredHooks()?.WorktreeRemove
   const hasSnapshotHooks = snapshotHooks && snapshotHooks.length > 0
   const hasRegisteredHooks = registeredHooks && registeredHooks.length > 0
   if (!hasSnapshotHooks && !hasRegisteredHooks) {

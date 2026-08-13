@@ -2758,7 +2758,7 @@ async function run(): Promise<CommanderCommand> {
         explicitModel &&
         explicitModel !== 'default' &&
         !hasGrowthBookEnvOverride('tengu_ant_model_override') &&
-        getGlobalConfig().cachedGrowthBookFeatures?.['tengu_ant_model_override'] == null
+        getGlobalConfig().cachedGrowthBookFeatures?.tengu_ant_model_override == null
       ) {
         await initializeGrowthBook()
       }

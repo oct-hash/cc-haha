@@ -106,7 +106,7 @@ function hexComponent(hex: string): number {
  * iTerm2 with the option enabled), so this is a best-effort hint.
  */
 function detectFromColorFgBg(): SystemTheme | undefined {
-  const colorfgbg = process.env['COLORFGBG']
+  const colorfgbg = process.env.COLORFGBG
   if (!colorfgbg) return undefined
   const parts = colorfgbg.split(';')
   const bg = parts[parts.length - 1]

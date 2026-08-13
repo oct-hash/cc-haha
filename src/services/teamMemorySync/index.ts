@@ -238,7 +238,7 @@ async function fetchTeamMemoryOnce(
 
     // Extract checksum from response data or ETag header
     const responseChecksum =
-      parsed.data.checksum || response.headers['etag']?.replace(/^"|"$/g, '') || undefined
+      parsed.data.checksum || response.headers.etag?.replace(/^"|"$/g, '') || undefined
     if (responseChecksum) {
       state.lastKnownChecksum = responseChecksum
     }
@@ -323,7 +323,7 @@ async function fetchTeamMemoryHashes(
       return { success: true, entryChecksums: {} }
     }
 
-    const checksum = response.data?.checksum || response.headers['etag']?.replace(/^"|"$/g, '')
+    const checksum = response.data?.checksum || response.headers.etag?.replace(/^"|"$/g, '')
     const entryChecksums = response.data?.entryChecksums
 
     // Requires anthropic/anthropic#283027. If entryChecksums is missing,

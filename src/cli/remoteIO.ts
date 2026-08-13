@@ -52,7 +52,7 @@ export class RemoteIO extends StructuredIO {
     const headers: Record<string, string> = {}
     const sessionToken = getSessionIngressAuthToken()
     if (sessionToken) {
-      headers['Authorization'] = `Bearer ${sessionToken}`
+      headers.Authorization = `Bearer ${sessionToken}`
     } else {
       logForDebugging('[remote-io] No session ingress token available', {
         level: 'error',
@@ -72,7 +72,7 @@ export class RemoteIO extends StructuredIO {
       const h: Record<string, string> = {}
       const freshToken = getSessionIngressAuthToken()
       if (freshToken) {
-        h['Authorization'] = `Bearer ${freshToken}`
+        h.Authorization = `Bearer ${freshToken}`
       }
       const freshErVersion = process.env.CLAUDE_CODE_ENVIRONMENT_RUNNER_VERSION
       if (freshErVersion) {

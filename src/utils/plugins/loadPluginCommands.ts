@@ -246,7 +246,7 @@ function createPluginCommand(
           ? parseUserSpecifiedModel(frontmatter.model as string)
           : undefined
 
-    const effortRaw = frontmatter['effort']
+    const effortRaw = frontmatter.effort
     const effort = effortRaw !== undefined ? parseEffortValue(effortRaw) : undefined
     if (effortRaw !== undefined && effort === undefined) {
       logForDebugging(

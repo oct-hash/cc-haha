@@ -21,7 +21,7 @@ function getAuthHeaders(): Record<string, string> {
   }
   const authToken = process.env.ANTHROPIC_AUTH_TOKEN
   const apiKey = process.env.ANTHROPIC_API_KEY
-  if (authToken) headers['Authorization'] = `Bearer ${authToken}`
+  if (authToken) headers.Authorization = `Bearer ${authToken}`
   else if (apiKey) headers['x-api-key'] = apiKey
   return headers
 }
@@ -153,7 +153,7 @@ async function collectDebateResult(
   const adapters: Record<AgentKind, AgentAdapter> = {
     'claude-haha': createE2EAdapter('claude-haha', models['claude-haha']),
     'claude-code': createE2EAdapter('claude-code', models['claude-code']),
-    codex: createE2EAdapter('codex', models['codex']),
+    codex: createE2EAdapter('codex', models.codex),
   }
 
   const orch = new DebateOrchestrator(adapters, {
@@ -250,7 +250,7 @@ Stack:
     const adapters: Record<AgentKind, AgentAdapter> = {
       'claude-haha': createE2EAdapter('claude-haha', models['claude-haha']),
       'claude-code': createE2EAdapter('claude-code', models['claude-code']),
-      codex: createE2EAdapter('codex', models['codex']),
+      codex: createE2EAdapter('codex', models.codex),
     }
     const orch = new DebateOrchestrator(adapters, {
       mode: 'debate',

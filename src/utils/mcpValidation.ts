@@ -35,7 +35,7 @@ export function getMaxMcpOutputTokens(): number {
     'tengu_satin_quoll',
     {},
   )
-  const override = overrides?.['mcp_tool']
+  const override = overrides?.mcp_tool
   if (typeof override === 'number' && Number.isFinite(override) && override > 0) {
     return override
   }

@@ -143,7 +143,7 @@ function getAuthHeaders(): Record<string, string> {
   const apiKey = process.env.ANTHROPIC_API_KEY
 
   if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`
+    headers.Authorization = `Bearer ${authToken}`
   } else if (apiKey) {
     headers['x-api-key'] = apiKey
   }
@@ -326,15 +326,15 @@ function buildAdapters(
 
   // codex: try CLI, fall back to direct API
   try {
-    adapters['codex'] = createAgentAdapter('codex', {
+    adapters.codex = createAgentAdapter('codex', {
       maxTurns: 5,
-      model: models['codex'],
+      model: models.codex,
     })
   } catch {
     console.error('[debate-mcp] codex CLI unavailable, falling back to direct API adapter.')
-    adapters['codex'] = createDirectApiAdapter({
+    adapters.codex = createDirectApiAdapter({
       maxTurns: 5,
-      model: models['codex'],
+      model: models.codex,
     })
   }
 

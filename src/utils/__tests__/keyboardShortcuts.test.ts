@@ -7,11 +7,11 @@ describe('MACOS_OPTION_SPECIAL_CHARS', () => {
   })
 
   it('maps option+p to model picker', () => {
-    expect(MACOS_OPTION_SPECIAL_CHARS['π']).toBe('alt+p')
+    expect(MACOS_OPTION_SPECIAL_CHARS.π).toBe('alt+p')
   })
 
   it('maps option+o to fast mode', () => {
-    expect(MACOS_OPTION_SPECIAL_CHARS['ø']).toBe('alt+o')
+    expect(MACOS_OPTION_SPECIAL_CHARS.ø).toBe('alt+o')
   })
 })
 

@@ -959,12 +959,12 @@ export const getMemoryFiles = memoize(
       logEvent('tengu_claudemd__initial_load', {
         file_count: result.length,
         total_content_length: totalContentLength,
-        user_count: typeCounts['User'] ?? 0,
-        project_count: typeCounts['Project'] ?? 0,
-        local_count: typeCounts['Local'] ?? 0,
-        managed_count: typeCounts['Managed'] ?? 0,
-        automem_count: typeCounts['AutoMem'] ?? 0,
-        ...(feature('TEAMMEM') ? { teammem_count: typeCounts['TeamMem'] ?? 0 } : {}),
+        user_count: typeCounts.User ?? 0,
+        project_count: typeCounts.Project ?? 0,
+        local_count: typeCounts.Local ?? 0,
+        managed_count: typeCounts.Managed ?? 0,
+        automem_count: typeCounts.AutoMem ?? 0,
+        ...(feature('TEAMMEM') ? { teammem_count: typeCounts.TeamMem ?? 0 } : {}),
         duration_ms: Date.now() - startTime,
       })
     }
