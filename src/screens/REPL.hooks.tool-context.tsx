@@ -260,7 +260,7 @@ export function useREPLToolContext(params: UseREPLToolContextParams) {
               setSandboxPermissionRequestQueue((queue) => {
                 queue
                   .filter((item) => item.hostPattern.host === hostPattern.host)
-                  .forEach((item) => item.resolvePromise(allow))
+                  .forEach((item) => { item.resolvePromise(allow) })
                 return queue.filter((item) => item.hostPattern.host !== hostPattern.host)
               })
               // Clean up all sibling bridge subscriptions for this host

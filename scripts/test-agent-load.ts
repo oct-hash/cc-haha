@@ -56,7 +56,7 @@ async function main() {
   console.log(`\nFirst 10 non-built-in agents:`)
   nonBuiltIn
     .slice(0, 10)
-    .forEach((a: AgentDefinition) => console.log(`  ${a.agentType} -> source=${a.source}`))
+    .forEach((a: AgentDefinition) => { console.log(`  ${a.agentType} -> source=${a.source}`) })
 
   process.exit(0)
 }

@@ -101,25 +101,25 @@ export function formatSummaryForDisplay(summary: ReviewSummary): string {
 
   if (summary.commonErrors.length > 0) {
     lines.push('--- 常见错误 ---')
-    summary.commonErrors.forEach((e, i) => lines.push(`${i + 1}. ${e}`))
+    summary.commonErrors.forEach((e, i) => { lines.push(`${i + 1}. ${e}`) })
     lines.push('')
   }
 
   if (summary.commonMissedTools.length > 0) {
     lines.push('--- 常遗漏工具 ---')
-    summary.commonMissedTools.forEach((t, i) => lines.push(`${i + 1}. ${t}`))
+    summary.commonMissedTools.forEach((t, i) => { lines.push(`${i + 1}. ${t}`) })
     lines.push('')
   }
 
   if (summary.improvementSuggestions.length > 0) {
     lines.push('--- 改进建议 ---')
-    summary.improvementSuggestions.forEach((s, i) => lines.push(`${i + 1}. ${s}`))
+    summary.improvementSuggestions.forEach((s, i) => { lines.push(`${i + 1}. ${s}`) })
     lines.push('')
   }
 
   if (summary.goodPatterns.length > 0) {
     lines.push('--- 好的实践 ---')
-    summary.goodPatterns.forEach((p, i) => lines.push(`${i + 1}. ${p}`))
+    summary.goodPatterns.forEach((p, i) => { lines.push(`${i + 1}. ${p}`) })
   }
 
   return lines.join('\n')

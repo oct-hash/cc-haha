@@ -207,6 +207,7 @@ describe('B — Adapter 生命周期', () => {
     const h = sm.createSession('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('fail-fast')
+        yield* []
       },
     })
 
@@ -271,6 +272,7 @@ describe('C — Retry 机制', () => {
     const h = sm.createSession('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('always-fail')
+        yield* []
       },
     })
 
@@ -287,6 +289,7 @@ describe('C — Retry 机制', () => {
     const h = sm.createSession('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('no-retry')
+        yield* []
       },
     })
 
@@ -304,6 +307,7 @@ describe('C — Retry 机制', () => {
     const h = sm.createSession('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('always')
+        yield* []
       },
     })
 

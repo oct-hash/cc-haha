@@ -1163,7 +1163,7 @@ export function MainRender(props: MainRenderProps): ReactNode {
                       setSandboxPermissionRequestQueue((queue) => {
                         queue
                           .filter((item) => item.hostPattern.host === approvedHost)
-                          .forEach((item) => item.resolvePromise(allow))
+                          .forEach((item) => { item.resolvePromise(allow) })
                         return queue.filter((item) => item.hostPattern.host !== approvedHost)
                       })
 

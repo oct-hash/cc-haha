@@ -2005,9 +2005,9 @@ function groupLogsBySessionId(filteredLogs: LogOption[]): Map<string, LogOption[
   }
 
   // Sort logs within each group by modified date (newest first)
-  groups.forEach((logs) =>
-    logs.sort((a, b) => new Date(b.modified).getTime() - new Date(a.modified).getTime()),
-  )
+  groups.forEach((logs) => {
+    logs.sort((a, b) => new Date(b.modified).getTime() - new Date(a.modified).getTime())
+  })
   return groups
 }
 

@@ -184,6 +184,7 @@ describe('Gap 4 — Error Recovery (retry)', () => {
       queryExecutor: async function* () {
         calls++
         throw new Error('fail once')
+        yield* []
       },
     })
 
@@ -462,6 +463,7 @@ describe('Gap 7 — Config Hot-Reload', () => {
       queryExecutor: async function* () {
         calls++
         throw new Error('fail')
+        yield* []
       },
     })
 
@@ -476,6 +478,7 @@ describe('Gap 7 — Config Hot-Reload', () => {
       queryExecutor: async function* () {
         calls++
         throw new Error('fail')
+        yield* []
       },
     })
 
@@ -565,6 +568,7 @@ describe('Gap 5 — Background Bridge (SessionHandle lifecycle)', () => {
     const handle = sm.createSession('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('Connection refused')
+        yield* []
       },
     })
 

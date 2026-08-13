@@ -259,6 +259,7 @@ describe('Status state machine', () => {
     const adapter = createAgentAdapter('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('early failure')
+        yield* []
       },
     } as AgentConfig)
 
@@ -317,6 +318,7 @@ describe('Concurrent call rejection', () => {
     const adapter = createAgentAdapter('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('fail')
+        yield* []
       },
     } as AgentConfig)
 

@@ -226,6 +226,7 @@ describe('维度 2 — startBackgroundBridgeStream 模式', () => {
     const handle = sm.createSession('claude-haha', {
       queryExecutor: async function* () {
         throw new Error('bg-crash')
+        yield* []
       },
     })
     await sm.save()

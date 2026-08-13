@@ -222,6 +222,7 @@ describe('维度 3 — 错误恢复并发', () => {
       sm.createSession('claude-haha', {
         queryExecutor: async function* () {
           throw new Error('always fail')
+          yield* []
         },
       }),
     )
@@ -286,6 +287,7 @@ describe('维度 4 — 配置热重载并发', () => {
       queryExecutor: async function* () {
         calls++
         throw new Error('fail')
+        yield* []
       },
     })
     await collect(s1.chatStream('go', new AbortController()))
@@ -299,6 +301,7 @@ describe('维度 4 — 配置热重载并发', () => {
       queryExecutor: async function* () {
         calls++
         throw new Error('fail')
+        yield* []
       },
     })
     await collect(s2.chatStream('go', new AbortController()))
@@ -314,6 +317,7 @@ describe('维度 4 — 配置热重载并发', () => {
       queryExecutor: async function* () {
         calls1++
         throw new Error('fail')
+        yield* []
       },
     })
 
@@ -324,6 +328,7 @@ describe('维度 4 — 配置热重载并发', () => {
       queryExecutor: async function* () {
         calls2++
         throw new Error('fail')
+        yield* []
       },
     })
 

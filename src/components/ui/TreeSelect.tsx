@@ -225,7 +225,7 @@ export function TreeSelect(t0) {
   let map
   if ($[13] !== flattenedNodes) {
     map = new Map()
-    flattenedNodes.forEach((fn) => map.set(fn.node.id, fn.node))
+    flattenedNodes.forEach((fn) => { map.set(fn.node.id, fn.node) })
     $[13] = flattenedNodes
     $[14] = map
   } else {
