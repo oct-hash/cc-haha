@@ -31,7 +31,7 @@ function createMockJwt(expiresInSeconds: number): string {
   return `${header}.${payload}.${signature}`
 }
 
-function createMockJwtWithPrefix(expiresInSeconds: number): string {
+function _createMockJwtWithPrefix(expiresInSeconds: number): string {
   return `sk-ant-si-${createMockJwt(expiresInSeconds)}`
 }
 

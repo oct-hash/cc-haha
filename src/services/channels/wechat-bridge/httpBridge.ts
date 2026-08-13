@@ -49,7 +49,7 @@ class WechatBridge {
   private async initSession(): Promise<void> {
     console.error('[Bridge] Initializing MCP session...')
 
-    const response = await axios.post(
+    const _response = await axios.post(
       CONFIG.weixinMcpUrl,
       {
         jsonrpc: '2.0',

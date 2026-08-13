@@ -325,7 +325,7 @@ describe('Concurrent call rejection', () => {
     } as AgentConfig)
 
     try {
-      for await (const ev of adapter.chatStream('test', new AbortController())) {
+      for await (const _ev of adapter.chatStream('test', new AbortController())) {
         // consume
       }
     } catch {

@@ -53,7 +53,7 @@ export async function runImpactReport(ctx: LaneExecutionContext): Promise<LaneRe
       (f) => f.startsWith('src/') && (f.endsWith('.ts') || f.endsWith('.tsx')),
     )
 
-    const impact: ImpactSummary = {
+    const _impact: ImpactSummary = {
       changedFiles: changedFiles.length,
       areas,
       labels: srcChanged ? ['source-changed'] : [],

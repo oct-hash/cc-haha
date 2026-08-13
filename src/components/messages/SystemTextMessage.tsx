@@ -884,7 +884,7 @@ function MemoryFileRow(t0) {
   }
   return t8
 }
-function ThinkingMessage(t0) {
+function _ThinkingMessage(t0) {
   const $ = _c(7)
   const { message, addMargin } = t0
   const bg = useSelectedMessageBg()

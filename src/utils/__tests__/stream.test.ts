@@ -75,7 +75,7 @@ describe('Stream', () => {
     const stream = new Stream<number>()
     stream.done()
     // First iteration starts
-    const it = stream[Symbol.asyncIterator]()
+    const _it = stream[Symbol.asyncIterator]()
     // Second iteration should throw
     expect(() => stream[Symbol.asyncIterator]()).toThrow('Stream can only be iterated once')
   })

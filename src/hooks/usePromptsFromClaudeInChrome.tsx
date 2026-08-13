@@ -10,7 +10,7 @@ import {
 import { lazySchema } from '../utils/lazySchema.js'
 
 // Schema for the prompt notification from Chrome extension (JSON-RPC 2.0 format)
-const ClaudeInChromePromptNotificationSchema = lazySchema(() =>
+const _ClaudeInChromePromptNotificationSchema = lazySchema(() =>
   z.object({
     method: z.literal('notifications/message'),
     params: z.object({

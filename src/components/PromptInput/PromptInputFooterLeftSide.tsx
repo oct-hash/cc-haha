@@ -322,7 +322,7 @@ function ModeIndicator({
   const expandedView = useAppState((s_3) => s_3.expandedView)
   const showSpinnerTree = expandedView === 'teammates'
   const prStatus = usePrStatus(isLoading, isPrStatusEnabled())
-  const hasTmuxSession = useAppState(
+  const _hasTmuxSession = useAppState(
     (s_4) => process.env.USER_TYPE === 'ant' && s_4.tungstenActiveSession !== undefined,
   )
   const nextTickAt = useSyncExternalStore(

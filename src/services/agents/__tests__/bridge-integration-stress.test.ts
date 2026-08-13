@@ -71,7 +71,7 @@ function delayedExecutor(label: string, delayMs: number) {
   }
 }
 
-function flakyExecutor(failLabel: string, okLabel: string) {
+function _flakyExecutor(failLabel: string, okLabel: string) {
   let firstCall = true
   return async function* (_msg: string, _ctrl: AbortController) {
     if (firstCall) {
@@ -635,7 +635,7 @@ describe('维度 8 — 真实混合场景', () => {
 
     // 用户切换到 claude-code（bridgeAdapterStream 模式）
     const existing = sm.listSessions().find((s) => s.agentKind === 'claude-code')
-    const h2 = existing ?? sm.createSession('claude-code')
+    const _h2 = existing ?? sm.createSession('claude-code')
     await sm.save()
 
     // 验证持久化

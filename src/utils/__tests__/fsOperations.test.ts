@@ -226,10 +226,10 @@ describe('resolveDeepestExistingAncestorSync', () => {
   it('resolves live symlink in path', () => {
     // /a/b is a symlink to /real/b
     // /a exists (no symlink), /a/b is a symlink
-    let callCount = 0
+    let _callCount = 0
     const fs = mockFs({
       lstatSync: (p: string) => {
-        callCount++
+        _callCount++
         if (p === '/a/b/c/file.txt') throw new Error('ENOENT')
         if (p === '/a/b/c') throw new Error('ENOENT')
         if (p === '/a/b') return fakeStats({ isSymbolicLink: () => true })

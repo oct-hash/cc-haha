@@ -22,7 +22,7 @@ function rawStream(text: string) {
   return { type: 'stream' as const, text }
 }
 
-function rawError(text: string, delayMs = 0) {
+function _rawError(text: string, delayMs = 0) {
   return async function* (_msg: string, _ctrl: AbortController) {
     if (delayMs > 0) await new Promise((r) => setTimeout(r, delayMs))
     throw new Error(text)
@@ -49,7 +49,7 @@ function rawEcho(delayMs = 0, label = 'echo') {
   }
 }
 
-function rawFlaky(failuresBeforeSuccess: number, label = 'flaky') {
+function _rawFlaky(failuresBeforeSuccess: number, label = 'flaky') {
   return async function* (_msg: string, _ctrl: AbortController) {
     if (failuresBeforeSuccess > 0) {
       throw new Error(`flaky failure #${failuresBeforeSuccess}`)
@@ -353,7 +353,7 @@ describe('维度 4 — 配置热重载并发', () => {
   it('updateSessionConfig 针对单个 session 生效', () => {
     const sm = getSessionManager()
     const s1 = sm.createSession('claude-haha', { cwd: '/old1' })
-    const s2 = sm.createSession('claude-haha', { cwd: '/old2' })
+    const _s2 = sm.createSession('claude-haha', { cwd: '/old2' })
 
     const ok = sm.updateSessionConfig(s1.id, { cwd: '/new1' })
     expect(ok).toBe(true)

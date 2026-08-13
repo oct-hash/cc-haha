@@ -83,7 +83,7 @@ class WechatBridge {
         throw new Error('Failed to spawn weixin-mcp')
       }
 
-      const rl = readline.createInterface({
+      const _rl = readline.createInterface({
         input: this.weixinProcess.stdout,
         crlfDelay: Infinity,
       })
@@ -179,7 +179,7 @@ class WechatBridge {
   }
 
   private async callClaude(userId: string, userMessage: string): Promise<string> {
-    const startTime = Date.now()
+    const _startTime = Date.now()
 
     try {
       const response = await axios.post(

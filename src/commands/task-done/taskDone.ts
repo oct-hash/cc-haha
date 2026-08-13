@@ -63,7 +63,7 @@ const TRIGGER_PATTERNS = [
 ]
 
 // 工具推荐规则
-const TOOL_RECOMMENDATIONS: Record<
+const _TOOL_RECOMMENDATIONS: Record<
   string,
   { shouldFollow: string[]; betterAlternative: Record<string, string> }
 > = {

@@ -41,7 +41,7 @@ function rawStream(text: string) {
   return { type: 'stream' as const, text }
 }
 
-function rawAssistantText(text: string) {
+function _rawAssistantText(text: string) {
   return { type: 'assistant' as const, content: [{ type: 'text' as const, text }] }
 }
 

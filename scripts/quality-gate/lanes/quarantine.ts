@@ -49,7 +49,7 @@ export async function runQuarantine(ctx: LaneExecutionContext): Promise<LaneResu
     saveQuarantine(ctx.rootDir, items)
   }
 
-  const hasOverdue = items.filter((i) => i.status === 'overdue').length > 0
+  const _hasOverdue = items.filter((i) => i.status === 'overdue').length > 0
 
   // Release mode: zero active quarantine items allowed
   if (ctx.options.mode === 'release' && items.filter((i) => i.status !== 'resolved').length > 0) {

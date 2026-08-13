@@ -634,7 +634,7 @@ describe('DebateOrchestrator — Edge Cases', () => {
 
 // ── Auto Mode Tests ─────────────────────────────────────────────────────
 
-function autoProbeResponse(label: string, confidence: number, content?: string): ResponseFactory {
+function _autoProbeResponse(label: string, confidence: number, content?: string): ResponseFactory {
   return (_msg: string) =>
     content ??
     `As ${label}, I've analyzed the question.\n\nMy recommendation is to use a two-tier caching strategy.\n\nCONFIDENCE: ${confidence}\nFINAL ANSWER: Two-tier Redis + DB query cache.`
@@ -673,7 +673,7 @@ function autoLowAgreement(agent: string): ResponseFactory {
     `${answers[agent] ?? 'Analysis.'}\n\nCONFIDENCE: 0.6\nFINAL ANSWER: ${answers[agent] ?? 'As above.'}`
 }
 
-function autoRoundResponse(agent: string, round: number): ResponseFactory {
+function _autoRoundResponse(agent: string, round: number): ResponseFactory {
   return (_msg: string) =>
     `${agent} round ${round}:\n\nRefined analysis incorporating feedback.\n\nCONFIDENCE: ${0.7 + round * 0.05}\nFINAL ANSWER: Refined caching strategy v${round}.`
 }
@@ -844,7 +844,7 @@ describe('DebateOrchestrator — Auto Mode', () => {
   it('converges early when debate round agents reach high confidence', async () => {
     // Agent responses start with moderate agreement but converge quickly
     let roundNum = 0
-    const convergingResponses: Record<AgentKind, ResponseFactory> = {
+    const _convergingResponses: Record<AgentKind, ResponseFactory> = {
       'claude-haha': (_msg: string) => {
         roundNum++
         const r = Math.floor((roundNum - 1) / 3) + 1

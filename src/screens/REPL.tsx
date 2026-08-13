@@ -72,9 +72,9 @@ import type {
 /* eslint-disable @typescript-eslint/no-require-imports */
 const proactiveModule =
   feature('PROACTIVE') || feature('KAIROS') ? require('../proactive/index.js') : null
-const PROACTIVE_NO_OP_SUBSCRIBE = (_cb: () => void) => () => {}
-const PROACTIVE_FALSE = () => false
-const SUGGEST_BG_PR_NOOP = (_p: string, _n: string): boolean => false
+const _PROACTIVE_NO_OP_SUBSCRIBE = (_cb: () => void) => () => {}
+const _PROACTIVE_FALSE = () => false
+const _SUGGEST_BG_PR_NOOP = (_p: string, _n: string): boolean => false
 const launchUltraplan: any = feature('ULTRAPLAN')
   ? require('../commands/ultraplan.js').launchUltraplan
   : () => Promise.resolve()
@@ -82,22 +82,22 @@ const launchUltraplan: any = feature('ULTRAPLAN')
 import { getCommandQueueLength } from '../utils/messageQueueManager.js'
 
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
-const AntModelSwitchCallout =
+const _AntModelSwitchCallout =
   process.env.USER_TYPE === 'ant'
     ? require('../components/AntModelSwitchCallout.js').AntModelSwitchCallout
     : null
-const shouldShowAntModelSwitch =
+const _shouldShowAntModelSwitch =
   process.env.USER_TYPE === 'ant'
     ? require('../components/AntModelSwitchCallout.js').shouldShowModelSwitchCallout
     : (): boolean => false
-const UndercoverAutoCallout =
+const _UndercoverAutoCallout =
   process.env.USER_TYPE === 'ant'
     ? require('../components/UndercoverAutoCallout.js').UndercoverAutoCallout
     : null
 
 
 /* eslint-disable @typescript-eslint/no-require-imports */
-const WebBrowserPanelModule = feature('WEB_BROWSER_TOOL')
+const _WebBrowserPanelModule = feature('WEB_BROWSER_TOOL')
   ? (require('../tools/WebBrowserTool/WebBrowserPanel.js') as typeof import('../tools/WebBrowserTool/WebBrowserPanel.js'))
   : null
 
@@ -107,7 +107,7 @@ import type { RemoteSessionConfig } from '../remote/RemoteSessionManager.js'
 // Stable empty array for hooks that accept MCPServerConnection[] — avoids
 // creating a new [] literal on every render in remote mode, which would
 // cause useEffect dependency changes and infinite re-render loops.
-const EMPTY_MCP_CLIENTS: MCPServerConnection[] = []
+const _EMPTY_MCP_CLIENTS: MCPServerConnection[] = []
 
 // Use LRU cache to prevent unbounded memory growth
 // 100 files should be sufficient for most coding sessions while preventing

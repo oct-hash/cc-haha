@@ -19,7 +19,7 @@ import type { DebateEvent, } from '../debate.js'
 /**
  * Creates a minimal mock AgentAdapter that yields text + done events.
  */
-function mockAdapter(kind: string) {
+function _mockAdapter(kind: string) {
   return {
     kind,
     get status() {
@@ -37,7 +37,7 @@ function mockAdapter(kind: string) {
 /**
  * Creates a mock orchestrator.run() generator from a sequence of fake events.
  */
-async function* mockOrchestratorRun(
+async function* _mockOrchestratorRun(
   events: DebateEvent[],
   shouldThrow = false,
 ): AsyncGenerator<DebateEvent, void, unknown> {
@@ -130,7 +130,7 @@ describe('runAutoDebate — signal handling', () => {
   it('removes abort listener in finally block', () => {
     // Verify the cleanup pattern: addEventListener → finally → removeEventListener
     const signal = new AbortController().signal
-    const listenersBefore = 0 // can't introspect listener count in bun
+    const _listenersBefore = 0 // can't introspect listener count in bun
     const handler = () => {}
 
     signal.addEventListener('abort', handler)
@@ -176,7 +176,7 @@ describe('runAutoDebate — adapter fallback', () => {
     // claude-haha always created
     adapters.push('claude-haha')
 
-    for (const kind of cliKinds) {
+    for (const _kind of cliKinds) {
       // Simulate: createAgentAdapter throws → fallback to claude-haha
       try {
         throw new Error('CLI not available')

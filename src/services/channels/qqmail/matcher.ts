@@ -82,7 +82,7 @@ export class KnowledgeBaseMatcher {
   }
 
   searchPapersByTitle(title: string, limit = 5): PaperNote[] {
-    const similarity = calculateSimilarity(title, '')
+    const _similarity = calculateSimilarity(title, '')
     const papers = this.index?.papers || []
 
     return papers

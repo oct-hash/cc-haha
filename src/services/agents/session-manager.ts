@@ -174,7 +174,7 @@ export class SessionManager {
   // --- Lifecycle -------------------------------------------------------------
 
   dispose(): void {
-    for (const [id, adapter] of this.activeAdapters) {
+    for (const [_id, adapter] of this.activeAdapters) {
       adapter.interrupt()
       adapter.dispose()
     }

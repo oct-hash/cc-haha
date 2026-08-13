@@ -59,7 +59,7 @@ export async function runConfigAudit(ctx: LaneExecutionContext): Promise<LaneRes
     if (config.mcpServers) {
       const serverCount = Object.keys(config.mcpServers).length
       let validCount = 0
-      for (const [name, entry] of Object.entries(config.mcpServers)) {
+      for (const [_name, entry] of Object.entries(config.mcpServers)) {
         if (entry && typeof entry === 'object') {
           const e = entry as Record<string, unknown>
           if (e.command || e.url) validCount++

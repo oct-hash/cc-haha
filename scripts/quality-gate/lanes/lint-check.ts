@@ -115,7 +115,7 @@ function compareRatchet(
 ): DetailItem[] {
   const details: DetailItem[] = []
   const allFiles = new Set([...Object.keys(current), ...Object.keys(baseline)])
-  let regressions = 0
+  let _regressions = 0
 
   for (const file of [...allFiles].sort()) {
     const cur = current[file] || 0
@@ -123,7 +123,7 @@ function compareRatchet(
     const delta = cur - base
 
     if (delta > 0) {
-      regressions++
+      _regressions++
       details.push({
         label: `${file}: +${delta} lint errors`,
         status: 'error',

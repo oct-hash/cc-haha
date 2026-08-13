@@ -707,7 +707,7 @@ async function s15_DisposeRace(): Promise<{ p: number; f: number }> {
     adapter.dispose()
 
     // Drain remaining — should handle disposed state gracefully
-    const remaining = await drain(gen)
+    const _remaining = await drain(gen)
     // After dispose, status should be killed
     assert(adapter.status === 'killed', `dr${i}: killed after dispose`)
   }
@@ -781,7 +781,7 @@ async function s17_Stubborn(): Promise<{ p: number; f: number }> {
 
     // Abort — executor ignores it and keeps yielding, but adapter should stop
     adapter.interrupt()
-    const remaining = await drain(gen)
+    const _remaining = await drain(gen)
     assert(adapter.status === 'killed', `st${i}: killed despite stubborn executor`)
   }
   return done()

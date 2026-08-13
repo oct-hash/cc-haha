@@ -245,7 +245,7 @@ function SpinnerWithVerbInner({
   // line instead of taking a separate row. apiMetricsRef is a ref so this
   // doesn't trigger re-renders; we pick up updates on the parent's ~25x/turn
   // re-render cadence, same as the old ApiMetricsLine did.
-  const ttftText: string | null = null
+  const _ttftText: string | null = null
 
   // When leader is idle but teammates are running (and we're viewing the leader),
   // show a static dim idle display instead of the animated spinner — otherwise

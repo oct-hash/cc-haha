@@ -24,7 +24,7 @@ const SERVER_VERSION = '1.0.0'
 
 // Global state
 let messageHandler: WechatMessageHandler | null = null
-let qrcodeData: { qrcode: string; qrcodeId: string } | null = null
+let _qrcodeData: { qrcode: string; qrcodeId: string } | null = null
 
 /**
  * Create the WeChat MCP Server
@@ -225,7 +225,7 @@ function createServer(): Server {
 
       case 'wechat_login': {
         const result = await login()
-        qrcodeData = { qrcode: result.qrcode, qrcodeId: '' }
+        _qrcodeData = { qrcode: result.qrcode, qrcodeId: '' }
         return {
           content: [
             {
@@ -317,7 +317,7 @@ async function main(): Promise<void> {
       console.error(`[WeChat Channel] Logged in as ${loginResult.account.userId}`)
       initMessageHandler(loginResult.account)
     }
-  } catch (err) {
+  } catch (_err) {
     console.error('[WeChat Channel] Not logged in. Run wechat_login to get a QR code.')
   }
 

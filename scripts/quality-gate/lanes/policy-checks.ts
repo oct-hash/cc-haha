@@ -7,7 +7,7 @@ import { parseFrontmatter, readJSON, readText } from '../utils/helpers'
 import type { DetailItem, LaneExecutionContext, LaneResult } from './types'
 
 const HOOKIFY_PATTERN = /^hookify\.(.+)\.local\.md$/
-const AGENT_PATTERN = /\.md$/
+const _AGENT_PATTERN = /\.md$/
 const SKILL_FILE = 'SKILL.md'
 
 export async function runPolicyChecks(ctx: LaneExecutionContext): Promise<LaneResult> {

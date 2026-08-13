@@ -294,7 +294,7 @@ export function queryEntities(
   })
 
   // Find matching papers
-  const keywordSet = new Set(keywords.map((k) => k.toLowerCase()))
+  const _keywordSet = new Set(keywords.map((k) => k.toLowerCase()))
   const matchingPapers = filteredNodes.filter((node) => {
     const title = ((node.metadata.title as string) || '').toLowerCase()
     const abstract = ((node.metadata.abstract as string) || '').toLowerCase()

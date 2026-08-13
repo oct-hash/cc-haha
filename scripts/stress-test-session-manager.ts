@@ -259,7 +259,7 @@ async function s3_AgentSwitch(): Promise<{ p: number; f: number }> {
 
   for (let i = 0; i < N; i++) {
     const target = kinds[i % 3]
-    const prev = sm.getActiveKind()
+    const _prev = sm.getActiveKind()
 
     // Simulate /agent command
     const r = simulateAgentCommand(target)

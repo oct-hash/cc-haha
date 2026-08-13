@@ -383,7 +383,7 @@ describe('D — AbortController 边界', () => {
     // 只 abort session1
     setTimeout(() => ctrl1.abort(), 20)
 
-    const [e1, e2] = await Promise.all([
+    const [_e1, e2] = await Promise.all([
       collect(h1.chatStream('go', ctrl1)),
       collect(h2.chatStream('go', ctrl2)),
     ])

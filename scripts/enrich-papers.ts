@@ -131,7 +131,7 @@ function getPartition(journal: string): number | null {
   return (JOURNAL_PARTITION as Record<string, number>)[clean] || 3 // 未收录默认3区
 }
 
-function getPartitionLabel(partition: number | null): string {
+function _getPartitionLabel(partition: number | null): string {
   if (partition === 1) return 'T1国际顶级'
   if (partition === 2) return 'T2国际知名'
   if (partition === 3) return 'T3较好'
@@ -164,7 +164,7 @@ async function queryCrossRef(doi: string) {
       issue: work.issue,
       pages: work.page,
     }
-  } catch (e) {
+  } catch (_e) {
     return null
   }
 }

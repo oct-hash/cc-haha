@@ -733,7 +733,7 @@ export class DebateOrchestrator {
     timeoutMs: number,
   ): AsyncGenerator<DebateEvent, void, unknown> {
     const autoCfg = { ...DEFAULT_AUTO, ...this.config.auto }
-    const agents = Object.keys(this.adapters) as AgentKind[]
+    const _agents = Object.keys(this.adapters) as AgentKind[]
     const positions = shuffleWithSeed(ROLES.auto, hashCode(topic))
 
     // ── Phase 1: Probe round — all agents answer independently ────────
