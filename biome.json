@@ -463,6 +463,21 @@
           "complexity": { "noExcessiveCognitiveComplexity": "off" }
         }
       }
+    },
+    {
+      "includes": [
+        "src/ink/parse-keypress.ts",
+        "src/tools/BashTool/bashSecurity.ts",
+        "src/utils/bash/ast.ts",
+        "src/components/shell/OutputLine.tsx",
+        "src/utils/hooks/execHttpHook.ts",
+        "src/tools/BashTool/sedValidation.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": { "noControlCharactersInRegex": "off" }
+        }
+      }
     }
   ]
 }
