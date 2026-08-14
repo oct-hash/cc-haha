@@ -20,6 +20,7 @@ import {
   LoopManager,
   type LoopManagerConfig,
 } from '../loop-manager.js'
+import { createDirectApiAdapter } from '../direct-api.js'
 import type { AgentKind, AgentStatus, NormalizedEvent } from '../types.js'
 
 // ── Mock Adapter Factory ──────────────────────────────────────────────────
@@ -452,6 +453,33 @@ describe('LoopManager', () => {
       const events = await collectEvents(manager.run('test'))
       // Should not throw — debate gate fails gracefully
       expect(events.some((e) => e.type === 'loop_complete')).toBe(true)
+    })
+  })
+
+  describe('gate unavailable (fail-open)', () => {
+    it('marks gate unavailable and passes when every adapter errors', async () => {
+      type MockFn = {
+        mockImplementation: (impl: (config?: { kind?: AgentKind }) => AgentAdapter) => void
+        getMockImplementation: () => ((config?: { kind?: AgentKind }) => AgentAdapter) | undefined
+      }
+      const mockedAdapter = createDirectApiAdapter as unknown as MockFn
+      const original = mockedAdapter.getMockImplementation()
+      mockedAdapter.mockImplementation((config?: { kind?: AgentKind }) =>
+        createMockAdapter(config?.kind ?? 'claude-haha', () => '', { shouldError: true }),
+      )
+      try {
+        const manager = new LoopManager(
+          makeConfig({ loopType: 'review', queryExecutor: undefined, gateKind: 'pre-commit' }),
+        )
+        const events = await collectEvents(manager.run('Review auth module'))
+        const post = events
+          .filter((e) => e.type === 'gate_result')
+          .find((e) => e.gate === 'post')
+        expect(post).toMatchObject({ unavailable: true, passed: true })
+        expect(post?.ignoreHash).toBeUndefined()
+      } finally {
+        if (original) mockedAdapter.mockImplementation(original)
+      }
     })
   })
 

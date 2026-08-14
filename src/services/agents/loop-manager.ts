@@ -14,6 +14,7 @@
  */
 
 import { randomUUID } from 'node:crypto'
+import { appendFileSync, mkdirSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
@@ -29,11 +30,20 @@ import {
 } from './debate.js'
 import { createDirectApiAdapter } from './direct-api.js'
 import { createAgentAdapter } from './factory.js'
+import {
+  assessGate,
+  decideBlock,
+  type BlockDecision,
+  type GateAssessment,
+  type GateKind,
+  type Severity,
+} from './gate-assessment.js'
 import type { AgentConfig, AgentKind } from './types.js'
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const SESSIONS_DIR = '.claude/sessions'
+const GATE_LOG_PATH = '.claude/gate-log.jsonl'
 const MODEL_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/
 
 /** Binaries for the CLI-based agent kinds. */
@@ -111,7 +121,20 @@ export interface GateResult {
   verdict: string
   winner?: AgentKind
   passed: boolean
+  severity: Severity
+  confidence: number
+  gateKind: GateKind
+  ignoreHash?: string
   durationMs: number
+  /** True when the debate failed or produced no verdict (fail-open, no assessment). */
+  unavailable?: boolean
+}
+
+/** Internal: a debate gate's raw summary plus the structured assessment/decision. */
+interface GateRunResult extends DebateSummary {
+  assessment: GateAssessment
+  decision: BlockDecision
+  unavailable?: boolean
 }
 
 export interface LoopManagerConfig {
@@ -124,6 +147,8 @@ export interface LoopManagerConfig {
   postGateMode?: DebateMode
   /** Per-agent timeout in ms (default 120_000). */
   perAgentTimeoutMs?: number
+  /** Which gate policy this loop enforces (default: pre-implementation, never blocks). */
+  gateKind?: GateKind
   /** Query executor for claude-haha adapter. Required for debate gates. */
   queryExecutor?: (
     prompt: string,
@@ -140,7 +165,7 @@ export type LoopEvent =
   | { type: 'debate_event'; event: DebateEvent }
   | { type: 'tick_start'; tick: number; taskId: string; description: string }
   | { type: 'tick_complete'; tick: number; evidence: TickEvidence }
-  | { type: 'gate_result'; gate: 'pre' | 'post'; verdict: string; passed: boolean }
+  | { type: 'gate_result'; gate: 'pre' | 'post'; verdict: string; passed: boolean; severity: Severity; confidence: number; gateKind: GateKind; ignoreHash?: string; unavailable?: boolean }
   | { type: 'loop_complete'; summary: LoopSummary }
   | { type: 'loop_suspended'; reason: string; resumeToken: string }
   | { type: 'loop_error'; message: string }
@@ -197,6 +222,7 @@ export class LoopManager {
       preGateMode: config.preGateMode ?? 'auto',
       postGateMode: config.postGateMode ?? 'council',
       perAgentTimeoutMs: config.perAgentTimeoutMs ?? DEFAULT_TIMEOUT_MS,
+      gateKind: config.gateKind ?? 'pre-implementation',
       queryExecutor: config.queryExecutor,
       agentConfigs: config.agentConfigs,
     }
@@ -293,19 +319,18 @@ export class LoopManager {
 
     const result = yield* this.runDebateGate('auto', topic, signal)
 
-    this.gateResults.push({
-      gate: 'pre',
-      verdict: result.verdict,
-      winner: result.winner,
-      passed: true,
-      durationMs: result.durationMs,
-    })
+    const gateResult = this.recordGate('pre', result)
 
     yield {
       type: 'gate_result',
       gate: 'pre',
       verdict: result.verdict,
-      passed: true,
+      passed: gateResult.passed,
+      severity: gateResult.severity,
+      confidence: gateResult.confidence,
+      gateKind: gateResult.gateKind,
+      ignoreHash: gateResult.ignoreHash,
+      unavailable: gateResult.unavailable,
     }
   }
 
@@ -323,19 +348,18 @@ export class LoopManager {
       signal,
     )
 
-    this.gateResults.push({
-      gate: 'pre',
-      verdict: preResult.verdict,
-      winner: preResult.winner,
-      passed: true,
-      durationMs: preResult.durationMs,
-    })
+    const preGateResult = this.recordGate('pre', preResult)
 
     yield {
       type: 'gate_result',
       gate: 'pre',
       verdict: preResult.verdict,
-      passed: true,
+      passed: preGateResult.passed,
+      severity: preGateResult.severity,
+      confidence: preGateResult.confidence,
+      gateKind: preGateResult.gateKind,
+      ignoreHash: preGateResult.ignoreHash,
+      unavailable: preGateResult.unavailable,
     }
 
     // Tick cycle
@@ -369,19 +393,18 @@ export class LoopManager {
       signal,
     )
 
-    this.gateResults.push({
-      gate: 'post',
-      verdict: postResult.verdict,
-      winner: postResult.winner,
-      passed: true,
-      durationMs: postResult.durationMs,
-    })
+    const postGateResult = this.recordGate('post', postResult)
 
     yield {
       type: 'gate_result',
       gate: 'post',
       verdict: postResult.verdict,
-      passed: true,
+      passed: postGateResult.passed,
+      severity: postGateResult.severity,
+      confidence: postGateResult.confidence,
+      gateKind: postGateResult.gateKind,
+      ignoreHash: postGateResult.ignoreHash,
+      unavailable: postGateResult.unavailable,
     }
   }
 
@@ -399,37 +422,35 @@ export class LoopManager {
       signal,
     )
 
-    this.gateResults.push({
-      gate: 'pre',
-      verdict: result.verdict,
-      winner: result.winner,
-      passed: true,
-      durationMs: result.durationMs,
-    })
+    const preGateResult = this.recordGate('pre', result)
 
     yield {
       type: 'gate_result',
       gate: 'pre',
       verdict: result.verdict,
-      passed: true,
+      passed: preGateResult.passed,
+      severity: preGateResult.severity,
+      confidence: preGateResult.confidence,
+      gateKind: preGateResult.gateKind,
+      ignoreHash: preGateResult.ignoreHash,
+      unavailable: preGateResult.unavailable,
     }
 
     yield* this.transitionTo('review_debate')
     const reviewResult = yield* this.runDebateGate('council', `Review: ${topic}`, signal)
 
-    this.gateResults.push({
-      gate: 'post',
-      verdict: reviewResult.verdict,
-      winner: reviewResult.winner,
-      passed: true,
-      durationMs: reviewResult.durationMs,
-    })
+    const postGateResult = this.recordGate('post', reviewResult)
 
     yield {
       type: 'gate_result',
       gate: 'post',
       verdict: reviewResult.verdict,
-      passed: true,
+      passed: postGateResult.passed,
+      severity: postGateResult.severity,
+      confidence: postGateResult.confidence,
+      gateKind: postGateResult.gateKind,
+      ignoreHash: postGateResult.ignoreHash,
+      unavailable: postGateResult.unavailable,
     }
   }
 
@@ -443,19 +464,18 @@ export class LoopManager {
     yield* this.transitionTo('research_probe')
     const probeResult = yield* this.runDebateGate('auto', `Research probe: ${topic}`, signal)
 
-    this.gateResults.push({
-      gate: 'pre',
-      verdict: probeResult.verdict,
-      winner: probeResult.winner,
-      passed: true,
-      durationMs: probeResult.durationMs,
-    })
+    const preGateResult = this.recordGate('pre', probeResult)
 
     yield {
       type: 'gate_result',
       gate: 'pre',
       verdict: probeResult.verdict,
-      passed: true,
+      passed: preGateResult.passed,
+      severity: preGateResult.severity,
+      confidence: preGateResult.confidence,
+      gateKind: preGateResult.gateKind,
+      ignoreHash: preGateResult.ignoreHash,
+      unavailable: preGateResult.unavailable,
     }
 
     // Synthesis phase: debate mode to converge findings
@@ -466,19 +486,18 @@ export class LoopManager {
       signal,
     )
 
-    this.gateResults.push({
-      gate: 'post',
-      verdict: synthResult.verdict,
-      winner: synthResult.winner,
-      passed: true,
-      durationMs: synthResult.durationMs,
-    })
+    const postGateResult = this.recordGate('post', synthResult)
 
     yield {
       type: 'gate_result',
       gate: 'post',
       verdict: synthResult.verdict,
-      passed: true,
+      passed: postGateResult.passed,
+      severity: postGateResult.severity,
+      confidence: postGateResult.confidence,
+      gateKind: postGateResult.gateKind,
+      ignoreHash: postGateResult.ignoreHash,
+      unavailable: postGateResult.unavailable,
     }
   }
 
@@ -494,7 +513,7 @@ export class LoopManager {
     mode: DebateMode,
     topic: string,
     signal: AbortSignal,
-  ): AsyncGenerator<LoopEvent, DebateSummary> {
+  ): AsyncGenerator<LoopEvent, GateRunResult> {
     const adapters = this.buildDebateAdapters()
     const config: DebateConfig = {
       mode,
@@ -507,12 +526,17 @@ export class LoopManager {
     let finalWinner: AgentKind | undefined
     let finalRounds = 0
     let finalDurationMs = 0
+    let unavailable = false
 
     try {
       for await (const event of orchestrator.run(topic, signal)) {
         // Passthrough debate events so consumer can track progress
         yield { type: 'debate_event', event }
 
+        // Abort or orchestrator-level failure: gate cannot assess, fail open.
+        if (event.type === 'error') {
+          unavailable = true
+        }
         if (event.type === 'verdict') {
           finalVerdict = event.content
           finalWinner = event.winner
@@ -527,15 +551,56 @@ export class LoopManager {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error'
       finalVerdict = `Debate gate failed: ${msg}`
+      unavailable = true
     } finally {
       // Track adapters then drain immediately — debate gates are fire-and-forget
       this.adapters.push(...Object.values(adapters))
+    }
+
+    // Detect infra failure (API down, missing key) before drainAdapters resets
+    // adapter status. When every agent errored there is no real assessment to
+    // feed into assessGate — feeding error text (e.g. "No API key configured")
+    // would misread "API key" as a critical finding and wrongly block. Fail open.
+    if (Object.values(adapters).every((a) => a.status === 'error')) {
+      unavailable = true
     }
     this.drainAdapters()
 
     if (!finalVerdict) {
       finalVerdict = 'Debate completed but produced no verdict.'
+      unavailable = true
     }
+
+    // Fail-open: an unavailable gate is recorded as a clean pass, never assessed.
+    // Feeding infra-error text to assessGate risks misclassifying "API key missing"
+    // as a critical finding and wrongly blocking the commit.
+    if (unavailable) {
+      return {
+        mode,
+        totalRounds: finalRounds,
+        statements: [],
+        verdict: finalVerdict,
+        winner: finalWinner,
+        durationMs: finalDurationMs,
+        assessment: { severity: 'low', confidence: 0, reasons: [] },
+        decision: {
+          block: false,
+          silent: false,
+          severity: 'low',
+          confidence: 0,
+          reason: 'GATE UNAVAILABLE',
+        },
+        unavailable: true,
+      }
+    }
+
+    const assessment = assessGate(finalVerdict, this.config.gateKind)
+    const decision = decideBlock(
+      this.config.gateKind,
+      assessment.severity,
+      assessment.confidence,
+      assessment.reasons[0] ?? '',
+    )
 
     return {
       mode,
@@ -544,6 +609,55 @@ export class LoopManager {
       verdict: finalVerdict,
       winner: finalWinner,
       durationMs: finalDurationMs,
+      assessment,
+      decision,
+    }
+  }
+
+  // ── Gate recording ──────────────────────────────────────────────────────
+
+  /**
+   * Build a GateResult from a gate run, persist it, write the structured JSONL
+   * log line, and return it so the caller can yield the matching event.
+   */
+  private recordGate(gate: 'pre' | 'post', result: GateRunResult): GateResult {
+    const gateResult: GateResult = {
+      gate,
+      verdict: result.verdict,
+      winner: result.winner,
+      passed: !result.decision.block,
+      severity: result.assessment.severity,
+      confidence: result.assessment.confidence,
+      gateKind: this.config.gateKind,
+      ignoreHash: result.decision.ignoreHash,
+      durationMs: result.durationMs,
+      unavailable: result.unavailable,
+    }
+    this.gateResults.push(gateResult)
+    this.logGateJsonl(gateResult)
+    return gateResult
+  }
+
+  /** Append one structured JSONL line for later false-positive-rate stats. */
+  private logGateJsonl(gateResult: GateResult): void {
+    try {
+      const line = JSON.stringify({
+        ts: new Date().toISOString(),
+        sessionId: this.sessionId,
+        loopType: this.loopType,
+        gate: gateResult.gate,
+        gateKind: gateResult.gateKind,
+        severity: gateResult.severity,
+        confidence: gateResult.confidence,
+        passed: gateResult.passed,
+        ignoreHash: gateResult.ignoreHash ?? null,
+        unavailable: gateResult.unavailable ?? null,
+        verdict: gateResult.verdict.slice(0, 400),
+      })
+      mkdirSync(dirname(GATE_LOG_PATH), { recursive: true })
+      appendFileSync(GATE_LOG_PATH, `${line}\n`)
+    } catch {
+      // Best-effort: gate logging must never fail the loop.
     }
   }
 
@@ -675,6 +789,7 @@ export class LoopManager {
         preGateMode: this.config.preGateMode,
         postGateMode: this.config.postGateMode,
         perAgentTimeoutMs: this.config.perAgentTimeoutMs,
+        gateKind: this.config.gateKind,
       },
       completedTicks: this.completedTicks,
       totalTicks: this.totalTicks,
