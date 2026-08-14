@@ -53,3 +53,6 @@ _voice_list.py
 
 # LoopManager runtime session state (auto-written every run)
 .claude/sessions/loop-*.json
+
+# Gate audit log (auto-appended on every gate run)
+.claude/gate-log.jsonl
