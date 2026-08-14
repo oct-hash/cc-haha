@@ -460,6 +460,8 @@ export class DebateOrchestrator {
     // Emit start
     yield { type: 'debate_start', mode, agents }
 
+    let finalVerdict = ''
+
     try {
       switch (mode) {
         case 'council':
@@ -486,6 +488,7 @@ export class DebateOrchestrator {
         // Judge phase
         yield { type: 'phase_change', phase: 'judge_deliberation' }
         const verdict = await this.judge(sanitizedTopic, abortSignal, timeoutMs)
+        finalVerdict = verdict
         const winner = this.determineWinner()
         yield { type: 'verdict', content: verdict, winner }
       }
@@ -505,9 +508,10 @@ export class DebateOrchestrator {
       totalRounds: new Set(this.statements.map((s) => s.round)).size,
       statements: this.statements,
       verdict:
-        this.statements.length > 0
+        finalVerdict ||
+        (this.statements.length > 0
           ? extractFinalAnswer(this.statements[this.statements.length - 1]?.content ?? '')
-          : '',
+          : ''),
       winner,
       durationMs,
     }

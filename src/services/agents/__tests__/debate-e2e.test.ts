@@ -10,7 +10,8 @@
 
 import { describe, expect, it } from 'bun:test'
 import { DebateOrchestrator, type DebateSummary } from '../debate.js'
-import type { AgentAdapter, AgentKind, AgentStatus, NormalizedEvent } from '../types.js'
+import type { AgentAdapter } from '../adapter.js'
+import type { AgentKind, AgentStatus, NormalizedEvent } from '../types.js'
 
 // ── Direct API adapter (same pattern as debate-mcp.ts) ────────────────────
 
@@ -55,10 +56,14 @@ function createE2EAdapter(kind: AgentKind, model?: string): AgentAdapter {
           method: 'POST',
           headers: getAuthHeaders(),
           body: JSON.stringify({
-            model: model || 'claude-sonnet-4-6',
+            model: model || process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6',
             max_tokens: 4096,
             messages: [{ role: 'user', content: userMessage }],
             stream: true,
+            // DeepSeek is a reasoning model; disable thinking so agents emit
+            // text immediately instead of a ~30-60s thinking block that would
+            // blow the per-agent timeout and produce empty responses.
+            thinking: { type: 'disabled' },
           }),
           signal: abortController.signal,
         })

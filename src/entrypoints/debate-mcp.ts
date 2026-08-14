@@ -18,13 +18,9 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import type { AgentAdapter } from '../services/agents/adapter.js'
 import { DebateOrchestrator, type DebateSummary } from '../services/agents/debate.js'
+import { createDirectApiAdapter } from '../services/agents/direct-api.js'
 import { createAgentAdapter } from '../services/agents/factory.js'
-import type {
-  AgentConfig,
-  AgentKind,
-  AgentStatus,
-  NormalizedEvent,
-} from '../services/agents/types.js'
+import type { AgentKind } from '../services/agents/types.js'
 
 // ── Tool definitions ────────────────────────────────────────────────────────
 
@@ -131,172 +127,6 @@ function getDebateModels(): Partial<Record<AgentKind, string | undefined>> {
   }
 }
 
-// ── Direct API adapter (for claude-haha slot, no subprocess needed) ─────────
-
-function getAuthHeaders(): Record<string, string> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'anthropic-version': '2023-06-01',
-  }
-
-  const authToken = process.env.ANTHROPIC_AUTH_TOKEN
-  const apiKey = process.env.ANTHROPIC_API_KEY
-
-  if (authToken) {
-    headers.Authorization = `Bearer ${authToken}`
-  } else if (apiKey) {
-    headers['x-api-key'] = apiKey
-  }
-
-  return headers
-}
-
-function getMessagesUrl(): string {
-  const base = process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com'
-  return base.endsWith('/') ? `${base}v1/messages` : `${base}/v1/messages`
-}
-
-/**
- * Lightweight adapter that calls the Anthropic-compatible API directly.
- * Used as the claude-haha agent in the MCP context where the REPL query()
- * infrastructure is not available.
- */
-function createDirectApiAdapter(config?: AgentConfig): AgentAdapter {
-  let status: AgentStatus = 'idle'
-
-  return {
-    kind: 'claude-haha' as AgentKind,
-
-    get status() {
-      return status
-    },
-
-    async *chatStream(
-      userMessage: string,
-      abortController: AbortController,
-    ): AsyncGenerator<NormalizedEvent, void, unknown> {
-      if (status !== 'idle') {
-        yield { type: 'error', message: `Agent is not idle (current: ${status})` }
-        return
-      }
-
-      status = 'running'
-
-      const apiKey = process.env.ANTHROPIC_API_KEY
-      const authToken = process.env.ANTHROPIC_AUTH_TOKEN
-      if (!apiKey && !authToken) {
-        status = 'error'
-        yield {
-          type: 'error',
-          message: 'No API key configured. Set ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN.',
-        }
-        return
-      }
-
-      const model = config?.model || 'claude-sonnet-4-6'
-      const url = getMessagesUrl()
-      const headers = getAuthHeaders()
-
-      try {
-        const response = await globalThis.fetch(url, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            model,
-            max_tokens: 4096,
-            messages: [{ role: 'user', content: userMessage }],
-            stream: true,
-          }),
-          signal: abortController.signal,
-        })
-
-        if (!response.ok) {
-          const errText = await response.text().catch(() => 'Unable to read error body')
-          status = 'error'
-          yield {
-            type: 'error',
-            message: `API error ${response.status} (${url}): ${errText.slice(0, 500)}`,
-          }
-          return
-        }
-
-        const body = response.body
-        if (!body) {
-          status = 'error'
-          yield { type: 'error', message: 'Empty response body from API' }
-          return
-        }
-
-        const reader = body.getReader()
-        const decoder = new TextDecoder()
-        let buffer = ''
-
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-
-          buffer += decoder.decode(value, { stream: true })
-          const lines = buffer.split('\n')
-          buffer = lines.pop() ?? ''
-
-          for (const line of lines) {
-            const trimmed = line.trim()
-            if (!trimmed.startsWith('data: ')) continue
-
-            const data = trimmed.slice(6).trim()
-            if (!data || data === '[DONE]') continue
-
-            try {
-              const parsed = JSON.parse(data)
-
-              // Anthropic SSE format: { type: 'content_block_delta', delta: { type: 'text_delta', text: '...' } }
-              if (
-                parsed.type === 'content_block_delta' &&
-                parsed.delta?.type === 'text_delta' &&
-                typeof parsed.delta.text === 'string'
-              ) {
-                yield { type: 'text_chunk', content: parsed.delta.text }
-              }
-
-              // Handle error events in stream
-              if (parsed.type === 'error') {
-                yield {
-                  type: 'error',
-                  message: parsed.error?.message || parsed.message || 'Stream error',
-                }
-              }
-            } catch {
-              // Skip unparseable SSE lines
-            }
-          }
-        }
-      } catch (err: unknown) {
-        if (abortController.signal.aborted) {
-          status = 'killed'
-          return
-        }
-        status = 'error'
-        const message = err instanceof Error ? err.message : 'Unknown error'
-        yield { type: 'error', message }
-        return
-      }
-
-      if (status === 'running' && !abortController.signal.aborted) {
-        yield { type: 'done' }
-        status = 'idle'
-      }
-    },
-
-    interrupt(): void {
-      status = 'killed'
-    },
-
-    dispose(): void {
-      this.interrupt()
-    },
-  }
-}
-
 // ── Adapter factory for MCP context ─────────────────────────────────────────
 
 function buildAdapters(
@@ -319,6 +149,7 @@ function buildAdapters(
   } catch {
     console.error('[debate-mcp] claude-code CLI unavailable, falling back to direct API adapter.')
     adapters['claude-code'] = createDirectApiAdapter({
+      kind: 'claude-code',
       maxTurns: 5,
       model: models['claude-code'],
     })
@@ -333,6 +164,7 @@ function buildAdapters(
   } catch {
     console.error('[debate-mcp] codex CLI unavailable, falling back to direct API adapter.')
     adapters.codex = createDirectApiAdapter({
+      kind: 'codex',
       maxTurns: 5,
       model: models.codex,
     })

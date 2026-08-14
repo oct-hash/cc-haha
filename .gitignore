@@ -50,3 +50,6 @@ _voice_list.py
 # Local config backups
 *.bak
 .claude/*.bak
+
+# LoopManager runtime session state (auto-written every run)
+.claude/sessions/loop-*.json

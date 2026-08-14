@@ -27,6 +27,7 @@ import {
   DebateOrchestrator,
   type DebateSummary,
 } from './debate.js'
+import { createDirectApiAdapter } from './direct-api.js'
 import { createAgentAdapter } from './factory.js'
 import type { AgentConfig, AgentKind } from './types.js'
 
@@ -34,6 +35,42 @@ import type { AgentConfig, AgentKind } from './types.js'
 
 const SESSIONS_DIR = '.claude/sessions'
 const MODEL_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/
+
+/** Binaries for the CLI-based agent kinds. */
+const CLI_BIN: Record<'claude-code' | 'codex', string> = {
+  'claude-code': 'claude',
+  codex: 'codex',
+}
+
+/**
+ * True if `bin` can actually be spawned. `Bun.which` may resolve a shim
+ * (e.g. a `codex.exe` launcher) that Bun's `uv_spawn` then fails to start on
+ * Windows with EFTYPE — so a real spawn probe is required, not just PATH lookup.
+ *
+ * The probe is memoized per binary: spawning `claude` (a large Bun-compiled
+ * binary) costs ~4.5s on Windows, so it must run at most once per process.
+ */
+const cliSpawnableCache = new Map<string, boolean>()
+
+function isCliSpawnable(bin: string): boolean {
+  const cached = cliSpawnableCache.get(bin)
+  if (cached !== undefined) return cached
+
+  let result = false
+  try {
+    const proc = Bun.spawn([bin, '--version'], { stdout: 'ignore', stderr: 'ignore' })
+    try {
+      proc.kill()
+    } catch {
+      // already exited
+    }
+    result = true
+  } catch {
+    result = false
+  }
+  cliSpawnableCache.set(bin, result)
+  return result
+}
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -532,43 +569,45 @@ export class LoopManager {
 
     const adapters = {} as Record<AgentKind, AgentAdapter>
 
-    // claude-haha always works (uses queryExecutor or direct adapter)
-    const hahaConfig: AgentConfig = {
-      maxTurns: 5,
-      model: DEBATE_MODELS['claude-haha'],
-      ...this.config.agentConfigs?.['claude-haha'],
-    }
-    if (this.config.queryExecutor) {
-      hahaConfig.queryExecutor = this.config.queryExecutor
-    }
-    adapters['claude-haha'] = createAgentAdapter('claude-haha', hahaConfig)
+    // Standalone (no REPL queryExecutor): every agent drives the
+    // Anthropic-compatible endpoint directly. The claude/codex CLIs are not
+    // wanted here — a heterogeneous debate against one endpoint is the whole
+    // point, and DEBATE_MODEL_* picks the per-agent model.
+    const standalone = !this.config.queryExecutor
 
-    // Try CLI-based adapters, fall back to claude-haha on failure
-    const cliKinds: AgentKind[] = ['claude-code', 'codex']
-    for (const kind of cliKinds) {
-      try {
-        adapters[kind] = createAgentAdapter(kind, {
-          maxTurns: 5,
-          model: DEBATE_MODELS[kind],
-          ...this.config.agentConfigs?.[kind],
-        })
-      } catch {
-        process.stderr.write(
-          `[LoopManager] ${kind} adapter unavailable, falling back to claude-haha.\n`,
-        )
-        try {
-          adapters[kind] = createAgentAdapter('claude-haha', {
-            maxTurns: 5,
-            queryExecutor: this.config.queryExecutor,
-            ...this.config.agentConfigs?.['claude-haha'],
-          })
-        } catch {
-          process.stderr.write(
-            `[LoopManager] claude-haha fallback for ${kind} also failed — reusing existing haha adapter.\n`,
-          )
-          adapters[kind] = adapters['claude-haha']
-        }
+    // claude-haha: use the REPL queryExecutor when available, else direct API
+    if (standalone) {
+      const override = this.config.agentConfigs?.['claude-haha']
+      adapters['claude-haha'] = createDirectApiAdapter({
+        maxTurns: 5,
+        ...override,
+        kind: 'claude-haha',
+        model: DEBATE_MODELS['claude-haha'] ?? override?.model,
+      })
+    } else {
+      const override = this.config.agentConfigs?.['claude-haha']
+      adapters['claude-haha'] = createAgentAdapter('claude-haha', {
+        maxTurns: 5,
+        ...override,
+        model: DEBATE_MODELS['claude-haha'] ?? override?.model,
+        queryExecutor: this.config.queryExecutor,
+      })
+    }
+
+    // claude-code / codex: CLI only in REPL mode and only when it can actually
+    // spawn (a shim may resolve on PATH but still fail with EFTYPE on Windows);
+    // standalone always uses direct API.
+    for (const kind of ['claude-code', 'codex'] as const) {
+      const override = this.config.agentConfigs?.[kind]
+      const config: AgentConfig = {
+        maxTurns: 5,
+        ...override,
+        model: DEBATE_MODELS[kind] ?? override?.model,
       }
+      const useCli = !standalone && isCliSpawnable(CLI_BIN[kind])
+      adapters[kind] = useCli
+        ? createAgentAdapter(kind, config)
+        : createDirectApiAdapter({ ...config, kind })
     }
 
     return adapters

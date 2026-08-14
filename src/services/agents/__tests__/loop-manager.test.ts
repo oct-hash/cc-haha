@@ -13,7 +13,7 @@
  *   - Edge cases (empty topics, missing queryExecutor, disposed state)
  */
 
-import { describe, expect, it, vi } from 'bun:test'
+import { beforeAll, describe, expect, it, vi } from 'bun:test'
 import type { AgentAdapter } from '../adapter.js'
 import {
   type LoopEvent,
@@ -158,6 +158,27 @@ vi.mock('../factory.js', () => ({
   getAgentAdapterFactory: vi.fn(),
   listAgentKinds: vi.fn(() => ['claude-haha', 'claude-code', 'codex']),
 }))
+
+// Direct-API fallback path (standalone / unspawnable CLI) — same mock adapter.
+vi.mock('../direct-api.js', () => ({
+  createDirectApiAdapter: vi.fn((config?: { kind?: AgentKind }) =>
+    createMockAdapter(
+      config?.kind ?? 'claude-haha',
+      (msg: string) =>
+        debateResponse(`[${config?.kind ?? 'claude-haha'}] Direct response to: ${msg.slice(0, 40)}...`, 0.85),
+    ),
+  ),
+}))
+
+// The CLI spawn probe (`isCliSpawnable`) would otherwise run a real
+// `claude --version`, which costs ~4.5s on Windows and makes the first test
+// flaky against the 5s timeout. Stub it out so the (mocked) direct-API path
+// is exercised deterministically.
+beforeAll(() => {
+  vi.spyOn(Bun, 'spawn').mockImplementation((() => {
+    throw new Error('spawn disabled in tests')
+  }) as unknown as typeof Bun.spawn)
+})
 
 // ── Tests ─────────────────────────────────────────────────────────────────
 
