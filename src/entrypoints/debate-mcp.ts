@@ -1,4 +1,7 @@
 /**
+ * @deprecated 未激活——当前未注册到任何 MCP server 配置。保留作为未来
+ * 通过 MCP 协议暴露辩论能力的扩展接口。如需启用，见 .mcp.json 注册示例。
+ *
  * Debate MCP Server — exposes the 3-agent debate system as MCP tools.
  *
  * Three tools:
