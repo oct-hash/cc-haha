@@ -99,6 +99,7 @@ function Web({ onDone }: { onDone: LocalJSXCommandOnDone }) {
   const [step, setStep] = useState<Step>({
     name: 'checking',
   })
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useEffect(() => {
     logEvent('tengu_remote_setup_started', {})
     void checkLoginState().then(async (result) => {

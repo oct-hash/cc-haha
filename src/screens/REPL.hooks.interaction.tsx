@@ -215,6 +215,7 @@ export function useREPLInteraction(params: UseREPLInteractionParams) {
 
   // Abort the current operation when a 'now' priority message arrives
   // (e.g. from a chat UI client via UDS).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     if (queuedCommands.some((cmd) => cmd.priority === 'now')) {
       abortControllerRef.current?.abort('interrupt')
@@ -319,6 +320,7 @@ export function useREPLInteraction(params: UseREPLInteractionParams) {
   }, [messages, isLoading])
 
   // Callback to capture frozen state when entering transcript mode
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const handleEnterTranscript = useCallback(() => {
     setFrozenTranscriptState({
       messagesLength: messages.length,
@@ -327,6 +329,7 @@ export function useREPLInteraction(params: UseREPLInteractionParams) {
   }, [messages.length, streamingToolUses.length])
 
   // Callback to clear frozen state when exiting transcript mode
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const handleExitTranscript = useCallback(() => {
     setFrozenTranscriptState(null)
   }, [])

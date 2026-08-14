@@ -8,7 +8,6 @@ import {
 
 export function useFileHistorySnapshotInit(
   initialFileHistorySnapshots: FileHistorySnapshot[] | undefined,
-  fileHistoryState: FileHistoryState,
   onUpdateState: (newState: FileHistoryState) => void,
 ): void {
   const initialized = useRef(false)
@@ -21,5 +20,5 @@ export function useFileHistorySnapshotInit(
     if (initialFileHistorySnapshots) {
       fileHistoryRestoreStateFromLog(initialFileHistorySnapshots, onUpdateState)
     }
-  }, [fileHistoryState, initialFileHistorySnapshots, onUpdateState])
+  }, [initialFileHistorySnapshots, onUpdateState])
 }

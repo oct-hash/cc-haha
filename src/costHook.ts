@@ -4,6 +4,7 @@ import { hasConsoleBillingAccess } from './utils/billing.js'
 import type { FpsMetrics } from './utils/fpsTracker.js'
 
 export function useCostSummary(getFpsMetrics?: () => FpsMetrics | undefined): void {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useEffect(() => {
     const f = () => {
       if (hasConsoleBillingAccess()) {

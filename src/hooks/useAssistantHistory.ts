@@ -100,6 +100,7 @@ export function useAssistantHistory({ config, setMessages, scrollRef, onPrepend 
 
   /** Prepend a page at the front, with scroll-anchor snapshot for non-initial.
    *  Replaces the sentinel (always at index 0 when present) in-place. */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const prepend = useCallback(
     (page: HistoryPage, isInitial: boolean) => {
       const msgs = pageToMessages(page)
@@ -128,6 +129,7 @@ export function useAssistantHistory({ config, setMessages, scrollRef, onPrepend 
   )
 
   // Initial fetch on mount — best-effort.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useEffect(() => {
     if (!enabled || !config) return
     let cancelled = false
@@ -147,6 +149,7 @@ export function useAssistantHistory({ config, setMessages, scrollRef, onPrepend 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   const loadOlder = useCallback(async () => {
     if (!enabled || inflightRef.current) return
     const cursor = cursorRef.current

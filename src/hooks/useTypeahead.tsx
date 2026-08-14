@@ -543,7 +543,7 @@ export function useTypeahead({
       setSuggestionType(combinedItems.length > 0 ? 'file' : 'none')
       setMaxColumnWidth(undefined) // No fixed width for file suggestions
     },
-    [mcpResources, setSuggestionsState, setSuggestionType, setMaxColumnWidth, agents],
+    [mcpResources, setSuggestionsState, agents],
   )
 
   // Pre-warm the file index on mount so the first @-mention doesn't block.
@@ -578,6 +578,7 @@ export function useTypeahead({
   // instead of stuttering on each repeated key. The search itself is ~8–15ms
   // on a 270k-file index.
   const debouncedFetchFileSuggestions = useDebounceCallback(fetchFileSuggestions, 50)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const fetchSlackChannels = useCallback(
     async (partial: string): Promise<void> => {
       latestSlackTokenRef.current = partial

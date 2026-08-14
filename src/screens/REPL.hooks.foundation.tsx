@@ -197,6 +197,7 @@ export function useREPLFoundation(params: UseREPLFoundationParams) {
   // /brief mid-session leaves the stale tool list (no SendUserMessage) and
   // the model emits plain text the brief filter hides.
   const isBriefOnly = useAppState((s) => s.isBriefOnly)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: proactiveActive/isBriefOnly are triggers to re-run getTools() (which reads global proactive/brief state), not read in the memo body
   const localTools = useMemo(
     () => getTools(toolPermissionContext),
     [toolPermissionContext, proactiveActive, isBriefOnly],
@@ -210,7 +211,7 @@ export function useREPLFoundation(params: UseREPLFoundationParams) {
     (config: Record<string, ScopedMcpServerConfig>) => {
       setDynamicMcpConfig(config)
     },
-    [setDynamicMcpConfig],
+    [],
   )
   const [screen, setScreen] = useState<Screen>('prompt')
   const [showAllInTranscript, setShowAllInTranscript] = useState(false)

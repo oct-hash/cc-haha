@@ -261,6 +261,7 @@ export function useHistorySearch(
   searchHistoryRef.current = searchHistory
 
   // Reset history search when query changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: historyQuery is a trigger to reset the search, not read in the body
   useEffect(() => {
     searchAbortController.current?.abort()
     const controller = new AbortController()

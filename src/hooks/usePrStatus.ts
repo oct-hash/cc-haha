@@ -38,6 +38,7 @@ export function usePrStatus(isLoading: boolean, enabled = true): PrStatusState {
   const disabledRef = useRef(false)
   const lastFetchRef = useRef(0)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: isLoading is an intentional trigger to restart the poll loop on turn boundaries
   useEffect(() => {
     if (!enabled) return
     if (disabledRef.current) return

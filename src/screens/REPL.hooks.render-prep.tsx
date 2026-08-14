@@ -292,6 +292,7 @@ export function useREPLRenderPrep(params: UseREPLRenderPrepParams): UseREPLRende
   // surprise n/N on re-entry. Same exit resets [ dump mode — each ctrl+o
   // entry is a fresh instance.
   const inTranscript = screen === 'transcript' && virtualScrollActive
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     if (!inTranscript) {
       setSearchQuery('')

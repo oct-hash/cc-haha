@@ -13,6 +13,7 @@ export function useMailboxBridge({ isLoading, onSubmitMessage }: Props): void {
   const getSnapshot = useCallback(() => mailbox.revision, [mailbox])
   const revision = useSyncExternalStore(subscribe, getSnapshot)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: revision is the trigger to re-poll the mailbox on new messages
   useEffect(() => {
     if (isLoading) return
     const msg = mailbox.poll()

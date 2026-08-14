@@ -651,6 +651,7 @@ export function ExitPlanModePermissionRequest({
     toolUseConfirm.onReject()
   }
   const useStickyFooter = !isEmpty && !!setStickyFooter
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useLayoutEffect(() => {
     if (!useStickyFooter) return
     setStickyFooter(

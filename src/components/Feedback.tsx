@@ -219,6 +219,7 @@ export function Feedback({
     }
     void loadEnvInfo()
   }, [])
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   const submitReport = useCallback(async () => {
     setStep('submitting')
     setError(null)

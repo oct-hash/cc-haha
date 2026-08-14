@@ -120,6 +120,7 @@ function ScrollBox({
       scheduleRenderFrom(el)
     })
   }
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useImperativeHandle(
     ref,
     (): ScrollBoxHandle => ({

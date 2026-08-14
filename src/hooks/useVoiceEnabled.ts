@@ -17,6 +17,7 @@ export function useVoiceEnabled(): boolean {
   const userIntent = useAppState((s) => s.settings.voiceEnabled === true)
   const authVersion = useAppState((s) => s.authVersion)
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // biome-ignore lint/correctness/useExhaustiveDependencies: authVersion is an intentional trigger to re-evaluate hasVoiceAuth on login
   const authed = useMemo(hasVoiceAuth, [authVersion])
   return userIntent && authed && isVoiceGrowthBookEnabled()
 }

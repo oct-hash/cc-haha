@@ -553,6 +553,7 @@ export function useVoice({
   // In focus mode, start recording when the terminal gains focus and
   // stop when it loses focus. This enables a "multi-clauding army"
   // workflow where voice input follows window focus.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useEffect(() => {
     if (!enabled || !focusMode) {
       // Focus mode was disabled while a focus-driven recording was active —
@@ -960,6 +961,7 @@ export function useVoice({
   // startup delay.  The release timer is only armed after auto-repeat
   // is detected (to avoid false releases during the OS key repeat
   // delay of ~500ms on macOS).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   const handleKeyEvent = useCallback(
     (fallbackMs = REPEAT_FALLBACK_MS): void => {
       if (!enabled || !isVoiceStreamAvailable()) {
@@ -1052,10 +1054,11 @@ export function useVoice({
         )
       }
     },
-    [enabled, focusMode, cleanup],
+    [enabled, focusMode],
   )
 
   // Cleanup only when disabled or unmounted - NOT on state changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useEffect(() => {
     if (!enabled && stateRef.current !== 'idle') {
       cleanup()

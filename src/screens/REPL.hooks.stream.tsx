@@ -223,6 +223,7 @@ export function useREPLStreamState(params: UseREPLStreamStateParams) {
   // tmux + fullscreen + `mouse off`: one-time hint that wheel won't scroll.
   // We no longer mutate tmux's session-scoped mouse option (it poisoned
   // sibling panes); tmux users already know this tradeoff from vim/less.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useEffect(() => {
     if (isFullscreenEnvEnabled()) {
       void maybeGetTmuxMouseHint().then((hint) => {
@@ -424,7 +425,7 @@ export function useREPLStreamState(params: UseREPLStreamStateParams) {
   useEffect(() => {
     registerLeaderToolUseConfirmQueue(setToolUseConfirmQueue)
     return () => unregisterLeaderToolUseConfirmQueue()
-  }, [setToolUseConfirmQueue])
+  }, [])
   return {
     streamMode,
     setStreamMode,

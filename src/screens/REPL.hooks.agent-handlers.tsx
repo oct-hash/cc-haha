@@ -128,6 +128,7 @@ export function useREPLAgentHandlers(params: UseREPLAgentHandlersParams) {
   } = params
 
   // Callback for when user submits input while viewing a teammate's transcript
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const onAgentSubmit = useCallback(
     async (
       input: string,
@@ -157,6 +158,7 @@ export function useREPLAgentHandlers(params: UseREPLAgentHandlersParams) {
   )
 
   // Handlers for auto-run /issue or /good-claude (defined after onSubmit)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const handleAutoRunIssue = useCallback(() => {
     const command = autoRunIssueReason ? getAutoRunCommand(autoRunIssueReason) : '/issue'
     setAutoRunIssueReason(null) // Clear the state
@@ -168,6 +170,7 @@ export function useREPLAgentHandlers(params: UseREPLAgentHandlersParams) {
       logForDebugging(`Auto-run ${command} failed: ${errorMessage(err)}`)
     })
   }, [onSubmit, autoRunIssueReason])
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const handleCancelAutoRunIssue = useCallback(() => {
     setAutoRunIssueReason(null)
   }, [])
@@ -236,6 +239,7 @@ export function useREPLAgentHandlers(params: UseREPLAgentHandlersParams) {
       setIsExiting(false)
     }
   }, [setIsExiting, setExitFlow])
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const handleShowMessageSelector = useCallback(() => {
     setIsMessageSelectorVisible((prev) => !prev)
   }, [])
@@ -245,6 +249,7 @@ export function useREPLAgentHandlers(params: UseREPLAgentHandlersParams) {
   // Does NOT touch the prompt input. Index is computed from messagesRef (always
   // fresh via the setMessages wrapper) so callers don't need to worry about
   // stale closures.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const rewindConversationTo = useCallback(
     (message: UserMessage) => {
       handleRewindConversationTo({
@@ -270,6 +275,7 @@ export function useREPLAgentHandlers(params: UseREPLAgentHandlersParams) {
   // Synchronous rewind + input population. Used directly by auto-restore on
   // interrupt (so React batches with the abort's setMessages → single render,
   // no flicker). MessageSelector wraps this in setImmediate via handleRestoreMessage.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const restoreMessageSync = useCallback(
     (message: UserMessage) => {
       rewindConversationTo(message)

@@ -121,6 +121,7 @@ export function FilePermissionDialog<T extends ToolInput = ToolInput>({
   // (FileWrite's getConfig calls readFileSync for the old-content diff).
   // Keyed on the raw input — parseInput is a pure Zod parse whose result
   // depends only on toolUseConfirm.input.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   const ideDiffConfig = useMemo(
     () => (ideDiffSupport ? ideDiffSupport.getConfig(parseInput(toolUseConfirm.input)) : null),
     [ideDiffSupport, toolUseConfirm.input],

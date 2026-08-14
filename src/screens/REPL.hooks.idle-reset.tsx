@@ -63,6 +63,7 @@ export function useREPLIdleReset(params: UseREPLIdleResetParams) {
   // Without this guard, both calls pick a tip → two recordShownTip → two
   // saveGlobalConfig writes back-to-back. Reset at submit in onSubmit.
   const tipPickedThisTurnRef = React.useRef(false)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reads stable refs and setters only
   const pickNewSpinnerTip = useCallback(() => {
     if (tipPickedThisTurnRef.current) return
     tipPickedThisTurnRef.current = true
@@ -99,6 +100,7 @@ export function useREPLIdleReset(params: UseREPLIdleResetParams) {
 
   // Resets UI loading state. Does NOT call onTurnComplete - that should be
   // called explicitly only when a query turn actually completes.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: resets stable refs and setters only
   const resetLoadingState = useCallback(() => {
     // isLoading is now derived from queryGuard — no setter call needed.
     // queryGuard.end() (onQuery finally) or cancelReservation() (executeUserInput

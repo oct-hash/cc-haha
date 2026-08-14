@@ -794,6 +794,7 @@ export function useInboxPoller({
   ])
 
   // When session becomes idle, deliver any pending messages and clean up processed ones
+  // biome-ignore lint/correctness/useExhaustiveDependencies: inboxMessageCount is a trigger to deliver newly-arrived messages, not read in the body
   useEffect(() => {
     if (!enabled) return
 

@@ -105,6 +105,7 @@ export function useREPLScrollInput(params: UseREPLScrollInputParams) {
   const [cursor, setCursor] = useState<MessageActionsState | null>(null)
   const cursorNavRef = useRef<MessageActionsNav | null>(null)
   // Memoized so Messages' React.memo holds.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messages.length (not messages) intentionally keys on append count; count-drop guard clears dividerIndex on replace/rewind
   const unseenDivider = useMemo(
     () => computeUnseenDivider(messages, dividerIndex),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- length change covers appends; useUnseenDivider's count-drop guard clears dividerIndex on replace/rewind
@@ -113,11 +114,12 @@ export function useREPLScrollInput(params: UseREPLScrollInputParams) {
   // Re-pin scroll to bottom and clear the unseen-messages baseline. Called
   // on any user-driven return-to-live action (submit, type-into-empty,
   // overlay appear/dismiss).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const repinScroll = useCallback(() => {
     scrollRef.current?.scrollToBottom()
     onRepin()
     setCursor(null)
-  }, [onRepin, setCursor])
+  }, [onRepin])
   // Backstop for the submit-handler repin at onSubmit. If a buffered stdin
   // event (wheel/drag) races between handler-fire and state-commit, the
   // handler's scrollToBottom can be undone. This effect fires on the render
@@ -126,6 +128,7 @@ export function useREPLScrollInput(params: UseREPLScrollInputParams) {
   // so useAssistantHistory's prepends don't spuriously repin.
   const lastMsg = messages.at(-1)
   const lastMsgIsHuman = lastMsg != null && isHumanTurn(lastMsg)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: lastMsg is an identity trigger to repin when the user's message lands, not read in the body
   useEffect(() => {
     if (lastMsgIsHuman) {
       repinScroll()
@@ -145,6 +148,7 @@ export function useREPLScrollInput(params: UseREPLScrollInputParams) {
       })
     : HISTORY_STUB
   // Compose useUnseenDivider's callbacks with the lazy-load trigger.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const composedOnScroll = useCallback(
     (sticky: boolean, handle: ScrollBoxHandle) => {
       lastUserScrollTsRef.current = Date.now()
@@ -204,6 +208,7 @@ export function useREPLScrollInput(params: UseREPLScrollInputParams) {
   // Both setState calls happen in the same synchronous context so React
   // batches them into a single render, eliminating the extra render that
   // the previous useEffect → setState pattern caused.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const setInputValue = useCallback(
     (value: string) => {
       if (trySuggestBgPRIntercept(inputValueRef.current, value)) return
@@ -234,6 +239,7 @@ export function useREPLScrollInput(params: UseREPLScrollInputParams) {
 
   // Schedule a timeout to stop suppressing dialogs after the user stops typing.
   // Only manages the timeout — the immediate activation is handled by setInputValue above.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     if (inputValue.trim().length === 0) return
     const timer = setTimeout(setIsPromptInputActive, PROMPT_SUPPRESSION_MS, false)

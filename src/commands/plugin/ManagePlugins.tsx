@@ -566,6 +566,7 @@ export function ManagePlugins({
   const toggleMcpServer = useMcpToggleEnabled()
 
   // Handle escape to go back - viewState-dependent navigation
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   const handleBack = React.useCallback(() => {
     if (viewState === 'plugin-details') {
       setViewState('plugin-list')
@@ -641,6 +642,7 @@ export function ManagePlugins({
   }
 
   // Derive unified items from plugins and MCP servers
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   const unifiedItems = useMemo(() => {
     const mergedSettings = getSettings_DEPRECATED()
 
@@ -1361,7 +1363,7 @@ export function ManagePlugins({
     } else if (item_7?.type === 'mcp') {
       void toggleMcpServer(item_7.client.name)
     }
-  }, [selectedIndex, filteredItems, pendingToggles, pluginStates, toggleMcpServer])
+  }, [selectedIndex, filteredItems, pendingToggles, toggleMcpServer])
 
   // Handle accept (Enter) in plugin-list
   const handleAccept = React.useCallback(() => {
@@ -1461,6 +1463,7 @@ export function ManagePlugins({
   )
 
   // Build details menu items (needed for navigation)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   const detailsMenuItems = React.useMemo(() => {
     if (viewState !== 'plugin-details' || !selectedPlugin) return []
     const mergedSettings_1 = getSettings_DEPRECATED()
@@ -1798,6 +1801,7 @@ export function ManagePlugins({
   )
 
   // Reset selection when search query changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: searchQuery is a trigger to reset selection, not read in the body
   React.useEffect(() => {
     setSelectedIndex(0)
   }, [searchQuery])

@@ -106,6 +106,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
     [],
   )
   usePermissionRequestLogging(toolUseConfirm, unaryEvent)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const options = useMemo(
     () =>
       powershellToolUseOptions({

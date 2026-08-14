@@ -27,6 +27,7 @@ function CompanionCard({
   }
 
   // Handle subcommands
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   React.useEffect(() => {
     if (trimmed === 'mute') {
       saveGlobalConfig((c) => ({ ...c, companionMuted: true }))

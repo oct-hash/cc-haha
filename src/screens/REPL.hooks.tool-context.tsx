@@ -177,6 +177,7 @@ export function useREPLToolContext(params: UseREPLToolContextParams) {
     contentReplacementStateRef,
   } = params
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const sandboxAskCallback: SandboxAskCallback = useCallback(
     async (hostPattern: NetworkHostPattern) => {
       // If running as a swarm worker, forward the request to the leader via mailbox
@@ -372,6 +373,7 @@ export function useREPLToolContext(params: UseREPLToolContextParams) {
     return () => unregisterLeaderSetToolPermissionContext()
   }, [setToolPermissionContext])
   const canUseTool = useCanUseTool(setToolUseConfirmQueue, setToolPermissionContext)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const requestPrompt = useCallback(
     (title: string, toolInputSummary?: string | null) =>
       (request: PromptRequest): Promise<PromptResponse> =>
@@ -389,6 +391,7 @@ export function useREPLToolContext(params: UseREPLToolContextParams) {
         }),
     [],
   )
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const getToolUseContext = useCallback(
     (
       messages: MessageType[],

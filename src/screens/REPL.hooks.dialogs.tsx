@@ -253,6 +253,7 @@ export function useREPLDialogs(params: UseREPLDialogsParams) {
   // Immediately capture pause/resume when focusedInputDialog changes
   // This ensures accurate timing even under high system load, rather than
   // relying on the 100ms polling interval to detect state changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     if (!isLoading) return
     const isPaused = focusedInputDialog === 'tool-permission'

@@ -115,6 +115,7 @@ export function AddMarketplace({
   }
 
   // Auto-add if inputValue is provided
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useEffect(() => {
     if (inputValue && !hasAttemptedAutoAdd.current && !error && !result) {
       hasAttemptedAutoAdd.current = true

@@ -489,6 +489,7 @@ function PromptInput({
   )
   const minCoordinatorIndex = hasBgTaskPill ? -1 : 0
   // Clamp index when tasks complete and the list shrinks beneath the cursor
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     if (coordinatorTaskIndex >= coordinatorTaskCount) {
       setCoordinatorTaskIndex(Math.max(minCoordinatorIndex, coordinatorTaskCount - 1))
@@ -683,6 +684,7 @@ function PromptInput({
     [displayedValue],
   )
   const knownChannelsVersion = useSyncExternalStore(subscribeKnownChannels, getKnownChannelsVersion)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: knownChannelsVersion is a trigger to recompute slack triggers when MCP channels change, not read in the memo body
   const slackChannelTriggers = useMemo(
     () =>
       hasSlackMcpServer(store.getState().mcp.clients)
@@ -758,7 +760,7 @@ function PromptInput({
       const mid = (inside.start + inside.end) / 2
       setCursorOffset(cursorOffset < mid ? inside.start : inside.end)
     }
-  }, [cursorOffset, imageRefPositions, setCursorOffset])
+  }, [cursorOffset, imageRefPositions])
   const combinedHighlights = useMemo((): TextHighlight[] => {
     const highlights: TextHighlight[] = []
 
@@ -911,7 +913,6 @@ function PromptInput({
     slashCommandTriggers,
     tokenBudgetTriggers,
     slackChannelTriggers,
-    displayedValue,
     voiceInterimRange,
     thinkTriggers,
     ultraplanTriggers,
@@ -1029,6 +1030,7 @@ function PromptInput({
     submitCount,
     viewingAgentName,
   })
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const onChange = useCallback(
     (value: string) => {
       if (value === '?') {
@@ -1187,6 +1189,7 @@ function PromptInput({
     },
     [],
   )
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   const onSubmit = useCallback(
     async (inputParam: string, isSubmittingSlashCommand = false) => {
       inputParam = inputParam.trimEnd()
@@ -1573,7 +1576,7 @@ function PromptInput({
     const newInput = `${input.slice(0, cursorOffset)}\n${input.slice(cursorOffset)}`
     trackAndSetInput(newInput)
     setCursorOffset(cursorOffset + 1)
-  }, [input, cursorOffset, trackAndSetInput, setCursorOffset, pushToBuffer, pastedContents])
+  }, [input, cursorOffset, trackAndSetInput, pushToBuffer, pastedContents])
 
   // Handler for chat:externalEditor - edit in $EDITOR
   const handleExternalEditor = useCallback(async () => {
@@ -1649,6 +1652,7 @@ function PromptInput({
   ])
 
   // Handler for chat:modelPicker - toggle model picker
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const handleModelPicker = useCallback(() => {
     setShowModelPicker((prev) => !prev)
     if (helpOpen) {
@@ -1657,6 +1661,7 @@ function PromptInput({
   }, [helpOpen])
 
   // Handler for chat:fastMode - toggle fast mode picker
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const handleFastModePicker = useCallback(() => {
     setShowFastModePicker((prev) => !prev)
     if (helpOpen) {
@@ -1665,6 +1670,7 @@ function PromptInput({
   }, [helpOpen])
 
   // Handler for chat:thinkingToggle - toggle thinking mode
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const handleThinkingToggle = useCallback(() => {
     setShowThinkingToggle((prev) => !prev)
     if (helpOpen) {
@@ -1673,6 +1679,7 @@ function PromptInput({
   }, [helpOpen])
 
   // Handler for chat:cycleMode - cycle through permission modes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const handleCycleMode = useCallback(() => {
     // When viewing a teammate, cycle their mode instead of the leader's
     if (isAgentSwarmsEnabled() && viewedTeammate && viewingAgentTaskId) {
@@ -1931,6 +1938,7 @@ function PromptInput({
         })
       }
     })
+  // biome-ignore lint/correctness/useExhaustiveDependencies: dep changes every render; intentionally kept for latest-value semantics
   }, [addNotification, onImagePaste])
 
   // Register chat:submit handler directly in the handler registry (not via
@@ -2444,6 +2452,7 @@ function PromptInput({
     mainLoopModelForSession,
     handleModelSelect,
     handleModelCancel,
+    isFastMode,
   ])
   const handleFastModeSelect = useCallback(
     (result?: string) => {
@@ -2502,6 +2511,7 @@ function PromptInput({
   }, [])
 
   // Memoize the thinking toggle element
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messages.length keys on message count — isMidConversation (messages.some assistant) only flips on append/remove, not content streaming
   const thinkingToggleElement = useMemo(() => {
     if (!showThinkingToggle) return null
     return (

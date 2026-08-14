@@ -52,6 +52,7 @@ export function useKickOffCheckAndDisableBypassPermissionsIfNeeded(): void {
   const setAppState = useSetAppState()
 
   // Run once, when the component mounts
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     if (getIsRemoteMode()) return
     void checkAndDisableBypassPermissionsIfNeeded(toolPermissionContext, setAppState)
@@ -126,6 +127,7 @@ export function useKickOffCheckAndDisableAutoModeIfNeeded(): void {
   // /fast on|off for the tengu_auto_mode_config.disableFastMode circuit
   // breaker. The print.ts headless paths are covered by the sync
   // isAutoModeGateEnabled() check.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mainLoopModel/mainLoopModelForSession are triggers to re-run the gate check, not read in the body
   useEffect(() => {
     if (getIsRemoteMode()) return
     if (isFirstRunRef.current) {

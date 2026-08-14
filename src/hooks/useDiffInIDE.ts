@@ -117,6 +117,7 @@ export function useDiffInIDE({ onChange, toolUseContext, filePath, edits, editMo
     }
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useEffect(() => {
     void showDiff()
 

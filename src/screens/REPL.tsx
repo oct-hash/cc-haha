@@ -598,7 +598,6 @@ export function REPL({
     setShowIdeOnboarding,
     setIDEInstallationStatus,
     initialFileHistorySnapshots,
-    fileHistory,
     setAppState,
   })
 
@@ -665,6 +664,7 @@ export function REPL({
     showBashesDialog,
   })
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messages is a trigger to re-check the cost threshold after each new message, not read in the body
   useEffect(() => {
     const totalCost = getTotalCost()
     if (totalCost >= 5 /* $5 */ && !showCostDialog && !haveShownCostDialog) {

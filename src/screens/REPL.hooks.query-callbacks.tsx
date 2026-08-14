@@ -183,6 +183,7 @@ export function useREPLQueryCallbacks(params: UseREPLQueryCallbacksParams) {
   } = params
 
   // Session backgrounding (Ctrl+B to background/foreground)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const handleBackgroundQuery = useCallback(() => {
     void handleBackgroundQueryFn({
       abortController,
@@ -218,6 +219,7 @@ export function useREPLQueryCallbacks(params: UseREPLQueryCallbacksParams) {
     setAbortController,
     onBackgroundQuery: handleBackgroundQuery,
   })
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const onQueryEvent = useCallback(
     (event: Parameters<typeof handleMessageFromStream>[0]) => {
       handleQueryEvent({
@@ -247,6 +249,7 @@ export function useREPLQueryCallbacks(params: UseREPLQueryCallbacksParams) {
       setConversationId,
     ],
   )
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const onQueryImpl = useCallback(
     async (
       messagesIncludingNewMessages: MessageType[],
@@ -309,6 +312,7 @@ export function useREPLQueryCallbacks(params: UseREPLQueryCallbacksParams) {
       titleDisabled,
     ],
   )
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const onQuery = useCallback(
     async (
       newMessages: MessageType[],

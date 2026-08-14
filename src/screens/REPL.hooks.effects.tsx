@@ -152,6 +152,7 @@ export function useREPLEffects(params: UseREPLEffectsParams): UseREPLEffectsResu
 
   // Update last interaction time when input changes.
   // Must be immediate because useEffect runs after the Ink render cycle flush.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: inputValue/submitCount are triggers to bump the interaction timestamp, not read in the body
   useEffect(() => {
     activityManager.recordUserActivity()
     updateLastInteractionTime(true)
@@ -163,6 +164,7 @@ export function useREPLEffects(params: UseREPLEffectsParams): UseREPLEffectsResu
   }, [submitCount])
 
   // Show notification when Claude is done responding and user is idle
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     // Don't set up notification if Claude is busy
     if (isLoading) return
@@ -214,6 +216,7 @@ export function useREPLEffects(params: UseREPLEffectsParams): UseREPLEffectsResu
   // Idle-return hint: show notification when idle threshold is exceeded.
   // Timer fires after the configured idle period; notification persists until
   // dismissed or the user submits.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     if (lastQueryCompletionTime === 0) return
     if (isLoading) return

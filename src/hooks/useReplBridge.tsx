@@ -111,6 +111,7 @@ export function useReplBridge(
   // Initialize/teardown bridge when enabled state changes.
   // Passes current messages as initialMessages so the remote session
   // starts with the existing conversation context (e.g. from /bridge).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     // feature() check must use positive pattern for dead code elimination —
     // negative pattern (if (!feature(...)) return) does NOT eliminate

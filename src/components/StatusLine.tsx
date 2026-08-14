@@ -290,6 +290,7 @@ function StatusLineInner({ messagesRef, lastAssistantMessageId, vimMode }: Props
   // When the statusLine command changes (hot reload), log the next result
   const statusLineCommand = settings?.statusLine?.command
   const isFirstSettingsRender = useRef(true)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: statusLineCommand is a trigger to re-log on hot reload, not read in the body
   useEffect(() => {
     if (isFirstSettingsRender.current) {
       isFirstSettingsRender.current = false
@@ -300,6 +301,7 @@ function StatusLineInner({ messagesRef, lastAssistantMessageId, vimMode }: Props
   }, [statusLineCommand, doUpdate])
 
   // Separate effect for logging on mount
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useEffect(() => {
     const statusLine = settings?.statusLine
     if (statusLine) {
@@ -332,6 +334,7 @@ function StatusLineInner({ messagesRef, lastAssistantMessageId, vimMode }: Props
   }, []) // Only run once on mount - settings stable for initial logging
 
   // Initial update on mount + cleanup on unmount
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   useEffect(() => {
     void doUpdate()
     return () => {

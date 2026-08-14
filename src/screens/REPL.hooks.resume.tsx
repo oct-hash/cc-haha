@@ -113,6 +113,7 @@ export function useREPLResume(params: UseREPLResumeParams) {
     readFileState,
     bashTools,
   } = params
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const resume = useCallback(
     async (sessionId: UUID, log: LogOption, entrypoint: ResumeEntrypoint) => {
       const resumeStart = performance.now()
@@ -332,6 +333,7 @@ export function useREPLResume(params: UseREPLResumeParams) {
 
   // Helper to restore read file state from messages (used for resume flows)
   // This allows Claude to edit files that were read in previous sessions
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const restoreReadFileState = useCallback((messages: MessageType[], cwd: string) => {
     const extracted = extractReadFilesFromMessages(messages, cwd, READ_FILE_STATE_CACHE_SIZE)
     readFileState.current = mergeFileStateCaches(readFileState.current, extracted)
@@ -343,6 +345,7 @@ export function useREPLResume(params: UseREPLResumeParams) {
   // Extract read file state from initialMessages on mount
   // This handles CLI flag resume (--resume-session) and ResumeConversation screen
   // where messages are passed as props rather than through the resume callback
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     if (initialMessages && initialMessages.length > 0) {
       restoreReadFileState(initialMessages, getOriginalCwd())

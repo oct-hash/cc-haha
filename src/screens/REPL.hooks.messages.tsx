@@ -37,6 +37,7 @@ export function useREPLMessages(params: UseREPLMessagesParams) {
   // truth, React state is the render projection.  Without this, paths
   // that queue functional updaters then synchronously read the ref
   // (e.g. handleSpeculationAccept → onQuery) see stale data.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const setMessages = useCallback((action: React.SetStateAction<MessageType[]>) => {
     const prev = messagesRef.current
     const next = typeof action === 'function' ? action(messagesRef.current) : action
@@ -65,6 +66,7 @@ export function useREPLMessages(params: UseREPLMessagesParams) {
   }, [])
   // Capture the baseline message count alongside the placeholder text so
   // the render can hide it once displayedMessages grows past the baseline.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const setUserInputOnProcessing = useCallback((input: string | undefined) => {
     if (input !== undefined) {
       userInputBaselineRef.current = messagesRef.current.length

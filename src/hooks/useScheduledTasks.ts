@@ -46,6 +46,7 @@ export function useScheduledTasks({ isLoading, assistantMode = false, setMessage
   const store = useAppStateStore()
   const setAppState = useSetAppState()
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     // Runtime gate checked here (not at the hook call site) so the hook
     // stays unconditionally mounted — rules-of-hooks forbid wrapping the

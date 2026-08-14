@@ -267,6 +267,7 @@ export function useManageMCPConnections(
     [flushPendingUpdates],
   )
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const onConnectionAttempt = useCallback(
     ({
       client,
@@ -689,6 +690,7 @@ export function useManageMCPConnections(
   // Skip claude.ai dedup here to avoid blocking on the network fetch; the connect
   // useEffect below runs immediately after and dedups before connecting.
   const sessionId = getSessionId()
+  // biome-ignore lint/correctness/useExhaustiveDependencies: sessionId/_pluginReconnectKey are re-run triggers (/clear, /reload-plugins), not read in the body
   useEffect(() => {
     async function initializeServersAsPending() {
       const { servers: existingConfigs, errors: mcpErrors } = isStrictMcpConfig
@@ -762,6 +764,7 @@ export function useManageMCPConnections(
 
   // Load MCP configs and connect to servers
   // Two-phase loading: Claude Code configs first (fast), then claude.ai configs (may be slow)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: _authVersion/sessionId/_pluginReconnectKey are re-run triggers, not read in the body
   useEffect(() => {
     let cancelled = false
 

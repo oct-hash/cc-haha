@@ -107,6 +107,7 @@ export function useREPLTeammateHints(params: UseREPLTeammateHintsParams) {
   )
 
   // Show deferred turn duration message once all swarm teammates finish
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     if (!hasRunningTeammates && swarmStartTimeRef.current !== null) {
       const totalMs = Date.now() - swarmStartTimeRef.current
@@ -228,7 +229,6 @@ export interface UseREPLSurveysParams {
   >
   // File history snapshot init
   initialFileHistorySnapshots?: FileHistorySnapshot[]
-  fileHistory: unknown
   setAppState: SetAppState
 }
 
@@ -250,7 +250,6 @@ export function useREPLSurveys(params: UseREPLSurveysParams) {
     setShowIdeOnboarding,
     setIDEInstallationStatus,
     initialFileHistorySnapshots,
-    fileHistory,
     setAppState,
   } = params
 
@@ -323,7 +322,7 @@ export function useREPLSurveys(params: UseREPLSurveysParams) {
     setShowIdeOnboarding,
     setIDEInstallationState: setIDEInstallationStatus,
   })
-  useFileHistorySnapshotInit(initialFileHistorySnapshots, fileHistory, (fileHistoryState) =>
+  useFileHistorySnapshotInit(initialFileHistorySnapshots, (fileHistoryState) =>
     setAppState((prev) => ({
       ...prev,
       fileHistory: fileHistoryState,
@@ -391,7 +390,6 @@ export function useREPLInitialMessage(params: UseREPLInitialMessageParams) {
     setAppState,
     onQuery,
     mainLoopModel,
-    tools,
     readFileState,
     discoveredSkillNamesRef,
     loadedNestedMemoryPathsRef,
@@ -409,6 +407,7 @@ export function useREPLInitialMessage(params: UseREPLInitialMessageParams) {
   // Handle initial message (from CLI args or plan mode exit with context clear)
   // This effect runs when isLoading becomes false and there's a pending message
   const initialMessageRef = useRef(false)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   useEffect(() => {
     const pending = initialMessage
     if (!pending || isLoading || initialMessageRef.current) return
@@ -533,5 +532,5 @@ export function useREPLInitialMessage(params: UseREPLInitialMessageParams) {
       )
     }
     void processInitialMessage(pending)
-  }, [initialMessage, isLoading, setMessages, setAppState, onQuery, mainLoopModel, tools])
+  }, [initialMessage, isLoading, setMessages, setAppState, onQuery, mainLoopModel])
 }

@@ -152,7 +152,6 @@ export interface UseREPLInputQueueParams {
 export function useREPLInputQueue(params: UseREPLInputQueueParams) {
   const {
     setAppState,
-    store,
     addNotification,
     commands,
     mainLoopModel,
@@ -198,6 +197,7 @@ export function useREPLInputQueue(params: UseREPLInputQueueParams) {
     onQuery,
   } = params
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: remoteSession is a trigger to rebuild onSubmit on remote-session switch, never read in the body (see params type note)
   const onSubmit = useCallback(
     async (
       input: string,
@@ -480,6 +480,7 @@ export function useREPLInputQueue(params: UseREPLInputQueueParams) {
 
   // Process queued commands when query completes and queue has items
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const executeQueuedInput = useCallback(
     async (queuedCommands: QueuedCommand[]) => {
       await handlePromptSubmit({
@@ -529,6 +530,7 @@ export function useREPLInputQueue(params: UseREPLInputQueueParams) {
 
   // Submits incoming prompts from teammate messages or tasks mode as new turns
   // Returns true if submission succeeded, false if a query is already running
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable refs/setters/store (React identity-stable, not a real dependency)
   const handleIncomingPrompt = useCallback(
     (
       content: string,
@@ -557,7 +559,7 @@ export function useREPLInputQueue(params: UseREPLInputQueueParams) {
       void onQuery([userMessage], newAbortController, true, [], mainLoopModel)
       return true
     },
-    [onQuery, mainLoopModel, store],
+    [onQuery, mainLoopModel],
   )
 
   return {

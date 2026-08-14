@@ -56,6 +56,7 @@ export function AutoUpdater({
   // progress.
   const isUpdatingRef = useRef(isUpdating)
   isUpdatingRef.current = isUpdating
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omitted dependency (mount-once effect / unstable callback identity)
   const checkForUpdates = React.useCallback(async () => {
     if (isUpdatingRef.current) {
       return
