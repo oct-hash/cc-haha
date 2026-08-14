@@ -124,7 +124,7 @@
           {
             "type": "command",
             "command": "bash /d/claude-code-haha/.claude/hooks/workflow-enforcement/pre-commit-gate.sh",
-            "timeout": 5000
+            "timeout": 300000
           }
         ]
       }
